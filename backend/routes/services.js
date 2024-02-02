@@ -27,40 +27,6 @@ module.exports = (db) => {
     });
   });
 
-  // router.post("/", (req, res) => {
-  //   const service = req.body.service;
-
-  //   const upsertQuery = `
-  //   INSERT INTO Services (${
-  //     service.id ? "id," : ""
-  //   } employee_id, name, duration_time, buffer_time)
-  //   VALUES ?
-  //   ON DUPLICATE KEY UPDATE name = VALUES(name), duration_time = VALUES(duration_time), buffer_time = VALUES(buffer_time)
-  // `;
-
-  //   console.log(service);
-  //   const values = [service].map(
-  //     ({ employeeIds, name, durationTime, bufferTime, id }) => {
-  //       const employeeIdsString = Array.isArray(employeeIds)
-  //         ? employeeIds.join(",")
-  //         : "";
-
-  //       if (id) {
-  //         return [id, employeeIdsString, name, durationTime, bufferTime];
-  //       }
-  //       return [employeeIdsString, name, durationTime, bufferTime];
-  //     }
-  //   );
-
-  //   db.query(upsertQuery, [values], (err, results) => {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //   });
-
-  //   res.json({ message: "Service data inserted successfully" });
-  // });
-
   router.post("/", (req, res) => {
     const service = req.body.service;
     const isUpdate = Boolean(service.id);

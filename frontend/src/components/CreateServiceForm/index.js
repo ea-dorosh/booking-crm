@@ -1,14 +1,14 @@
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControlLabel from "@mui/material/FormControlLabel";
+import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import { useState, useMemo } from "react";
+import Typography from "@mui/material/Typography";
+import { useState } from "react";
 
 const timeDurations = [
   { title: "15 min", value: "00:15:00" },
@@ -31,7 +31,7 @@ export default function CreateServiceForm({
   createNewService,
 }) {
   const isEditMode = Boolean(service);
-  console.log(service);
+
   const [formData, setFormData] = useState({
     name: isEditMode ? service.name : "",
     durationTime: isEditMode ? service.durationTime : "",
@@ -45,10 +45,11 @@ export default function CreateServiceForm({
     setFormData((prevData) => ({
       ...prevData,
       employeeIds: checked
-        ? [...new Set([...prevData.employeeIds, Number(value)])]
+        ? // eslint-disable-next-line no-undef
+        [...new Set([...prevData.employeeIds, Number(value)])]
         : prevData.employeeIds.filter(
-            (checkboxId) => Number(checkboxId) !== Number(value)
-          ),
+          (checkboxId) => Number(checkboxId) !== Number(value)
+        ),
     }));
 
     console.log("formData", formData.employeeIds);

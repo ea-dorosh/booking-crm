@@ -32,8 +32,10 @@ const deleteService = async (id) => {
   return data;
 };
 
-export default {
+const serviceService = {
   getServices,
   createService,
   deleteService,
 };
+
+export default serviceService;

@@ -1,12 +1,12 @@
 "use client";
 
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Select from "@mui/material/Select";
+import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
-import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Typography from "@mui/material/Typography";
 import { useState, useEffect, useMemo } from "react";
 
 export default function DayFormRow({
@@ -127,7 +127,7 @@ export default function DayFormRow({
           size="small"
           variant="outlined"
           onClick={onDeleteEmployeeAvailability}
-          disabled={!Boolean(employeeAvailability)}
+          disabled={!employeeAvailability}
         >
           Discard
         </Button>
