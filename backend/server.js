@@ -25,9 +25,11 @@ app.use(express.json());
 
 const servicesRouter = require('./routes/services')(db); // Pass the db object
 const adminRouter = require('./routes/admin')(db); // Pass the db object
+const calendarRouter = require('./routes/calendar')(db); // Pass the db object
 
 app.use('/api/services', servicesRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/calendar', calendarRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

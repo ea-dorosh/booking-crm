@@ -59,8 +59,6 @@ module.exports = (db) => {
 
     const sql = 'SELECT * FROM EmployeeAvailability WHERE employee_id = ?';
 
-    // const sql = 'SELECT id, employee_id, day_id, start_time_id, end_time_id FROM EmployeeAvailability';
-
     db.query(sql, [employeeId], (err, results) => {
       if (err) {
         console.error(err);

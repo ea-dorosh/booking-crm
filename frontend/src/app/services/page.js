@@ -5,10 +5,12 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
+import MonthCalendar from "@/components/MonthCalendar";
 import servicesService from "@/services/services.service";
 
 export default function ServicesPage() {
   const [services, setServices] = useState(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -33,15 +35,22 @@ export default function ServicesPage() {
         </Typography>
       </Box>
 
-      <ul>
+      <div>
         {services?.map((service) => (
-          <li key={service.id}>
+          <div key={service.id}>
             {service.name}
 
-            <Button variant="contained">Book an appointment</Button>
-          </li>
+            <Button 
+              variant="contained"
+              onClick={() => setIsCalendarOpen(service.id)}
+            >Book an appointment</Button>
+          </div>
         ))}
-      </ul>
+      </div>
+
+      {isCalendarOpen && 
+        <MonthCalendar />
+      }
     </Container>
   );
 }

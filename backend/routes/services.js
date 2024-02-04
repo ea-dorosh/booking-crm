@@ -35,11 +35,11 @@ module.exports = (db) => {
       ? `
         UPDATE Services
         SET employee_id = ?, name = ?, duration_time = ?, buffer_time = ?
-        WHERE id = ?
+        WHERE id = ?;
       `
       : `
-        INSERT INTO Services (id, employee_id, name, duration_time, buffer_time)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO Services (employee_id, name, duration_time, buffer_time)
+        VALUES (?, ?, ?, ?)
       `;
 
     const values = isUpdate
@@ -53,7 +53,6 @@ module.exports = (db) => {
           service.id,
         ]
       : [
-          service.id,
           Array.isArray(service.employeeIds)
             ? service.employeeIds.join(",")
             : "",
