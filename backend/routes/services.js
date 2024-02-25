@@ -12,7 +12,6 @@ module.exports = (db) => {
       if (err) {
         res.status(500).json({ error: "Error fetching services" });
       } else {
-        console.log(`RESULTS`, results);
         const data = results.map((row) => ({
           id: row.id,
           name: row.name,
@@ -74,7 +73,6 @@ module.exports = (db) => {
 
   router.delete("/:id", (req, res) => {
     const serviceId = req.params.id;
-    console.log(`serviceId`, serviceId);
     const deleteQuery = "DELETE FROM Services WHERE id = ?";
 
     db.query(deleteQuery, [serviceId], (err, results) => {
@@ -83,7 +81,7 @@ module.exports = (db) => {
         res.status(500).json({ error: "Internal Server Error" });
         return;
       }
-      console.log(`results`, results);
+      
       if (results.affectedRows === 0) {
         res.status(404).json({ error: "Service not found" });
       } else {

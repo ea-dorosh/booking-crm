@@ -7,24 +7,54 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Typography from "@mui/material/Typography";
+import dayjs from 'dayjs';
 import { useState, useEffect, useMemo } from "react";
+import { formattedTime } from '@/utils/formatters';
+
+const timeSlots = [
+  { startTime: '08:00:00', endTime: '08:30:00' },
+  { startTime: '08:30:00', endTime: '09:00:00' },
+  { startTime: '09:00:00', endTime: '09:30:00' },
+  { startTime: '09:30:00', endTime: '10:00:00' },
+  { startTime: '10:00:00', endTime: '10:30:00' },
+  { startTime: '10:30:00', endTime: '11:00:00' },
+  { startTime: '11:00:00', endTime: '11:30:00' },
+  { startTime: '11:30:00', endTime: '12:00:00' },
+  { startTime: '12:00:00', endTime: '12:30:00' },
+  { startTime: '12:30:00', endTime: '13:00:00' },
+  { startTime: '13:00:00', endTime: '13:30:00' },
+  { startTime: '13:30:00', endTime: '14:00:00' },
+  { startTime: '14:00:00', endTime: '14:30:00' },
+  { startTime: '14:30:00', endTime: '15:00:00' },
+  { startTime: '15:00:00', endTime: '15:30:00' },
+  { startTime: '15:30:00', endTime: '16:00:00' },
+  { startTime: '16:00:00', endTime: '16:30:00' },
+  { startTime: '16:30:00', endTime: '17:00:00' },
+  { startTime: '17:00:00', endTime: '17:30:00' },
+  { startTime: '17:30:00', endTime: '18:00:00' },
+  { startTime: '18:00:00', endTime: '18:30:00' },
+  { startTime: '18:30:00', endTime: '19:00:00' },
+  { startTime: '19:00:00', endTime: '19:30:00' },
+  { startTime: '19:30:00', endTime: '20:00:00' },
+  { startTime: '20:00:00', endTime: '20:30:00' },
+  { startTime: '20:30:00', endTime: '21:00:00' },
+];
 
 export default function DayFormRow({
-  timeSlots,
   day,
   employeeAvailability,
   applyEmployeeAvailability,
   deleteEmployeeAvailability,
 }) {
   const [startTime, setStartTime] = useState(
-    employeeAvailability?.startTimeId || ""
+    employeeAvailability?.startTime || ''
   );
-  const [endTime, setEndTime] = useState(employeeAvailability?.endTimeId || "");
+  const [endTime, setEndTime] = useState(employeeAvailability?.endTime || '');
   const [isTimeChanged, setIsTimeChanged] = useState(false);
 
   useEffect(() => {
-    setStartTime(employeeAvailability?.startTimeId || "");
-    setEndTime(employeeAvailability?.endTimeId || "");
+    setStartTime(employeeAvailability?.startTime || '');
+    setEndTime(employeeAvailability?.endTime || '');
     setIsTimeChanged(false);
   }, [employeeAvailability]);
 
@@ -50,7 +80,7 @@ export default function DayFormRow({
   };
 
   const isApplyButtonDisabled = useMemo(() => {
-    if (!startTime || !endTime || startTime > endTime) {
+    if (!startTime || !endTime || dayjs(startTime) > dayjs(endTime)) {
       return true;
     }
 
@@ -86,8 +116,8 @@ export default function DayFormRow({
           onChange={handleStartTimeChange}
         >
           {timeSlots.map((timeSlot) => (
-            <MenuItem key={timeSlot.id} value={timeSlot.id}>
-              {timeSlot.startTime}
+            <MenuItem key={timeSlot.startTime} value={timeSlot.startTime}>
+              { formattedTime(timeSlot.startTime) }
             </MenuItem>
           ))}
         </Select>
@@ -105,8 +135,8 @@ export default function DayFormRow({
           onChange={handleEndTimeChange}
         >
           {timeSlots.map((timeSlot) => (
-            <MenuItem key={timeSlot.id} value={timeSlot.id}>
-              {timeSlot.endTime}
+            <MenuItem key={timeSlot.endTime} value={timeSlot.endTime}>
+              {formattedTime(timeSlot.endTime)}
             </MenuItem>
           ))}
         </Select>

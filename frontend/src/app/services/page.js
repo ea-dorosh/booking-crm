@@ -10,7 +10,8 @@ import servicesService from "@/services/services.service";
 
 export default function ServicesPage() {
   const [services, setServices] = useState(null);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -20,6 +21,18 @@ export default function ServicesPage() {
 
     fetchServices();
   }, []);
+
+  const onBookAppointmentClick = (service) => {
+    // setIsCalendarOpen(null)
+    setIsCalendarOpen(prevState => {
+      console.log(prevState);
+      // Ensure that it's set to null regardless of its previous value
+      return null;
+    });
+
+    setIsCalendarOpen(true)
+    setSelectedService(service)
+  }
 
   return (
     <Container>
@@ -37,19 +50,24 @@ export default function ServicesPage() {
 
       <div>
         {services?.map((service) => (
-          <div key={service.id}>
-            {service.name}
+          <Box key={service.id} sx={{marginBottom: 2}}>
+            <Typography variant="h6" sx={{width: '200px'}}>{service.name}</Typography>
 
-            <Button 
+            <Typography variant="body1">Duration Time: {service.durationTime}</Typography>
+
+            <Typography variant="body1">Buffer Time: {service.bufferTime ?? '-'}</Typography>
+
+            <Button
+              sx={{marginLeft: 2}}
               variant="contained"
-              onClick={() => setIsCalendarOpen(service.id)}
+              onClick={() => onBookAppointmentClick(service)}
             >Book an appointment</Button>
-          </div>
+          </Box>
         ))}
       </div>
 
       {isCalendarOpen && 
-        <MonthCalendar />
+        <MonthCalendar service={selectedService} />
       }
     </Container>
   );

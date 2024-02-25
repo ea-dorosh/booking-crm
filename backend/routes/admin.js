@@ -37,6 +37,7 @@ module.exports = (db) => {
     });
   });
 
+  // TODD: remove this route
   router.get('/time-slots', (req, res) => {
     const sql = 'SELECT timeslot_id, start_time, end_time FROM TimeSlots';
 
@@ -69,8 +70,8 @@ module.exports = (db) => {
           id: row.id,
           employeeId: row.employee_id,
           dayId: row.day_id,
-          startTimeId: row.start_time_id,
-          endTimeId: row.end_time_id,
+          startTime: row.start_time,
+          endTime: row.end_time,
         }));
         res.json(data);
       }
@@ -79,7 +80,25 @@ module.exports = (db) => {
 
   router.post('/employee-availability', (req, res) => {
     const availability = req.body.availability;
-    upsertAvailability([availability], db);
+
+    const upsertQuery = `
+    INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time) 
+    VALUES ?
+    ON DUPLICATE KEY UPDATE start_time = VALUES(start_time), end_time = VALUES(end_time)
+  `;
+  
+    const values = [availability].map(({ employeeId, dayId, startTime, endTime }) => [
+      employeeId,
+      dayId,
+      startTime,
+      endTime,
+    ]);
+  
+    db.query(upsertQuery, [values], (err, results) => {
+      if (err) {
+        console.error(err);
+      }
+    });
 
     res.json({ message: 'Availability data inserted successfully' });
   });
@@ -106,27 +125,3 @@ module.exports = (db) => {
 
   return router;
 };
-
-
-
-
-function upsertAvailability(availabilities, connection) {
-  const upsertQuery = `
-  INSERT INTO EmployeeAvailability (employee_id, day_id, start_time_id, end_time_id) 
-  VALUES ?
-  ON DUPLICATE KEY UPDATE start_time_id = VALUES(start_time_id), end_time_id = VALUES(end_time_id)
-`;
-
-  const values = availabilities.map(({ employeeId, dayId, startTimeId, endTimeId }) => [
-    employeeId,
-    dayId,
-    startTimeId,
-    endTimeId,
-  ]);
-
-  connection.query(upsertQuery, [values], (err, results) => {
-    if (err) {
-      console.error(err);
-    }
-  });
-}

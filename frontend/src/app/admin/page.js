@@ -32,7 +32,7 @@ export default function AdminPage() {
   const [employees, setEmployees] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedService, setSelectedService] = useState(null);
-  const [timeSlots, setTimeSlots] = useState(null);
+  // const [timeSlots, setTimeSlots] = useState(null);
   const [employeeAvailability, setEmployeeAvailability] = useState(null);
 
   useEffect(() => {
@@ -46,14 +46,14 @@ export default function AdminPage() {
       return setDaysOfWeek(data);
     };
 
-    const fetchTimeSlots = async () => {
-      const data = await adminService.getTimeSlots();
-      return setTimeSlots(data);
-    };
+    // const fetchTimeSlots = async () => {
+    //   const data = await adminService.getTimeSlots();
+    //   return setTimeSlots(data);
+    // };
 
     fetchDaysOfWeek();
     fetchEmployees();
-    fetchTimeSlots();
+    // fetchTimeSlots();
     fetchServices();
   }, []);
 
@@ -75,12 +75,12 @@ export default function AdminPage() {
     return employeeAvailability?.find((item) => item.dayId === dayId);
   };
 
-  const applyEmployeeAvailability = async (dayId, startTimeId, endTimeId) => {
+  const applyEmployeeAvailability = async (dayId, startTime, endTime) => {
     await adminService.applyEmployeeAvailability({
       employeeId: selectedEmployee,
       dayId,
-      startTimeId,
-      endTimeId,
+      startTime,
+      endTime,
     });
     fetchEmployeeAvailability(selectedEmployee);
   };
@@ -148,7 +148,7 @@ export default function AdminPage() {
           </Box>
         )}
 
-        {daysOfWeek && timeSlots && employeeAvailability && (
+        {daysOfWeek && employeeAvailability && (
           <Box mt={3}>
             {daysOfWeek
               .sort((a, b) => a.dayId - b.dayId)
@@ -156,7 +156,6 @@ export default function AdminPage() {
                 <DayFormRow
                   key={day.dayId}
                   day={day}
-                  timeSlots={timeSlots}
                   employeeAvailability={getEmployeeAvailabilityByDayId(
                     day.dayId
                   )}
