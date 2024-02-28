@@ -1,0 +1,13 @@
+{
+  "extends": ["eslint:recommended", "next/core-web-vitals"],
+  "plugins": ["import"],
+  "rules": {
+    "indent": ["warn", 2], // Use 2 spaces for indentation
+    "import/order": ["error", {
+      "alphabetize": {
+        "order": "asc",
+        "caseInsensitive": true
+      }
+    }]
+  }
+}

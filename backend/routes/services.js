@@ -30,6 +30,20 @@ module.exports = (db) => {
     const service = req.body.service;
     const isUpdate = Boolean(service.id);
 
+    // Validation
+    const errors = [];
+
+    if (!service.employeeIds || !Array.isArray(service.employeeIds) || !service.employeeIds.length) {
+      errors.push({
+        message: `Employee IDs must be provided as an array`,
+        property: "employeeIds",
+      });
+    }
+
+    if (errors.length > 0) {
+      return res.status(428).json({ errors });
+    }
+
     const query = isUpdate
       ? `
         UPDATE Services
