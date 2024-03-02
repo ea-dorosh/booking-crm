@@ -61,11 +61,6 @@ export default function MonthCalendar({service}) {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  useEffect(() => {
-    console.log(selectedDay);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDay]);
-
   const fetchHighlightedDays = (date) => {
     fakeFetch(date, service.id)
       .then(({ daysToHighlight }) => {
@@ -122,7 +117,6 @@ export default function MonthCalendar({service}) {
 
                 setAvailableTimeSlots(highlightedDay.availableTimeslots);
                 setSelectedDay(highlightedDay);
-                console.log(highlightedDay.day);
               },
             },
           }}

@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import FormHelperText from "@mui/material/FormHelperText";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -29,6 +30,7 @@ export default function CreateServiceForm({
   service,
   employees,
   createNewService,
+  formErrors,
 }) {
   const isEditMode = Boolean(service);
 
@@ -42,6 +44,8 @@ export default function CreateServiceForm({
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
 
+    delete formErrors.employeeIds;
+
     setFormData((prevData) => ({
       ...prevData,
       employeeIds: checked
@@ -51,12 +55,15 @@ export default function CreateServiceForm({
           (checkboxId) => Number(checkboxId) !== Number(value)
         ),
     }));
-
-    console.log("formData", formData.employeeIds);
   };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if(formErrors && formErrors[name]) {
+      delete formErrors[name];
+    }
+    
 
     setFormData((prevData) => ({
       ...prevData,
@@ -64,11 +71,10 @@ export default function CreateServiceForm({
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // You can perform form submission logic here
-    console.log("Form submitted:", formData);
-    createNewService({
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    await createNewService({
       ...service,
       ...formData,
     });
@@ -81,15 +87,27 @@ export default function CreateServiceForm({
         flexDirection: "column",
       }}
     >
-      <TextField
-        value={formData.name}
-        label="Service Name"
-        variant="outlined"
-        name="name"
-        onChange={handleChange}
-      />
+      <FormControl
+        error={formErrors?.name}
+      >
+        <TextField
+          value={formData.name}
+          label="Service Name"
+          variant="outlined"
+          name="name"
+          onChange={handleChange}
+        />
+        {formErrors?.name && 
+          <FormHelperText>
+            {formErrors.name}
+          </FormHelperText>
+        }
+      </FormControl>
 
-      <FormControl sx={{ mt: `20px` }}>
+      <FormControl
+        sx={{ mt: `20px` }}
+        error={formErrors?.durationTime}
+      >
         <InputLabel id="time-select-label">Duration Time</InputLabel>
 
         <Select
@@ -105,6 +123,12 @@ export default function CreateServiceForm({
             </MenuItem>
           ))}
         </Select>
+
+        {formErrors?.durationTime && 
+          <FormHelperText>
+            {formErrors?.durationTime}
+          </FormHelperText>
+        }
       </FormControl>
 
       <FormControl sx={{ mt: `20px` }}>
@@ -126,30 +150,41 @@ export default function CreateServiceForm({
         </Select>
       </FormControl>
 
-      <Typography variant="subtitle1" mt={2}>
-        Employees:
-      </Typography>
+      <FormControl
+        error={formErrors?.employeeIds}
+      >
+        <Typography variant="subtitle1" mt={2}>
+          Employees:
+        </Typography>
 
-      {employees?.map((employee) => (
-        <FormControlLabel
-          key={employee.employeeId}
-          control={
-            <Checkbox
-              name={employee.employeeName}
-              checked={formData.employeeIds.includes(employee.employeeId)}
-              onChange={handleCheckboxChange}
-              value={employee.employeeId}
-            />
-          }
-          label={employee.employeeName}
-        />
-      ))}
+        {employees?.map((employee) => (
+          <FormControlLabel
+            key={employee.employeeId}
+            control={
+              <Checkbox
+                name={employee.employeeName}
+                checked={formData.employeeIds.includes(employee.employeeId)}
+                onChange={handleCheckboxChange}
+                value={employee.employeeId}
+              />
+            }
+            label={employee.employeeName}
+          />
+        ))}
+        {formErrors?.employeeIds && 
+          <FormHelperText>
+            {formErrors.employeeIds}
+          </FormHelperText>
+        }
+      </FormControl>
 
       <Button
         type="submit"
         variant="contained"
         color="primary"
         onClick={handleSubmit}
+        sx={{ mt: `20px` }}
+        disabled={formErrors && Object.keys(formErrors).length > 0}
       >
         Submit
       </Button>

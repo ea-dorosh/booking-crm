@@ -67,7 +67,6 @@ module.exports = (db) => {
               console.error('Ошибка при добавлении записи SavedAppointments: ' + err.message);
               return;
           }
-          console.log('Запись успешно сохранена');
 
           res.json({ 
             message: `Appointment has been saved successfully`,

@@ -22,16 +22,10 @@ export default function ServicesPage() {
     fetchServices();
   }, []);
 
-  const onBookAppointmentClick = (service) => {
-    // setIsCalendarOpen(null)
-    setIsCalendarOpen(prevState => {
-      console.log(prevState);
-      // Ensure that it's set to null regardless of its previous value
-      return null;
-    });
-
-    setIsCalendarOpen(true)
-    setSelectedService(service)
+  const onBookAppointmentClick = async (service) => {
+    setIsCalendarOpen(null);
+    setIsCalendarOpen(true);
+    setSelectedService(service);
   }
 
   return (

@@ -22,8 +22,7 @@ export default function BookServiceForm({createAppointment}) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // You can perform form submission logic here
-    console.log("Form submitted:", formData);
+
     createAppointment({
       ...formData,
     });

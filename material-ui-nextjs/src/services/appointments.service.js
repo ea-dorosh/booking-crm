@@ -9,7 +9,6 @@ const createAppointment = async (appointment) => {
 
   try {
     const data = await response.json();
-    console.log(`created! data:`, data);
     return data;
   } catch (error) {
     console.error(error);

@@ -26,23 +26,41 @@ module.exports = (db) => {
     });
   });
 
-  router.post("/", (req, res) => {
+  router.post("/", async (req, res) => {
     const service = req.body.service;
     const isUpdate = Boolean(service.id);
 
     // Validation
-    const errors = [];
+    const errors = {};
 
     if (!service.employeeIds || !Array.isArray(service.employeeIds) || !service.employeeIds.length) {
-      errors.push({
-        message: `Employee IDs must be provided as an array`,
-        property: "employeeIds",
-      });
+      errors.employeeIds = `Choose at least one empolyee for the service`;
     }
 
-    if (errors.length > 0) {
+    if (!service.name || service.name.length <= 3 ) {
+      errors.name = `Service name must be at least 3 characters long`;
+    }
+
+    if (!service.durationTime || service.durationTime === `00:00:00`) {
+      errors.durationTime = `Duration time is required`;
+    }
+
+    if (Object.keys(errors).length > 0) {
       return res.status(428).json({ errors });
     }
+
+    //   // Check if service with the same name exists
+    //   const checkQuery = `
+    //   SELECT COUNT(*) AS count FROM Services WHERE name = ?
+    // `;
+
+    // const [checkResults] = await db.promise().query(checkQuery, [service.name]);
+    // const serviceCount = checkResults[0].count;
+
+    // if (serviceCount > isUpdate ? 1 : 0) {
+    //   errors.name = `Service with this name already exists`;
+    //   return res.status(428).json({ errors });
+    // }
 
     const query = isUpdate
       ? `
@@ -77,7 +95,10 @@ module.exports = (db) => {
     db.query(query, values, (err, results) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: "Internal Server Error" });
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(428).json({ errors: { name: `Service with this name already exists` } });
+        }
+        res.status(500).json(err);
       } else {
         const action = isUpdate ? "updated" : "inserted";
         res.json({ message: `Service data ${action} successfully` });
@@ -92,7 +113,7 @@ module.exports = (db) => {
     db.query(deleteQuery, [serviceId], (err, results) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json(err);
         return;
       }
       

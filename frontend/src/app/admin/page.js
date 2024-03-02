@@ -29,10 +29,11 @@ export default function AdminPage() {
   const [services, setServices] = useState(null);
   const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
     useState(false);
+  const [createServiceErrors, setCreateServiceErrors] =
+    useState(null);
   const [employees, setEmployees] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedService, setSelectedService] = useState(null);
-  // const [timeSlots, setTimeSlots] = useState(null);
   const [employeeAvailability, setEmployeeAvailability] = useState(null);
 
   useEffect(() => {
@@ -46,14 +47,8 @@ export default function AdminPage() {
       return setDaysOfWeek(data);
     };
 
-    // const fetchTimeSlots = async () => {
-    //   const data = await adminService.getTimeSlots();
-    //   return setTimeSlots(data);
-    // };
-
     fetchDaysOfWeek();
     fetchEmployees();
-    // fetchTimeSlots();
     fetchServices();
   }, []);
 
@@ -97,10 +92,17 @@ export default function AdminPage() {
   };
 
   const createNewService = async (service) => {
-    await servicesService.createService(service);
-    setIsCreateServiceModalOpen(false);
-    setSelectedService(null);
-    fetchServices();
+    try {
+      setCreateServiceErrors(null);
+      await servicesService.createService(service);
+
+      setIsCreateServiceModalOpen(false);
+      setSelectedService(null);
+      fetchServices();
+    } catch (error) {
+      const parsedErrors = await JSON.parse(error.message);
+      setCreateServiceErrors(parsedErrors);
+    }
   };
 
   return (
@@ -230,6 +232,7 @@ export default function AdminPage() {
         onClose={() => {
           setIsCreateServiceModalOpen(false);
           setSelectedService(null);
+          setCreateServiceErrors(null);
         }}
       >
         <Box
@@ -249,6 +252,7 @@ export default function AdminPage() {
             employees={employees || []}
             service={selectedService}
             createNewService={createNewService}
+            formErrors={createServiceErrors}
           />
         </Box>
       </Modal>

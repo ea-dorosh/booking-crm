@@ -51,8 +51,6 @@ export default function CreateServiceForm({
           (checkboxId) => Number(checkboxId) !== Number(value)
         ),
     }));
-
-    console.log("formData", formData.employeeIds);
   };
 
   const handleChange = (event) => {

@@ -21,7 +21,6 @@ const createService = async (service) => {
 
     if(response.status === 428) {
       const data = await response.json();
-      
       throw new Error(JSON.stringify(data.error));
     }
 

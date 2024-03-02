@@ -144,31 +144,6 @@ module.exports = (db) => {
         }));
 
         return blockedTimes;
-        // let updatedTimeslots = [...availableTimeslots];
-        // console.log(updatedTimeslots);
-
-        // // Define the date for which you want to check appointments
-        // const targetDate = date;
-
-        // // Query MySQL to get all entries for the target date
-        // const savedAppointmentsQuery = `SELECT * FROM SavedAppointments WHERE date = ?`;
-        // const [results] = await db.promise().query(savedAppointmentsQuery, [targetDate]);
-
-        // // Iterate over the results and identify occupied timeslots
-        // results.forEach(appointment => {
-        //   const rangeStartTime = dayjs(appointment.time, TIME_FORMAT);
-        //   const rangeEndTime = dayjs(getAppointmentEndTime(appointment.time, appointment.service_duration), TIME_FORMAT);
-
-        //   updatedTimeslots = updatedTimeslots.filter((timeslot) => {
-        //     const slotStartTime = dayjs(timeslot.startTime, TIME_FORMAT);
-        //     const slotEndTime = dayjs(timeslot.endTime, TIME_FORMAT);
-
-        //     // Check if timeslot falls outside the specified range
-        //     return slotStartTime.isSameOrAfter(rangeEndTime) || slotEndTime.isSameOrBefore(rangeStartTime);
-        //   });
-        // });
-
-        // return updatedTimeslots;
       };
       
       // Iterate through all employeeAvailability from the database

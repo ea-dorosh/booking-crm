@@ -29,6 +29,8 @@ export default function AdminPage() {
   const [services, setServices] = useState(null);
   const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
     useState(false);
+  const [createServiceErrors, setCreateServiceErrors] =
+    useState(null);
   const [employees, setEmployees] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedService, setSelectedService] = useState(null);
@@ -97,7 +99,7 @@ export default function AdminPage() {
       fetchServices();
     } catch (error) {
       const parsedErrors = JSON.parse(error.message);
-      console.log(parsedErrors);
+      setCreateServiceErrors(parsedErrors);
     }
   };
 
@@ -247,7 +249,7 @@ export default function AdminPage() {
             employees={employees || []}
             service={selectedService}
             createNewService={createNewService}
-            formErrors={null}
+            formErrors={createServiceErrors}
           />
         </Box>
       </Modal>
