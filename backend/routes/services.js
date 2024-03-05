@@ -49,19 +49,6 @@ module.exports = (db) => {
       return res.status(428).json({ errors });
     }
 
-    //   // Check if service with the same name exists
-    //   const checkQuery = `
-    //   SELECT COUNT(*) AS count FROM Services WHERE name = ?
-    // `;
-
-    // const [checkResults] = await db.promise().query(checkQuery, [service.name]);
-    // const serviceCount = checkResults[0].count;
-
-    // if (serviceCount > isUpdate ? 1 : 0) {
-    //   errors.name = `Service with this name already exists`;
-    //   return res.status(428).json({ errors });
-    // }
-
     const query = isUpdate
       ? `
         UPDATE Services
@@ -98,7 +85,7 @@ module.exports = (db) => {
         if (err.code === 'ER_DUP_ENTRY') {
           return res.status(428).json({ errors: { name: `Service with this name already exists` } });
         }
-        res.status(500).json(err);
+        return res.status(500).json(err);
       } else {
         const action = isUpdate ? "updated" : "inserted";
         res.json({ message: `Service data ${action} successfully` });

@@ -61,7 +61,9 @@ export default function ServicesPage() {
       </div>
 
       {isCalendarOpen && 
-        <MonthCalendar service={selectedService} />
+        <MonthCalendar 
+          service={selectedService}
+        />
       }
     </Container>
   );

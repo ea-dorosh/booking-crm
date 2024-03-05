@@ -60,6 +60,7 @@ export default function MonthCalendar({service}) {
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [createAppointmentErrors, setCreateAppointmentErrors] = useState(null);
 
   const fetchHighlightedDays = (date) => {
     fakeFetch(date, service.id)
@@ -86,13 +87,18 @@ export default function MonthCalendar({service}) {
   };
 
   const createAppointmentHadler = async (formData) => {
-    await appointmentsService.createAppointment({
-      ...formData,
-      date: selectedDay.day,
-      time: selectedTimeSlot.startTime,
-      serviceId: service.id,
-      serviceDuration: service.duration,
-    });
+    try {
+      await appointmentsService.createAppointment({
+        ...formData,
+        date: selectedDay.day,
+        time: selectedTimeSlot.startTime,
+        serviceId: service.id,
+        serviceDuration: service.duration,
+      });
+    } catch (error) {
+      const parsedErrors = await JSON.parse(error.message);
+      setCreateAppointmentErrors(parsedErrors);
+    }
   }
 
   return (
@@ -176,7 +182,10 @@ export default function MonthCalendar({service}) {
         <Box sx={{
           marginTop: '20px',
         }}>
-          <BookServiceForm createAppointment={createAppointmentHadler}/>
+          <BookServiceForm 
+            createAppointment={createAppointmentHadler}
+            formErrors={createAppointmentErrors}
+          />
         </Box>
       </Box>}
     </Box>

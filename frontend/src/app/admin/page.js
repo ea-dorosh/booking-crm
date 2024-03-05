@@ -27,10 +27,8 @@ import servicesService from "@/services/services.service";
 export default function AdminPage() {
   const [daysOfWeek, setDaysOfWeek] = useState(null);
   const [services, setServices] = useState(null);
-  const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
-    useState(false);
-  const [createServiceErrors, setCreateServiceErrors] =
-    useState(null);
+  const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] = useState(false);
+  const [createServiceErrors, setCreateServiceErrors] = useState(null);
   const [employees, setEmployees] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [selectedService, setSelectedService] = useState(null);

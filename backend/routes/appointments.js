@@ -1,30 +1,54 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const validator = require('validator');
+const { phone } = require('phone');
 const { getServiceDuration } = require('../utils/timeUtils');
+const { formattedName, formattedPhone } = require('../utils/formatters');
 
-// const getServiceDuration = (durationTime, bufferTime) => {
-//   if (!bufferTime) return durationTime;
-
-//   const format = "HH:mm:ss";
-//   const parsedTime1 = dayjs(durationTime, format);
-//   const parsedTime2 = dayjs(bufferTime, format);
-
-//   // Add the times together
-//   const totalTime = parsedTime1.add(parsedTime2.hour(), 'hour').add(parsedTime2.minute(), 'minute').add(parsedTime2.second(), 'second');
-
-//   return totalTime.format(format);
-// }
+function validateEmail(email) {
+  return validator.isEmail(email);
+}
 
 module.exports = (db) => {
-    router.post("/create", async (req, res) => {
+  router.post(`/create`, async (req, res) => {
     const appointmentAndCustomer = req.body.appointment;
 
-    // get Service from the database
-    const serviceQuery = 'SELECT * FROM Services WHERE id = ?';
-    const [serviceRows] = await db.promise().query(serviceQuery, [appointmentAndCustomer.serviceId]);
+    // Validation
+    const errors = {};
 
-    //get service duration (service_time + buffer_time)
-    const serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceRows[0].duration_time, serviceRows[0].buffer_time);
+    if (!validateEmail(appointmentAndCustomer.email)) {
+      errors.email = `Invalid email address`;
+    }
+
+    if ((!appointmentAndCustomer.firstName.length)) {
+      errors.firstName = `Invalid first name`;
+    }
+
+    if ((!appointmentAndCustomer.lastName.length)) {
+      errors.lastName = `Invalid last name`;
+    }
+
+    if (!phone(appointmentAndCustomer.phone, {country: `DE`}).isValid) {
+      if (!phone(appointmentAndCustomer.phone).isValid) {
+        errors.phone = `Invalid phone number`;
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(428).json({ errors });
+    }
+
+    let serviceDurationAndBufferTimeInMinutes;
+    try {
+      // get Service from the database
+      const serviceQuery = `SELECT * FROM Services WHERE id = ?`;
+      const [serviceRows] = await db.promise().query(serviceQuery, [appointmentAndCustomer.serviceId]);
+
+      //get service duration (service_time + buffer_time)
+      serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceRows[0].duration_time, serviceRows[0].buffer_time);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
 
     const customerQuery = `
         INSERT INTO Customers (first_name, last_name, email, phone)
@@ -32,48 +56,45 @@ module.exports = (db) => {
       `;
 
     const customerValues = [
-      appointmentAndCustomer.firstName,
-      appointmentAndCustomer.lastName,
+      formattedName(appointmentAndCustomer.firstName),
+      formattedName(appointmentAndCustomer.lastName),
       appointmentAndCustomer.email,
-      appointmentAndCustomer.phone,
-        ];
+      formattedPhone(appointmentAndCustomer.phone),
+    ];
 
     let customerId;
 
+    try {
+      const [customerResults] = await db.promise().query(customerQuery, customerValues);
+      customerId = customerResults.insertId;
+    } catch (error) {
+      return res.status(500).json(error);
+    }
 
-    db.query(customerQuery, customerValues, (err, results) => {
+    const appointmentQuery = `
+      INSERT INTO SavedAppointments (date, time, service_id, customer_id, service_duration, employee_id)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    const appointmentValues = [
+      appointmentAndCustomer.date,
+      appointmentAndCustomer.time,
+      appointmentAndCustomer.serviceId,
+      customerId,
+      serviceDurationAndBufferTimeInMinutes,
+      1, // employee_id
+    ];
+
+    db.query(appointmentQuery, appointmentValues, (err, result) => {
       if (err) {
-        console.error(err);
-        res.status(500).json({ error: "Error when create a customer" });
-      } else {
-        customerId = results.insertId;
-
-        const appointmentQuery = `
-          INSERT INTO SavedAppointments (date, time, service_id, customer_id, service_duration, employee_id)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `;
-
-        const appointmentValues = [
-          appointmentAndCustomer.date,
-          appointmentAndCustomer.time,
-          appointmentAndCustomer.serviceId,
-          customerId,
-          serviceDurationAndBufferTimeInMinutes,
-          1, // employee_id
-        ];
-
-        db.query(appointmentQuery, appointmentValues, (err, result) => {
-          if (err) {
-              console.error('Ошибка при добавлении записи SavedAppointments: ' + err.message);
-              return;
-          }
-
-          res.json({ 
-            message: `Appointment has been saved successfully`,
-            data: result,
-          });
-        });
+          console.error(`Error while creating appointments: ${err.message}`);
+          return;
       }
+
+      res.json({ 
+        message: `Appointment has been saved successfully`,
+        data: result,
+      });
     });
   });
 

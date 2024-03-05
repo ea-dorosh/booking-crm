@@ -1,18 +1,27 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
 
-export default function BookServiceForm({createAppointment}) {
+export default function BookServiceForm({
+  createAppointment,
+  formErrors,
+}) {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
+    firstName: ``,
+    lastName: ``,
+    phone: ``,
+    email: ``,
   });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
+    if(formErrors && formErrors[name]) {
+      delete formErrors[name];
+    }
 
     setFormData((prevData) => ({
       ...prevData,
@@ -20,8 +29,8 @@ export default function BookServiceForm({createAppointment}) {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
     createAppointment({
       ...formData,
@@ -37,37 +46,70 @@ export default function BookServiceForm({createAppointment}) {
         gap: "20px",
       }}
     >
-      <TextField
-        value={formData.firstName}
-        label="First Name"
-        variant="outlined"
-        name="firstName"
-        onChange={handleChange}
-      />
+      <FormControl error={formErrors?.firstName}>
+        <TextField
+          value={formData.firstName}
+          label="First Name"
+          variant="outlined"
+          name="firstName"
+          onChange={handleChange}
+        />
+        {formErrors?.firstName && 
+          <FormHelperText>
+            {formErrors.firstName}
+          </FormHelperText>
+        }
+      </FormControl>
 
-      <TextField
-        value={formData.lastName}
-        label="Last Name"
-        variant="outlined"
-        name="lastName"
-        onChange={handleChange}
-      />
+      <FormControl error={formErrors?.lastName}>
+        <TextField
+          value={formData.lastName}
+          label="Last Name"
+          variant="outlined"
+          name="lastName"
+          onChange={handleChange}
+        />
+        {formErrors?.lastName && 
+            <FormHelperText>
+              {formErrors.lastName}
+            </FormHelperText>
+        }
+      </FormControl>
 
-      <TextField
-        value={formData.phone}
-        label="Phone"
-        variant="outlined"
-        name="phone"
-        onChange={handleChange}
-      />
+      <FormControl
+        error={formErrors?.phone}
+      >
+        <TextField
+          value={formData.phone}
+          label="Phone"
+          variant="outlined"
+          name="phone"
+          type="tel"
+          placeholder="+49 111 111 11111"
+          onChange={handleChange}
+        />
+        {formErrors?.phone && 
+            <FormHelperText>
+              {formErrors.phone}
+            </FormHelperText>
+        }
+      </FormControl>
 
-      <TextField
-        value={formData.email}
-        label="Email"
-        variant="outlined"
-        name="email"
-        onChange={handleChange}
-      />
+      <FormControl error={formErrors?.email}>
+        <TextField
+          value={formData.email}
+          label="Email"
+          variant="outlined"
+          name="email"
+          type="email"
+          onChange={handleChange}
+        />
+        {formErrors?.email && 
+          <FormHelperText>
+            {formErrors.email}
+          </FormHelperText>
+        }
+      </FormControl>
 
       <Button
         type="submit"

@@ -44,8 +44,10 @@ export default function CreateServiceForm({
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
 
-    delete formErrors.employeeIds;
-
+    if(formErrors && formErrors.employeeIds) {
+      delete formErrors.employeeIds;
+    }
+    
     setFormData((prevData) => ({
       ...prevData,
       employeeIds: checked
@@ -64,7 +66,6 @@ export default function CreateServiceForm({
       delete formErrors[name];
     }
     
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -87,9 +88,7 @@ export default function CreateServiceForm({
         flexDirection: "column",
       }}
     >
-      <FormControl
-        error={formErrors?.name}
-      >
+      <FormControl error={formErrors?.name}>
         <TextField
           value={formData.name}
           label="Service Name"
