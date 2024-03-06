@@ -97,18 +97,19 @@ export default function DayFormRow({
     >
       <Typography
         sx={{
-          width: "80px",
+          width: "70px",
+          flexShrink: 0,
         }}
         variant="caption"
       >
         {day.dayName}
       </Typography>
 
-      <FormControl size="small" sx={{ marginRight: `20px` }}>
+      <FormControl size="small" sx={{ marginRight: `15px` }}>
         <InputLabel id="start-select-label">From:</InputLabel>
 
         <Select
-          sx={{ width: `100px` }}
+          sx={{ width: `90px` }}
           labelId="start-select-label"
           id="start-select"
           value={startTime}
@@ -127,7 +128,7 @@ export default function DayFormRow({
         <InputLabel id="end-select-label">To:</InputLabel>
 
         <Select
-          sx={{ width: `100px` }}
+          sx={{ width: `90px` }}
           labelId="end-select-label"
           id="end-select"
           value={endTime}
