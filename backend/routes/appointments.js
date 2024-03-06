@@ -1,13 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const validator = require('validator');
-const { phone } = require('phone');
 const { getServiceDuration } = require('../utils/timeUtils');
+const { validateEmail, validatePhone } = require('../utils/validators');
 const { formattedName, formattedPhone } = require('../utils/formatters');
 
-function validateEmail(email) {
-  return validator.isEmail(email);
-}
+
 
 module.exports = (db) => {
   router.post(`/create`, async (req, res) => {
@@ -28,10 +25,8 @@ module.exports = (db) => {
       errors.lastName = `Invalid last name`;
     }
 
-    if (!phone(appointmentAndCustomer.phone, {country: `DE`}).isValid) {
-      if (!phone(appointmentAndCustomer.phone).isValid) {
-        errors.phone = `Invalid phone number`;
-      }
+    if (!validatePhone(appointmentAndCustomer.phone)) {
+      errors.phone = `Invalid phone number`;
     }
 
     if (Object.keys(errors).length > 0) {

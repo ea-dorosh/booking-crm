@@ -23,15 +23,17 @@ const db = mysql.createPool({
 app.use(cors()); 
 app.use(express.json());
 
-const servicesRouter = require('./routes/services')(db); // Pass the db object
-const adminRouter = require('./routes/admin')(db); // Pass the db object
-const calendarRouter = require('./routes/calendar')(db); // Pass the db object
-const appointmentsRouter = require('./routes/appointments')(db); // Pass the db object
+const servicesRouter = require('./routes/services')(db);
+const adminRouter = require('./routes/admin')(db);
+const calendarRouter = require('./routes/calendar')(db);
+const appointmentsRouter = require('./routes/appointments')(db);
+const employeesRouter = require('./routes/employees')(db);
 
 app.use('/api/services', servicesRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/calendar', calendarRouter);
 app.use('/api/appointments', appointmentsRouter);
+app.use('/api/employees', employeesRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

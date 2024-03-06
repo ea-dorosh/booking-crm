@@ -161,13 +161,13 @@ export default function CreateServiceForm({
             key={employee.employeeId}
             control={
               <Checkbox
-                name={employee.employeeName}
+                name="employeeName"
                 checked={formData.employeeIds.includes(employee.employeeId)}
                 onChange={handleCheckboxChange}
                 value={employee.employeeId}
               />
             }
-            label={employee.employeeName}
+            label={`${employee.firstName} ${employee.lastName}`}
           />
         ))}
         {formErrors?.employeeIds && 
