@@ -18,10 +18,22 @@ import { formattedTime } from '@/utils/formatters';
 
 dayjs.locale('de')
 
-async function fakeFetch(date, serviceId) {
-  const response = await fetch(`${process.env.REACT_APP_API_URL}api/calendar/${date.format('YYYY-MM-DD')}/${serviceId}`);
+async function fakeFetch(date, serviceId, employees) {
+  // Construct the URL with query parameters
+  const apiUrl = `${process.env.REACT_APP_API_URL}api/calendar?date=${date.format('YYYY-MM-DD')}&serviceId=${serviceId}&employeeIds=${employees.join(',')}`;
+
+  // Fetch data using GET method
+  const response = await fetch(apiUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  // Parse response
   const data = await response.json();
 
+  // Return data
   return { daysToHighlight: data };
 }
 
@@ -54,7 +66,10 @@ function ServerDay(props) {
   );
 }
 
-export default function MonthCalendar({service}) {
+export default function MonthCalendar({
+  service,
+  employees,
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedDays, setHighlightedDays] = useState([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
@@ -63,7 +78,7 @@ export default function MonthCalendar({service}) {
   const [createAppointmentErrors, setCreateAppointmentErrors] = useState(null);
 
   const fetchHighlightedDays = (date) => {
-    fakeFetch(date, service.id)
+    fakeFetch(date, service.id, employees)
       .then(({ daysToHighlight }) => {
         setHighlightedDays(daysToHighlight);
         setIsLoading(false);

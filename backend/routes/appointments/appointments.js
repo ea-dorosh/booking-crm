@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getServiceDuration } = require('../utils/timeUtils');
-const { validateEmail, validatePhone } = require('../utils/validators');
-const { formattedName, formattedPhone } = require('../utils/formatters');
+const { getServiceDuration } = require('../../utils/timeUtils');
+const { validateEmail, validatePhone } = require('../../utils/validators');
+const { formattedName, formattedPhone } = require('../../utils/formatters');
 
 
 

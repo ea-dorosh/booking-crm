@@ -44,7 +44,7 @@ export default function AdminEmployeesModule({
 
   const applyEmployeeAvailability = async (dayId, startTime, endTime) => {
     await employeesService.applyEmployeeAvailability({
-      employeeId: selectedEmployee,
+      employeeId: selectedEmployee.employeeId,
       dayId,
       startTime,
       endTime,

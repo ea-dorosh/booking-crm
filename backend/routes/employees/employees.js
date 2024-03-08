@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { validateEmail, validatePhone } = require('../utils/validators');
-const { formattedName, formattedPhone } = require('../utils/formatters');
+const { validateEmail, validatePhone } = require('../../utils/validators');
+const { formattedName, formattedPhone } = require('../../utils/formatters');
 
 module.exports = (db) => {
   router.get(`/`, (req, res) => {

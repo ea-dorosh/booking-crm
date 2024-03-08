@@ -23,11 +23,11 @@ const db = mysql.createPool({
 app.use(cors()); 
 app.use(express.json());
 
-const servicesRouter = require('./routes/services')(db);
-const adminRouter = require('./routes/admin')(db);
-const calendarRouter = require('./routes/calendar')(db);
-const appointmentsRouter = require('./routes/appointments')(db);
-const employeesRouter = require('./routes/employees')(db);
+const servicesRouter = require('./routes/services/services')(db);
+const adminRouter = require('./routes/admin/admin')(db);
+const calendarRouter = require('./routes/calendar/calendar')(db);
+const appointmentsRouter = require('./routes/appointments/appointments')(db);
+const employeesRouter = require('./routes/employees/employees')(db);
 
 app.use('/api/services', servicesRouter);
 app.use('/api/admin', adminRouter);
