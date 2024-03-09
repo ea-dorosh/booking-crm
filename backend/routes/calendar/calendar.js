@@ -9,6 +9,7 @@ const {
   addTimeSlotsAccordingEmployeeAvailability,
   disableTimeSlotsForServiceDuration,
   getAppointmentEndTime,
+  replaceExistingDayWithNewEmployeeData,
 } = require('./calendarUtils');
 
 dayjs.extend(advancedFormat);
@@ -23,7 +24,6 @@ const findBlockedTimeSlots = async ({db, date, employeeId}) => {
   const savedAppointmentsQuery = `SELECT * FROM SavedAppointments WHERE date = ? AND employee_id = ?`;
   const [results] = await db.promise().query(savedAppointmentsQuery, [date, employeeId]);
 
-  console.log(`results`, results);
   const blockedTimes = results.map(appointment => {
     return {
       startBlockedTime: dayjs(appointment.time, TIME_FORMAT),
@@ -93,15 +93,28 @@ module.exports = (db) => {
 
             availableTimeslots = disableTimeSlotsForServiceDuration(availableTimeslots, serviceDurationWithBuffer);
 
-            availableDays.push(
-              { 
-                day: currentDay.format(DATE_FORMAT),
-                employeeId: availability.employeeId,
-                startTime: availability.startTime,
-                endTime: availability.endTime,
-                availableTimeslots,
-              }
-            );
+            let currentDayIndex = availableDays.findIndex(availableDay => availableDay.day === currentDay.format(DATE_FORMAT));
+
+            if (currentDayIndex >= 0) {
+              availableDays[currentDayIndex] = replaceExistingDayWithNewEmployeeData({
+                existingDay: availableDays[currentDayIndex],
+                newDay: {
+                  day: currentDay.format(DATE_FORMAT),
+                  startTime: availability.startTime,
+                  endTime: availability.endTime,
+                  availableTimeslots,
+                },
+              })
+            } else {
+              availableDays.push(
+                { 
+                  day: currentDay.format(DATE_FORMAT),
+                  startTime: availability.startTime,
+                  endTime: availability.endTime,
+                  availableTimeslots,
+                }
+              );
+            }
           }
           currentDay = currentDay.add(1, `day`);
         }

@@ -2,6 +2,7 @@ const {
   getAppointmentEndTime, 
   disableTimeSlotsForServiceDuration, 
   addTimeSlotsAccordingEmployeeAvailability,
+  replaceExistingDayWithNewEmployeeData,
 } = require('./calendarUtils');
 
 describe(`getAppointmentEndTime`, () => {
@@ -20,91 +21,91 @@ describe(`getAppointmentEndTime`, () => {
 describe(`disableTimeSlotsForServiceDuration`, () => {
   it(`should filter out time slots that are before appointment end time`, () => {
     const availableTimeSlots1 = [
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
     ];
 
     const filteredSlots1 = disableTimeSlotsForServiceDuration(availableTimeSlots1, `01:30:00`);
 
     expect(filteredSlots1).toEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true, notActive: true },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, notActive: true },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, notActive: true, employeeId: [] },
     ]);
 
     const availableTimeSlots2 = [
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: [1] },
     ];
 
     const filteredSlots2 = disableTimeSlotsForServiceDuration(availableTimeSlots2, `00:40:00`);
 
     expect(filteredSlots2).toEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: true, notActive: true },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: true, notActive: true, employeeId: [] },
     ]);
   });
 
   it(`should filter out time slots that are before appointment end time and that are before disabled time slots (blocked)`, () => {
     const availableTimeSlots1 = [
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true },
-      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: false },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true, employeeId: [] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true, employeeId: [] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true, employeeId: [] },
+      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: false, employeeId: [1] },
     ];
 
     const filteredSlots1 = disableTimeSlotsForServiceDuration(availableTimeSlots1, `01:00:00`);
 
     expect(filteredSlots1).toEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: true, notActive: true },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: true, notActive: true },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: true, notActive: true },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true },
-      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: true, notActive: true },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true, employeeId: [] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true, employeeId: [] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true, employeeId: [] },
+      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: true, notActive: true, employeeId: [] },
     ]);
 
     const availableTimeSlots2 = [
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true },
-      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: false },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true, employeeId: [] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true, employeeId: [] },
+      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: false, employeeId: [1] },
     ];
 
     const filteredSlots2 = disableTimeSlotsForServiceDuration(availableTimeSlots2, `01:40:00`);
 
     expect(filteredSlots2).toEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true, notActive: true },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, notActive: true },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: true, notActive: true },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: true, notActive: true },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: true, notActive: true },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true },
-      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: true, notActive: true },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true, employeeId: [] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: true, notActive: true, employeeId: [] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: true, employeeId: [] },
+      { startTime: `13:00:00`, endTime: `13:30:00`, disabled: true, notActive: true, employeeId: [] },
     ]);
   });
 });
@@ -120,14 +121,14 @@ describe(`addTimeSlotsAccordingEmployeeAvailability`, () => {
     });
 
     expect(timeSlots).toStrictEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false, employeeId: 1},
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: false, employeeId: 1 },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false, employeeId: [1]},
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: false, employeeId: [1] },
     ]);
   });
 
@@ -146,14 +147,14 @@ describe(`addTimeSlotsAccordingEmployeeAvailability`, () => {
     });
 
     expect(timeSlots).toStrictEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, employeeId: 1 },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: false, employeeId: 1 },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, employeeId: [] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: false, employeeId: [1] },
     ]);
   });
 
@@ -176,14 +177,441 @@ describe(`addTimeSlotsAccordingEmployeeAvailability`, () => {
     });
 
     expect(timeSlots).toStrictEqual([
-      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: 1 },
-      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, employeeId: 1 },
-      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: 1 },
-      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true, employeeId: 1 },
-      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: true, employeeId: 1 },
-      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: true, employeeId: 1 },
-      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: false, employeeId: 1 },
+      { startTime: `09:00:00`, endTime: `09:30:00`, disabled: false, employeeId: [1] },
+      { startTime: `09:30:00`, endTime: `10:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `10:00:00`, endTime: `10:30:00`, disabled: true, employeeId: [] },
+      { startTime: `10:30:00`, endTime: `11:00:00`, disabled: false, employeeId: [1] },
+      { startTime: `11:00:00`, endTime: `11:30:00`, disabled: true, employeeId: [] },
+      { startTime: `11:30:00`, endTime: `12:00:00`, disabled: true, employeeId: [] },
+      { startTime: `12:00:00`, endTime: `12:30:00`, disabled: true, employeeId: [] },
+      { startTime: `12:30:00`, endTime: `13:00:00`, disabled: false, employeeId: [1] },
     ]);
   });
+});
+
+describe(`replaceExistingDayWithNewEmployeeData`, () => {
+  it(`should replace the existing day with new employee data when existing day has not disabled timeslots and newDate also doesnt have disabled timeslots`, () => {
+    const existingDay = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+      ]
+    }
+
+    const newEmployeeData = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+      ]
+    };
+
+    const replacedDay = replaceExistingDayWithNewEmployeeData({
+      existingDay,
+      newDay: newEmployeeData,
+    });
+
+    expect(replacedDay).toStrictEqual({
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1, 2]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [1, 2]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1, 2]
+        },
+      ]
+    });
+  })
+
+  it(`should replace the existing day with new employee data when existing day has disabled timeslots and newDate doesn't have disabled timeslots`, () => {
+    const existingDay = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: true,
+          employeeId: []
+        },
+      ]
+    }
+
+    const newEmployeeData = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+      ]
+    };
+
+    const replacedDay = replaceExistingDayWithNewEmployeeData({
+      existingDay,
+      newDay: newEmployeeData,
+    });
+
+    expect(replacedDay).toStrictEqual({
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+      ]
+    });
+  })
+
+  it(`should replace the existing day with new employee data when existing day doesn't have disabled timeslots and newDate has disabled timeslots`, () => {
+    const existingDay = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+      ]
+    }
+
+    const newEmployeeData = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: []
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: []
+        },
+      ]
+    };
+
+    const replacedDay = replaceExistingDayWithNewEmployeeData({
+      existingDay,
+      newDay: newEmployeeData,
+    });
+
+    expect(replacedDay).toStrictEqual({
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+      ]
+    });
+  })
+
+  it(`should replace the existing day with new employee data when existing day has some disabled timeslots and newDate has some other disabled timeslots`, () => {
+    const existingDay = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+      ]
+    }
+
+    const newEmployeeData = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+      ]
+    };
+
+    const replacedDay = replaceExistingDayWithNewEmployeeData({
+      existingDay,
+      newDay: newEmployeeData,
+    });
+
+    expect(replacedDay).toStrictEqual({
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1, 2]
+        },
+      ]
+    });
+  })
+
+  it(`should replace the existing day with new employee data when existing day has some disabled timeslots and newDate has same disabled timeslots`, () => {
+    const existingDay = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1]
+        },
+      ]
+    }
+
+    const newEmployeeData = {
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [2]
+        },
+      ]
+    };
+
+    const replacedDay = replaceExistingDayWithNewEmployeeData({
+      existingDay,
+      newDay: newEmployeeData,
+    });
+
+    expect(replacedDay).toStrictEqual({
+      day: "2024-03-11",
+      startTime: "10:00:00",
+      endTime: "20:00:00",
+      availableTimeslots: [
+        {
+          startTime: "10:00:00",
+          endTime: "10:30:00",
+          disabled: false,
+          employeeId: [1, 2]
+        },
+        {
+          startTime: "10:30:00",
+          endTime: "11:00:00",
+          disabled: true,
+          employeeId: []
+        },
+        {
+          startTime: "11:00:00",
+          endTime: "11:30:00",
+          disabled: false,
+          employeeId: [1, 2]
+        },
+      ]
+    });
+  })
 });

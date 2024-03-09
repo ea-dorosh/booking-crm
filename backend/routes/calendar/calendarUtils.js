@@ -41,6 +41,7 @@ const disableTimeSlotsForServiceDuration = (availableTimeSlots, serviceDuration)
         return {
           ...slot,
           disabled: true,
+          employeeId: [],
           notActive: true,
         };
       }
@@ -50,6 +51,7 @@ const disableTimeSlotsForServiceDuration = (availableTimeSlots, serviceDuration)
           return {
             ...slot,
             disabled: true,
+            employeeId: [],
             notActive: true,
           };
         }
@@ -66,7 +68,9 @@ const disableTimeSlotsForServiceDuration = (availableTimeSlots, serviceDuration)
   return modifiedTimeSlots;
 };
 
-const addTimeSlotsAccordingEmployeeAvailability = ({startTime, endTime, blockedTimes, employeeId}) => {
+const addTimeSlotsAccordingEmployeeAvailability = ({
+  startTime, endTime, blockedTimes, employeeId,
+}) => {
   const parsedStartTime = dayjs(startTime, TIME_FORMAT);
   const parsedEndTime = dayjs(endTime, TIME_FORMAT);
 
@@ -74,7 +78,7 @@ const addTimeSlotsAccordingEmployeeAvailability = ({startTime, endTime, blockedT
   let currentTime = parsedStartTime;
 
   while (currentTime.isBefore(parsedEndTime)) {
-    const nextTime = currentTime.add(30, 'minute');
+    const nextTime = currentTime.add(30, `minute`);
     let disabled = false;
 
     // Check if current slot overlaps with any blocked period
@@ -90,11 +94,17 @@ const addTimeSlotsAccordingEmployeeAvailability = ({startTime, endTime, blockedT
       }
     }
 
+    let employeeIds = [];
+
+    if (!disabled) {
+      employeeIds = [employeeId];
+    }
+
     slots.push({
         startTime: currentTime.format(TIME_FORMAT),
         endTime: nextTime.format(TIME_FORMAT),
         disabled: disabled,
-        employeeId,
+        employeeId: employeeIds,
     });
     currentTime = nextTime;
   }
@@ -102,8 +112,40 @@ const addTimeSlotsAccordingEmployeeAvailability = ({startTime, endTime, blockedT
   return slots;
 }
 
+const replaceExistingDayWithNewEmployeeData = ({existingDay, newDay}) => {
+  const replacedDay = { ...existingDay };
+
+  newDay.availableTimeslots.forEach(newTimeslot => {
+    const index = replacedDay.availableTimeslots.findIndex(existingTimeslot =>
+      existingTimeslot.startTime === newTimeslot.startTime &&
+      existingTimeslot.endTime === newTimeslot.endTime
+    );
+
+    if (index !== -1) {
+      replacedDay.availableTimeslots[index].employeeId.push(...newTimeslot.employeeId);
+      // Update disabled flag only if it's already disabled in the existing day
+      if (replacedDay.availableTimeslots[index].disabled) {
+        replacedDay.availableTimeslots[index].disabled = newTimeslot.disabled;
+      }
+    } else {
+      replacedDay.availableTimeslots.push(newTimeslot);
+    }
+  });
+
+  // If any timeslot from the existing day is missing in the new day, remove it
+  replacedDay.availableTimeslots = replacedDay.availableTimeslots.filter(existingTimeslot =>
+    newDay.availableTimeslots.some(newTimeslot =>
+      newTimeslot.startTime === existingTimeslot.startTime &&
+      newTimeslot.endTime === existingTimeslot.endTime
+    )
+  );
+
+  return replacedDay;
+};
+
 module.exports = {
   getAppointmentEndTime,
   disableTimeSlotsForServiceDuration,
   addTimeSlotsAccordingEmployeeAvailability,
+  replaceExistingDayWithNewEmployeeData,
 };
