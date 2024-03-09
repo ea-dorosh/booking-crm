@@ -190,27 +190,27 @@ describe(`addTimeSlotsAccordingEmployeeAvailability`, () => {
 });
 
 describe(`replaceExistingDayWithNewEmployeeData`, () => {
-  it(`should replace the existing day with new employee data when existing day has not disabled timeslots and newDate also doesnt have disabled timeslots`, () => {
+  it(`should replace the existing day with new employee data when existing day has not disabled timeslots and newDate also does not have disabled timeslots`, () => {
     const existingDay = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1]
         },
@@ -218,25 +218,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     }
 
     const newEmployeeData = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [2]
         },
@@ -249,25 +249,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
 
     expect(replacedDay).toStrictEqual({
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1, 2]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [1, 2]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1, 2]
         },
@@ -275,27 +275,27 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
   })
 
-  it(`should replace the existing day with new employee data when existing day has disabled timeslots and newDate doesn't have disabled timeslots`, () => {
+  it(`should replace the existing day with new employee data when existing day has disabled timeslots and newDate does not have disabled timeslots`, () => {
     const existingDay = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: true,
           employeeId: []
         },
@@ -303,25 +303,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     }
 
     const newEmployeeData = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [2]
         },
@@ -334,25 +334,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
 
     expect(replacedDay).toStrictEqual({
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [2]
         },
@@ -360,27 +360,27 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
   })
 
-  it(`should replace the existing day with new employee data when existing day doesn't have disabled timeslots and newDate has disabled timeslots`, () => {
+  it(`should replace the existing day with new employee data when existing day does not have disabled timeslots and newDate has disabled timeslots`, () => {
     const existingDay = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1]
         },
@@ -388,25 +388,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     }
 
     const newEmployeeData = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: []
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: []
         },
@@ -419,25 +419,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
 
     expect(replacedDay).toStrictEqual({
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1]
         },
@@ -447,25 +447,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
 
   it(`should replace the existing day with new employee data when existing day has some disabled timeslots and newDate has some other disabled timeslots`, () => {
     const existingDay = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1]
         },
@@ -473,25 +473,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     }
 
     const newEmployeeData = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [2]
         },
@@ -504,25 +504,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
 
     expect(replacedDay).toStrictEqual({
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1, 2]
         },
@@ -532,25 +532,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
 
   it(`should replace the existing day with new employee data when existing day has some disabled timeslots and newDate has same disabled timeslots`, () => {
     const existingDay = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1]
         },
@@ -558,25 +558,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     }
 
     const newEmployeeData = {
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [2]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [2]
         },
@@ -589,25 +589,25 @@ describe(`replaceExistingDayWithNewEmployeeData`, () => {
     });
 
     expect(replacedDay).toStrictEqual({
-      day: "2024-03-11",
-      startTime: "10:00:00",
-      endTime: "20:00:00",
+      day: `2024-03-11`,
+      startTime: `10:00:00`,
+      endTime: `20:00:00`,
       availableTimeslots: [
         {
-          startTime: "10:00:00",
-          endTime: "10:30:00",
+          startTime: `10:00:00`,
+          endTime: `10:30:00`,
           disabled: false,
           employeeId: [1, 2]
         },
         {
-          startTime: "10:30:00",
-          endTime: "11:00:00",
+          startTime: `10:30:00`,
+          endTime: `11:00:00`,
           disabled: true,
           employeeId: []
         },
         {
-          startTime: "11:00:00",
-          endTime: "11:30:00",
+          startTime: `11:00:00`,
+          endTime: `11:30:00`,
           disabled: false,
           employeeId: [1, 2]
         },
