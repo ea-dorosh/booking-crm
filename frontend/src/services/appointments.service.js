@@ -1,4 +1,4 @@
-import ERRORS from "@/constants/errors";
+import ERRORS from '@/constants/errors';
 
 const createAppointment = async (appointment) => {
   // eslint-disable-next-line no-useless-catch

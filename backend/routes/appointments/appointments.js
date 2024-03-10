@@ -1,33 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { getServiceDuration } = require('../../utils/timeUtils');
-const { validateEmail, validatePhone } = require('../../utils/validators');
 const { formattedName, formattedPhone } = require('../../utils/formatters');
-
-
+const { validateCustomerForm } = require('./appointmentsUtils');
+const { getAppointmentEndTime } = require('../calendar/calendarUtils');
 
 module.exports = (db) => {
   router.post(`/create`, async (req, res) => {
     const appointmentAndCustomer = req.body.appointment;
 
     // Validation
-    const errors = {};
-
-    if (!validateEmail(appointmentAndCustomer.email)) {
-      errors.email = `Invalid email address`;
-    }
-
-    if ((!appointmentAndCustomer.firstName.length)) {
-      errors.firstName = `Invalid first name`;
-    }
-
-    if ((!appointmentAndCustomer.lastName.length)) {
-      errors.lastName = `Invalid last name`;
-    }
-
-    if (!validatePhone(appointmentAndCustomer.phone)) {
-      errors.phone = `Invalid phone number`;
-    }
+    const errors = validateCustomerForm(appointmentAndCustomer);
 
     if (Object.keys(errors).length > 0) {
       return res.status(428).json({ errors });
@@ -67,13 +50,17 @@ module.exports = (db) => {
     }
 
     const appointmentQuery = `
-      INSERT INTO SavedAppointments (date, time, service_id, customer_id, service_duration, employee_id)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
+
+    const timeStart = appointmentAndCustomer.time;
+    const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
 
     const appointmentValues = [
       appointmentAndCustomer.date,
-      appointmentAndCustomer.time,
+      timeStart,
+      timeEnd,
       appointmentAndCustomer.serviceId,
       customerId,
       serviceDurationAndBufferTimeInMinutes,

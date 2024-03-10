@@ -8,7 +8,6 @@ const advancedFormat = require('dayjs/plugin/advancedFormat');
 const { 
   addTimeSlotsAccordingEmployeeAvailability,
   disableTimeSlotsForServiceDuration,
-  getAppointmentEndTime,
   replaceExistingDayWithNewEmployeeData,
 } = require('./calendarUtils');
 
@@ -22,12 +21,12 @@ const DATE_FORMAT = `YYYY-MM-DD`;
 const findBlockedTimeSlots = async ({db, date, employeeId}) => {
   // Query MySQL to get all entries for the target date
   const savedAppointmentsQuery = `SELECT * FROM SavedAppointments WHERE date = ? AND employee_id = ?`;
-  const [results] = await db.promise().query(savedAppointmentsQuery, [date, employeeId]);
+  const [appointmentResults] = await db.promise().query(savedAppointmentsQuery, [date, employeeId]);
 
-  const blockedTimes = results.map(appointment => {
+  const blockedTimes = appointmentResults.map(appointment => {
     return {
-      startBlockedTime: dayjs(appointment.time, TIME_FORMAT),
-      endBlockedTime: dayjs(getAppointmentEndTime(appointment.time, appointment.service_duration), TIME_FORMAT),
+      startBlockedTime: dayjs(appointment.time_start, TIME_FORMAT),
+      endBlockedTime: dayjs(appointment.time_end, TIME_FORMAT),
   }});
 
   return blockedTimes;
