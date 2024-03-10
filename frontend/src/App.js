@@ -1,10 +1,10 @@
-import './App.css';
-import AdminPage from '@/pages/page.js';
+import '@/App.css';
+import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 
 function App() {
   return (
     <div className="App">
-      <AdminPage />
+      <DashboardPage />
     </div>
   );
 }
