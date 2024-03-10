@@ -5,6 +5,31 @@ const { formattedName, formattedPhone } = require('../../utils/formatters');
 const { validateCustomerForm } = require('./appointmentsUtils');
 const { getAppointmentEndTime } = require('../calendar/calendarUtils');
 
+const checkEmployeeTimeNotOverlap = async ({db, res}, {date, employeeId, timeStart, timeEnd }) => {
+  const checkAvailabilityQuery = `
+    SELECT * FROM SavedAppointments 
+    WHERE employee_id = ? 
+    AND date = ? 
+    AND (
+      (time_start >= ? AND time_start < ?) OR 
+      (time_end > ? AND time_end <= ?) OR 
+      (time_start <= ? AND time_end >= ?)
+    )
+  `;
+
+  const checkAvailabilityValues = [employeeId, date, timeStart, timeEnd, timeStart, timeEnd, timeStart, timeEnd];
+
+  try {
+    const [existingAppointments] = await db.promise().query(checkAvailabilityQuery, checkAvailabilityValues);
+
+    if (existingAppointments.length > 0) {
+      return res.status(409).json({ error: `Employee is already busy at the specified date and time.` });
+    }
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
+
 module.exports = (db) => {
   router.post(`/create`, async (req, res) => {
     const appointmentAndCustomer = req.body.appointment;
@@ -49,28 +74,32 @@ module.exports = (db) => {
       return res.status(500).json(error);
     }
 
+    const employeeId = appointmentAndCustomer.employeeId;
+    const date = appointmentAndCustomer.date;
+    const timeStart = appointmentAndCustomer.time;
+    const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
+
+    await checkEmployeeTimeNotOverlap({db, res, req}, {date, employeeId, timeStart, timeEnd });
+
     const appointmentQuery = `
       INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const timeStart = appointmentAndCustomer.time;
-    const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
-
     const appointmentValues = [
-      appointmentAndCustomer.date,
+      date,
       timeStart,
       timeEnd,
       appointmentAndCustomer.serviceId,
       customerId,
       serviceDurationAndBufferTimeInMinutes,
-      appointmentAndCustomer.employeeId,
+      employeeId,
     ];
 
-    db.query(appointmentQuery, appointmentValues, (err, result) => {
-      if (err) {
-          console.error(`Error while creating appointments: ${err.message}`);
-          return;
+    db.query(appointmentQuery, appointmentValues, (error, result) => {
+      if (error) {
+        console.error(`Error while creating appointments: ${error.message}`);
+        return res.status(500).json(error);
       }
 
       res.json({ 

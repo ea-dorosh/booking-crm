@@ -36,6 +36,8 @@ export default function ServicesPage() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [createAppointmentErrors, setCreateAppointmentErrors] = useState(null);
 
+  const [generalError, setGeneralError] = useState(null);
+
   const [formStep, setFormStep] = useState(FORM_STEPS.SERVICES);
 
   const shouldShowServices = formStep === FORM_STEPS.SERVICES;
@@ -154,7 +156,12 @@ export default function ServicesPage() {
       setSelectedEmployeeFromTimeSlotAvailability(null);
     } catch (error) {
       const parsedErrors = await JSON.parse(error.message);
-      setCreateAppointmentErrors(parsedErrors);
+
+      if (typeof parsedErrors === `string`) {
+        setGeneralError(parsedErrors);
+      } else {
+        setCreateAppointmentErrors(parsedErrors);
+      }
     }
   }
 
@@ -357,6 +364,16 @@ export default function ServicesPage() {
             Choose next service
           </Button>
         </Box>
+      }
+
+      {generalError && 
+        <Typography
+          variant="subtitle1"
+          mt={2}
+          color={`error`}
+        >
+          {generalError}
+        </Typography>
       }
     </Container>
   );
