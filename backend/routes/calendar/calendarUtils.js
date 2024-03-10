@@ -42,7 +42,6 @@ const disableTimeSlotsForServiceDuration = (availableTimeSlots, serviceDuration)
           ...slot,
           disabled: true,
           employeeId: [],
-          notActive: true,
         };
       }
 
@@ -52,7 +51,6 @@ const disableTimeSlotsForServiceDuration = (availableTimeSlots, serviceDuration)
             ...slot,
             disabled: true,
             employeeId: [],
-            notActive: true,
           };
         }
       } else if (dayjs(timeSlot.endTime, TIME_FORMAT).isSame(dayjs(appointmentEndTime, TIME_FORMAT))) {
@@ -113,34 +111,39 @@ const addTimeSlotsAccordingEmployeeAvailability = ({
 }
 
 const replaceExistingDayWithNewEmployeeData = ({existingDay, newDay}) => {
-  const replacedDay = { ...existingDay };
+  const mergedTimeslots = {};
 
-  newDay.availableTimeslots.forEach(newTimeslot => {
-    const index = replacedDay.availableTimeslots.findIndex(existingTimeslot =>
-      existingTimeslot.startTime === newTimeslot.startTime &&
-      existingTimeslot.endTime === newTimeslot.endTime
-    );
-
-    if (index !== -1) {
-      replacedDay.availableTimeslots[index].employeeId.push(...newTimeslot.employeeId);
-      // Update disabled flag only if it's already disabled in the existing day
-      if (replacedDay.availableTimeslots[index].disabled) {
-        replacedDay.availableTimeslots[index].disabled = newTimeslot.disabled;
-      }
+  // Combine timeslots from both existing and new day
+  [...existingDay.availableTimeslots, ...newDay.availableTimeslots].forEach(timeslot => {
+    const key = `${timeslot.startTime}-${timeslot.endTime}`;
+    if (!mergedTimeslots[key]) {
+      mergedTimeslots[key] = { ...timeslot };
     } else {
-      replacedDay.availableTimeslots.push(newTimeslot);
+      mergedTimeslots[key].employeeId.push(...timeslot.employeeId.filter(id => !mergedTimeslots[key].employeeId.includes(id)));
+      // Set disabled to true only if both existing and new timeslots are disabled
+      if (timeslot.disabled && mergedTimeslots[key].disabled) {
+        mergedTimeslots[key].disabled = true;
+      } else {
+        mergedTimeslots[key].disabled = false;
+      }
     }
   });
 
-  // If any timeslot from the existing day is missing in the new day, remove it
-  replacedDay.availableTimeslots = replacedDay.availableTimeslots.filter(existingTimeslot =>
-    newDay.availableTimeslots.some(newTimeslot =>
-      newTimeslot.startTime === existingTimeslot.startTime &&
-      newTimeslot.endTime === existingTimeslot.endTime
-    )
-  );
+  // Convert merged timeslots back to array
+  const availableTimeslots = Object.values(mergedTimeslots);
 
-  return replacedDay;
+  // Sort timeslots by start time
+  availableTimeslots.sort((a, b) => {
+    return a.startTime.localeCompare(b.startTime);
+  });
+
+  // Replace existing day with merged timeslots
+  return {
+    day: existingDay.day,
+    startTime: existingDay.startTime,
+    endTime: existingDay.endTime,
+    availableTimeslots
+  };
 };
 
 module.exports = {

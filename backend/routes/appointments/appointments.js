@@ -77,7 +77,7 @@ module.exports = (db) => {
       appointmentAndCustomer.serviceId,
       customerId,
       serviceDurationAndBufferTimeInMinutes,
-      1, // employee_id
+      appointmentAndCustomer.employeeId,
     ];
 
     db.query(appointmentQuery, appointmentValues, (err, result) => {

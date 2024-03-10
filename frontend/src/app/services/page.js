@@ -7,15 +7,20 @@ import Container from "@mui/material/Container";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
+import BookServiceForm from '@/components/BookServiceForm';
 import MonthCalendar from "@/components/MonthCalendar";
+import appointmentsService from '@/services/appointments.service';
 import employeesService from "@/services/employees.service";
 import servicesService from "@/services/services.service";
+import { formattedTime } from '@/utils/formatters';
 
 const FORM_STEPS = {
   SERVICES: 1,
   EMPLOYEES: 2,
   CALENDAR: 3,
-  CUSTOMER_FORM: 4,
+  EMPLOYEES_FOR_CURRENT_SLOT: 4,
+  CUSTOMER_FORM: 5,
+  FINISH: 6,
 };
 
 export default function ServicesPage() {
@@ -25,16 +30,23 @@ export default function ServicesPage() {
 
   const [selectedService, setSelectedService] = useState(null);
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState([]);
+  const [selectedEmployeeFromTimeSlotAvailability, setSelectedEmployeeFromTimeSlotAvailability] = useState(null);
+
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+  const [createAppointmentErrors, setCreateAppointmentErrors] = useState(null);
 
   const [formStep, setFormStep] = useState(FORM_STEPS.SERVICES);
 
   const shouldShowServices = formStep === FORM_STEPS.SERVICES;
-  const shouldShowServiceDetails = formStep > FORM_STEPS.SERVICES;
+  const shouldShowServiceDetails = formStep > FORM_STEPS.SERVICES && formStep < FORM_STEPS.FINISH;
   const shouldShowEmployees = formStep === FORM_STEPS.EMPLOYEES;
-  const shouldShowEmployeeDetails = formStep > FORM_STEPS.EMPLOYEES;
+  const shouldShowEmployeeDetails = formStep > FORM_STEPS.EMPLOYEES && formStep < FORM_STEPS.FINISH;
   const shouldShowCalendar = formStep === FORM_STEPS.CALENDAR;
-  const shouldShowCalendarDetails = formStep > FORM_STEPS.CALENDAR;
+  const shouldShowCalendarDetails = formStep > FORM_STEPS.CALENDAR && formStep < FORM_STEPS.FINISH;
+  const shouldShowEmployeesForCurrentSlot = formStep === FORM_STEPS.EMPLOYEES_FOR_CURRENT_SLOT;
   const shouldShowCustomerForm = formStep === FORM_STEPS.CUSTOMER_FORM;
+  const shouldShowApproveMessage = formStep === FORM_STEPS.FINISH;
 
   useEffect(() => {
     if (selectedService) {
@@ -72,6 +84,7 @@ export default function ServicesPage() {
 
   const onChangeServiceClick = () => {
     setSelectedService(null);
+    setSelectedEmployeeFromTimeSlotAvailability(null);
     setSelectedEmployeeIds([]);
 
     setFormStep(FORM_STEPS.SERVICES);
@@ -96,9 +109,53 @@ export default function ServicesPage() {
   };
 
   const onChangeEmployeeClick = () => {
-    setSelectedEmployee(null);
-
+    setSelectedTimeSlot(null);
+    setSelectedEmployeeFromTimeSlotAvailability(null);
     setFormStep(FORM_STEPS.EMPLOYEES);
+  }
+
+  const onSelectTimeSlotClick = (slot) => {
+    setSelectedTimeSlot(slot);
+
+    if (slot.employeeId.length > 1) {
+      setFormStep(FORM_STEPS.EMPLOYEES_FOR_CURRENT_SLOT);
+    } else {
+      setSelectedEmployeeFromTimeSlotAvailability(slot.employeeId[0]);
+      setFormStep(FORM_STEPS.CUSTOMER_FORM);
+    }
+  }
+
+  const onChangeDateAndTimeClick = () => {
+    setFormStep(FORM_STEPS.CALENDAR);
+    setSelectedTimeSlot(null)
+    setSelectedEmployeeFromTimeSlotAvailability(null);
+  }
+
+  const createAppointmentHadler = async (formData) => {
+    const appointmentData = {
+      ...formData,
+      date: selectedDay.day,
+      time: selectedTimeSlot.startTime,
+      serviceId: selectedService.id,
+      serviceDuration: selectedService.duration,
+      employeeId: selectedEmployeeFromTimeSlotAvailability,
+    };
+
+    try {
+      await appointmentsService.createAppointment(appointmentData);
+      
+      // reset form after successful submission
+      setFormStep(FORM_STEPS.FINISH);
+      setSelectedService(null);
+      setSelectedEmployeeIds([]);
+      setSelectedDay(null);
+      setSelectedTimeSlot(null);
+      setCreateAppointmentErrors(null);
+      setSelectedEmployeeFromTimeSlotAvailability(null);
+    } catch (error) {
+      const parsedErrors = await JSON.parse(error.message);
+      setCreateAppointmentErrors(parsedErrors);
+    }
   }
 
   return (
@@ -112,6 +169,15 @@ export default function ServicesPage() {
       >
         <Typography variant="body1" gutterBottom>
           Services Page
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          selectedService: {selectedService?.toString()}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+        selectedEmployeeIds: {selectedEmployeeIds?.toString()}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+        selectedEmployeeFromTimeSlotAvailability: {selectedEmployeeFromTimeSlotAvailability?.toString()}
         </Typography>
       </Box>
 
@@ -163,7 +229,7 @@ export default function ServicesPage() {
             />
           ))}
         </Box>
-        
+
         {shouldShowEmployees && <Button
           sx={{marginLeft: 2}}
           variant="contained"
@@ -187,7 +253,7 @@ export default function ServicesPage() {
 
             <Button
               sx={{marginLeft: 2}}
-              onClick={onChangeServiceClick}
+              onClick={onChangeEmployeeClick}
             >Change master</Button>
           </Box>
         }
@@ -197,7 +263,100 @@ export default function ServicesPage() {
         <MonthCalendar 
           service={selectedService}
           employees={selectedEmployeeIds}
+          setSelectedDay={setSelectedDay}
+          selectedTimeSlot={selectedTimeSlot}
+          setSelectedTimeSlot={onSelectTimeSlotClick}
         />
+      }
+
+      {shouldShowCalendarDetails && 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          gap: '30px',
+          marginTop: '30px',
+        }}>
+          <Box>
+            <Typography>
+              Selected day: {selectedDay.day}
+            </Typography>
+
+            <Typography>
+              Selected time slot: {formattedTime(selectedTimeSlot.startTime)}
+            </Typography>
+          </Box>
+
+          <Button
+            onClick={onChangeDateAndTimeClick}
+          >
+            Change date and time
+          </Button>
+        </Box>
+      }
+
+      {shouldShowEmployeesForCurrentSlot && 
+        <Box sx={{
+          marginTop: '30px',
+        }}>
+          <Typography>
+            At this time the following masters are available:
+          </Typography>
+
+          {selectedTimeSlot.employeeId.map((employeeId) => {
+            const employee = employees.find((emp) => emp.employeeId === employeeId);
+
+            return (
+              <Box 
+                key={employeeId} 
+                sx={{
+                  display: 'flex',
+                  gap: '30px',
+                }}
+              >
+                <Typography>
+                  {employee.firstName} {employee.lastName}
+                </Typography>
+
+                <Button onClick={()=>{
+                  setSelectedEmployeeFromTimeSlotAvailability(employeeId);
+                  setFormStep(FORM_STEPS.CUSTOMER_FORM);
+                }}>Choose</Button>
+              </Box>
+            );
+          })}
+
+          <Button onClick={()=>{
+            setSelectedEmployeeFromTimeSlotAvailability(selectedTimeSlot.employeeId[0]);
+            setFormStep(FORM_STEPS.CUSTOMER_FORM)
+          }}>Continue with any Master</Button>
+        </Box>
+      }
+
+      {shouldShowCustomerForm && 
+        <Box>
+          <Box sx={{
+            marginTop: '20px',
+          }}>
+            <BookServiceForm 
+              createAppointment={createAppointmentHadler}
+              formErrors={createAppointmentErrors}
+            />
+          </Box>
+        </Box>
+      }
+
+      {shouldShowApproveMessage && 
+        <Box>
+          <Typography>
+            Your appointment has been created!
+          </Typography>
+
+          <Button
+            onClick={()=> setFormStep(FORM_STEPS.SERVICES)}
+          >
+            Choose next service
+          </Button>
+        </Box>
       }
     </Container>
   );
