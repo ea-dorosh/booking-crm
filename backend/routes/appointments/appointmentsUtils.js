@@ -1,5 +1,4 @@
 const { validateEmail, validatePhone } = require('../../utils/validators');
-const { formattedName, formattedPhone } = require('../../utils/formatters');
 
 const validateCustomerForm = (formData) => {
   const errors = {};
