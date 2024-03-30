@@ -35,6 +35,6 @@ app.use('/api/calendar', calendarRouter);
 app.use('/api/appointments', appointmentsRouter);
 app.use('/api/employees', employeesRouter);
 
-app.listen(port, () => {
+app.listen(port, '192.168.178.27', () => {
   console.log(`Server is running on port ${port}`);
 });

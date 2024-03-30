@@ -12,7 +12,7 @@ const createEmployee = async (employee) => {
   // eslint-disable-next-line no-useless-catch
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}api/employees/create`,
+      `${process.env.REACT_APP_API_URL}api/employees/create-employee`,
       {
         method: `POST`,
         headers: {

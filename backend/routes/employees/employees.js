@@ -26,7 +26,7 @@ module.exports = (db) => {
     });
   });
 
-  router.post(`/create`, async (req, res) => {
+  router.post(`/create-employee`, async (req, res) => {
     const employee = req.body.employee;
 
     // Validation
@@ -64,14 +64,18 @@ module.exports = (db) => {
       formattedPhone(employee.phone),
     ];
 
-    db.query(query, values, (err, results) => {
+    db.query(query, values, (err, result) => {
       if (err) {
         // if (err.code === `ER_DUP_ENTRY`) {
         //   return res.status(428).json({ errors: { name: `Service with this name already exists` } });
         // }
         // return res.status(500).json(err);
       } else {
-        res.json({ message: `New employee data inserted successfully` });
+        console.log(`createEmployee`, result);
+        res.json({
+          message: `New employee data inserted successfully`,
+          data: result.insertId,
+        });
       }
     });
   });
@@ -162,13 +166,16 @@ module.exports = (db) => {
       endTime,
     ]);
   
-    db.query(upsertQuery, [values], (err, results) => {
-      if (err) {
-        console.error(err);
+    db.query(upsertQuery, [values], (error, result) => {
+      if (error) {
+        console.error(error);
       }
-    });
 
-    res.json({ message: `Availability data inserted successfully` });
+      res.json({ 
+        message: `Availability data inserted successfully`,
+        data: result,
+      });
+    });
   });
 
   router.delete(`/employee-availability/:id`, (req, res) => {

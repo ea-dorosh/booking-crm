@@ -88,7 +88,7 @@ export default function CreateServiceForm({
         flexDirection: "column",
       }}
     >
-      <FormControl error={formErrors?.name}>
+      <FormControl error={Boolean(formErrors?.name)}>
         <TextField
           value={formData.name}
           label="Service Name"
@@ -105,7 +105,7 @@ export default function CreateServiceForm({
 
       <FormControl
         sx={{ mt: `20px` }}
-        error={formErrors?.durationTime}
+        error={Boolean(formErrors?.durationTime)}
       >
         <InputLabel id="time-select-label">Duration Time</InputLabel>
 
@@ -150,7 +150,7 @@ export default function CreateServiceForm({
       </FormControl>
 
       <FormControl
-        error={formErrors?.employeeIds}
+        error={Boolean(formErrors?.employeeIds)}
       >
         <Typography variant="subtitle1" mt={2}>
           Employees:

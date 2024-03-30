@@ -3,17 +3,14 @@ import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
 import TextField from "@mui/material/TextField";
-import { useState } from "react";
-import DayFormRow from "@/components/DayFormRow";
+import { useEffect, useState } from "react";
 
 export default function CreateEmployeeForm({
   employee,
   createEmployee,
   formErrors,
-  daysOfWeek,
-  employeeAvailability,
-  applyEmployeeAvailability,
-  deleteEmployeeAvailability,
+  cleanError,
+  cleanErrors,
 }) {
   const isEditMode = Boolean(employee);
 
@@ -28,9 +25,9 @@ export default function CreateEmployeeForm({
     const { name, value } = event.target;
 
     if(formErrors && formErrors[name]) {
-      delete formErrors[name];
+      cleanError(name);
     }
-    console.log(name, value);
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -46,9 +43,11 @@ export default function CreateEmployeeForm({
     });
   };
 
-  const getEmployeeAvailabilityByDayId = (dayId) => {
-    return employeeAvailability?.find((item) => item.dayId === dayId);
-  };
+  useEffect(() => {
+    return () => cleanErrors()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box
@@ -59,7 +58,7 @@ export default function CreateEmployeeForm({
     >
       <FormControl 
         sx={{ mt: `20px` }}
-        error={formErrors?.firstName}
+        error={Boolean(formErrors?.firstName)}
       >
         <TextField
           value={formData.firstName}
@@ -77,7 +76,7 @@ export default function CreateEmployeeForm({
 
       <FormControl 
         sx={{ mt: `20px` }}
-        error={formErrors?.lastName}
+        error={Boolean(formErrors?.lastName)}
       >
         <TextField
           value={formData.lastName}
@@ -95,7 +94,7 @@ export default function CreateEmployeeForm({
 
       <FormControl 
         sx={{ mt: `20px` }}
-        error={formErrors?.email}
+        error={Boolean(formErrors?.email)}
       >
         <TextField
           value={formData.email}
@@ -113,7 +112,7 @@ export default function CreateEmployeeForm({
 
       <FormControl 
         sx={{ mt: `20px` }}
-        error={formErrors?.phone}
+        error={Boolean(formErrors?.phone)}
       >
         <TextField
           value={formData.phone}
@@ -135,26 +134,10 @@ export default function CreateEmployeeForm({
         color="primary"
         onClick={handleSubmit}
         sx={{ mt: `20px` }}
-        disabled={formErrors && Object.keys(formErrors).length > 0}
+        disabled={formErrors && Object.values(formErrors).length > 0}
       >
         Submit
       </Button>
-
-      {daysOfWeek && employeeAvailability && (
-        <Box mt={3}>
-          {daysOfWeek
-            .sort((a, b) => a.dayId - b.dayId)
-            .map((day) => (
-              <DayFormRow
-                key={day.dayId}
-                day={day}
-                employeeAvailability={getEmployeeAvailabilityByDayId(day.dayId)}
-                applyEmployeeAvailability={applyEmployeeAvailability}
-                deleteEmployeeAvailability={deleteEmployeeAvailability}
-              />
-            ))}
-        </Box>
-      )}
     </Box>
   );
 }

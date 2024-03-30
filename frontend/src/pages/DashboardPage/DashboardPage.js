@@ -1,38 +1,36 @@
+/* eslint-disable no-unused-vars */
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import { useState, useEffect } from "react";
-import AdminEmployeesModule from "@/components/AdminEmployeesModule";
-import AdminServicesModule from "@/components/AdminServicesModule";
-import employeesService from "@/services/employees.service";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from "react-router-dom";
+import { increment, decrement } from '@/features/counter/counterSlice';
 
-export default function AdminPage() {
-  const [employees, setEmployees] = useState(null);
 
-  const fetchEmployees = async () => {
-    const data = await employeesService.getEmployees();
-    return setEmployees(data);
-  };
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+export default function DashboardPage() {
+  const dispatch = useDispatch();
+  const counter = useSelector(state => state.counter.value);
 
   return (
     <main>
       <Box sx={{ width: "100%", maxWidth: 768 }}>
-        <Typography variant="h2">ADMIN</Typography>
-
-        <AdminEmployeesModule 
-          employees={employees || []}
-          fetchEmployees={fetchEmployees}
-        />
+        <Typography variant="h2">Dashboard</Typography>
 
         <Divider />
 
-        <AdminServicesModule employees={employees || []} />
+        <Link to={`employees`}>Employees</Link>
 
+        <Divider />
+
+        <Link to={`services`}>Services</Link>
       </Box>
+
+      <div>
+        <h1>Counter: {counter}</h1>
+        <button onClick={() => dispatch(increment())}>Increment</button>
+        <button onClick={() => dispatch(decrement())}>Decrement</button>
+      </div>
     </main>
   );
 }

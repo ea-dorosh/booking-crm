@@ -46,7 +46,7 @@ export default function BookServiceForm({
         gap: "20px",
       }}
     >
-      <FormControl error={formErrors?.firstName}>
+      <FormControl error={Boolean(formErrors?.firstName)}>
         <TextField
           value={formData.firstName}
           label="First Name"
@@ -61,7 +61,7 @@ export default function BookServiceForm({
         }
       </FormControl>
 
-      <FormControl error={formErrors?.lastName}>
+      <FormControl error={Boolean(formErrors?.lastName)}>
         <TextField
           value={formData.lastName}
           label="Last Name"
@@ -77,7 +77,7 @@ export default function BookServiceForm({
       </FormControl>
 
       <FormControl
-        error={formErrors?.phone}
+        error={Boolean(formErrors?.phone)}
       >
         <TextField
           value={formData.phone}
@@ -95,7 +95,7 @@ export default function BookServiceForm({
         }
       </FormControl>
 
-      <FormControl error={formErrors?.email}>
+      <FormControl error={Boolean(formErrors?.email)}>
         <TextField
           value={formData.email}
           label="Email"
