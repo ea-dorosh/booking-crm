@@ -9,7 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const timeDurations = [
   { title: "15 min", value: "00:15:00" },
@@ -31,6 +31,8 @@ export default function CreateServiceForm({
   employees,
   createNewService,
   formErrors,
+  cleanError,
+  cleanErrors,
 }) {
   const isEditMode = Boolean(service);
 
@@ -41,11 +43,17 @@ export default function CreateServiceForm({
     employeeIds: isEditMode ? service.employeeIds : [],
   });
 
+  useEffect(() => {
+    return () => cleanErrors()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
 
     if(formErrors && formErrors.employeeIds) {
-      delete formErrors.employeeIds;
+      cleanError(`employeeIds`);
     }
     
     setFormData((prevData) => ({
@@ -63,7 +71,7 @@ export default function CreateServiceForm({
     const { name, value } = event.target;
 
     if(formErrors && formErrors[name]) {
-      delete formErrors[name];
+      cleanError(name);
     }
     
     setFormData((prevData) => ({

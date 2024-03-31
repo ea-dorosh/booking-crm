@@ -2,21 +2,21 @@ const express = require("express");
 const router = express.Router();
 
 module.exports = (db) => {
-  router.get("/", (req, res) => {
+  router.get(`/`, (req, res) => {
     // Use the db object to query for services
 
     const sql =
-      "SELECT id, name, employee_id, duration_time, buffer_time FROM Services";
+      `SELECT id, name, employee_id, duration_time, buffer_time FROM Services`;
 
     db.query(sql, (err, results) => {
       if (err) {
-        res.status(500).json({ error: "Error fetching services" });
+        res.status(500).json({ error: `Error fetching services` });
       } else {
         const data = results.map((row) => ({
           id: row.id,
           name: row.name,
           employeeIds: row.employee_id
-            ? row.employee_id.split(",").map(Number)
+            ? row.employee_id.split(`,`).map(Number)
             : [],
           durationTime: row.duration_time,
           bufferTime: row.buffer_time,
@@ -26,7 +26,7 @@ module.exports = (db) => {
     });
   });
 
-  router.post("/", async (req, res) => {
+  router.post(`/`, async (req, res) => {
     const service = req.body.service;
     const isUpdate = Boolean(service.id);
 
@@ -63,8 +63,8 @@ module.exports = (db) => {
     const values = isUpdate
       ? [
           Array.isArray(service.employeeIds)
-            ? service.employeeIds.join(",")
-            : "",
+            ? service.employeeIds.join(`,`)
+            : ``,
           service.name,
           service.durationTime,
           service.bufferTime,
@@ -72,30 +72,33 @@ module.exports = (db) => {
         ]
       : [
           Array.isArray(service.employeeIds)
-            ? service.employeeIds.join(",")
-            : "",
+            ? service.employeeIds.join(`,`)
+            : ``,
           service.name,
           service.durationTime,
           service.bufferTime,
         ];
 
-    db.query(query, values, (err, results) => {
-      if (err) {
-        console.error(err);
+    db.query(query, values, (error, result) => {
+      if (error) {
+        console.error(error);
         if (err.code === 'ER_DUP_ENTRY') {
           return res.status(428).json({ errors: { name: `Service with this name already exists` } });
         }
         return res.status(500).json(err);
       } else {
-        const action = isUpdate ? "updated" : "inserted";
-        res.json({ message: `Service data ${action} successfully` });
+        const action = isUpdate ? `updated` : `inserted`;
+        res.json({ 
+          message: `Service data ${action} successfully`,
+          data: result.insertId,
+        });
       }
     });
   });
 
-  router.delete("/:id", (req, res) => {
+  router.delete(`/:id`, (req, res) => {
     const serviceId = req.params.id;
-    const deleteQuery = "DELETE FROM Services WHERE id = ?";
+    const deleteQuery = `DELETE FROM Services WHERE id = ?`;
 
     db.query(deleteQuery, [serviceId], (err, results) => {
       if (err) {
@@ -105,9 +108,9 @@ module.exports = (db) => {
       }
       
       if (results.affectedRows === 0) {
-        res.status(404).json({ error: "Service not found" });
+        res.status(404).json({ error: `Service not found` });
       } else {
-        res.status(200).json({ message: "Service deleted successfully" });
+        res.status(200).json({ message: `Service deleted successfully` });
       }
     });
   });

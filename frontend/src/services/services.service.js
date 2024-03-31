@@ -1,4 +1,4 @@
-import ERRORS from "@/constants/errors";
+import ERRORS from '@/constants/errors';
 
 const getServices = async () => {
   const response = await fetch(`${process.env.REACT_APP_API_URL}api/services`);
@@ -7,7 +7,7 @@ const getServices = async () => {
 };
 
 const createService = async (service) => {
-  if (service.bufferTime === "") {
+  if (service.bufferTime === ``) {
     service.bufferTime = null;
   }
 

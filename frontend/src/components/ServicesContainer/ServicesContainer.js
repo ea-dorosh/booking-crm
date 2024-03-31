@@ -10,8 +10,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import { Link as RouterLink } from 'react-router-dom';
 
-export default function EmployeesContainer({ 
-  employees,
+export default function ServicesContainer({ 
+  services,
 }) {
   return (
     <Box>
@@ -23,10 +23,10 @@ export default function EmployeesContainer({
         }}
       >
         <Typography variant="button" mr={2}>
-          add employee
+          add service
         </Typography>
 
-        <RouterLink to={`/employees/create-employee`}>
+        <RouterLink to={`/services/create-service`}>
           <IconButton
             color="primary"
           >
@@ -36,27 +36,27 @@ export default function EmployeesContainer({
       </Box>
 
       <List>
-        {employees.map((employee) => (
-          <ListItem key={employee.employeeId}>
-            <ListItemText
-              primary={`${employee.firstName} ${employee.lastName}`}
-              sx={{ flex: `0 0 200px` }}
-            />
+        {services &&
+            services.map((service) => (
+              <ListItem key={service.id}>
+                <ListItemText
+                  primary={service.name}
+                  sx={{ flex: `0 0 200px` }}
+                />
 
-            <Box sx={{ width: `30px` }}>
-              <RouterLink to={`/employees/${employee.employeeId}`}>
-                <ListItemButton
-                  sx={{ padding: `0` }}
-                  onClick={() => {}}
-                >
-                  <ListItemIcon>
-                    <EditIcon />
-                  </ListItemIcon>
-                </ListItemButton>
-              </RouterLink>
-            </Box>
-          </ListItem>
-        ))}
+                <Box sx={{ width: `30px` }}>
+                  <RouterLink to={`/services/${service.id}`}>
+                    <ListItemButton
+                      sx={{ padding: `0` }}
+                    >
+                      <ListItemIcon>
+                        <EditIcon />
+                      </ListItemIcon>
+                    </ListItemButton>
+                  </RouterLink>
+                </Box>
+              </ListItem>
+            ))}
       </List>
     </Box>
   );

@@ -12,6 +12,7 @@ export default function EmployeesPage() {
     if (!employees.length) {
       dispatch(fetchEmployees());
     }
+    
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -10,6 +10,7 @@ import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
 import EmployeesPage from '@/pages/EmployeesPage/EmployeesPage';
 import ErrorPage from '@/pages/ErrorPage/ErrorPage';
+import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
 import store from '@/store/store';
 
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: `/services`,
     element: <ServicesPage />,
+  },
+  {
+    path: `/services/:serviceId`,
+    element: <ServicesDetailPage />,
   },
 ]);
 

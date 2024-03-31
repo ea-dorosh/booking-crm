@@ -50,7 +50,6 @@ export default function EmployeeDetailPage() {
         setIsEditMode(false);
         dispatch(resetUpdateFormStatus());
 
-        console.log(`newEmployeeId`, newEmployeeId);
         if (newEmployeeId) {
           navigate(`/employees/${newEmployeeId}`);
         }
