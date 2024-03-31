@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { validateServiceForm } = require('./servicesUtils');
 
 module.exports = (db) => {
   router.get(`/`, (req, res) => {
@@ -25,25 +26,14 @@ module.exports = (db) => {
       }
     });
   });
-
+  
+  // TODO: add separate route for updating service
   router.post(`/`, async (req, res) => {
     const service = req.body.service;
     const isUpdate = Boolean(service.id);
 
     // Validation
-    const errors = {};
-
-    if (!service.employeeIds || !Array.isArray(service.employeeIds) || !service.employeeIds.length) {
-      errors.employeeIds = `Choose at least one empolyee for the service`;
-    }
-
-    if (!service.name || service.name.length <= 3 ) {
-      errors.name = `Service name must be at least 3 characters long`;
-    }
-
-    if (!service.durationTime || service.durationTime === `00:00:00`) {
-      errors.durationTime = `Duration time is required`;
-    }
+    const errors = validateServiceForm(service);
 
     if (Object.keys(errors).length > 0) {
       return res.status(428).json({ errors });

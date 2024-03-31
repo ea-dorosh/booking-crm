@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { validateEmail, validatePhone } = require('../../utils/validators');
 const { formattedName, formattedPhone } = require('../../utils/formatters');
+const { validateEmployeeForm } = require('./employeesUtils');
 
 module.exports = (db) => {
   router.get(`/`, (req, res) => {
@@ -30,23 +30,7 @@ module.exports = (db) => {
     const employee = req.body.employee;
 
     // Validation
-    const errors = {};
-
-    if (!employee.firstName || employee.firstName.length < 2 ) {
-      errors.firstName = `Service name must be at least 2 characters long`;
-    }
-
-    if (!employee.lastName || employee.lastName.length < 2 ) {
-      errors.lastName = `Service name must be at least 2 characters long`;
-    }
-
-    if (!validateEmail(employee.email)) {
-      errors.email = `Invalid email address`;
-    }
-
-    if (!validatePhone(employee.phone)) {
-      errors.phone = `Invalid phone number`;
-    }
+    const errors = validateEmployeeForm(employee);
 
     if (Object.keys(errors).length > 0) {
       return res.status(428).json({ errors });
@@ -85,23 +69,7 @@ module.exports = (db) => {
     const employee = req.body.employee;
 
     // Validation
-    const errors = {};
-
-    if (!employee.firstName || employee.firstName.length < 2 ) {
-      errors.firstName = `First name must be at least 2 characters long`;
-    }
-
-    if (!employee.lastName || employee.lastName.length < 2 ) {
-      errors.lastName = `Last name must be at least 2 characters long`;
-    }
-
-    if (!validateEmail(employee.email)) {
-      errors.email = `Invalid email address`;
-    }
-
-    if (!validatePhone(employee.phone)) {
-      errors.phone = `Invalid phone number`;
-    }
+    const errors = validateEmployeeForm(employee);
 
     if (Object.keys(errors).length > 0) {
       return res.status(428).json({ errors });
@@ -130,12 +98,12 @@ module.exports = (db) => {
   router.get(`/employee-availability/:employeeId`, (req, res) => {
     const employeeId = req.params.employeeId;
 
-    const sql = 'SELECT * FROM EmployeeAvailability WHERE employee_id = ?';
+    const sql = `SELECT * FROM EmployeeAvailability WHERE employee_id = ?`;
 
     db.query(sql, [employeeId], (err, results) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Error fetching EmployeeAvailability' });
+        res.status(500).json({ error: `Error fetching EmployeeAvailability` });
         return;
       } else {
         const data = results.map((row) => ({
@@ -181,19 +149,19 @@ module.exports = (db) => {
   router.delete(`/employee-availability/:id`, (req, res) => {
     const availabilityId = req.params.id;
   
-    const deleteQuery = 'DELETE FROM EmployeeAvailability WHERE id = ?';
+    const deleteQuery = `DELETE FROM EmployeeAvailability WHERE id = ?`;
   
     db.query(deleteQuery, [availabilityId], (err, results) => {
       if (err) {
         console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: `Internal Server Error` });
         return;
       }
   
       if (results.affectedRows === 0) {
-        res.status(404).json({ error: 'Availability not found' });
+        res.status(404).json({ error: `Availability not found` });
       } else {
-        res.status(200).json({ message: 'Availability deleted successfully' });
+        res.status(200).json({ message: `Availability deleted successfully` });
       }
     });
   });
