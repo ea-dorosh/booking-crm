@@ -6,12 +6,12 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useNavigate } from "react-router-dom";
 import CreateEmployeeForm from "@/components/CreateEmployeeForm";
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
+import PageContainer from '@/components/PageContainer/PageContainer';
 import { 
   fetchEmployees,
   updateEmployee,
@@ -73,20 +73,15 @@ export default function EmployeeDetailPage() {
   };
 
   return (
-    <Box sx={{ width: `100%`, maxWidth: 768, padding: `0 20px` }}>
-      <Typography variant="h4">{employee ? 
+    <PageContainer 
+      pageTitle={employee ? 
         `Details for ${employee.lastName} ${employee.firstName}` 
         :
         `New employee`
-      }</Typography>
-
-      <Divider />
-
-      <Link to={`/`}>Dashboard</Link>
-
-      <Divider />
-
-      <Link to={`/employees`}>Employees</Link>
+      }
+      hideSideNav
+    >
+      <Link to={`/employees`}>Go back</Link>
 
       <Divider />
 
@@ -142,6 +137,6 @@ export default function EmployeeDetailPage() {
       {employee && <Box mt={3}>
         <EmployeeAvailability employeeId={employee.employeeId} />
       </Box>}
-    </Box>
+    </PageContainer>
   );
 }

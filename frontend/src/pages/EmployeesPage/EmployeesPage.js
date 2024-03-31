@@ -1,12 +1,8 @@
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from "react-router-dom";
 import EmployeesContainer from "@/components/EmployeesContainer/EmployeesContainer";
+import PageContainer from '@/components/PageContainer/PageContainer';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
-
 
 export default function EmployeesPage() {
   const dispatch = useDispatch();
@@ -20,20 +16,10 @@ export default function EmployeesPage() {
   }, []);
 
   return (
-    <main>
-      <Box sx={{ width: "100%", maxWidth: 768 }}>
-        <Typography variant="h2">Employees</Typography>
-
-        <Divider />
-
-        <Link to={`/`}>Dashboard</Link>
-
-        <Divider />
-
-        {employees.length > 0 && <EmployeesContainer 
-          employees={employees}
-        />}
-      </Box>
-    </main>
+    <PageContainer pageTitle="Employees">
+      {employees.length > 0 && <EmployeesContainer 
+        employees={employees}
+      />}
+    </PageContainer>
   );
 }

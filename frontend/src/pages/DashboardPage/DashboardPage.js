@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
+import PageContainer from '@/components/PageContainer/PageContainer';
 import { increment, decrement } from '@/features/counter/counterSlice';
 
 
@@ -13,24 +14,12 @@ export default function DashboardPage() {
   const counter = useSelector(state => state.counter.value);
 
   return (
-    <main>
-      <Box sx={{ width: "100%", maxWidth: 768 }}>
-        <Typography variant="h2">Dashboard</Typography>
-
-        <Divider />
-
-        <Link to={`employees`}>Employees</Link>
-
-        <Divider />
-
-        <Link to={`services`}>Services</Link>
-      </Box>
-
+    <PageContainer pageTitle="Dashboard">
       <div>
         <h1>Counter: {counter}</h1>
         <button onClick={() => dispatch(increment())}>Increment</button>
         <button onClick={() => dispatch(decrement())}>Decrement</button>
       </div>
-    </main>
+    </PageContainer>
   );
 }

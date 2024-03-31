@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 // import { useDispatch, useSelector } from 'react-redux';
 import { Link } from "react-router-dom";
 import AdminServicesModule from "@/components/AdminServicesModule";
+import PageContainer from '@/components/PageContainer/PageContainer';
 import employeesService from "@/services/employees.service";
 
 
@@ -22,18 +23,8 @@ export default function ServicesPage() {
   }, []);
 
   return (
-    <main>
-      <Box sx={{ width: "100%", maxWidth: 768 }}>
-        <Typography variant="h2">Services</Typography>
-
-        <Divider />
-
-        <Link to={`/`}>Dashboard</Link>
-
-        <Divider />
-
-        <AdminServicesModule employees={employees || []} />
-      </Box>
-    </main>
+    <PageContainer pageTitle="Services">
+      <AdminServicesModule employees={employees || []} />
+    </PageContainer>
   );
 }
