@@ -21,9 +21,13 @@ export const updateService = createAsyncThunk(
   `services/updateService`,
   async (formData, thunkAPI) => {
     try {
-      const { data } = await servicesService.createService(formData);
+      if (formData.id !== undefined) {
+        await servicesService.updateService(formData);
+      } else {
+        const { data } = await servicesService.createService(formData);
 
-      return data;
+        return data;
+      }
     } catch (error) {
       const parsedErrors = await JSON.parse(error.message);
       return thunkAPI.rejectWithValue(parsedErrors);

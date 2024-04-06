@@ -86,9 +86,9 @@ module.exports = (db) => {
       employeeId
     ];
 
-    db.query(query, values, (err, results) => {
-      if (err) {
-        return res.status(500).json(err);
+    db.query(query, values, (error, result) => {
+      if (error) {
+        return res.status(500).json(error);
       } else {
         res.json({ message: `Employee data updated successfully` });
       }

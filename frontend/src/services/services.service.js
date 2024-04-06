@@ -13,8 +13,36 @@ const createService = async (service) => {
 
   // eslint-disable-next-line no-useless-catch
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}api/services`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}api/services/create-service`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ service }),
+    });
+
+    if(response.status === ERRORS.VALIDATION_ERROR) {
+      const data = await response.json();
+      throw new Error(JSON.stringify(data.errors));
+    }
+
+    const data = await response.json();
+    
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateService = async (service) => {
+  if (service.bufferTime === ``) {
+    service.bufferTime = null;
+  }
+
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}api/services/edit/${service.id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -47,6 +75,7 @@ const deleteService = async (id) => {
 
 const serviceService = {
   getServices,
+  updateService,
   createService,
   deleteService,
 };

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -26,7 +27,7 @@ const timeDurations = [
   { title: "4 hours", value: "04:00:00" },
 ];
 
-export default function CreateServiceForm({
+export default function ServiceForm({
   service,
   employees,
   createNewService,
@@ -40,7 +41,7 @@ export default function CreateServiceForm({
     name: isEditMode ? service.name : "",
     durationTime: isEditMode ? service.durationTime : "",
     bufferTime: isEditMode && service.bufferTime ? service.bufferTime : "",
-    employeeIds: isEditMode ? service.employeeIds : [],
+    employeePrices: isEditMode ? service.employeePrices : [],
   });
 
   useEffect(() => {
@@ -49,21 +50,29 @@ export default function CreateServiceForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCheckboxChange = (event) => {
-    const { value, checked } = event.target;
-
-    if(formErrors && formErrors.employeeIds) {
-      cleanError(`employeeIds`);
-    }
-    
-    setFormData((prevData) => ({
+  const handleCheckboxChange = (event, employeeId) => {
+    const { checked } = event.target;
+  
+    // if (formErrors && formErrors.employeeIds) {
+    //   cleanError(`employeeIds`);
+    // }
+  
+    setFormData(prevData => ({
       ...prevData,
-      employeeIds: checked
-        ? // eslint-disable-next-line no-undef
-        [...new Set([...prevData.employeeIds, Number(value)])]
-        : prevData.employeeIds.filter(
-          (checkboxId) => Number(checkboxId) !== Number(value)
-        ),
+      employeePrices: checked
+        ? [...prevData.employeePrices, { employeeId, price: '' }] // Add employee
+        : prevData.employeePrices.filter(price => price.employeeId !== employeeId), // Remove employee
+    }));
+  };
+
+  const handlePriceChange = (event, employeeId) => {
+    const { value } = event.target;
+  
+    setFormData(prevData => ({
+      ...prevData,
+      employeePrices: prevData.employeePrices.map(employeePrice =>
+        employeePrice.employeeId === employeeId ? { ...employeePrice, price: value } : employeePrice
+      ),
     }));
   };
 
@@ -157,33 +166,55 @@ export default function CreateServiceForm({
         </Select>
       </FormControl>
 
-      <FormControl
-        error={Boolean(formErrors?.employeeIds)}
-      >
+      <Box>
         <Typography variant="subtitle1" mt={2}>
-          Employees:
+          Employees for this service:
         </Typography>
 
-        {employees?.map((employee) => (
-          <FormControlLabel
-            key={employee.employeeId}
-            control={
-              <Checkbox
-                name="employeeName"
-                checked={formData.employeeIds.includes(employee.employeeId)}
-                onChange={handleCheckboxChange}
-                value={employee.employeeId}
+        {employees?.map(employee => (
+          <Box key={employee.employeeId} mt={2} sx={{
+            border: `1px solid #ccc`,
+            borderRadius: `3px`,
+            padding: `10px`,
+          }}>
+            <FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="employeeName"
+                    checked={formData.employeePrices.some(employeePrice => employeePrice.employeeId === employee.employeeId)}
+                    onChange={event => handleCheckboxChange(event, employee.employeeId)}
+                    value={employee.employeeId}
+                  />
+                }
+                label={`${employee.firstName} ${employee.lastName}`}
               />
-            }
-            label={`${employee.firstName} ${employee.lastName}`}
-          />
+            </FormControl>
+            
+            {formData.employeePrices.some(employeePrice => employeePrice.employeeId === employee.employeeId) && <FormControl error={Boolean(formErrors?.name)}>
+              <TextField
+                value={formData.employeePrices.find(employeePrice => employeePrice.employeeId === employee.employeeId).price}
+                label="Service Price"
+                variant="outlined"
+                name="employeePrice"
+                onChange={event => handlePriceChange(event, employee.employeeId)}
+                size="small"
+              />
+              {/* {formErrors?.name && 
+            <FormHelperText>
+              {formErrors.name}
+            </FormHelperText>
+              } */}
+            </FormControl>}
+          </Box>
         ))}
+
         {formErrors?.employeeIds && 
           <FormHelperText>
             {formErrors.employeeIds}
           </FormHelperText>
         }
-      </FormControl>
+      </Box>
 
       <Button
         type="submit"
@@ -193,7 +224,7 @@ export default function CreateServiceForm({
         sx={{ mt: `20px` }}
         disabled={formErrors && Object.keys(formErrors).length > 0}
       >
-        Submit
+        Save
       </Button>
     </Box>
   );

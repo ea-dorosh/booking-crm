@@ -94,3 +94,10 @@ export const {
   resetUpdateFormStatus,
 } = employeesSlice.actions;
 export default employeesSlice.reducer;
+
+export const selectEmployeeNameById = (state, employeeId) => {
+  const firstName = state.employees.data.find(employee => employee.employeeId === employeeId)?.firstName;
+  const lastName = state.employees.data.find(employee => employee.employeeId === employeeId)?.lastName;
+
+  return `${firstName} ${lastName}`;
+}

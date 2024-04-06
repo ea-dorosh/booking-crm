@@ -1,18 +1,20 @@
+/* eslint-disable no-unused-vars */
 import EditIcon from "@mui/icons-material/Edit";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useNavigate } from "react-router-dom";
-import CreateServiceForm from "@/components/CreateServiceForm";
 import PageContainer from '@/components/PageContainer/PageContainer';
-import { fetchEmployees } from '@/features/employees/employeesSlice';
+import ServiceForm from "@/components/ServiceForm/ServiceForm";
 import { 
+  fetchEmployees,
+  selectEmployeeNameById,
+} from '@/features/employees/employeesSlice';
+import {
   fetchServices,
   updateService,
   cleanError,
@@ -34,17 +36,18 @@ export default function ServicesDetailPage() {
   const updateFormStatus = useSelector(state => state.services.updateFormStatus);
   const deleteServiceStatus = useSelector(state => state.services.deleteServiceStatus);
   const newServiceId = useSelector(state => state.services.updateFormData);
+  const state = useSelector(state => state);
 
-  const shouldShowCreateServiceForm = serviceId === `create-service`;
+  const shouldShowServiceForm = serviceId === `create-service`;
 
   useEffect(() => {
     if (!employees.length) {
       dispatch(fetchEmployees());
     }
 
-    if (!service && !shouldShowCreateServiceForm) {
+    if (!service && !shouldShowServiceForm) {
       dispatch(fetchServices());
-    } else if (shouldShowCreateServiceForm) {
+    } else if (shouldShowServiceForm) {
       setIsEditMode(true)
     }
 
@@ -109,7 +112,7 @@ export default function ServicesDetailPage() {
       <Divider />
 
       {isEditMode && <Box mt={3}>
-        <CreateServiceForm
+        <ServiceForm
           employees={employees || []}
           service={service}
           createNewService={updateServiceHandler}
@@ -119,7 +122,7 @@ export default function ServicesDetailPage() {
         />
 
         <Box mt={2} sx={{width:`100%`}}>
-          {!shouldShowCreateServiceForm && <Button 
+          {!shouldShowServiceForm && <Button 
             variant="outlined"
             onClick={() => setIsEditMode(false)}
             sx={{width:`100%`}}
@@ -128,11 +131,12 @@ export default function ServicesDetailPage() {
           </Button>}
         </Box>
 
-        <Box sx={{ width: `100%` }}>
+        <Box mt={2} sx={{ width: `100%` }}>
           <Button 
             variant="outlined"
             onClick={onDeleteServiceClick}
             sx={{width:`100%`}}
+            color="error"
           >
             Delete Service
           </Button>
@@ -143,29 +147,58 @@ export default function ServicesDetailPage() {
         <List>
           <ListItemText
             primary={service.name}
-            sx={{ flex: `0 0 200px` }}
+            secondary="Service Name"
+            sx={{ 
+              flex: `0 0 200px`,
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
           />
 
           <ListItemText
             primary={service.durationTime}
-            sx={{ flex: `0 0 200px` }}
+            secondary="Duration Time"
+            sx={{ 
+              flex: `0 0 200px`,
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
           />
 
           <ListItemText
-            primary={service.bufferTime}
-            sx={{ flex: `0 0 200px` }}
+            primary={service.bufferTime || `-`}
+            secondary="Buffer Time"
+            sx={{ 
+              flex: `0 0 200px`,
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
           />
 
-          <ListItemButton
-            sx={{ padding: `0` }}
-            onClick={() => {
-              setIsEditMode(true);
-            }}
+          <Box sx={{marginTop: `20px`}}>
+            <Typography>
+              This service is provided by the following masters:
+            </Typography>
+
+            <List>
+              {service.employeePrices.map((employeePrice) => (
+                <ListItemText
+                  key={employeePrice.employeeId}
+                  primary={selectEmployeeNameById(state, employeePrice.employeeId)}
+                  secondary={employeePrice.price}
+                  sx={{ flex: `0 0 200px` }}
+                />
+              ))}
+            </List>
+          </Box>
+
+          <Button
+            startIcon={<EditIcon />}
+            onClick={() => setIsEditMode(true)}
+            variant="outlined"
           >
-            <ListItemIcon>
-              <EditIcon />
-            </ListItemIcon>
-          </ListItemButton>
+            Update
+          </Button>
         </List>
       </Box>}
     </PageContainer>
