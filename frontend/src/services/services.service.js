@@ -1,7 +1,14 @@
 import ERRORS from '@/constants/errors';
 
+const token = localStorage.getItem('token');
+
 const getServices = async () => {
-  const response = await fetch(`${process.env.REACT_APP_API_URL}api/services`);
+  const response = await fetch(`${process.env.REACT_APP_API_URL}api/services`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   const data = await response.json();
   return data;
 };
@@ -16,6 +23,7 @@ const createService = async (service) => {
     const response = await fetch(`${process.env.REACT_APP_API_URL}api/services/create-service`, {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ service }),
@@ -44,6 +52,7 @@ const updateService = async (service) => {
     const response = await fetch(`${process.env.REACT_APP_API_URL}api/services/edit/${service.id}`, {
       method: "PUT",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ service }),
@@ -64,9 +73,11 @@ const updateService = async (service) => {
 
 const deleteService = async (id) => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/services/${id}`,
-    {
+    `${process.env.REACT_APP_API_URL}api/services/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
   const data = await response.json();

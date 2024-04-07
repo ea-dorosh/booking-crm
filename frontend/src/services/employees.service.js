@@ -1,8 +1,15 @@
 import ERRORS from "@/constants/errors";
 
+const token = localStorage.getItem('token');
+
 const getEmployees = async () => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees`
+    `${process.env.REACT_APP_API_URL}api/employees`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
   const data = await response.json();
   return data;
@@ -17,6 +24,7 @@ const createEmployee = async (employee) => {
         method: `POST`,
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ employee }),
       }
@@ -43,6 +51,7 @@ const updateEmployee = async (employee) => {
       {
         method: `PUT`,
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ employee }),
@@ -64,7 +73,12 @@ const updateEmployee = async (employee) => {
 
 const getEmployeeAvailability = async (id) => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees/employee-availability/${id}`
+    `${process.env.REACT_APP_API_URL}api/employees/employee-availability/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
   const data = await response.json();
   return data;
@@ -76,6 +90,7 @@ const applyEmployeeAvailability = async (availability) => {
     {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ availability }),
@@ -88,9 +103,11 @@ const applyEmployeeAvailability = async (availability) => {
 
 const deleteEmployeeAvailability = async (id) => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees/employee-availability/${id}`,
-    {
+    `${process.env.REACT_APP_API_URL}api/employees/employee-availability/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
   const data = await response.json();
