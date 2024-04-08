@@ -1,10 +1,10 @@
-/* eslint-disable no-unused-vars */
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
+import AccountPage from '@/pages/AccountPage/AccountPage';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
 import EmployeesPage from '@/pages/EmployeesPage/EmployeesPage';
 import ErrorPage from '@/pages/ErrorPage/ErrorPage';
-import LoginPage from '@/pages/LoginPage/LoginPage'; // Adjust the import path as necessary
+import LoginPage from '@/pages/LoginPage/LoginPage';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
 import { ProtectedRoute } from '@/ProtectedRoute';
@@ -43,8 +43,14 @@ export const router = createBrowserRouter([
   },
   {
     path: `/services/:serviceId`,
-    element:       <ProtectedRoute>
+    element: <ProtectedRoute>
       <ServicesDetailPage />
+    </ProtectedRoute>,
+  },
+  {
+    path: `/account`,
+    element: <ProtectedRoute>
+      <AccountPage />
     </ProtectedRoute>,
   },
 ]);
