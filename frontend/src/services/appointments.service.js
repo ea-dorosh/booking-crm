@@ -2,7 +2,7 @@ import ERRORS from '@/constants/errors';
 
 const createAppointment = async (appointment) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}api/appointments/create`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/appointments/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

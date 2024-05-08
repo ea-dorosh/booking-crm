@@ -17,7 +17,7 @@ dayjs.locale('de')
 
 async function fakeFetch(date, serviceId, employees) {
   // Construct the URL with query parameters
-  const apiUrl = `${process.env.REACT_APP_API_URL}api/calendar?date=${date.format('YYYY-MM-DD')}&serviceId=${serviceId}&employeeIds=${employees.join(',')}`;
+  const apiUrl = `${process.env.REACT_APP_API_URL}api/protected/calendar?date=${date.format('YYYY-MM-DD')}&serviceId=${serviceId}&employeeIds=${employees.join(',')}`;
 
   // Fetch data using GET method
   const response = await fetch(apiUrl, {

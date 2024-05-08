@@ -4,7 +4,7 @@ const token = localStorage.getItem('token');
 
 const getEmployees = async () => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees`, {
+    `${process.env.REACT_APP_API_URL}api/protected/employees`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -19,7 +19,7 @@ const createEmployee = async (employee) => {
   // eslint-disable-next-line no-useless-catch
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}api/employees/create-employee`,
+      `${process.env.REACT_APP_API_URL}api/protected/employees/create-employee`,
       {
         method: `POST`,
         headers: {
@@ -47,7 +47,7 @@ const updateEmployee = async (employee) => {
   // eslint-disable-next-line no-useless-catch
   try {
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}api/employees/edit/${employee.employeeId}`,
+      `${process.env.REACT_APP_API_URL}api/protected/employees/edit/${employee.employeeId}`,
       {
         method: `PUT`,
         headers: {
@@ -73,7 +73,7 @@ const updateEmployee = async (employee) => {
 
 const getEmployeeAvailability = async (id) => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees/employee-availability/${id}`, {
+    `${process.env.REACT_APP_API_URL}api/protected/employees/employee-availability/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -86,7 +86,7 @@ const getEmployeeAvailability = async (id) => {
 
 const applyEmployeeAvailability = async (availability) => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees/employee-availability`,
+    `${process.env.REACT_APP_API_URL}api/protected/employees/employee-availability`,
     {
       method: "POST",
       headers: {
@@ -103,7 +103,7 @@ const applyEmployeeAvailability = async (availability) => {
 
 const deleteEmployeeAvailability = async (id) => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/employees/employee-availability/${id}`, {
+    `${process.env.REACT_APP_API_URL}api/protected/employees/employee-availability/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

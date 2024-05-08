@@ -1,6 +1,6 @@
 const getDaysOfWeek = async () => {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/admin/days`
+    `${process.env.REACT_APP_API_URL}api/protected/admin/days`
   );
   
   const data = await response.json();
