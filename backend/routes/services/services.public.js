@@ -6,6 +6,21 @@ router.get(`/`, async (req, res) => {
     return res.status(500).json({ message: `Database connection not initialized` });
   }
 
+  // get service categories
+  const categoriesSql = `
+    SELECT c.id, c.name
+    FROM ServiceCategories c
+  `;
+
+  const [categoriesResult] = await req.dbPool.query(categoriesSql);
+
+  const categoriesData = categoriesResult.map((row) => ({
+    id: row.id,
+    name: row.name,
+  }));
+
+
+  // get all services and map with categories and employee prices
   const sql = `
     SELECT 
       s.id, 
@@ -21,7 +36,6 @@ router.get(`/`, async (req, res) => {
   `;
 
   try {
-    // Use async/await with the promise-enabled query
     const [results] = await req.dbPool.query(sql);
     const servicesMap = new Map(); // Using Map to group results by service ID
 
@@ -47,6 +61,7 @@ router.get(`/`, async (req, res) => {
           bufferTime: buffer_time,
           bookingNote: booking_note,
           employeePrices: [],
+          categoryName: categoriesData.find(category => category.id === category_id).name,
         });
       }
       // Push employee ID and price into the array
