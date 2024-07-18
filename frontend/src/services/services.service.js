@@ -1,9 +1,20 @@
 import ERRORS from '@/constants/errors';
 
-const token = localStorage.getItem('token');
+const token = localStorage.getItem(`token`);
 
 const getServices = async () => {
   const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await response.json();
+  return data;
+};
+
+const getServiceCategories = async () => {
+  const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services/categories`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -86,6 +97,7 @@ const deleteService = async (id) => {
 
 const serviceService = {
   getServices,
+  getServiceCategories,
   updateService,
   createService,
   deleteService,

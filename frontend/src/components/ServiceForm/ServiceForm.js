@@ -30,6 +30,7 @@ const timeDurations = [
 export default function ServiceForm({
   service,
   employees,
+  serviceCategories,
   createNewService,
   formErrors,
   cleanError,
@@ -38,9 +39,11 @@ export default function ServiceForm({
   const isEditMode = Boolean(service);
 
   const [formData, setFormData] = useState({
-    name: isEditMode ? service.name : "",
-    durationTime: isEditMode ? service.durationTime : "",
-    bufferTime: isEditMode && service.bufferTime ? service.bufferTime : "",
+    name: isEditMode ? service.name : ``,
+    categoryId: isEditMode ? service.categoryId : ``,
+    durationTime: isEditMode ? service.durationTime : ``,
+    bufferTime: isEditMode && service.bufferTime ? service.bufferTime : ``,
+    bookingNote: isEditMode ? service.bookingNote : ``,
     employeePrices: isEditMode ? service.employeePrices : [],
   });
 
@@ -122,6 +125,33 @@ export default function ServiceForm({
 
       <FormControl
         sx={{ mt: `20px` }}
+        error={Boolean(formErrors?.categoryId)}
+      >
+        <InputLabel id="category-select-label">Service Category</InputLabel>
+
+        <Select
+          name="categoryId"
+          value={formData.categoryId}
+          labelId="category-select-label"
+          label="Service Category"
+          onChange={handleChange}
+        >
+          {serviceCategories.map((category) => (
+            <MenuItem key={category.id} value={category.id}>
+              {category.name}
+            </MenuItem>
+          ))}
+        </Select>
+
+        {formErrors?.categoryId && 
+          <FormHelperText>
+            {formErrors?.categoryId}
+          </FormHelperText>
+        }
+      </FormControl>
+
+      <FormControl
+        sx={{ mt: `20px` }}
         error={Boolean(formErrors?.durationTime)}
       >
         <InputLabel id="time-select-label">Duration Time</InputLabel>
@@ -166,6 +196,25 @@ export default function ServiceForm({
         </Select>
       </FormControl>
 
+      <FormControl
+        sx={{ mt: `20px` }}
+        error={Boolean(formErrors?.bookingNote)}
+      >
+        <TextField
+          value={formData.bookingNote}
+          label="Note"
+          variant="outlined"
+          name="bookingNote"
+          multiline
+          onChange={handleChange}
+        />
+        {formErrors?.bookingNote && 
+          <FormHelperText>
+            {formErrors.bookingNote}
+          </FormHelperText>
+        }
+      </FormControl>
+
       <Box>
         <Typography variant="subtitle1" mt={2}>
           Employees for this service:
@@ -200,11 +249,6 @@ export default function ServiceForm({
                 onChange={event => handlePriceChange(event, employee.employeeId)}
                 size="small"
               />
-              {/* {formErrors?.name && 
-            <FormHelperText>
-              {formErrors.name}
-            </FormHelperText>
-              } */}
             </FormControl>}
           </Box>
         ))}

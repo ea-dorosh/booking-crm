@@ -4,11 +4,19 @@ const { validateServiceForm } = require('./servicesUtils');
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
-    return res.status(500).json({ message: "Database connection not initialized" });
+    return res.status(500).json({ message: `Database connection not initialized` });
   }
 
   const sql = `
-    SELECT s.id, s.name, s.duration_time, s.buffer_time, sep.employee_id, sep.price
+    SELECT 
+      s.id, 
+      s.name, 
+      s.category_id, 
+      s.duration_time, 
+      s.buffer_time,
+      s.booking_note,
+      sep.employee_id,
+      sep.price
     FROM Services s
     LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
   `;
@@ -20,20 +28,31 @@ router.get(`/`, async (req, res) => {
 
     // Process results
     results.forEach(row => {
-      const { id, name, duration_time, buffer_time, employee_id, price } = row;
+      const { 
+        id, 
+        name, 
+        category_id, 
+        duration_time, 
+        buffer_time,
+        booking_note,
+        employee_id,
+        price,
+      } = row;
 
       if (!servicesMap.has(id)) {
         servicesMap.set(id, {
           id,
           name,
+          categoryId: category_id,
           durationTime: duration_time,
           bufferTime: buffer_time,
+          bookingNote: booking_note,
           employeePrices: [],
         });
       }
       // Push employee ID and price into the array
       if (employee_id) {
-          servicesMap.get(id).employeePrices.push({ employeeId: employee_id, price });
+        servicesMap.get(id).employeePrices.push({ employeeId: employee_id, price });
       }
     });
 
@@ -41,8 +60,33 @@ router.get(`/`, async (req, res) => {
     const data = Array.from(servicesMap.values());
     res.json(data);
   } catch (error) {
-    console.error("Database query error:", error);
-    res.status(500).json({ message: "Failed to query database" });
+    console.error(`Database query error:`, error);
+    res.status(500).json({ message: `Failed to query database` });
+  }
+});
+
+router.get(`/categories`, async (req, res) => {
+  if (!req.dbPool) {
+    return res.status(500).json({ message: `Database connection not initialized` });
+  }
+
+  const sql = `
+    SELECT c.id, c.name
+    FROM ServiceCategories c
+  `;
+
+  try {
+    const [results] = await req.dbPool.query(sql);
+
+    const data = results.map((row) => ({
+      id: row.id,
+      name: row.name,
+    }));
+
+    res.json(data);
+  } catch (error) {
+    console.error(`Database query error:`, error);
+    res.status(500).json({ message: `Failed to query database` });
   }
 });
 
@@ -57,8 +101,15 @@ router.post(`/create-service`, async (req, res) => {
   }
 
   const serviceQuery = `
-    INSERT INTO Services (employee_id, name, duration_time, buffer_time)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO Services (
+      employee_id, 
+      name, 
+      category_id, 
+      duration_time, 
+      buffer_time, 
+      booking_note
+    )
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
   const employeeIds = service.employeePrices.map(employeePrice => {
@@ -70,8 +121,10 @@ router.post(`/create-service`, async (req, res) => {
   const serviceValues = [
       employeeIds,
       service.name,
+      service.categoryId,
       service.durationTime,
       service.bufferTime,
+      service.bookingNote,
   ];
 
   let serviceId;
@@ -114,7 +167,7 @@ router.put(`/edit/:id`, async (req, res) => {
 
   const updateServiceQuery = `
     UPDATE Services
-    SET employee_id = ?, name = ?, duration_time = ?, buffer_time = ?
+    SET employee_id = ?, name = ?, category_id = ?, duration_time = ?, buffer_time = ?, booking_note = ?
     WHERE id = ?;
   `;
 
@@ -123,8 +176,10 @@ router.put(`/edit/:id`, async (req, res) => {
   const serviceValues = [
     employeeIds,
     service.name,
+    service.categoryId,
     service.durationTime,
     service.bufferTime,
+    service.bookingNote,
     serviceId,
   ];
 
@@ -175,9 +230,6 @@ router.delete(`/:id`, (req, res) => {
 });
 
 module.exports = router;
-
-//   return router;
-// };
 
 const deleteEmployeesPriceForService = async ({ db, res }, serviceId) => {
   try {

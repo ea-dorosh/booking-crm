@@ -17,6 +17,19 @@ export const fetchServices = createAsyncThunk(
   }
 );
 
+export const fetchServiceCategories = createAsyncThunk(
+  `services/fetchServiceCategories`,
+  async (thunkAPI) => {
+    try {
+      const data = await servicesService.getServiceCategories();
+
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const updateService = createAsyncThunk(
   `services/updateService`,
   async (formData, thunkAPI) => {
@@ -53,6 +66,7 @@ const servicesSlice = createSlice({
   name: `services`,
   initialState: {
     data: [],
+    serviceCategories: [],
     status: `idle`,
     error: null,
     updateFormData: null,
@@ -92,6 +106,9 @@ const servicesSlice = createSlice({
       .addCase(fetchServices.rejected, (state, action) => {
         state.status = `failed`;
         state.error = action.payload;
+      })
+      .addCase(fetchServiceCategories.fulfilled, (state, action) => {
+        state.serviceCategories = action.payload;
       })
       .addCase(updateService.pending, (state) => {
         state.updateFormStatus = `loading`;

@@ -221,7 +221,11 @@ export default function PageContainer({
           </List>
         </DrawerHidden>}
 
-        <Box sx={{marginTop: `64px`, padding: `0 20px 20px 20px`}}>
+        <Box sx={{
+          marginTop: `64px`, 
+          padding: `0 20px 20px 20px`,
+          width: `100%`,
+        }}>
           {children}
         </Box>
       </Box>

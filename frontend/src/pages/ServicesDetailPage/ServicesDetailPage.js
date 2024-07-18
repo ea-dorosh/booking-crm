@@ -16,6 +16,7 @@ import {
 } from '@/features/employees/employeesSlice';
 import {
   fetchServices,
+  fetchServiceCategories,
   updateService,
   cleanError,
   cleanErrors,
@@ -37,10 +38,13 @@ export default function ServicesDetailPage() {
   const deleteServiceStatus = useSelector(state => state.services.deleteServiceStatus);
   const newServiceId = useSelector(state => state.services.updateFormData);
   const state = useSelector(state => state);
+  const serviceCategories = useSelector(state => state.services.serviceCategories);
 
   const shouldShowServiceForm = serviceId === `create-service`;
 
   useEffect(() => {
+    dispatch(fetchServiceCategories());
+
     if (!employees.length) {
       dispatch(fetchEmployees());
     }
@@ -115,6 +119,7 @@ export default function ServicesDetailPage() {
         <ServiceForm
           employees={employees || []}
           service={service}
+          serviceCategories={serviceCategories}
           createNewService={updateServiceHandler}
           formErrors={formErrors}
           cleanError={handleCleanError}
@@ -156,6 +161,16 @@ export default function ServicesDetailPage() {
           />
 
           <ListItemText
+            primary={serviceCategories.find(category => category.id === service.categoryId).name || `-`}
+            secondary="Service Category"
+            sx={{ 
+              flex: `0 0 200px`,
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
+          />
+
+          <ListItemText
             primary={service.durationTime}
             secondary="Duration Time"
             sx={{ 
@@ -168,6 +183,16 @@ export default function ServicesDetailPage() {
           <ListItemText
             primary={service.bufferTime || `-`}
             secondary="Buffer Time"
+            sx={{ 
+              flex: `0 0 200px`,
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
+          />
+
+          <ListItemText
+            primary={service.bookingNote || `-`}
+            secondary="Note"
             sx={{ 
               flex: `0 0 200px`,
               display: `flex`,
