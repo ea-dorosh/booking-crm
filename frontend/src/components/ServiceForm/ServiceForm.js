@@ -11,6 +11,7 @@ import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
+import { Link as RouterLink } from 'react-router-dom';
 
 const timeDurations = [
   { title: "15 min", value: "00:15:00" },
@@ -123,32 +124,51 @@ export default function ServiceForm({
         }
       </FormControl>
 
-      <FormControl
-        sx={{ mt: `20px` }}
-        error={Boolean(formErrors?.categoryId)}
+      <Box 
+        sx={{
+          mt: `20px`,
+          display: `flex`,
+          alignItems: `center`,
+          gap: `20px`,
+        }}
       >
-        <InputLabel id="category-select-label">Service Category</InputLabel>
-
-        <Select
-          name="categoryId"
-          value={formData.categoryId}
-          labelId="category-select-label"
-          label="Service Category"
-          onChange={handleChange}
+        <FormControl
+          sx={{ flexGrow: 1 }}
+          error={Boolean(formErrors?.categoryId)}
         >
-          {serviceCategories.map((category) => (
-            <MenuItem key={category.id} value={category.id}>
-              {category.name}
-            </MenuItem>
-          ))}
-        </Select>
+          <InputLabel id="category-select-label">Service Category</InputLabel>
 
-        {formErrors?.categoryId && 
+          <Select
+            name="categoryId"
+            value={formData.categoryId}
+            labelId="category-select-label"
+            label="Service Category"
+            onChange={handleChange}
+          >
+            {serviceCategories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
+            ))}
+          </Select>
+
+          {formErrors?.categoryId && 
           <FormHelperText>
             {formErrors?.categoryId}
           </FormHelperText>
-        }
-      </FormControl>
+          }
+        </FormControl>
+
+        <RouterLink to={`/categories/${formData.categoryId}`}>
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+          >
+          Edit Category
+          </Button>
+        </RouterLink>
+      </Box>
 
       <FormControl
         sx={{ mt: `20px` }}

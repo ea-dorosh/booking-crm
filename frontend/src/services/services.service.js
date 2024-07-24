@@ -82,6 +82,31 @@ const updateService = async (service) => {
   }
 };
 
+const updateServiceCategory = async (serviceCategory) => {  
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services/category/edit/${serviceCategory.id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ category: serviceCategory }),
+    });
+
+    if(response.status === ERRORS.VALIDATION_ERROR) {
+      const data = await response.json();
+      throw new Error(JSON.stringify(data.errors));
+    }
+
+    const data = await response.json();
+    
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const deleteService = async (id) => {
   const response = await fetch(
     `${process.env.REACT_APP_API_URL}api/protected/services/${id}`, {
@@ -99,6 +124,7 @@ const serviceService = {
   getServices,
   getServiceCategories,
   updateService,
+  updateServiceCategory,
   createService,
   deleteService,
 };

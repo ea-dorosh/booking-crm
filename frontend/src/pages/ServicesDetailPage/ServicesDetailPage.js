@@ -39,10 +39,12 @@ export default function ServicesDetailPage() {
   const newServiceId = useSelector(state => state.services.updateFormData);
   const state = useSelector(state => state);
   const serviceCategories = useSelector(state => state.services.serviceCategories);
-
+  console.log(`serviceCategories`, serviceCategories);
   const shouldShowServiceForm = serviceId === `create-service`;
 
   useEffect(() => {
+    console.log(`useEffect, dispatch(fetchServiceCategories());
+    `);
     dispatch(fetchServiceCategories());
 
     if (!employees.length) {
@@ -148,7 +150,7 @@ export default function ServicesDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && service && <Box mt={3}>
+      {!isEditMode && service && serviceCategories && <Box mt={3}>
         <List>
           <ListItemText
             primary={service.name}

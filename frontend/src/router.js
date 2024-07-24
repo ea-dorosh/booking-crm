@@ -5,6 +5,7 @@ import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
 import EmployeesPage from '@/pages/EmployeesPage/EmployeesPage';
 import ErrorPage from '@/pages/ErrorPage/ErrorPage';
 import LoginPage from '@/pages/LoginPage/LoginPage';
+import ServiceCategoryDetailPage from '@/pages/ServiceCategoryDetailPage/ServiceCategoryDetailPage';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
 import { ProtectedRoute } from '@/ProtectedRoute';
@@ -45,6 +46,12 @@ export const router = createBrowserRouter([
     path: `/services/:serviceId`,
     element: <ProtectedRoute>
       <ServicesDetailPage />
+    </ProtectedRoute>,
+  },
+  {
+    path: `/categories/:categoryId`,
+    element: <ProtectedRoute>
+      <ServiceCategoryDetailPage />
     </ProtectedRoute>,
   },
   {

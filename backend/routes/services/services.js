@@ -1,6 +1,9 @@
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 const { validateServiceForm } = require('./servicesUtils');
+
+const upload = multer({ dest: 'uploads/' });
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
@@ -205,6 +208,40 @@ router.put(`/edit/:id`, async (req, res) => {
     console.log(error);
     if (error.code === `ER_DUP_ENTRY`) {
       return res.status(428).json({ errors: { name: `Service with this name already exists` } });
+    }
+    return res.status(500).json(error);
+  }
+});
+
+router.put(`/category/edit/:id`, upload.single('img'), async (req, res) => {
+  const categoryId = req.params.id;
+  const category = req.body.category;
+
+  const imgPath = `uploads/${req.body.category.img}`;
+
+  const updateServiceCategoryQuery = `
+    UPDATE ServiceCategories
+    SET name = ?, img = ?
+    WHERE id = ?;
+  `;
+
+  const serviceValues = [
+    category.name,
+    imgPath,
+    categoryId,
+  ];
+
+  try {
+    await req.dbPool.query(updateServiceCategoryQuery, serviceValues);
+
+    res.json({
+        message: `Category data updated successfully`,
+        data: categoryId,
+    });
+  } catch (error) {
+    console.log(error);
+    if (error.code === `ER_DUP_ENTRY`) {
+      return res.status(428).json({ errors: { name: `Category with this name already exists` } });
     }
     return res.status(500).json(error);
   }

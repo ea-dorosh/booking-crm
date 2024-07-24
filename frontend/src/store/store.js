@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import counterReducer from '@/features/counter/counterSlice';
 import employeeAvailabilitySlice from '@/features/employees/employeeAvailabilitySlice';
 import employeesSlice from '@/features/employees/employeesSlice';
+import serviceCategoriesSlice from '@/features/serviceCategories/serviceCategoriesSlice';
 import servicesSlice from '@/features/services/servicesSlice';
 
 export default configureStore({
@@ -10,5 +11,6 @@ export default configureStore({
     employeeAvailability: employeeAvailabilitySlice,
     employees: employeesSlice,
     services: servicesSlice,
+    serviceCategories: serviceCategoriesSlice,
   },
 });
