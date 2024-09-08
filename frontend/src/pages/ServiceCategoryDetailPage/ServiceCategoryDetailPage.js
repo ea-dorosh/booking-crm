@@ -24,6 +24,7 @@ export default function ServicesDetailPage() {
   const { categoryId } = useParams();
 
   const serviceCategory = useSelector(state => state.serviceCategories.data?.find(category => category.id === Number(categoryId)));
+  const { loading } = useSelector(state => state.serviceCategories);
   const formErrors = useSelector(state => state.services.updateFormErrors);
   const updateFormStatus = useSelector(state => state.services.updateFormStatus);
 
@@ -31,8 +32,6 @@ export default function ServicesDetailPage() {
 
   useEffect(() => {
     dispatch(fetchServiceCategories());
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -42,8 +41,6 @@ export default function ServicesDetailPage() {
         dispatch(resetUpdateFormStatus());
       }
     })();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateFormStatus]);
 
   const updateServiceCategoryHandler = (service) => {
@@ -67,14 +64,17 @@ export default function ServicesDetailPage() {
       }
       hideSideNav
     >
+
+      <span onClick={()=> navigate(-1)}>Go back</span>
+
       <Box mt={3}>
-        <ServiceCategoryForm
+        {!loading && <ServiceCategoryForm
           category={serviceCategory}
           createNewCategory={updateServiceCategoryHandler}
           formErrors={formErrors}
           cleanError={handleCleanError}
           cleanErrors={handleCleanErrors}
-        />
+        />}
       </Box>
     </PageContainer>
   );

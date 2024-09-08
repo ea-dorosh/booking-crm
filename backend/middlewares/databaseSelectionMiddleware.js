@@ -2,10 +2,7 @@ const mysql = require('mysql2/promise');
 
 // This middleware selects the appropriate database based on the request's hostname
 async function databaseSelectionMiddleware(req, res, next) {
-  console.log(`req`, req);
-  console.log("Starting database selection middleware");
   const hostname = req.hostname;
-  console.log("Hostname:", hostname);
 
   let databaseName;
   switch (hostname) {
@@ -27,8 +24,7 @@ async function databaseSelectionMiddleware(req, res, next) {
     password: process.env.DB_PASSWORD,
     database: databaseName,
   });
-
-  console.log("Database pool created for", databaseName, "- proceeding to next middleware/route");
+  
   next();
 }
 

@@ -61,7 +61,6 @@ router.post(`/create-employee`, async (req, res) => {
         data: employeeId,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json(error);
   }
 });
@@ -96,7 +95,6 @@ router.put(`/edit/:id`, async (req, res) => {
       data: employeeResults.insertId,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json(error);
   }
 });

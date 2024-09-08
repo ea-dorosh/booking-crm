@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import EditIcon from "@mui/icons-material/Edit";
 import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -56,8 +55,6 @@ export default function ServicesDetailPage() {
     } else if (shouldShowServiceForm) {
       setIsEditMode(true)
     }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -68,8 +65,6 @@ export default function ServicesDetailPage() {
         navigate(`/services`);
       }
     })();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deleteServiceStatus]);
 
   useEffect(() => {
@@ -84,8 +79,6 @@ export default function ServicesDetailPage() {
         }
       }
     })();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateFormStatus]);
 
   const updateServiceHandler = (service) => {

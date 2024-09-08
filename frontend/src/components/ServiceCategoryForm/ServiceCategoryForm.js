@@ -1,15 +1,8 @@
-/* eslint-disable no-unused-vars */
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import FormHelperText from "@mui/material/FormHelperText";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useState, useEffect } from "react";
 
 export default function ServiceCategoryForm({
@@ -19,18 +12,19 @@ export default function ServiceCategoryForm({
   cleanError,
   cleanErrors,
 }) {
-  const isEditMode = Boolean(category);
-  console.log('category', category);
+  const isEditMode = Boolean(category);  
+  console.log(`category`, category);
+
   const [formData, setFormData] = useState({
     name: isEditMode ? category.name : ``,
     id: isEditMode ? category.id : ``,
-    img: isEditMode ? category.img : null,
+    image: isEditMode ? category?.image : null,
   });
+
+  const [temporaryImage, setTemporaryImage] = useState(null);
 
   useEffect(() => {
     return () => cleanErrors()
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (event) => {
@@ -47,21 +41,27 @@ export default function ServiceCategoryForm({
   };
 
   const handleImgChange = (event) => {
+    const [file] = event.target.files
+    if (file) {
+      setTemporaryImage(URL.createObjectURL(file))
+    }
+
     setFormData((prevData) => ({
       ...prevData,
-      img: event.target.files[0],
+      image: event.target.files[0],
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log(`formData`, formData);
 
     await createNewCategory({
       ...category,
       ...formData,
     });
   };
-  console.log(`formData`, formData);
+
   return (
     <Box
       sx={{
@@ -83,18 +83,36 @@ export default function ServiceCategoryForm({
           </FormHelperText>
         }
       </FormControl>
+      {(temporaryImage || category?.image) && 
+        <Box 
+          sx={{
+            padding: `20px`, 
+            margin: `20px 0`, 
+            width: `100%`,
+            backgroundColor: `#f5f5f5`,
+          }}
+        >
+          {temporaryImage && 
+            <img 
+              src={temporaryImage}
+              style={{ width: `100%` }}
+            />
+          }
 
-      <Button
-        variant="contained"
-        component="label"
-      >
-        Upload File
-        <input
-          type="file"
-          hidden
-          onChange={handleImgChange}
-        />
-      </Button>
+          {!temporaryImage && category?.image && 
+            <img 
+              src={category.image} 
+              style={{ width: `100%` }}
+            />
+          }
+        </Box>}
+
+      <input
+        accept="image/*"
+        type='file'
+        onChange={handleImgChange}
+        style={{ margin: `20px 0`}}
+      />
 
       <Button
         type="submit"

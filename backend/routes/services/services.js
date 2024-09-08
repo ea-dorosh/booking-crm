@@ -1,9 +1,21 @@
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const router = express.Router();
 const { validateServiceForm } = require('./servicesUtils');
 
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images');
+  },
+  filename: (req, file, cb) => {    
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage,
+});
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
@@ -74,7 +86,7 @@ router.get(`/categories`, async (req, res) => {
   }
 
   const sql = `
-    SELECT c.id, c.name
+    SELECT c.id, c.name, c.img
     FROM ServiceCategories c
   `;
 
@@ -84,6 +96,7 @@ router.get(`/categories`, async (req, res) => {
     const data = results.map((row) => ({
       id: row.id,
       name: row.name,
+      image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
     }));
 
     res.json(data);
@@ -213,11 +226,11 @@ router.put(`/edit/:id`, async (req, res) => {
   }
 });
 
-router.put(`/category/edit/:id`, upload.single('img'), async (req, res) => {
+router.put(`/category/edit/:id`, upload.single(`image`), async (req, res) => {    
   const categoryId = req.params.id;
-  const category = req.body.category;
+  const { name } = req.body;
 
-  const imgPath = `uploads/${req.body.category.img}`;
+  const imgPath = `${req.file.filename}`;
 
   const updateServiceCategoryQuery = `
     UPDATE ServiceCategories
@@ -226,7 +239,7 @@ router.put(`/category/edit/:id`, upload.single('img'), async (req, res) => {
   `;
 
   const serviceValues = [
-    category.name,
+    name,
     imgPath,
     categoryId,
   ];

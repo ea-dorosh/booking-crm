@@ -16,6 +16,7 @@ const port = process.env.PORT || 3500;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(`public`));
 
 // routes for CRM
 const authRouter = require('./routes/auth');
@@ -44,6 +45,10 @@ app.use('/api/public/employees', databaseSelectionMiddleware, employeesPublicRou
 app.use('/api/public/calendar', databaseSelectionMiddleware, calendarRouter);
 app.use('/api/public/appointments', databaseSelectionMiddleware, appointmentsRouter);
 
-app.listen(port, '192.168.178.27', () => {
+// app.listen(port, '192.168.178.27', () => {
+//   console.log(`Server is running on port ${port}`);
+// });
+
+app.listen(port, 'localhost', () => {
   console.log(`Server is running on port ${port}`);
 });

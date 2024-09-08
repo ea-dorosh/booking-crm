@@ -53,7 +53,7 @@ const serviceCategoriesSlice = createSlice({
   name: `services`,
   initialState: {
     data: null,
-    status: `idle`,
+    loading: false,
     error: null,
     updateFormData: null,
     updateFormStatus: `idle`,
@@ -77,14 +77,14 @@ const serviceCategoriesSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchServiceCategories.pending, (state) => {
-        state.status = `loading`;
+        state.loading = true;
       })
       .addCase(fetchServiceCategories.fulfilled, (state, action) => {
-        state.status = `succeeded`;
+        state.loading = false;
         state.data = action.payload;
       })
       .addCase(fetchServiceCategories.rejected, (state, action) => {
-        state.status = `failed`;
+        state.loading = false;
         state.error = action.payload;
       })
       .addCase(updateService.pending, (state) => {
