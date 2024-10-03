@@ -13,7 +13,6 @@ export default function ServiceCategoryForm({
   cleanErrors,
 }) {
   const isEditMode = Boolean(category);  
-  console.log(`category`, category);
 
   const [formData, setFormData] = useState({
     name: isEditMode ? category.name : ``,
@@ -54,7 +53,6 @@ export default function ServiceCategoryForm({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(`formData`, formData);
 
     await createNewCategory({
       ...category,

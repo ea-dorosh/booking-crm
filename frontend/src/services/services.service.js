@@ -1,7 +1,7 @@
 import axios from 'axios';
 import ERRORS from '@/constants/errors';
 
-function appendFormData(data, formData = new FormData(), parentKey = '') {
+const appendFormData = (data, formData = new FormData(), parentKey = '') => {
   if (data && typeof data === 'object' && !(data instanceof File)) {
     Object.keys(data).forEach(key => {
       const fullKey = parentKey ? `${parentKey}[${key}]` : key;
@@ -17,25 +17,28 @@ function appendFormData(data, formData = new FormData(), parentKey = '') {
 const token = localStorage.getItem(`token`);
 
 const getServices = async () => {
-  const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const response = await axios.get(
+    `${process.env.REACT_APP_API_URL}api/protected/services`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
-  const data = await response.json();
-  return data;
+  );
+
+  return response.data;
 };
 
 const getServiceCategories = async () => {
-  const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services/categories`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const data = await response.json();
-  return data;
+  const response = await axios.get(
+    `${process.env.REACT_APP_API_URL}api/protected/services/categories`, 
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+  return response.data;
 };
 
 const createService = async (service) => {
