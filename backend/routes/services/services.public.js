@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const {toKebabCase} = require('../../utils/formatters');
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
@@ -8,7 +9,7 @@ router.get(`/`, async (req, res) => {
 
   // get service categories
   const categoriesSql = `
-    SELECT c.id, c.name
+    SELECT c.id, c.name, c.img
     FROM ServiceCategories c
   `;
 
@@ -17,6 +18,7 @@ router.get(`/`, async (req, res) => {
   const categoriesData = categoriesResult.map((row) => ({
     id: row.id,
     name: row.name,
+    image: row.img ? `${process.env.SERVER_API_URL}images/${row.img}` : null,
   }));
 
 
@@ -25,7 +27,7 @@ router.get(`/`, async (req, res) => {
     SELECT 
       s.id, 
       s.name,
-      s.category_id, 
+      s.category_id,
       s.duration_time, 
       s.buffer_time,
       s.booking_note,
@@ -62,6 +64,8 @@ router.get(`/`, async (req, res) => {
           bookingNote: booking_note,
           employeePrices: [],
           categoryName: categoriesData.find(category => category.id === category_id).name,
+          categoryImage: categoriesData.find(category => category.id === category_id).image || null,
+          categoryUrl: toKebabCase(categoriesData.find(category => category.id === category_id).name)
         });
       }
       // Push employee ID and price into the array

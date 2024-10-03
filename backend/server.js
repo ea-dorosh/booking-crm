@@ -5,7 +5,6 @@ const dotenv = require('dotenv');
 const databaseMiddleware = require('./middlewares/databaseMiddleware');
 const databaseSelectionMiddleware = require('./middlewares/databaseSelectionMiddleware');
 
-
 dotenv.config();
 
 const app = express();

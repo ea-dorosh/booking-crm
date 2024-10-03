@@ -22,6 +22,19 @@ router.get(`/`, async (req, res) => {
     return res.status(500).json({ message: `Database connection not initialized` });
   }
 
+    const categoriesSql = `
+    SELECT c.id, c.name, c.img
+    FROM ServiceCategories c
+  `;
+
+  const [categoriesResult] = await req.dbPool.query(categoriesSql);
+
+  const categoriesData = categoriesResult.map((row) => ({
+    id: row.id,
+    name: row.name,
+    image: row.img ? `${process.env.SERVER_API_URL}images/${row.img}` : null,
+  }));
+
   const sql = `
     SELECT 
       s.id, 
@@ -59,6 +72,7 @@ router.get(`/`, async (req, res) => {
           id,
           name,
           categoryId: category_id,
+          categoryName: categoriesData.find(category => category.id === category_id).name,
           durationTime: duration_time,
           bufferTime: buffer_time,
           bookingNote: booking_note,

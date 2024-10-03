@@ -20,36 +20,100 @@ export default function ServicesContainer({
           display: `flex`,
           alignItems: `center`,
           marginTop: `20px`,
+          marginLeft: `auto`,
+          backgroundColor: `#1976d2`,
+          width: `fit-content`,
+          padding: `10px 20px 10px 30px`,
+          borderRadius: `50px`,
         }}
       >
-        <Typography variant="button" mr={2}>
+        <Typography variant="button"
+          sx={{color: `#fff`}}
+        >
           add service
         </Typography>
 
         <RouterLink to={`/services/create-service`}>
           <IconButton
-            color="primary"
+            sx={{color: `#fff`}}
           >
             <AddCircle />
           </IconButton>
         </RouterLink>
       </Box>
 
-      <List>
+      <List
+        sx={{
+          display: `flex`,
+          flexDirection: `column`,
+          gap: `1.5rem`,
+          marginTop: `2rem`,
+          maxWidth: `768px`,
+        }}
+      >
         {services &&
             services.map((service) => (
-              <ListItem key={service.id}>
-                <ListItemText
-                  primary={service.name}
-                  sx={{ flex: `0 0 200px` }}
-                />
+              <ListItem key={service.id}
+                sx={{
+                  padding: `10px 20px`,
+                  border: `1px solid grey`,
+                  borderTopLeftRadius: `20px`,
+                  borderBottomLeftRadius: `20px`,
+                  borderTopRightRadius: `20px`,
+                  borderBottomRightRadius: `20px`,
+                }}
+              >
+                <Box sx={{
+                  display: `flex`,
+                  flexDirection: `column`,
+                  width: `80%`,
+                  paddingRight: `1rem`,
+                }}>
+                  <ListItemText
+                    primary={service.name}
+                    sx={{
+                      fontSize: `1.2rem`,
+                      margin: `0`,
+                    }}
+                  />
 
-                <Box sx={{ width: `30px` }}>
-                  <RouterLink to={`/services/${service.id}`}>
+                  <ListItemText
+                    secondary={service.categoryName}
+                    sx={{
+                      fontSize: `1.1rem`,
+                      margin: `0`,
+                    }}
+                  />
+                </Box>
+
+                <Box sx={{ 
+                  width: `20%`,
+                  alignSelf: `stretch`,
+                  display: `flex`,
+                  alignItems: `center`,
+                  justifyContent: `center`,
+                  borderLeft: `1px solid grey`,
+              
+                }}>
+                  <RouterLink
+                    style={{
+                      height: `100%`,
+                      width: `100%`,
+                      display: `flex`,
+                      alignItems: `center`,
+                      justifyContent: `center`,
+                    }}
+                    to={`/services/${service.id}`}>
                     <ListItemButton
-                      sx={{ padding: `0` }}
+                      sx={{
+                        padding: `0`,
+                        display: `flex`,
+                        flexGrow: `0`,
+                      }}
                     >
-                      <ListItemIcon>
+                      <ListItemIcon sx={{
+                        minWidth: `0`,
+                      }}>
                         <EditIcon />
                       </ListItemIcon>
                     </ListItemButton>
