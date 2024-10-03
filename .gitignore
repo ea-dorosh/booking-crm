@@ -23,6 +23,7 @@
 /backend/build/
 /frontend/build
 /backend/build
+/backend/public/images
 
 # misc
 .DS_Store

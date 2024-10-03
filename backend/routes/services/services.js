@@ -244,22 +244,22 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req, res) => {
   const categoryId = req.params.id;
   const { name } = req.body;
 
-  const imgPath = `${req.file.filename}`;
+  const imgPath = req.file?.filename || null;
 
   const updateServiceCategoryQuery = `
     UPDATE ServiceCategories
-    SET name = ?, img = ?
+    SET name = ?, img = COALESCE(?, img)
     WHERE id = ?;
   `;
 
-  const serviceValues = [
+  const categoryValues = [
     name,
     imgPath,
     categoryId,
   ];
 
   try {
-    await req.dbPool.query(updateServiceCategoryQuery, serviceValues);
+    await req.dbPool.query(updateServiceCategoryQuery, categoryValues);
 
     res.json({
         message: `Category data updated successfully`,
@@ -273,6 +273,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req, res) => {
     return res.status(500).json(error);
   }
 });
+
 
 router.delete(`/:id`, (req, res) => {
   const serviceId = req.params.id;
