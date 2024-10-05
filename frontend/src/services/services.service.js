@@ -1,44 +1,41 @@
 import axios from 'axios';
 import ERRORS from '@/constants/errors';
-
-const appendFormData = (data, formData = new FormData(), parentKey = '') => {
-  if (data && typeof data === 'object' && !(data instanceof File)) {
-    Object.keys(data).forEach(key => {
-      const fullKey = parentKey ? `${parentKey}[${key}]` : key;
-
-      appendFormData(data[key], formData, fullKey);
-    });
-  } else {
-    formData.append(parentKey, data);
-  }
-  return formData;
-}
+import { appendFormData } from '@/utils/formData';
 
 const token = localStorage.getItem(`token`);
 
-const getServices = async () => {
-  const response = await axios.get(
-    `${process.env.REACT_APP_API_URL}api/protected/services`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+const axiosInstance = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
-  return response.data;
+const handleAxiosError = (error) => {
+  if (error.response && error.response.status === ERRORS.VALIDATION_ERROR) {
+    throw new Error(JSON.stringify(error.response.data.errors));
+  }
+  throw error;
+};
+
+const getServices = async () => {
+  try {
+    const response = await axiosInstance.get(`api/protected/services`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const getServiceCategories = async () => {
-  const response = await axios.get(
-    `${process.env.REACT_APP_API_URL}api/protected/services/categories`, 
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  try {
+    const response = await axiosInstance.get(`api/protected/services/categories`);
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const createService = async (service) => {
@@ -46,27 +43,20 @@ const createService = async (service) => {
     service.bufferTime = null;
   }
 
-  // eslint-disable-next-line no-useless-catch
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services/create-service`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const response = await axiosInstance.post(
+      `api/protected/services/create-service`, 
+      service,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-      body: JSON.stringify({ service }),
-    });
+    );
 
-    if(response.status === ERRORS.VALIDATION_ERROR) {
-      const data = await response.json();
-      throw new Error(JSON.stringify(data.errors));
-    }
-
-    const data = await response.json();
-    
-    return data;
+    return response.data;
   } catch (error) {
-    throw error;
+    handleAxiosError(error);
   }
 };
 
@@ -75,72 +65,59 @@ const updateService = async (service) => {
     service.bufferTime = null;
   }
 
-  // eslint-disable-next-line no-useless-catch
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/services/edit/${service.id}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const response = await axiosInstance.put(
+      `api/protected/services/edit/${service.id}`, 
+      service,
+      { 
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-      body: JSON.stringify({ service }),
-    });
+    );
 
-    if(response.status === ERRORS.VALIDATION_ERROR) {
-      const data = await response.json();
-      throw new Error(JSON.stringify(data.errors));
-    }
-
-    const data = await response.json();
-    
-    return data;
+    return response.data;
   } catch (error) {
-    throw error;
+    handleAxiosError(error);
   }
 };
 
-const updateServiceCategory = async (serviceCategory) => {  
+const updateServiceCategory = async (serviceCategory) => {
   const formData = appendFormData(serviceCategory);
 
-  try {    
-    const response = await axios.put(
-      `${process.env.REACT_APP_API_URL}api/protected/services/category/edit/${serviceCategory.id}`,
+  try {
+    const response = await axiosInstance.put(
+      `api/protected/services/category/edit/${serviceCategory.id}`,
       formData,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
         },
       }
     );
 
     return response.data;
   } catch (error) {
-    if (error.response && error.response.status === ERRORS.VALIDATION_ERROR) {
-      throw new Error(JSON.stringify(error.response.data.errors));
-    }
-    throw error;
+    handleAxiosError(error);
   }
 };
 
 const deleteService = async (id) => {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/protected/services/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  const data = await response.json();
-  return data;
+  try {
+    const response = await axiosInstance.delete(`api/protected/services/${id}`);
+    
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const serviceService = {
   getServices,
   getServiceCategories,
+  createService,
   updateService,
   updateServiceCategory,
-  createService,
   deleteService,
 };
 

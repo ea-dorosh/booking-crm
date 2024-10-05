@@ -13,9 +13,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({
-  storage,
-});
+const upload = multer({ storage });
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
@@ -121,7 +119,7 @@ router.get(`/categories`, async (req, res) => {
 });
 
 router.post(`/create-service`, async (req, res) => {
-  const service = req.body.service;
+  const service = req.body;
 
   // Validation
   const errors = validateServiceForm(service);
@@ -186,7 +184,7 @@ router.post(`/create-service`, async (req, res) => {
 
 router.put(`/edit/:id`, async (req, res) => {
   const serviceId = req.params.id;
-  const service = req.body.service;
+  const service = req.body;
 
   // Validation
   const errors = validateServiceForm(service);
@@ -243,7 +241,7 @@ router.put(`/edit/:id`, async (req, res) => {
 router.put(`/category/edit/:id`, upload.single(`image`), async (req, res) => {    
   const categoryId = req.params.id;
   const { name } = req.body;
-
+  
   const imgPath = req.file?.filename || null;
 
   const updateServiceCategoryQuery = `

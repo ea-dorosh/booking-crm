@@ -17,7 +17,7 @@ export default function ServiceCategoryForm({
   const [formData, setFormData] = useState({
     name: isEditMode ? category.name : ``,
     id: isEditMode ? category.id : ``,
-    image: isEditMode ? category?.image : null,
+    image: null,
   });
 
   const [temporaryImage, setTemporaryImage] = useState(null);
