@@ -100,7 +100,7 @@ export default function ServicesDetailPage() {
   return (
     <PageContainer 
       pageTitle={service ? 
-        `Details for ${service.name}` 
+        `${service.name}` 
         :
         `New Service`
       }

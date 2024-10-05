@@ -39,8 +39,6 @@ export default function EmployeeDetailPage() {
     } else if (shouldShowCreateEmployeeForm) {
       setIsEditMode(true)
     }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -55,8 +53,6 @@ export default function EmployeeDetailPage() {
         }
       }
     })();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateFormStatus]);
 
   const updateEmployeeHandler = (employee) => {
@@ -74,7 +70,7 @@ export default function EmployeeDetailPage() {
   return (
     <PageContainer 
       pageTitle={employee ? 
-        `Details for ${employee.lastName} ${employee.firstName}` 
+        `${employee.lastName} ${employee.firstName}` 
         :
         `New employee`
       }

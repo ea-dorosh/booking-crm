@@ -58,7 +58,7 @@ export default function ServicesDetailPage() {
   return (
     <PageContainer 
       pageTitle={serviceCategory ? 
-        `Details for ${serviceCategory.name}` 
+        `${serviceCategory.name}` 
         :
         `New Service Category`
       }

@@ -1,126 +1,72 @@
-import ERRORS from "@/constants/errors";
-
-const token = localStorage.getItem('token');
+import axios, { handleAxiosError } from '@/services/axios.service';
 
 const getEmployees = async () => {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/protected/employees`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  const data = await response.json();
-  return data;
+  try {
+    const response = await axios.get(`/employees`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const createEmployee = async (employee) => {
-  // eslint-disable-next-line no-useless-catch
   try {
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}api/protected/employees/create-employee`,
-      {
-        method: `POST`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ employee }),
-      }
-    );
+    const response = await axios.post(`/employees/create-employee`, employee);
 
-    if(response.status === ERRORS.VALIDATION_ERROR) {
-      const data = await response.json();
-      throw new Error(JSON.stringify(data.errors));
-    }
-
-    const data = await response.json();
-
-    return data;
+    return response.data;
   } catch (error) {
-    throw error;
+    handleAxiosError(error);
   }
 };
 
 const updateEmployee = async (employee) => {
-  // eslint-disable-next-line no-useless-catch
   try {
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}api/protected/employees/edit/${employee.employeeId}`,
-      {
-        method: `PUT`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ employee }),
-      }
-    );
+    const response = await axios.put(`/employees/edit/${employee.employeeId}`, employee);
 
-    if(response.status === ERRORS.VALIDATION_ERROR) {
-      const data = await response.json();
-      throw new Error(JSON.stringify(data.errors));
-    }
-
-    const data = await response.json();
-
-    return data;
+    return response.data;
   } catch (error) {
-    throw error;
+    handleAxiosError(error);
   }
 };
 
 const getEmployeeAvailability = async (id) => {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/protected/employees/employee-availability/${id}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  const data = await response.json();
-  return data;
+  try {
+    const response = await axios.get(`/employees/employee-availability/${id}`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const applyEmployeeAvailability = async (availability) => {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/protected/employees/employee-availability`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ availability }),
-    }
-  );
+  try {
+    const response = await axios.post(`/employees/employee-availability`, availability);
 
-  const data = await response.json();
-  return data;
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const deleteEmployeeAvailability = async (id) => {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URL}api/protected/employees/employee-availability/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  const data = await response.json();
-  return data;
+  try {
+    const response = await axios.delete(`/employees/employee-availability/${id}`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
 };
 
 const adminService = {
-  getEmployees,
-  createEmployee,
-  updateEmployee,
-  getEmployeeAvailability,
   applyEmployeeAvailability,
+  createEmployee,
   deleteEmployeeAvailability,
+  getEmployeeAvailability,
+  getEmployees,
+  updateEmployee,
 };
 
 export default adminService;

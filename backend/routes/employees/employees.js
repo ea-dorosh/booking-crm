@@ -5,7 +5,7 @@ const { validateEmployeeForm } = require('./employeesUtils');
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
-    return res.status(500).json({ message: "Database connection not initialized" });
+    return res.status(500).json({ message: `Database connection not initialized` });
   }
 
   const sql = `SELECT employee_id, first_name, last_name, email, phone FROM Employees`;
@@ -29,7 +29,7 @@ router.get(`/`, async (req, res) => {
 });
 
 router.post(`/create-employee`, async (req, res) => {
-  const employee = req.body.employee;
+  const employee = req.body;
 
   // Validation
   const errors = validateEmployeeForm(employee);
@@ -67,7 +67,7 @@ router.post(`/create-employee`, async (req, res) => {
 
 router.put(`/edit/:id`, async (req, res) => {
   const employeeId = req.params.id;
-  const employee = req.body.employee;
+  const employee = req.body;
 
   // Validation
   const errors = validateEmployeeForm(employee);
@@ -124,7 +124,7 @@ router.get(`/employee-availability/:employeeId`, async (req, res) => {
 });
 
 router.post(`/employee-availability`, async (req, res) => {
-  const availability = req.body.availability;
+  const availability = req.body;
 
   const upsertQuery = `
   INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time) 
@@ -168,7 +168,7 @@ router.delete(`/employee-availability/:id`, async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: `Error deleteing EmployeeAvailability` });
+    res.status(500).json({ error: `Error deleting EmployeeAvailability` });
     return;
   }
 });
