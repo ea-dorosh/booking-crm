@@ -50,8 +50,6 @@ export default function ServiceForm({
 
   useEffect(() => {
     return () => cleanErrors()
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCheckboxChange = (event, employeeId) => {

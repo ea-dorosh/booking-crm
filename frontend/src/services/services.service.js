@@ -1,26 +1,9 @@
-import axios from 'axios';
-import ERRORS from '@/constants/errors';
+import axios, { handleAxiosError } from '@/services/axios.service';
 import { appendFormData } from '@/utils/formData';
-
-const token = localStorage.getItem(`token`);
-
-const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-
-const handleAxiosError = (error) => {
-  if (error.response && error.response.status === ERRORS.VALIDATION_ERROR) {
-    throw new Error(JSON.stringify(error.response.data.errors));
-  }
-  throw error;
-};
 
 const getServices = async () => {
   try {
-    const response = await axiosInstance.get(`api/protected/services`);
+    const response = await axios.get(`/services`);
 
     return response.data;
   } catch (error) {
@@ -30,7 +13,7 @@ const getServices = async () => {
 
 const getServiceCategories = async () => {
   try {
-    const response = await axiosInstance.get(`api/protected/services/categories`);
+    const response = await axios.get(`/services/categories`);
 
     return response.data;
   } catch (error) {
@@ -44,15 +27,7 @@ const createService = async (service) => {
   }
 
   try {
-    const response = await axiosInstance.post(
-      `api/protected/services/create-service`, 
-      service,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const response = await axios.post(`/services/create-service`, service);
 
     return response.data;
   } catch (error) {
@@ -66,15 +41,7 @@ const updateService = async (service) => {
   }
 
   try {
-    const response = await axiosInstance.put(
-      `api/protected/services/edit/${service.id}`, 
-      service,
-      { 
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    const response = await axios.put(`/services/edit/${service.id}`, service);
 
     return response.data;
   } catch (error) {
@@ -86,15 +53,7 @@ const updateServiceCategory = async (serviceCategory) => {
   const formData = appendFormData(serviceCategory);
 
   try {
-    const response = await axiosInstance.put(
-      `api/protected/services/category/edit/${serviceCategory.id}`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+    const response = await axios.put(`/services/category/edit/${serviceCategory.id}`, formData);
 
     return response.data;
   } catch (error) {
@@ -104,7 +63,7 @@ const updateServiceCategory = async (serviceCategory) => {
 
 const deleteService = async (id) => {
   try {
-    const response = await axiosInstance.delete(`api/protected/services/${id}`);
+    const response = await axios.delete(`/services/${id}`);
     
     return response.data;
   } catch (error) {

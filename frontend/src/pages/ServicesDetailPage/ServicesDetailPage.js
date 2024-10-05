@@ -110,7 +110,7 @@ export default function ServicesDetailPage() {
 
       <Divider />
 
-      {isEditMode && <Box mt={3}>
+      {isEditMode && serviceCategories && <Box mt={3}>
         <ServiceForm
           employees={employees || []}
           service={service}
