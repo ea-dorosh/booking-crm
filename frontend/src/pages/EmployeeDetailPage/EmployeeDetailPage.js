@@ -1,11 +1,12 @@
-import EditIcon from "@mui/icons-material/Edit";
-import { Button } from "@mui/material";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import { Edit } from "@mui/icons-material";
+import { 
+  Button, 
+  Typography,
+  Box,
+  Divider,
+  List,
+  ListItemText
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -109,29 +110,30 @@ export default function EmployeeDetailPage() {
         }}>
           <ListItemText
             primary={`${employee.firstName} ${employee.lastName}`}
-            sx={{ flex: `0 0 200px` }}
+            secondary="Name"
+            sx={{ 
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
           />
 
           <ListItemText
             primary={employee.email}
-            sx={{ flex: `0 0 200px` }}
+            secondary="Email"
+            sx={{ 
+              display: `flex`,
+              flexDirection: `column-reverse`,
+            }}
           />
 
           <ListItemText
             primary={employee.phone}
-            sx={{ flex: `0 0 200px` }}
-          />
-
-          <ListItemButton
-            sx={{ padding: `0` }}
-            onClick={() => {
-              setIsEditMode(true);
+            secondary="Phone"
+            sx={{ 
+              display: `flex`,
+              flexDirection: `column-reverse`,
             }}
-          >
-            <ListItemIcon>
-              <EditIcon />
-            </ListItemIcon>
-          </ListItemButton>
+          />
         </List>
 
         <Box sx={{width: `40%`}}>
@@ -143,7 +145,23 @@ export default function EmployeeDetailPage() {
         </Box>
       </Box>}
 
-      {employee && <Box mt={3}>
+      <Button
+        sx={{ width: `100%`, mt: `20px` }}
+        onClick={() => {
+          setIsEditMode(true);
+        }}
+        startIcon={<Edit />}
+        variant="outlined"
+      >
+        Update Employee
+      </Button>
+      
+
+      {employee && <Box mt={2.5}>
+        <Typography variant="h6">
+          Availability
+        </Typography>
+
         <EmployeeAvailability employeeId={employee.employeeId} />
       </Box>}
     </PageContainer>

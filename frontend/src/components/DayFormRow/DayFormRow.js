@@ -1,10 +1,17 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Typography from "@mui/material/Typography";
+import { 
+  AddCircle,
+  Delete,
+} from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import dayjs from 'dayjs';
 import { useState, useEffect, useMemo } from "react";
 import { formattedTime } from '@/utils/formatters';
@@ -98,11 +105,11 @@ export default function DayFormRow({
         display: "flex",
         alignItems: "center",
       }}
-      mb={2}
+      mb={2.5}
     >
       <Typography
         sx={{
-          width: `100px`,
+          minWidth: `100px`,
           flexShrink: 0,
         }}
         variant="caption"
@@ -113,6 +120,7 @@ export default function DayFormRow({
       {!employeeAvailability && !isEditMode && <Box sx={{
         display: "flex",
         alignItems: "center",
+        width: `100%`,
       }}>
         <Typography
           variant="caption"
@@ -125,7 +133,8 @@ export default function DayFormRow({
           onClick={() => setIsEditMode(true)}
           size="small"
           variant="contained"
-          sx={{ width: `148px` }}
+          sx={{ flexGrow: 1 }}
+          startIcon={<AddCircle />}
         >
           Add
         </Button>
@@ -134,6 +143,7 @@ export default function DayFormRow({
       {employeeAvailability && !isEditMode && <Box sx={{
         display: "flex",
         alignItems: "center",
+        width: `100%`,
       }}>
         <Typography
           variant="caption"
@@ -147,23 +157,20 @@ export default function DayFormRow({
           size="small"
           variant="outlined"
           sx={{ 
-            width: `64px`,
+            flexGrow: 1,
             marginRight: `20px`
           }}
         >
           Change
         </Button>
 
-        <Button
+        <IconButton
           onClick={onDeleteEmployeeAvailability}
-          size="small"
           variant="outlined"
-          sx={{ 
-            width: `64px`,
-          }}
+          color="error"
         >
-          Delete
-        </Button>
+          <Delete />
+        </IconButton>
       </Box>}
 
       {isEditMode && <Box>

@@ -1,13 +1,18 @@
-import AddCircle from "@mui/icons-material/AddCircle";
-import EditIcon from "@mui/icons-material/Edit";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import { 
+  AddCircle,
+  Edit,
+} from "@mui/icons-material";
+import { 
+  Box,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  Typography,
+  Card, 
+  CardHeader,
+  Avatar,
+} from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function EmployeesContainer({ 
@@ -20,42 +25,91 @@ export default function EmployeesContainer({
           display: `flex`,
           alignItems: `center`,
           marginTop: `20px`,
+          marginLeft: `auto`,
+          backgroundColor: `#1976d2`,
+          width: `fit-content`,
+          padding: `10px 20px 10px 30px`,
+          borderRadius: `50px`,
         }}
       >
-        <Typography variant="button" mr={2}>
+        <Typography variant="button"
+          sx={{color: `#fff`}}
+        >
           add employee
         </Typography>
 
         <RouterLink to={`/employees/create-employee`}>
           <IconButton
-            color="primary"
+            sx={{color: `#fff`}}
           >
             <AddCircle />
           </IconButton>
         </RouterLink>
       </Box>
 
-      <List>
+      <List
+        sx={{
+          display: `flex`,
+          flexDirection: `column`,
+          gap: `1.5rem`,
+          marginTop: `2rem`,
+          maxWidth: `768px`,
+        }}
+      >
         {employees.map((employee) => (
-          <ListItem key={employee.employeeId}>
-            <ListItemText
-              primary={`${employee.firstName} ${employee.lastName}`}
-              sx={{ flex: `0 0 200px` }}
-            />
+          <Card 
+            key={employee.employeeId}
+            sx={{
+              display: `flex`,
+              alignItems: `center`,
+              gap: `1rem`,
+            }}
+          >
+            <Box sx={{
+              width: `80%`,
+              paddingRight: `1rem`,
+            }}>
+              <CardHeader
+                sx={{
+                  '& .MuiCardHeader-title': {
+                    fontSize: `1.2rem`,
+                  },
+                }}
+                title={`${employee.firstName} ${employee.lastName}`}
+                subheader={employee.email}
+                avatar={
+                  <Avatar src={employee.image}/>
+                }
+              />
+            </Box>            
 
             <Box sx={{ width: `30px` }}>
-              <RouterLink to={`/employees/${employee.employeeId}`}>
+              <RouterLink
+                style={{
+                  height: `100%`,
+                  width: `100%`,
+                  display: `flex`,
+                  alignItems: `center`,
+                  justifyContent: `center`,
+                }}
+                to={`/employees/${employee.employeeId}`}
+              >
                 <ListItemButton
-                  sx={{ padding: `0` }}
-                  onClick={() => {}}
+                  sx={{ 
+                    padding: `0`,
+                    display: `flex`,
+                    flexGrow: `0`,
+                  }}
                 >
-                  <ListItemIcon>
-                    <EditIcon />
+                  <ListItemIcon sx={{
+                    minWidth: `0`,
+                  }}>
+                    <Edit />
                   </ListItemIcon>
                 </ListItemButton>
               </RouterLink>
             </Box>
-          </ListItem>
+          </Card>
         ))}
       </List>
     </Box>

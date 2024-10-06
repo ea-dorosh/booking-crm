@@ -225,6 +225,7 @@ export default function PageContainer({
           marginTop: `64px`, 
           padding: `0 20px 20px 20px`,
           width: `100%`,
+          maxWidth: `768px`,
         }}>
           {children}
         </Box>

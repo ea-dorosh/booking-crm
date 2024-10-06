@@ -80,15 +80,7 @@ export default function ServicesContainer({
                   />
                 </Box>
 
-                <Box sx={{ 
-                  // width: `20%`,
-                  // alignSelf: `stretch`,
-                  // display: `flex`,
-                  // alignItems: `center`,
-                  // justifyContent: `center`,
-                  // borderLeft: `1px solid grey`,
-              
-                }}>
+                <Box>
                   <RouterLink
                     style={{
                       height: `100%`,
