@@ -1,4 +1,5 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
+import { appendFormData } from '@/utils/formData';
 
 const getEmployees = async () => {
   try {
@@ -21,8 +22,10 @@ const createEmployee = async (employee) => {
 };
 
 const updateEmployee = async (employee) => {
+  const formData = appendFormData(employee);
+
   try {
-    const response = await axios.put(`/employees/edit/${employee.employeeId}`, employee);
+    const response = await axios.put(`/employees/edit/${employee.employeeId}`, formData);
 
     return response.data;
   } catch (error) {

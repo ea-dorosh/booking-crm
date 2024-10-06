@@ -99,8 +99,14 @@ export default function EmployeeDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && employee && <Box mt={3}>
-        <List>
+      {!isEditMode && employee && <Box mt={3}
+        sx={{
+          display: `flex`,
+        }}
+      >
+        <List   sx={{
+          width: `60%`
+        }}>
           <ListItemText
             primary={`${employee.firstName} ${employee.lastName}`}
             sx={{ flex: `0 0 200px` }}
@@ -127,6 +133,14 @@ export default function EmployeeDetailPage() {
             </ListItemIcon>
           </ListItemButton>
         </List>
+
+        <Box sx={{width: `40%`}}>
+          <img 
+            src={employee.image} 
+            alt={`${employee.firstName} ${employee.lastName}`}
+            style={{ width: `100%` }}
+          />
+        </Box>
       </Box>}
 
       {employee && <Box mt={3}>

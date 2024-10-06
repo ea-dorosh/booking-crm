@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { formattedName, formattedPhone } = require('../../utils/formatters');
 const { validateEmployeeForm } = require('./employeesUtils');
+const { upload } = require('../../utils/uploadFile');
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
     return res.status(500).json({ message: `Database connection not initialized` });
   }
 
-  const sql = `SELECT employee_id, first_name, last_name, email, phone FROM Employees`;
+  const sql = `SELECT employee_id, first_name, last_name, email, phone, image FROM Employees`;
 
   try {
     const [results] = await req.dbPool.query(sql);
@@ -19,6 +20,7 @@ router.get(`/`, async (req, res) => {
       lastName: row.last_name,
       email: row.email,
       phone: row.phone,
+      image: row.image ? `${process.env.SERVER_API_URL}images/${row.image}` : `${process.env.SERVER_API_URL}images/no-user-photo.png`,
     }));
 
     res.json(data);
@@ -65,9 +67,11 @@ router.post(`/create-employee`, async (req, res) => {
   }
 });
 
-router.put(`/edit/:id`, async (req, res) => {
+router.put(`/edit/:id`, upload.single(`image`), async (req, res) => {
   const employeeId = req.params.id;
   const employee = req.body;
+
+  const imgPath = req.file?.filename || null;
 
   // Validation
   const errors = validateEmployeeForm(employee);
@@ -76,7 +80,9 @@ router.put(`/edit/:id`, async (req, res) => {
     return res.status(428).json({ errors });
   }
 
-  const query = `UPDATE Employees SET first_name = ?, last_name = ?, email = ?, phone = ? WHERE employee_id = ?
+  const query = `UPDATE Employees 
+    SET first_name = ?, last_name = ?, email = ?, phone = ?, image = COALESCE(?, image)
+    WHERE employee_id = ?
   `;
 
   const values = [
@@ -84,6 +90,7 @@ router.put(`/edit/:id`, async (req, res) => {
     formattedName(employee.lastName),
     employee.email,
     formattedPhone(employee.phone),
+    imgPath,
     employeeId
   ];
 

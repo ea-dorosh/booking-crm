@@ -19,7 +19,10 @@ export default function EmployeeForm({
     lastName: isEditMode ? employee.lastName : ``,
     email: isEditMode ? employee.email : ``,
     phone: isEditMode ? employee.phone : ``,
+    image: null,
   });
+
+  const [temporaryImage, setTemporaryImage] = useState(null);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -31,6 +34,18 @@ export default function EmployeeForm({
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
+    }));
+  };
+
+  const handleImgChange = (event) => {
+    const [file] = event.target.files
+    if (file) {
+      setTemporaryImage(URL.createObjectURL(file))
+    }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      image: event.target.files[0],
     }));
   };
 
@@ -125,6 +140,37 @@ export default function EmployeeForm({
           </FormHelperText>
         }
       </FormControl>
+
+      {(temporaryImage || employee?.image) && 
+        <Box 
+          sx={{
+            padding: `20px`, 
+            margin: `20px 0`, 
+            width: `50%`,
+            backgroundColor: `#f5f5f5`,
+          }}
+        >
+          {temporaryImage && 
+            <img 
+              src={temporaryImage}
+              style={{ width: `100%` }}
+            />
+          }
+
+          {!temporaryImage && employee?.image && 
+            <img 
+              src={employee.image} 
+              style={{ width: `100%` }}
+            />
+          }
+        </Box>}
+
+      <input
+        accept="image/*"
+        type='file'
+        onChange={handleImgChange}
+        style={{ margin: `20px 0`}}
+      />
 
       <Button
         type="submit"
