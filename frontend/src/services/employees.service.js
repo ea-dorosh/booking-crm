@@ -12,8 +12,10 @@ const getEmployees = async () => {
 };
 
 const createEmployee = async (employee) => {
+  const formData = appendFormData(employee);
+
   try {
-    const response = await axios.post(`/employees/create-employee`, employee);
+    const response = await axios.post(`/employees/create-employee`, formData);
 
     return response.data;
   } catch (error) {

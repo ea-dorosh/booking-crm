@@ -30,8 +30,9 @@ router.get(`/`, async (req, res) => {
   }
 });
 
-router.post(`/create-employee`, async (req, res) => {
+router.post(`/create-employee`, upload.single(`image`), async (req, res) => {
   const employee = req.body;
+  const imgPath = req.file?.filename || null;
 
   // Validation
   const errors = validateEmployeeForm(employee);
@@ -41,8 +42,8 @@ router.post(`/create-employee`, async (req, res) => {
   }
 
   const query = `
-    INSERT INTO Employees (first_name, last_name, email, phone)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO Employees (first_name, last_name, email, phone, image)
+    VALUES (?, ?, ?, ?, COALESCE(?, image))
   `;
 
   const values = [
@@ -50,6 +51,7 @@ router.post(`/create-employee`, async (req, res) => {
     formattedName(employee.lastName),
     employee.email,
     formattedPhone(employee.phone),
+    imgPath,
   ];
 
   let employeeId;
