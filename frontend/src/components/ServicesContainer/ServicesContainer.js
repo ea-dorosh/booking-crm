@@ -1,13 +1,17 @@
-import AddCircle from "@mui/icons-material/AddCircle";
-import EditIcon from "@mui/icons-material/Edit";
-import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
+import { 
+  AddCircle,
+  Edit,
+} from "@mui/icons-material";
+import { 
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  Typography,
+  Box,
+  Card, 
+  CardHeader,
+} from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function ServicesContainer({ 
@@ -53,46 +57,36 @@ export default function ServicesContainer({
       >
         {services &&
             services.map((service) => (
-              <ListItem key={service.id}
+              <Card 
+                key={service.id}
                 sx={{
-                  padding: `10px 20px`,
-                  border: `1px solid grey`,
-                  borderTopLeftRadius: `20px`,
-                  borderBottomLeftRadius: `20px`,
-                  borderTopRightRadius: `20px`,
-                  borderBottomRightRadius: `20px`,
+                  display: `flex`,
+                  alignItems: `center`,
+                  gap: `1rem`,
                 }}
               >
                 <Box sx={{
-                  display: `flex`,
-                  flexDirection: `column`,
                   width: `80%`,
                   paddingRight: `1rem`,
                 }}>
-                  <ListItemText
-                    primary={service.name}
+                  <CardHeader
                     sx={{
-                      fontSize: `1.2rem`,
-                      margin: `0`,
+                      '& .MuiCardHeader-title': {
+                        fontSize: `1.2rem`,
+                      },
                     }}
-                  />
-
-                  <ListItemText
-                    secondary={service.categoryName}
-                    sx={{
-                      fontSize: `1.1rem`,
-                      margin: `0`,
-                    }}
+                    title={service.name}
+                    subheader={service.categoryName}
                   />
                 </Box>
 
                 <Box sx={{ 
-                  width: `20%`,
-                  alignSelf: `stretch`,
-                  display: `flex`,
-                  alignItems: `center`,
-                  justifyContent: `center`,
-                  borderLeft: `1px solid grey`,
+                  // width: `20%`,
+                  // alignSelf: `stretch`,
+                  // display: `flex`,
+                  // alignItems: `center`,
+                  // justifyContent: `center`,
+                  // borderLeft: `1px solid grey`,
               
                 }}>
                   <RouterLink
@@ -114,12 +108,12 @@ export default function ServicesContainer({
                       <ListItemIcon sx={{
                         minWidth: `0`,
                       }}>
-                        <EditIcon />
+                        <Edit />
                       </ListItemIcon>
                     </ListItemButton>
                   </RouterLink>
                 </Box>
-              </ListItem>
+              </Card>
             ))}
       </List>
     </Box>
