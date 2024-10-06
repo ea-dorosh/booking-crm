@@ -5,7 +5,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 
-export default function CreateEmployeeForm({
+export default function EmployeeForm({
   employee,
   createEmployee,
   formErrors,
@@ -45,8 +45,6 @@ export default function CreateEmployeeForm({
 
   useEffect(() => {
     return () => cleanErrors()
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

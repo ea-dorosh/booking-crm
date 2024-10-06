@@ -9,8 +9,8 @@ import ListItemText from "@mui/material/ListItemText";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams, useNavigate } from "react-router-dom";
-import CreateEmployeeForm from "@/components/CreateEmployeeForm";
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
+import EmployeeForm from "@/components/EmployeeForm/EmployeeForm";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { 
   fetchEmployees,
@@ -81,7 +81,7 @@ export default function EmployeeDetailPage() {
       <Divider />
 
       {isEditMode && <Box mt={3}>
-        <CreateEmployeeForm
+        <EmployeeForm
           employee={employee}
           createEmployee={updateEmployeeHandler}
           formErrors={formErrors}
