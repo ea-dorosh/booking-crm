@@ -145,7 +145,7 @@ export default function EmployeeDetailPage() {
         </Box>
       </Box>}
 
-      <Button
+      {!isEditMode && <Button
         sx={{ width: `100%`, mt: `20px` }}
         onClick={() => {
           setIsEditMode(true);
@@ -154,7 +154,7 @@ export default function EmployeeDetailPage() {
         variant="outlined"
       >
         Update Employee
-      </Button>
+      </Button>}
       
 
       {employee && <Box mt={2.5}>
