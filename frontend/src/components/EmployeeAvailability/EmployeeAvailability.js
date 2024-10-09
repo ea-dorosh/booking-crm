@@ -20,7 +20,7 @@ export default function EmployeeAvailability({ employeeId }) {
     return () => {
       dispatch(cleanEmployeeAvailability());
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const employeeAvailability = useSelector(state => state.employeeAvailability.data);

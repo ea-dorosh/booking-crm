@@ -20,7 +20,7 @@ router.get(`/`, async (req, res) => {
       lastName: row.last_name,
       email: row.email,
       phone: row.phone,
-      image: row.image ? `${process.env.SERVER_API_URL}images/${row.image}` : `${process.env.SERVER_API_URL}images/no-user-photo.png`,
+      image: row.image ? `${process.env.SERVER_API_URL}/images/${row.image}` : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
     }));
 
     res.json(data);

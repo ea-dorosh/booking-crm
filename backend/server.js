@@ -44,10 +44,6 @@ app.use('/api/public/employees', databaseSelectionMiddleware, employeesPublicRou
 app.use('/api/public/calendar', databaseSelectionMiddleware, calendarRouter);
 app.use('/api/public/appointments', databaseSelectionMiddleware, appointmentsRouter);
 
-// app.listen(port, '192.168.178.27', () => {
-//   console.log(`Server is running on port ${port}`);
-// });
-
-app.listen(port, 'localhost', () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(port, `0.0.0.0`, () => {
+  console.log(`Server is running on port ${process.env.SERVER_API_URL}`);
 });

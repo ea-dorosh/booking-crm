@@ -18,7 +18,24 @@ router.get(`/`, async (req, res) => {
   const categoriesData = categoriesResult.map((row) => ({
     id: row.id,
     name: row.name,
-    image: row.img ? `${process.env.SERVER_API_URL}images/${row.img}` : null,
+    image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+  }));
+
+  // get employees
+  const employeesSql = `
+SELECT employee_id, first_name, last_name, email, phone, image 
+FROM Employees
+  `;
+
+  const [employeesResult] = await req.dbPool.query(employeesSql);
+
+  const employeesData = employeesResult.map((row) => ({
+    id: row.employee_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email,
+    phone: row.phone,
+    image: row.image ? `${process.env.SERVER_API_URL}/images/${row.image}` : null,
   }));
 
 
@@ -62,7 +79,7 @@ router.get(`/`, async (req, res) => {
           durationTime: duration_time,
           bufferTime: buffer_time,
           bookingNote: booking_note,
-          employeePrices: [],
+          employees: [],
           categoryName: categoriesData.find(category => category.id === category_id).name,
           categoryImage: categoriesData.find(category => category.id === category_id).image || null,
           categoryUrl: toKebabCase(categoriesData.find(category => category.id === category_id).name)
@@ -70,7 +87,15 @@ router.get(`/`, async (req, res) => {
       }
       // Push employee ID and price into the array
       if (employee_id) {
-        servicesMap.get(id).employeePrices.push({ employeeId: employee_id, price });
+        servicesMap.get(id).employees.push({ 
+          id: employee_id, 
+          price,
+          firstName: employeesData.find(employee => employee.id === employee_id).firstName,
+          lastName: employeesData.find(employee => employee.id === employee_id).lastName,
+          email: employeesData.find(employee => employee.id === employee_id).email,
+          phone: employeesData.find(employee => employee.id === employee_id).phone,
+          image: employeesData.find(employee => employee.id === employee_id).image,
+         });
       }
     });
 
