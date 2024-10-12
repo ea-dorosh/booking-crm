@@ -20,7 +20,7 @@ const checkEmployeeTimeNotOverlap = async ({db, res}, {date, employeeId, timeSta
   const checkAvailabilityValues = [employeeId, date, timeStart, timeEnd, timeStart, timeEnd, timeStart, timeEnd];
 
   try {
-    const [existingAppointments] = await db.promise().query(checkAvailabilityQuery, checkAvailabilityValues);
+    const [existingAppointments] = await db.query(checkAvailabilityQuery, checkAvailabilityValues);
 
     if (existingAppointments.length > 0) {
       return res.status(409).json({ error: `Employee is already busy at the specified date and time.` });
@@ -30,84 +30,90 @@ const checkEmployeeTimeNotOverlap = async ({db, res}, {date, employeeId, timeSta
   }
 };
 
-module.exports = (db) => {
-  router.post(`/create`, async (req, res) => {
-    const appointmentAndCustomer = req.body.appointment;
+router.post(`/create`, async (req, res) => {
+  const appointmentAndCustomer = req.body.appointment;
 
-    // Validation
-    const errors = validateCustomerForm(appointmentAndCustomer);
+  // Validation
+  const errors = validateCustomerForm(appointmentAndCustomer);
 
-    if (Object.keys(errors).length > 0) {
-      return res.status(428).json({ errors });
-    }
+  if (Object.keys(errors).length > 0) {
+    return res.status(428).json({ errors });
+  }
+console.log(`appointmentAndCustomer`, appointmentAndCustomer);
 
-    let serviceDurationAndBufferTimeInMinutes;
-    try {
-      // get Service from the database
-      const serviceQuery = `SELECT * FROM Services WHERE id = ?`;
-      const [serviceRows] = await db.promise().query(serviceQuery, [appointmentAndCustomer.serviceId]);
+  let serviceDurationAndBufferTimeInMinutes;
+  try {
+    // get Service from the database
+    const serviceQuery = `SELECT * FROM Services WHERE id = ?`;
+    const [serviceRows] = await req.dbPool.query(serviceQuery, [appointmentAndCustomer.serviceId]);
 
-      //get service duration (service_time + buffer_time)
-      serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceRows[0].duration_time, serviceRows[0].buffer_time);
-    } catch (error) {
-      return res.status(500).json(error);
-    }
+    //get service duration (service_time + buffer_time)
+    serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceRows[0].duration_time, serviceRows[0].buffer_time);
+  } catch (error) {
+    console.log(`1 catch (error)`, error);
+    return res.status(500).json(error);
+  }
 
-    const customerQuery = `
-        INSERT INTO Customers (first_name, last_name, email, phone)
-        VALUES (?, ?, ?, ?)
-      `;
-
-    const customerValues = [
-      formattedName(appointmentAndCustomer.firstName),
-      formattedName(appointmentAndCustomer.lastName),
-      appointmentAndCustomer.email,
-      formattedPhone(appointmentAndCustomer.phone),
-    ];
-
-    let customerId;
-
-    try {
-      const [customerResults] = await db.promise().query(customerQuery, customerValues);
-      customerId = customerResults.insertId;
-    } catch (error) {
-      return res.status(500).json(error);
-    }
-
-    const employeeId = appointmentAndCustomer.employeeId;
-    const date = appointmentAndCustomer.date;
-    const timeStart = appointmentAndCustomer.time;
-    const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
-
-    await checkEmployeeTimeNotOverlap({db, res, req}, {date, employeeId, timeStart, timeEnd });
-
-    const appointmentQuery = `
-      INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+  const customerQuery = `
+      INSERT INTO Customers (first_name, last_name, email, phone)
+      VALUES (?, ?, ?, ?)
     `;
 
-    const appointmentValues = [
-      date,
-      timeStart,
-      timeEnd,
-      appointmentAndCustomer.serviceId,
-      customerId,
-      serviceDurationAndBufferTimeInMinutes,
-      employeeId,
-    ];
+  const customerValues = [
+    formattedName(appointmentAndCustomer.firstName),
+    formattedName(appointmentAndCustomer.lastName),
+    appointmentAndCustomer.email,
+    formattedPhone(appointmentAndCustomer.phone),
+  ];
 
-    db.query(appointmentQuery, appointmentValues, (error, result) => {
-      if (error) {
-        console.error(`Error while creating appointments: ${error.message}`);
-        return res.status(500).json(error);
-      }
+  let customerId;
 
-      res.json({ 
-        message: `Appointment has been saved successfully`,
-        data: result,
-      });
+  try {
+    const [customerResults] = await req.dbPool.query(customerQuery, customerValues);
+    customerId = customerResults.insertId;
+  } catch (error) {
+    console.log(`2 catch (error)`, error);
+    return res.status(500).json(error);
+  }
+
+  const employeeId = appointmentAndCustomer.employeeId;
+  const date = appointmentAndCustomer.date;
+  const timeStart = appointmentAndCustomer.time;
+  const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
+
+  await checkEmployeeTimeNotOverlap({
+    db: req.dbPool, 
+    res,
+    req,
+  }, {date, employeeId, timeStart, timeEnd });
+
+  const appointmentQuery = `
+    INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const appointmentValues = [
+    date,
+    timeStart,
+    timeEnd,
+    appointmentAndCustomer.serviceId,
+    customerId,
+    serviceDurationAndBufferTimeInMinutes,
+    employeeId,
+  ];
+
+
+  try {
+    const [appointmentResults] = await req.dbPool.query(appointmentQuery, appointmentValues);
+
+    res.json({ 
+      message: `Appointment has been saved successfully`,
+      data: appointmentResults,
     });
-  });
+  } catch (error) {
+    console.error(`Error while creating appointments: ${error.message}`);
+    return res.status(500).json(error);
+  }
+});
 
-  return router;
-};
+module.exports = router;
