@@ -6,6 +6,7 @@ const { validateCustomerForm } = require('./appointmentsUtils');
 const { getAppointmentEndTime } = require('../calendar/calendarUtils');
 const dayjs = require('dayjs');
 const advancedFormat = require('dayjs/plugin/advancedFormat');
+const { customerNewStatusEnum } = require('../../enums/enums');
 
 dayjs.extend(advancedFormat);
 
@@ -54,44 +55,48 @@ router.post(`/create`, async (req, res) => {
   }
 
   let serviceDurationAndBufferTimeInMinutes;
+  let serviceName;
+
   try {
-    // get Service from the database
     const serviceQuery = `SELECT * FROM Services WHERE id = ?`;
     const [serviceRows] = await req.dbPool.query(serviceQuery, [appointmentAndCustomer.serviceId]);
 
-    //get service duration (service_time + buffer_time)
+    /** save serviceName for response */
+    serviceName = serviceRows[0].name;
+
     serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceRows[0].duration_time, serviceRows[0].buffer_time);
   } catch (error) {
     return res.status(500).json(error);
   }
 
-  // check customer already exists
+  /** check customer already exists */
   const customerCheckQuery = `
     SELECT customer_id FROM Customers
     WHERE email = ?
   `;
 
-  let isCustomerNew = 1; // 0 - Existing Customer, 1 - New Customer
+  let isCustomerNew = customerNewStatusEnum.new;
   let customerId;
 
   try {
     const [customerResults] = await req.dbPool.query(customerCheckQuery, [appointmentAndCustomer.email]);
 
     if (customerResults.length >= 1) {
-      isCustomerNew = 0; // 0 - Existing Customer
+      isCustomerNew = customerNewStatusEnum.existing;
       customerId = customerResults[0].customer_id;
     }
   } catch (error) {
     return res.status(500).json(error);
   }
 
-  if (isCustomerNew === 1) { // New Customer
+  if (isCustomerNew === customerNewStatusEnum.new) {
     const customerQuery = `
-        INSERT INTO Customers (first_name, last_name, email, phone)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Customers (salutation, first_name, last_name, email, phone)
+        VALUES (?, ?, ?, ?, ?)
       `;
 
     const customerValues = [
+      appointmentAndCustomer.salutation,
       formattedName(appointmentAndCustomer.firstName),
       formattedName(appointmentAndCustomer.lastName),
       appointmentAndCustomer.email,
@@ -117,15 +122,14 @@ router.post(`/create`, async (req, res) => {
     req,
   }, {date, employeeId, timeStart, timeEnd });
 
-  const appointmentQuery = `
-    INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id, created_date, customer_first_name, customer_last_name, customer_email, customer_phone, is_customer_new)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  if (res.headersSent) {
+    return;
+  }
 
-  /** is_customer_new ENUM 
-   * 0 - Existing Customer
-   * 1 - New Customer
-  */
+  const appointmentQuery = `
+    INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id, created_date, customer_salutation, customer_first_name, customer_last_name, customer_email, customer_phone, is_customer_new)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
   const appointmentValues = [
     date,
@@ -136,6 +140,7 @@ router.post(`/create`, async (req, res) => {
     serviceDurationAndBufferTimeInMinutes,
     employeeId,
     dayjs().format('DD.MM.YYYY HH:mm:ss'),
+    appointmentAndCustomer.salutation,
     formattedName(appointmentAndCustomer.firstName),
     formattedName(appointmentAndCustomer.lastName),
     appointmentAndCustomer.email,
@@ -149,7 +154,16 @@ router.post(`/create`, async (req, res) => {
 
     res.json({ 
       message: `Appointment has been saved successfully`,
-      data: appointmentResults,
+      data: {
+        id: appointmentResults.insertId,
+        date,
+        timeStart,
+        timeEnd,
+        serviceName,
+        firstName: formattedName(appointmentAndCustomer.firstName),
+        lastName: formattedName(appointmentAndCustomer.lastName),
+        salutation: appointmentAndCustomer.salutation,
+      },
     });
   } catch (error) {
     console.error(`Error while creating appointments: ${error.message}`);

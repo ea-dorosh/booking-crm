@@ -1,7 +1,12 @@
 const { validateEmail, validatePhone } = require('../../utils/validators');
+const { salutationEnum } = require('../../enums/enums');
 
 const validateCustomerForm = (formData) => {
   const errors = {};
+
+  if (formData.salutation !== salutationEnum.male && formData.salutation !== salutationEnum.female) {
+      errors.salutation = `Please choose a salutation`;
+    }
 
   if (!validateEmail(formData.email)) {
     errors.email = `Invalid email address`;
