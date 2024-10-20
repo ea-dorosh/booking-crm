@@ -1,35 +1,28 @@
-import ERRORS from '@/constants/errors';
+import axios, { handleAxiosError } from '@/services/axios.service';
 
+const getAppointments = async () => {
+  try {
+    const response = await axios.get(`/appointments`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+//TODO: Implement createAppointment in BE (protected route)
 const createAppointment = async (appointment) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}api/protected/appointments/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ appointment }),
-    });
+    const response = await axios.post(`/appointments/create`, appointment);
 
-    if (response.status === ERRORS.VALIDATION_ERROR) {
-      const data = await response.json();
-
-      throw new Error(JSON.stringify(data.errors));
-    } else if (response.status === ERRORS.CONFLICT_ERROR) {
-      const data = await response.json();
-
-      throw new Error(JSON.stringify(data.error));
-    }
-
-    const data = await response.json();
-
-    return data;
+    return response.data;
   } catch (error) {
-    console.error(error);
-    throw error;
+    handleAxiosError(error);
   }
 };
 
 const appointmentsService = {
+  getAppointments,
   createAppointment,
 };
 
