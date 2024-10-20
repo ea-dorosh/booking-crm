@@ -26,7 +26,7 @@ const employeesRouter = require('./routes/employees/employees');
 // routes for client site
 const servicesPublicRouter = require('./routes/services/services.public');
 const employeesPublicRouter = require('./routes/employees/employees.public');
-const calendarRouter = require('./routes/calendar/calendar');
+const calendarPublicRouter = require('./routes/calendar/calendar.public');
 const appointmentsRouter = require('./routes/appointments/appointments');
 
 // Use authentication routes
@@ -41,7 +41,7 @@ app.use('/api/protected/employees', employeesRouter);
 // Use client site routes
 app.use('/api/public/services', databaseSelectionMiddleware, servicesPublicRouter);
 app.use('/api/public/employees', databaseSelectionMiddleware, employeesPublicRouter);
-app.use('/api/public/calendar', databaseSelectionMiddleware, calendarRouter);
+app.use('/api/public/calendar', databaseSelectionMiddleware, calendarPublicRouter);
 app.use('/api/public/appointments', databaseSelectionMiddleware, appointmentsRouter);
 
 app.listen(port, `0.0.0.0`, () => {
