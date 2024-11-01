@@ -10,6 +10,16 @@ const getAppointments = async () => {
   }
 };
 
+const getAppointment = async (id) => {
+  try {
+    const response = await axios.get(`/appointments/${id}`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 //TODO: Implement createAppointment in BE (protected route)
 const createAppointment = async (appointment) => {
   try {
@@ -23,6 +33,7 @@ const createAppointment = async (appointment) => {
 
 const appointmentsService = {
   getAppointments,
+  getAppointment,
   createAppointment,
 };
 

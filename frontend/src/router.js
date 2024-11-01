@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
+import AppointmentDetailPage from './pages/AppointmentDetailPage/AppointmentDetailPage';
 import AppointmentsPage from './pages/AppointmentsPage/AppointmentsPage';
 import AccountPage from '@/pages/AccountPage/AccountPage';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
@@ -29,6 +30,12 @@ export const router = createBrowserRouter([
     path: `/appointments`,
     element: <ProtectedRoute>
       <AppointmentsPage />
+    </ProtectedRoute>,
+  },
+  {
+    path: `/appointments/:appointmentId`,
+    element: <ProtectedRoute>
+      <AppointmentDetailPage />
     </ProtectedRoute>,
   },
   {

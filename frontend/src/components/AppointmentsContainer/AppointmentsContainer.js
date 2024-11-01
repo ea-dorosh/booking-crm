@@ -28,8 +28,10 @@ export default function AppointmentsContainer({
         }}
       >
         {appointments && appointments.map((appointment) => (
-          <Box 
+          <Box
+            component={RouterLink}
             key={appointment.id}
+            to={`/appointments/${appointment.id}`}
             sx={{
               display: `flex`,
               alignItems: `center`,
@@ -37,6 +39,8 @@ export default function AppointmentsContainer({
               gap: `.4rem`,
               padding: `.8rem 0 .4rem 0`,
               borderBottom: `1px solid #ddd`,
+              textDecoration: `none`,
+              color: `#333`,
             }}
           >
             <Box sx={{
@@ -64,14 +68,16 @@ export default function AppointmentsContainer({
               flexDirection: `column`,
               position: `relative`,
             }}>
-              <Typography sx={{
-                fontSize: `.8rem`,
-                color: `green`,
-                marginLeft: `auto`,
-                position: `absolute`,
-                right: `0`,
-                top: `-14px`,
-              }}>
+              <Typography 
+                sx={{
+                  fontSize: `.8rem`,
+                  color: `green`,
+                  marginLeft: `auto`,
+                  position: `absolute`,
+                  right: `0`,
+                  top: `-14px`,
+                }}
+              >
                 {formatCreatedDate(appointment.createdDate)}
               </Typography>
                     
