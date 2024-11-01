@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
+import AppointmentsPage from './pages/AppointmentsPage/AppointmentsPage';
 import AccountPage from '@/pages/AccountPage/AccountPage';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
@@ -23,6 +24,12 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     errorElement: <ErrorPage />,
+  },
+  {
+    path: `/appointments`,
+    element: <ProtectedRoute>
+      <AppointmentsPage />
+    </ProtectedRoute>,
   },
   {
     path: `/employees`,

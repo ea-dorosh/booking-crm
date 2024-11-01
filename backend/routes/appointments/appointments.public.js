@@ -127,8 +127,24 @@ router.post(`/create`, async (req, res) => {
   }
 
   const appointmentQuery = `
-    INSERT INTO SavedAppointments (date, time_start, time_end, service_id, customer_id, service_duration, employee_id, created_date, customer_salutation, customer_first_name, customer_last_name, customer_email, customer_phone, is_customer_new)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO SavedAppointments (
+      date, 
+      time_start, 
+      time_end, 
+      service_id, 
+      service_name, 
+      customer_id, 
+      service_duration, 
+      employee_id, 
+      created_date,
+      customer_salutation, 
+      customer_first_name, 
+      customer_last_name, 
+      customer_email, 
+      customer_phone, 
+      is_customer_new
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const appointmentValues = [
@@ -136,10 +152,11 @@ router.post(`/create`, async (req, res) => {
     timeStart,
     timeEnd,
     appointmentAndCustomer.serviceId,
+    serviceName,
     customerId,
     serviceDurationAndBufferTimeInMinutes,
     employeeId,
-    dayjs().format('DD.MM.YYYY HH:mm:ss'),
+    dayjs().format('YYYY-MM-DD HH:mm:ss'),
     appointmentAndCustomer.salutation,
     formattedName(appointmentAndCustomer.firstName),
     formattedName(appointmentAndCustomer.lastName),

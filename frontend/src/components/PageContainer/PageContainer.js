@@ -223,7 +223,7 @@ export default function PageContainer({
 
         <Box sx={{
           marginTop: `64px`, 
-          padding: `0 20px 20px 20px`,
+          padding: `0 16px 20px 16px`,
           width: `100%`,
           maxWidth: `768px`,
         }}>

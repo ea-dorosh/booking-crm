@@ -19,6 +19,7 @@ app.use(express.static(`public`));
 
 // routes for CRM
 const authRouter = require('./routes/auth');
+const appointmentsRouter = require('./routes/appointments/appointments');
 const servicesRouter = require('./routes/services/services');
 const employeesRouter = require('./routes/employees/employees');
 
@@ -33,6 +34,7 @@ app.use('/auth', authRouter);
 app.use('/api/protected', databaseMiddleware);
 
 // Use CRM routes
+app.use('/api/protected/appointments', appointmentsRouter);
 app.use('/api/protected/services', servicesRouter);
 app.use('/api/protected/employees', employeesRouter);
 
