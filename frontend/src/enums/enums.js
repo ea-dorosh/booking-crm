@@ -14,7 +14,7 @@ const appointmentStatusEnum = {
   canceled: 1,
 };
 
-module.exports = {
+export {
   appointmentStatusEnum,
   customerNewStatusEnum,
   salutationEnum,

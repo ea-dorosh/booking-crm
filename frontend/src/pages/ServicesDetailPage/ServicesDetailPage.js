@@ -1,12 +1,15 @@
 import EditIcon from "@mui/icons-material/Edit";
-import { Button, Typography } from "@mui/material";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItemText from "@mui/material/ListItemText";
+import {
+  Box, 
+  Button, 
+  Typography,
+  List,
+  ListItemText,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceForm from "@/components/ServiceForm/ServiceForm";
 import { 
@@ -42,8 +45,6 @@ export default function ServicesDetailPage() {
   const shouldShowServiceForm = serviceId === `create-service`;
 
   useEffect(() => {
-    console.log(`useEffect, dispatch(fetchServiceCategories());
-    `);
     dispatch(fetchServiceCategories());
 
     if (!employees.length) {
@@ -106,9 +107,7 @@ export default function ServicesDetailPage() {
       }
       hideSideNav
     >
-      <Link to={`/services`}>Go back</Link>
-
-      <Divider />
+      <GoBackNavigation />
 
       {isEditMode && serviceCategories && <Box mt={3}>
         <ServiceForm

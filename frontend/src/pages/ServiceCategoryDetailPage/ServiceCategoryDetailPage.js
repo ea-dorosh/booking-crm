@@ -1,13 +1,8 @@
-/* eslint-disable no-unused-vars */
-import EditIcon from "@mui/icons-material/Edit";
-import { Button, Typography } from "@mui/material";
-import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItemText from "@mui/material/ListItemText";
-import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceCategoryForm from "@/components/ServiceCategoryForm/ServiceCategoryForm";
 import {
@@ -27,8 +22,6 @@ export default function ServicesDetailPage() {
   const { loading } = useSelector(state => state.serviceCategories);
   const formErrors = useSelector(state => state.services.updateFormErrors);
   const updateFormStatus = useSelector(state => state.services.updateFormStatus);
-
-  const shouldShowCategoryForm = categoryId === `create-category`;
 
   useEffect(() => {
     dispatch(fetchServiceCategories());
@@ -64,8 +57,7 @@ export default function ServicesDetailPage() {
       }
       hideSideNav
     >
-
-      <span onClick={()=> navigate(-1)}>Go back</span>
+      <GoBackNavigation />
 
       <Box mt={3}>
         {!loading && <ServiceCategoryForm

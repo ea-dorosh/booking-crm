@@ -3,15 +3,15 @@ import {
   Button, 
   Typography,
   Box,
-  Divider,
   List,
   ListItemText
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
 import EmployeeForm from "@/components/EmployeeForm/EmployeeForm";
+import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { 
   fetchEmployees,
@@ -77,9 +77,7 @@ export default function EmployeeDetailPage() {
       }
       hideSideNav
     >
-      <Link to={`/employees`}>Go back</Link>
-
-      <Divider />
+      <GoBackNavigation />
 
       {isEditMode && <Box mt={3}>
         <EmployeeForm

@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const {customerNewStatusEnum} = require('../../enums/enums');
+
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
@@ -95,7 +97,9 @@ router.get(`/:id`, async (req, res) => {
       customer_id, 
       created_date, 
       customer_last_name, 
-      customer_first_name 
+      customer_first_name,
+      is_customer_new,
+      status
     FROM SavedAppointments
     WHERE id = ?
   `;
@@ -112,10 +116,14 @@ router.get(`/:id`, async (req, res) => {
       serviceDuration: row.service_duration,
       serviceId: row.service_id, 
       serviceName: row.service_name, 
-      customerId: row.customer_id, 
       createdDate: row.created_date, 
-      customerLastName: row.customer_last_name, 
-      customerFirstName: row.customer_first_name,
+      customer: {
+        id: row.customer_id,
+        firstName: row.customer_first_name,
+        lastName: row.customer_last_name,
+        isCustomerNew: row.is_customer_new === customerNewStatusEnum.existing ? false : true,
+      },
+      status: row.status,
     }));
 
     const employeeSql = `

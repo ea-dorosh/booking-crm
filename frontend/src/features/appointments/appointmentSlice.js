@@ -23,6 +23,11 @@ const appointmentSlice = createSlice({
     isPending: false,
     error: null,
   },
+  reducers: {
+    clearAppointment: (state) => {
+      state.data = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAppointment.pending, (state) => {
@@ -39,4 +44,5 @@ const appointmentSlice = createSlice({
   }
 });
 
+export const { clearAppointment } = appointmentSlice.actions;
 export default appointmentSlice.reducer;

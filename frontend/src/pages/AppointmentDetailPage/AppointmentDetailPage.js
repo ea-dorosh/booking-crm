@@ -1,15 +1,18 @@
 import { 
   Typography,
   Box,
-  Divider,
+  LinearProgress,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
+import { appointmentStatusEnum } from '@/enums/enums';
 import {
   fetchAppointment,
+  clearAppointment,
 } from '@/features/appointments/appointmentSlice';
 import { 
   formattedTime,
@@ -20,14 +23,17 @@ import {
 
 export default function AppointmentDetailPage() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const { appointmentId } = useParams();
   
-  const appointment = useSelector(state => state.appointment.data);  
+  const {data: appointment, isPending} = useSelector(state => state.appointment);  
 
   useEffect(() => {
     dispatch(fetchAppointment(appointmentId));
+
+    return () => {
+      dispatch(clearAppointment());
+    };
   }, []);
 
   return (
@@ -35,13 +41,9 @@ export default function AppointmentDetailPage() {
       pageTitle="Appointment Detail"
       hideSideNav
     >
-      <Typography
-        onClick={() => navigate(-1)}
-      >
-        Go back
-      </Typography>
+      <GoBackNavigation />
 
-      <Divider />
+      {isPending && <LinearProgress />}
 
       {appointment && <Box mt={3}
         sx={{
@@ -49,7 +51,10 @@ export default function AppointmentDetailPage() {
           flexDirection: `column`,
         }}
       >
-        <Box>
+        <Box sx={{
+          display: `flex`,
+          flexDirection: `column`,
+        }}>
           <Typography
             variant="h4"
             bold
@@ -60,14 +65,29 @@ export default function AppointmentDetailPage() {
             {appointment.serviceName}
           </Typography>
 
-          <Typography
-            variant="subtitle1"
-            sx={{
-              mt: `1.5rem`,
-            }}
-          >
-            Date: {formatIsoDate(appointment.date)}
-          </Typography>
+          <Box sx={{
+            display: `flex`,
+            alignItems: `center`,
+            gap: `10px`,
+            mt: `1rem`,
+          }}>
+            <Typography
+              variant="subtitle1"
+            >
+              Date: {formatIsoDate(appointment.date)}
+            </Typography>
+
+            {appointment.status === appointmentStatusEnum.active && <Box sx={{
+              backgroundColor: `green`,
+              color: `#fff`,
+              padding: `4px 10px`,
+              borderRadius: `3px`,
+              fontSize: `.8rem`,
+              ml: `auto`,
+            }}>
+              Active
+            </Box>}
+          </Box>
 
           <Typography
             variant="subtitle1"
@@ -106,12 +126,42 @@ export default function AppointmentDetailPage() {
             </Box>   
           </Typography>
 
-          <Typography
-            variant="subtitle1"
-            mt={1}
+          <Box
+            sx={{
+              display: `flex`,
+              alignItems: `center`,
+              gap: `10px`,
+              mt: `20px`,
+            }}
           >
-            Client: {appointment.customerLastName} {appointment.customerFirstName}
-          </Typography>
+            <Typography
+              variant="subtitle1"
+            >
+              Client: 
+            </Typography>
+
+            <Typography
+              component={RouterLink}
+              to={`/employees/${appointment.employee.id}`}
+              variant="subtitle1"
+              sx={{
+                color: `#1976d2`,
+                textDecoration: `none`,
+              }}
+            >
+              {appointment.customer.lastName} {appointment.customer.firstName}
+            </Typography>
+
+            {appointment.customer.isCustomerNew && <Box sx={{
+              backgroundColor: `green`,
+              color: `#fff`,
+              padding: `3px 6px`,
+              borderRadius: `3px`,
+              fontSize: `.7rem`,
+            }}>
+              New Client
+            </Box>}
+          </Box>
 
           <Box
             sx={{
@@ -124,13 +174,17 @@ export default function AppointmentDetailPage() {
             <Typography
               variant="subtitle1"
             >
-            Master:
+              Master:
             </Typography>
 
             <Typography
               component={RouterLink}
               to={`/employees/${appointment.employee.id}`}
               variant="subtitle1"
+              sx={{
+                color: `#1976d2`,
+                textDecoration: `none`,
+              }}
             >
               {appointment.employee.lastName} {appointment.employee.firstName}
             </Typography>
