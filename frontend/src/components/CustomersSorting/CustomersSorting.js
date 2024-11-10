@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {
   North,
   South,
@@ -14,20 +13,18 @@ import {
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  APPOINTMENTS_SORT_RULE,
+  CUSTOMERS_SORT_RULE,
   SORT_DIRECTION,
 } from '@/constants/sorting';
-import { 
-  setSortingRule,
-} from '@/features/appointments/appointmentsSlice';
+import { setSortingRule } from '@/features/customers/customersSlice';
 
-export default function AppointmentsPage() {
+export default function CustomersSorting() {
   const dispatch = useDispatch();
 
   const [menuEl, setMenuEl] = useState(null);
   const isSortMenuOpen = Boolean(menuEl);
 
-  const { sortRule, sortDirection } = useSelector((state) => state.appointments);
+  const { sortRule, sortDirection } = useSelector((state) => state.customers);
 
   const handleMenuClick = (event) => {
     setMenuEl(event.currentTarget);
@@ -69,10 +66,9 @@ export default function AppointmentsPage() {
         }}
       >
         <MenuItem 
-          onClick={() => updateSortOrder(APPOINTMENTS_SORT_RULE.DATE)}
+          onClick={() => updateSortOrder(CUSTOMERS_SORT_RULE.LAST_NAME)}
           sx={{
-            backgroundColor: sortRule === APPOINTMENTS_SORT_RULE.DATE ? 
-              `lightgrey` : `initial`,
+            backgroundColor: sortRule === CUSTOMERS_SORT_RULE.LAST_NAME ? `lightgrey` : `initial`,
             display: `flex`,
               
           }}
@@ -80,15 +76,14 @@ export default function AppointmentsPage() {
           <South 
             fontSize='small'
             sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.DESC
-                ? `initial` : `grey`,
+              color: sortRule === CUSTOMERS_SORT_RULE.LAST_NAME && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
             }}
           /> 
 
           <North 
             fontSize='small'
             sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
+              color: sortRule === CUSTOMERS_SORT_RULE.LAST_NAME && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
             }}
           />
 
@@ -97,27 +92,27 @@ export default function AppointmentsPage() {
               marginLeft: 1.5,
             }}
           >
-            Date
+            Last Name
           </Typography>
         </MenuItem>
 
-        <MenuItem 
-          onClick={() => updateSortOrder(APPOINTMENTS_SORT_RULE.CREATED_DATE)}
+        <MenuItem
+          onClick={() => updateSortOrder(CUSTOMERS_SORT_RULE.FIRST_NAME)}
           sx={{
-            backgroundColor: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE ? `lightgrey` : `initial`,
+            backgroundColor: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME ? `lightgrey` : `initial`,
           }}
         >
           <South 
             fontSize='small'
             sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
+              color: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
             }}
           /> 
 
           <North 
             fontSize='small'
             sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
+              color: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
             }}
           />
 
@@ -126,7 +121,36 @@ export default function AppointmentsPage() {
               marginLeft: 1.5,
             }}
           >
-            Created Date
+            First Name
+          </Typography>
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => updateSortOrder(CUSTOMERS_SORT_RULE.ADDED_DATE)}
+          sx={{
+            backgroundColor: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE ? `lightgrey` : `initial`,
+          }}
+        >
+          <South 
+            fontSize='small'
+            sx={{
+              color: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
+            }}
+          /> 
+
+          <North 
+            fontSize='small'
+            sx={{
+              color: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
+            }}
+          />
+
+          <Typography
+            sx={{
+              marginLeft: 1.5,
+            }}
+          >
+            Added Date
           </Typography>
         </MenuItem>
       </Menu>

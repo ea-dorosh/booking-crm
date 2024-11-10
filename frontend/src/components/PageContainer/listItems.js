@@ -53,12 +53,12 @@ export const mainListItems = (
       </ListItemButton>
     </Link>
 
-    <Link to={`/clients`}>
+    <Link to={`/customers`}>
       <ListItemButton>
         <ListItemIcon>
           <Face4 />
         </ListItemIcon>
-        <ListItemText primary="Clients" />
+        <ListItemText primary="Customers" />
       </ListItemButton>
     </Link>
   </>

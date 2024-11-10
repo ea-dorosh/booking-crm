@@ -8,6 +8,6 @@ const sortDirection = state => state.appointments.sortDirection;
 export const selectSortedAppointments = createSelector(
   [data, sortRule, sortDirection],
   (appointments, sortRule, sortDirection) => {
-    return orderBy(appointments, [sortRule, 'timeStart'], [sortDirection, sortDirection]);
+    return orderBy(appointments, [sortRule, `timeStart`], [sortDirection, sortDirection]);
   }
 );

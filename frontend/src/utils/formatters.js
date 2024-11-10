@@ -40,6 +40,7 @@ export const getDay = (dateString) => {
 
   return day;
 };
+
 /**
  * Formats ISO date to a day of the week (Mon, Tue, Wed, etc.)
  * @param {*} dateString - The date '2021-01-01' to format
@@ -118,3 +119,17 @@ export const formatTimeToString = (timeStr) => {
 
   return formattedTime;
 }
+
+/**
+ * Formats DATETIME from 2024-11-10T15:47:12.000Z to 10. Nov 24
+ * @param {*} dateString - The date '2021-01-01' to format
+ * @returns {string} - The formatted date '01. Jan 21'
+ */
+export const formatFromDateTimeToStringDate = (dateString) => {
+  const date = new Date(dateString);
+  const options = { month: `short`, year: `2-digit`, day: `2-digit` };
+  const formattedDate = date.toLocaleDateString(`en-GB`, options);
+  const [day, month, year] = formattedDate.split(` `);
+
+  return `${day}. ${month} ${year}`;
+};

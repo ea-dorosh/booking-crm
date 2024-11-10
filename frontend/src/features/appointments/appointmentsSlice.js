@@ -2,6 +2,10 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
+import { 
+  APPOINTMENTS_SORT_RULE,
+  SORT_DIRECTION,
+} from '@/constants/sorting';
 import { appointmentStatusEnum  } from '@/enums/enums';
 import appointmentsService from "@/services/appointments.service";
 
@@ -25,8 +29,8 @@ const appointmentsSlice = createSlice({
     data: null,
     isPending: false,
     error: null,
-    sortRule: `date`,
-    sortDirection: `asc`,
+    sortRule: APPOINTMENTS_SORT_RULE.DATE,
+    sortDirection: SORT_DIRECTION.ASC,
     startDate: null,
     status: appointmentStatusEnum.active,
   },

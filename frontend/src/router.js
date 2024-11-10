@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import AppointmentDetailPage from './pages/AppointmentDetailPage/AppointmentDetailPage';
 import AppointmentsPage from './pages/AppointmentsPage/AppointmentsPage';
 import AccountPage from '@/pages/AccountPage/AccountPage';
+import CustomersPage from '@/pages/CustomersPage/CustomersPage';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
 import EmployeesPage from '@/pages/EmployeesPage/EmployeesPage';
@@ -36,6 +37,12 @@ export const router = createBrowserRouter([
     path: `/appointments/:appointmentId`,
     element: <ProtectedRoute>
       <AppointmentDetailPage />
+    </ProtectedRoute>,
+  },
+  {
+    path: `/customers`,
+    element: <ProtectedRoute>
+      <CustomersPage />
     </ProtectedRoute>,
   },
   {
