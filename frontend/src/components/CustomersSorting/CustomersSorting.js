@@ -73,17 +73,17 @@ export default function CustomersSorting() {
               
           }}
         >
-          <South 
-            fontSize='small'
-            sx={{
-              color: sortRule === CUSTOMERS_SORT_RULE.LAST_NAME && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
-            }}
-          /> 
-
           <North 
             fontSize='small'
             sx={{
               color: sortRule === CUSTOMERS_SORT_RULE.LAST_NAME && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
+            }}
+          />
+          
+          <South 
+            fontSize='small'
+            sx={{
+              color: sortRule === CUSTOMERS_SORT_RULE.LAST_NAME && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
             }}
           />
 
@@ -102,17 +102,17 @@ export default function CustomersSorting() {
             backgroundColor: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME ? `lightgrey` : `initial`,
           }}
         >
-          <South 
-            fontSize='small'
-            sx={{
-              color: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
-            }}
-          /> 
-
           <North 
             fontSize='small'
             sx={{
               color: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
+            }}
+          />
+          
+          <South
+            fontSize='small'
+            sx={{
+              color: sortRule === CUSTOMERS_SORT_RULE.FIRST_NAME && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
             }}
           />
 
@@ -131,19 +131,19 @@ export default function CustomersSorting() {
             backgroundColor: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE ? `lightgrey` : `initial`,
           }}
         >
-          <South 
-            fontSize='small'
-            sx={{
-              color: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
-            }}
-          /> 
-
           <North 
             fontSize='small'
             sx={{
               color: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
             }}
           />
+          
+          <South 
+            fontSize='small'
+            sx={{
+              color: sortRule === CUSTOMERS_SORT_RULE.ADDED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
+            }}
+          /> 
 
           <Typography
             sx={{

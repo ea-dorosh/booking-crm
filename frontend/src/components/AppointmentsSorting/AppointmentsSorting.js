@@ -77,18 +77,18 @@ export default function AppointmentsPage() {
               
           }}
         >
+          <North 
+            fontSize='small'
+            sx={{
+              color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
+            }}
+          />
+
           <South 
             fontSize='small'
             sx={{
               color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.DESC
                 ? `initial` : `grey`,
-            }}
-          /> 
-
-          <North 
-            fontSize='small'
-            sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
             }}
           />
 
@@ -107,19 +107,19 @@ export default function AppointmentsPage() {
             backgroundColor: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE ? `lightgrey` : `initial`,
           }}
         >
-          <South 
-            fontSize='small'
-            sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
-            }}
-          /> 
-
           <North 
             fontSize='small'
             sx={{
               color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
             }}
           />
+          
+          <South 
+            fontSize='small'
+            sx={{
+              color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
+            }}
+          /> 
 
           <Typography
             sx={{
