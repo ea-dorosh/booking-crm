@@ -18,16 +18,17 @@ app.use(express.json());
 app.use(express.static(`public`));
 
 // routes for CRM
-const authRouter = require('./routes/auth');
 const appointmentsRouter = require('./routes/appointments/appointments');
-const servicesRouter = require('./routes/services/services');
+const authRouter = require('./routes/auth');
+const customersRouter = require('./routes/customers/customers');
 const employeesRouter = require('./routes/employees/employees');
+const servicesRouter = require('./routes/services/services');
 
 // routes for client site
-const servicesPublicRouter = require('./routes/services/services.public');
-const employeesPublicRouter = require('./routes/employees/employees.public');
-const calendarPublicRouter = require('./routes/calendar/calendar.public');
 const appointmentsPublicRouter = require('./routes/appointments/appointments.public');
+const calendarPublicRouter = require('./routes/calendar/calendar.public');
+const employeesPublicRouter = require('./routes/employees/employees.public');
+const servicesPublicRouter = require('./routes/services/services.public');
 
 // Use authentication routes
 app.use('/auth', authRouter);
@@ -35,14 +36,15 @@ app.use('/api/protected', databaseMiddleware);
 
 // Use CRM routes
 app.use('/api/protected/appointments', appointmentsRouter);
-app.use('/api/protected/services', servicesRouter);
+app.use('/api/protected/customers', customersRouter);
 app.use('/api/protected/employees', employeesRouter);
+app.use('/api/protected/services', servicesRouter);
 
 // Use client site routes
-app.use('/api/public/services', databaseSelectionMiddleware, servicesPublicRouter);
-app.use('/api/public/employees', databaseSelectionMiddleware, employeesPublicRouter);
-app.use('/api/public/calendar', databaseSelectionMiddleware, calendarPublicRouter);
 app.use('/api/public/appointments', databaseSelectionMiddleware, appointmentsPublicRouter);
+app.use('/api/public/calendar', databaseSelectionMiddleware, calendarPublicRouter);
+app.use('/api/public/employees', databaseSelectionMiddleware, employeesPublicRouter);
+app.use('/api/public/services', databaseSelectionMiddleware, servicesPublicRouter);
 
 app.listen(port, `0.0.0.0`, () => {
   console.log(`Server is running on port ${process.env.SERVER_API_URL}`);
