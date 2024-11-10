@@ -16,6 +16,18 @@ export const fetchAppointment = createAsyncThunk(
   }
 );
 
+export const cancelAppointment = createAsyncThunk(
+  `appointment/cancelAppointment`,
+  async (id, thunkAPI) => {    
+    try {
+      const data = await appointmentsService.cancelAppointment(id);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 const appointmentSlice = createSlice({
   name: `appointment`,
   initialState: {

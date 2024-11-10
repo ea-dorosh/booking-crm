@@ -2,6 +2,7 @@ import {
   Typography,
   Box,
   LinearProgress,
+  Button,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,6 +14,7 @@ import { appointmentStatusEnum } from '@/enums/enums';
 import {
   fetchAppointment,
   clearAppointment,
+  cancelAppointment,
 } from '@/features/appointments/appointmentSlice';
 import { 
   formattedTime,
@@ -36,6 +38,11 @@ export default function AppointmentDetailPage() {
     };
   }, []);
 
+  const handleCancelAppointment = async (id) => {
+    await dispatch(cancelAppointment(id));
+    dispatch(fetchAppointment(appointmentId));
+  };
+
   return (
     <PageContainer 
       pageTitle="Appointment Detail"
@@ -56,10 +63,10 @@ export default function AppointmentDetailPage() {
           flexDirection: `column`,
         }}>
           <Typography
-            variant="h4"
-            bold
+            variant="h4"  
             sx={{
               fontSize: `1.5rem`,
+              fontWeight: `bold`,
             }}
           >
             {appointment.serviceName}
@@ -86,6 +93,17 @@ export default function AppointmentDetailPage() {
               ml: `auto`,
             }}>
               Active
+            </Box>}
+
+            {appointment.status === appointmentStatusEnum.canceled && <Box sx={{
+              backgroundColor: `red`,
+              color: `#fff`,
+              padding: `4px 10px`,
+              borderRadius: `3px`,
+              fontSize: `.8rem`,
+              ml: `auto`,
+            }}>
+              Canceled
             </Box>}
           </Box>
 
@@ -190,6 +208,19 @@ export default function AppointmentDetailPage() {
             </Typography>
           </Box>
         </Box>
+
+        {appointment.status === appointmentStatusEnum.active && <Button
+          variant="outlined"
+          sx={{
+            width: `fit-content`,
+            mt: `20px`,
+          }}
+          color="error"
+          onClick={()=>handleCancelAppointment(appointment.id)}
+        >
+          Cancel Appointment
+        </Button>}
+
       </Box>}
     </PageContainer>
   );

@@ -6,7 +6,7 @@ import servicesService from "@/services/services.service";
 
 export const fetchServiceCategories = createAsyncThunk(
   `serviceCategories/fetchServiceCategories`,
-  async (thunkAPI) => {
+  async (_arg, thunkAPI) => {
     try {
       const data = await servicesService.getServiceCategories();
 

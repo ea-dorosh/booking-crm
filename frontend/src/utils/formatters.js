@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/de';
 
 dayjs.extend(relativeTime);
+dayjs.locale(`de`);
 
 /**
  * Formats time to a more readable format without seconds
@@ -66,8 +68,8 @@ export const getMonth = (dateString) => {
 };
 
 export const formatCreatedDate = (createdDate) => {
-  const date = dayjs(createdDate, 'YYYY-MM-DD HH:mm:ss', true);
-  const now = dayjs();
+  const date = dayjs(createdDate);
+  const now = dayjs(); 
 
   // If the date parsing failed, return a fallback message
   if (!date.isValid()) {

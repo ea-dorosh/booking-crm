@@ -1,8 +1,13 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
 
-const getAppointments = async () => {
+const getAppointments = async (startDate, status) => {
   try {
-    const response = await axios.get(`/appointments`);
+    const response = await axios.get(`/appointments`, {
+      params: { 
+        startDate,
+        status,
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -13,6 +18,16 @@ const getAppointments = async () => {
 const getAppointment = async (id) => {
   try {
     const response = await axios.get(`/appointments/${id}`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const cancelAppointment = async (id) => {
+  try {
+    const response = await axios.put(`/appointments/${id}/cancel`);
 
     return response.data;
   } catch (error) {
@@ -32,9 +47,10 @@ const createAppointment = async (appointment) => {
 };
 
 const appointmentsService = {
-  getAppointments,
-  getAppointment,
+  cancelAppointment,
   createAppointment,
+  getAppointment,
+  getAppointments,
 };
 
 export default appointmentsService;

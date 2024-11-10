@@ -6,7 +6,7 @@ import employeesService from "@/services/employees.service";
 
 export const fetchEmployees = createAsyncThunk(
   `employees/fetchEmployees`,
-  async (thunkAPI) => {
+  async (_arg, thunkAPI) => {
     try {
       const data = await employeesService.getEmployees();
 

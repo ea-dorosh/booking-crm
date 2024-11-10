@@ -2,14 +2,16 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
-import { sortBy } from 'lodash';
+import { appointmentStatusEnum  } from '@/enums/enums';
 import appointmentsService from "@/services/appointments.service";
 
 export const fetchAppointments = createAsyncThunk(
   `appointments/fetchAppointments`,
-  async (thunkAPI) => {
+  async (_arg, thunkAPI) => {    
     try {
-      const data = await appointmentsService.getAppointments();
+      const state = thunkAPI.getState();
+
+      const data = await appointmentsService.getAppointments(state.appointments.startDate, state.appointments.status);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -23,16 +25,24 @@ const appointmentsSlice = createSlice({
     data: null,
     isPending: false,
     error: null,
-    sortingRule: `date`,
-    direction: `asc`,
+    sortRule: `date`,
+    sortDirection: `asc`,
+    startDate: null,
+    status: appointmentStatusEnum.active,
   },
   reducers: {
+    resetAppointmentsData: (state) => {
+      state.data = null;
+    },
     setSortingRule: (state, action) => {
-      state.sortingRule = action.payload.rule;
-      state.direction = action.payload.direction;
-      if (state.data) {
-        state.data = applySorting(state.data, state.sortingRule, state.direction);
-      }
+      state.sortRule = action.payload.sortRule;
+      state.sortDirection = action.payload.sortDirection;
+    },
+    setStartDate: (state, action) => {      
+      state.startDate = action.payload.startDate;
+    },
+    setStatus: (state, action) => {      
+      state.status = action.payload.status;
     },
   },
   extraReducers: (builder) => {
@@ -42,7 +52,7 @@ const appointmentsSlice = createSlice({
       })
       .addCase(fetchAppointments.fulfilled, (state, action) => {
         state.isPending = false;
-        state.data = applySorting(action.payload, 'date', 'asc', 'timeStart');
+        state.data = action.payload;
       })
       .addCase(fetchAppointments.rejected, (state, action) => {
         state.isPending = false;
@@ -51,10 +61,10 @@ const appointmentsSlice = createSlice({
   }
 });
 
-const applySorting = (data, rule, direction, secondaryRule = 'timeStart') => {
-  const sortedData = sortBy(data, [rule, secondaryRule]);
-  return direction === 'des' ? sortedData.reverse() : sortedData;
-};
-
-export const { setSortingRule } = appointmentsSlice.actions;
+export const { 
+  setSortingRule, 
+  setStartDate,
+  setStatus,
+  resetAppointmentsData,
+} = appointmentsSlice.actions;
 export default appointmentsSlice.reducer;

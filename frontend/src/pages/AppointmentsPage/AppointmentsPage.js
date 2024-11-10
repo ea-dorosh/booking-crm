@@ -1,36 +1,77 @@
 /* eslint-disable no-unused-vars */
+import { 
+  Box,
+  LinearProgress,
+} from "@mui/material";
+import dayjs from 'dayjs';
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import AppointmentsContainer from "@/components/AppointmentsContainer/AppointmentsContainer";
+import AppointmentsSorting from "@/components/AppointmentsSorting/AppointmentsSorting";
+import AppointmentsStartDate from "@/components/AppointmentsStartDate/AppointmentsStartDate";
+import AppointmentsStatus from "@/components/AppointmentsStatus/AppointmentsStatus";
 import PageContainer from '@/components/PageContainer/PageContainer';
+import { selectSortedAppointments } from '@/features/appointments/appointmentsSelectors';
 import { 
   fetchAppointments,
-  setSortingRule,
+  resetAppointmentsData,
+  setStartDate,
 } from '@/features/appointments/appointmentsSlice';
-
 
 export default function AppointmentsPage() {
   const dispatch = useDispatch();
-  const { data: appointments, sortingRule, direction } = useSelector((state) => state.appointments);
 
-  useEffect(() => {
+  const appointments = useSelector(selectSortedAppointments);
+  const { startDate, isPending } = useSelector((state) => state.appointments);
+
+  useEffect(() => {    
+    if (!startDate) {
+      dispatch(setStartDate({ startDate: dayjs(new Date()).format(`YYYY-MM-DD`) }));
+    }
+    
     dispatch(fetchAppointments());
+
+    return () => {
+      dispatch(resetAppointmentsData());
+    };
   }, []);
 
-  const handleSortChange = (rule) => {
-    const newDirection = sortingRule === rule && direction === `des` ? `asc` : `des`;
-    dispatch(setSortingRule({ rule, direction: newDirection }));
+  const onStartDateChange = (newStartDate) => {
+    dispatch(setStartDate({ startDate: newStartDate }));
+    dispatch(fetchAppointments());
   };
 
   return (
-    <PageContainer pageTitle="Appointments">
+    <PageContainer 
+      pageTitle="Appointments"
+      hideSideNav
+    >
 
-      <button onClick={() => handleSortChange('date')}>Sort by Date</button>
-      <button onClick={() => handleSortChange('createdDate')}>Sort by Created Date</button>
+      <Box sx={{
+        display: `flex`,
+        alignItems: `flex-start`,
+        mt: 1.5,
+        gap: 2,
+      }}>
+        {startDate && <AppointmentsStartDate 
+          startDate={startDate}
+          onStartDateChange={onStartDateChange}
+        />}
+
+        <AppointmentsStatus />
+
+        <Box ml="auto">
+          <AppointmentsSorting /> 
+        </Box>
+      </Box>
+
+      {isPending && <Box mt={2}>
+        <LinearProgress />
+      </Box>}
       
-      <AppointmentsContainer
+      {appointments && <AppointmentsContainer
         appointments={appointments}
-      />
+      />}
     </PageContainer>
   );
 }

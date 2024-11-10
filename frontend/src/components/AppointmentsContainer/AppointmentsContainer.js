@@ -4,6 +4,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
+import { appointmentStatusEnum } from '@/enums/enums';
 import { 
   formattedTime,
   formatCreatedDate,
@@ -68,6 +69,19 @@ export default function AppointmentsContainer({
               flexDirection: `column`,
               position: `relative`,
             }}>
+              {appointment.status === appointmentStatusEnum.canceled && <Box sx={{
+                fontSize: `.5rem`,
+                bgcolor: `red`,
+                color: `#fff`,
+                marginLeft: `auto`,
+                position: `absolute`,
+                padding: `1px 4px`,
+                left: `0`,
+                top: `-12px`,
+              }}>
+                canceled
+              </Box>}
+
               <Typography 
                 sx={{
                   fontSize: `.8rem`,
