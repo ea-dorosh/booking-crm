@@ -10,8 +10,45 @@ const getCustomers = async () => {
   }
 };
 
+const getCustomer = async (id) => {
+  try {
+    const response = await axios.get(`/customers/${id}`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const createCustomer = async (customer) => {
+  try {
+    customer.salutation = Number(customer.salutation);
+    
+    const response = await axios.post(`/customers/create-customer`, customer);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const updateCustomer = async (customer) => {
+  try {
+    customer.salutation = Number(customer.salutation);
+
+    const response = await axios.put(`/customers/edit/${customer.id}`, customer);
+
+    return response.data;
+  } catch (error) {    
+    handleAxiosError(error);
+  }
+};
+
 const customersService = {
+  createCustomer,
+  getCustomer,
   getCustomers,
+  updateCustomer,
 };
 
 export default customersService;

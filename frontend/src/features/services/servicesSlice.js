@@ -20,7 +20,6 @@ export const fetchServices = createAsyncThunk(
 export const fetchServiceCategories = createAsyncThunk(
   `services/fetchServiceCategories`,
   async (thunkAPI) => {
-    console.log(`fetchServiceCategories`);
     try {
       const data = await servicesService.getServiceCategories();
 
