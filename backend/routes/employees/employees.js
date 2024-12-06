@@ -3,27 +3,18 @@ const router = express.Router();
 const { formattedName, formattedPhone } = require('../../utils/formatters');
 const { validateEmployeeForm } = require('./employeesUtils');
 const { upload } = require('../../utils/uploadFile');
+const { getEmployees } = require('../../services/employees/employeesService');
+const { getCustomers } = require('../../services/customer/customerService');
 
 router.get(`/`, async (req, res) => {
   if (!req.dbPool) {
     return res.status(500).json({ message: `Database connection not initialized` });
   }
 
-  const sql = `SELECT employee_id, first_name, last_name, email, phone, image FROM Employees`;
-
   try {
-    const [results] = await req.dbPool.query(sql);
+    const employees = await getEmployees(req.dbPool);
 
-    const data = results.map((row) => ({
-      employeeId: row.employee_id,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      email: row.email,
-      phone: row.phone,
-      image: row.image ? `${process.env.SERVER_API_URL}/images/${row.image}` : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
-    }));
-
-    res.json(data);
+    res.json(employees);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: `Error fetching employees` });
@@ -108,7 +99,7 @@ router.put(`/edit/:id`, upload.single(`image`), async (req, res) => {
   }
 });
 
-router.get(`/employee-availability/:employeeId`, async (req, res) => {
+router.get(`/:employeeId/availabilities`, async (req, res) => {
   const employeeId = req.params.employeeId;
 
   const sql = `SELECT * FROM EmployeeAvailability WHERE employee_id = ?`;
@@ -132,7 +123,7 @@ router.get(`/employee-availability/:employeeId`, async (req, res) => {
   }
 });
 
-router.post(`/employee-availability`, async (req, res) => {
+router.post(`/availability`, async (req, res) => {
   const availability = req.body;
 
   const upsertQuery = `
@@ -162,7 +153,7 @@ router.post(`/employee-availability`, async (req, res) => {
   }
 });
 
-router.delete(`/employee-availability/:id`, async (req, res) => {
+router.delete(`/:id/availability`, async (req, res) => {
   const availabilityId = req.params.id;
 
   const deleteQuery = `DELETE FROM EmployeeAvailability WHERE id = ?`;
@@ -179,6 +170,57 @@ router.delete(`/employee-availability/:id`, async (req, res) => {
     console.error(error);
     res.status(500).json({ error: `Error deleting EmployeeAvailability` });
     return;
+  }
+});
+
+router.get(`/:id/appointments`, async (request, response) => {
+  const employeeId = request.params.id;
+  const customers = await getCustomers(request.dbPool);
+
+  const sql = `
+    SELECT 
+      id, 
+      date, 
+      time_start, 
+      time_end, 
+      service_id, 
+      service_name,
+      created_date, 
+      service_duration,
+      customer_id,
+      status
+    FROM SavedAppointments
+    WHERE employee_id = ?
+  `;
+
+  try {
+    const [results] = await request.dbPool.query(sql, [employeeId]);
+
+    const savedAppointments = results.map((row) => ({
+      id: row.id,
+      date: row.date,
+      timeStart: row.time_start,
+      timeEnd: row.time_end,
+      createdDate: row.created_date,
+      service: {
+        id: row.service_id,
+        name: row.service_name,
+        duration: row.service_duration,
+      },
+      customer: {
+        id: row.customer_id,
+        firstName: customers.find(customer => customer.id === row.customer_id).firstName,
+        lastName: customers.find(customer => customer.id === row.customer_id).lastName,
+      },
+      status: row.status,
+    }));
+
+    response.json(savedAppointments);
+  } catch (error) {
+    response.status(500).json({ 
+      errorMessage: `Error fetching Saved Appointments`,
+      message: error.message,
+    });
   }
 });
 

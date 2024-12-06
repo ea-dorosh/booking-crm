@@ -4,6 +4,8 @@ const {
   createCustomer,
   updateCustomerData,
 } = require('../../services/customer/customerService');
+const { getEmployees } = require('../../services/employees/employeesService');
+const { getCustomers } = require('../../services/customer/customerService');
 
 router.get(`/`, async (request, response) => {
   if (!request.dbPool) {
@@ -13,24 +15,10 @@ router.get(`/`, async (request, response) => {
     });
   }
 
-  const sql = `
-    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date
-    FROM Customers
-  `;
-
   try {
-    const [results] = await request.dbPool.query(sql);
+    const customers = await getCustomers(request.dbPool);
 
-    const customersResponse = results.map((row) => ({
-      id: row.customer_id,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      email: row.email,
-      phone: row.phone,
-      addedDate: row.added_date,
-    }));
-
-    response.json(customersResponse);
+    response.json(customers);
   } catch (error) {
     response.status(500).json({
       errorMessages: `Error fetching customers`,
@@ -135,6 +123,57 @@ router.put(`/edit/:id`, async (request, response) => {
 
     response.status(500).json({ 
       errorMessage: `Error while creating customer`,
+      message: error.message,
+    });
+  }
+});
+
+router.get(`/:id/saved-appointments`, async (request, response) => {
+  const customerId = request.params.id;
+  const employees = await getEmployees(request.dbPool);
+
+  const sql = `
+    SELECT 
+      id, 
+      date, 
+      time_start, 
+      time_end, 
+      service_id, 
+      service_name,
+      created_date, 
+      service_duration,
+      employee_id,
+      status
+    FROM SavedAppointments
+    WHERE customer_id = ?
+  `;
+
+  try {
+    const [results] = await request.dbPool.query(sql, [customerId]);
+
+    const savedAppointments = results.map((row) => ({
+      id: row.id,
+      date: row.date,
+      timeStart: row.time_start,
+      timeEnd: row.time_end,
+      createdDate: row.created_date,
+      service: {
+        id: row.service_id,
+        name: row.service_name,
+        duration: row.service_duration,
+      },
+      employee: {
+        id: row.employee_id,
+        firstName: employees.find(employee => employee.employeeId === row.employee_id).firstName,
+        lastName: employees.find(employee => employee.employeeId === row.employee_id).lastName,
+      },
+      status: row.status,
+    }));
+
+    response.json(savedAppointments);
+  } catch (error) {
+    response.status(500).json({ 
+      errorMessage: `Error fetching Saved Appointments`,
       message: error.message,
     });
   }

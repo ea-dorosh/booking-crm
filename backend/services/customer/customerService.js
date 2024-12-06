@@ -1,6 +1,26 @@
 const { validateCustomerForm } = require('../../validators/customer');
 const { formattedName, formattedPhone } = require('../../utils/formatters');
 
+const getCustomers = async (dbPool) => {
+  const sql = `
+    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date
+    FROM Customers
+  `;
+
+  const [results] = await dbPool.query(sql);
+
+  const customersResponse = results.map((row) => ({
+    id: row.customer_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email,
+    phone: row.phone,
+    addedDate: row.added_date,
+  }));
+
+  return customersResponse;
+};
+
 const createCustomer = async (dbPool, customerData) => {
   const errors = validateCustomerForm(customerData);
 
@@ -79,6 +99,7 @@ const checkCustomerExists= async (dbPool, email) => {
 }
 
 module.exports = {
+  getCustomers,
   createCustomer,
   checkCustomerExists,
   updateCustomerData,

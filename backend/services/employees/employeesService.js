@@ -1,3 +1,28 @@
+const getEmployees = async (dbPool) => {
+  const sql = `
+    SELECT 
+      employee_id, 
+      first_name, 
+      last_name, 
+      email, 
+      phone, 
+      image 
+    FROM Employees`;
+
+    const [results] = await dbPool.query(sql);
+
+    const employees = results.map((row) => ({
+      employeeId: row.employee_id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      email: row.email,
+      phone: row.phone,
+      image: row.image ? `${process.env.SERVER_API_URL}/images/${row.image}` : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
+    }));
+
+    return employees;
+};
+
 const checkEmployeeTimeNotOverlap = async (dbPool, { date, employeeId, timeStart, timeEnd }) => {
   const checkAvailabilityQuery = `
     SELECT * FROM SavedAppointments
@@ -32,4 +57,5 @@ const checkEmployeeTimeNotOverlap = async (dbPool, { date, employeeId, timeStart
 
 module.exports = {
   checkEmployeeTimeNotOverlap,
+  getEmployees,
 };
