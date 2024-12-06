@@ -4,17 +4,20 @@ import {
   Typography,
   Box,
   List,
-  ListItemText
+  ListItemText,
+  LinearProgress,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
+import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppointments";
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
 import EmployeeForm from "@/components/EmployeeForm/EmployeeForm";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { 
   fetchEmployees,
+  fetchEmployeeAppointments,
   updateEmployee,
   cleanError,
   cleanErrors,
@@ -28,6 +31,8 @@ export default function EmployeeDetailPage() {
   const dispatch = useDispatch();
   const { employeeId } = useParams();
   const employee = useSelector(state => state.employees.data.find(employee => employee.employeeId === Number(employeeId)));
+  const { isCustomersDataRequestPending, lastAppointments, isLastAppointmentsPending } = useSelector(state => state.employees);
+
   const newEmployeeId = useSelector(state => state.employees.updateFormData);
   const formErrors = useSelector(state => state.employees.updateFormErrors);
   const updateFormStatus = useSelector(state => state.employees.updateFormStatus);
@@ -35,6 +40,8 @@ export default function EmployeeDetailPage() {
   const shouldShowCreateEmployeeForm = employeeId === `create-employee`;
 
   useEffect(() => {
+    dispatch(fetchEmployeeAppointments(employeeId));
+
     if (!employee && !shouldShowCreateEmployeeForm) {
       dispatch(fetchEmployees());
     } else if (shouldShowCreateEmployeeForm) {
@@ -78,6 +85,10 @@ export default function EmployeeDetailPage() {
       hideSideNav
     >
       <GoBackNavigation />
+
+      {(isCustomersDataRequestPending || isLastAppointmentsPending) && <Box mt={2}>
+        <LinearProgress />
+      </Box>}
 
       {isEditMode && <Box mt={3}>
         <EmployeeForm
@@ -161,6 +172,12 @@ export default function EmployeeDetailPage() {
         </Typography>
 
         <EmployeeAvailability employeeId={employee.employeeId} />
+      </Box>}
+
+      {!isEditMode && lastAppointments && <Box mt={3}>
+        <EmployeeAppointments 
+          appointments={lastAppointments}
+        />
       </Box>}
     </PageContainer>
   );

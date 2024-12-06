@@ -20,10 +20,20 @@ const getCustomer = async (id) => {
   }
 };
 
+const getCustomerAppointments = async (id) => {
+  try {
+    const response = await axios.get(`/customers/${id}/saved-appointments`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const createCustomer = async (customer) => {
   try {
     customer.salutation = Number(customer.salutation);
-    
+
     const response = await axios.post(`/customers/create-customer`, customer);
 
     return response.data;
@@ -47,6 +57,7 @@ const updateCustomer = async (customer) => {
 const customersService = {
   createCustomer,
   getCustomer,
+  getCustomerAppointments,
   getCustomers,
   updateCustomer,
 };

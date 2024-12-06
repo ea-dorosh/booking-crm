@@ -37,7 +37,17 @@ const updateEmployee = async (employee) => {
 
 const getEmployeeAvailability = async (id) => {
   try {
-    const response = await axios.get(`/employees/employee-availability/${id}`);
+    const response = await axios.get(`/employees/${id}/availabilities`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const getEmployeeAppointments = async (id) => {
+  try {
+    const response = await axios.get(`/employees/${id}/appointments`);
 
     return response.data;
   } catch (error) {
@@ -47,7 +57,7 @@ const getEmployeeAvailability = async (id) => {
 
 const applyEmployeeAvailability = async (availability) => {
   try {
-    const response = await axios.post(`/employees/employee-availability`, availability);
+    const response = await axios.post(`/employees/availability`, availability);
 
     return response.data;
   } catch (error) {
@@ -57,7 +67,7 @@ const applyEmployeeAvailability = async (availability) => {
 
 const deleteEmployeeAvailability = async (id) => {
   try {
-    const response = await axios.delete(`/employees/employee-availability/${id}`);
+    const response = await axios.delete(`/employees/${id}/availability`);
 
     return response.data;
   } catch (error) {
@@ -70,6 +80,7 @@ const adminService = {
   createEmployee,
   deleteEmployeeAvailability,
   getEmployeeAvailability,
+  getEmployeeAppointments,
   getEmployees,
   updateEmployee,
 };

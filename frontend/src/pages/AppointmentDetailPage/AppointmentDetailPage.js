@@ -160,7 +160,7 @@ export default function AppointmentDetailPage() {
 
             <Typography
               component={RouterLink}
-              to={`/employees/${appointment.employee.id}`}
+              to={`/customers/${appointment.customer.id}`}
               variant="subtitle1"
               sx={{
                 color: `#1976d2`,

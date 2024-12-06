@@ -55,15 +55,15 @@ export default function CustomersContainer({
         sx={{
           display: `flex`,
           flexDirection: `column`,
-          gap: `0.5rem`,
+          gap: `.5rem`,
           marginTop: `.4rem`,
           maxWidth: `768px`,
         }}
       >
         {customers.map((customer) => (
           <Box
-            component={RouterLink}
             key={customer.id}
+            component={RouterLink}
             to={`/customers/${customer.id}`}
             sx={{
               display: `flex`,

@@ -17,15 +17,28 @@ export const fetchEmployees = createAsyncThunk(
   }
 );
 
+export const fetchEmployeeAppointments = createAsyncThunk(
+  `customer/fetchEmployeeLastAppointments`,
+  async (id, thunkAPI) => {
+    try {
+      const data = await employeesService.getEmployeeAppointments(id);
+
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const updateEmployee = createAsyncThunk(
   `employees/updateEmployee`,
-  async (employeFormData, thunkAPI) => {
+  async (employeeFormData, thunkAPI) => {
     try {
-      if (employeFormData.employeeId !== undefined) {
-        await employeesService.updateEmployee(employeFormData);
+      if (employeeFormData.employeeId !== undefined) {
+        await employeesService.updateEmployee(employeeFormData);
       }
       else {
-        const { data } = await employeesService.createEmployee(employeFormData);
+        const { data } = await employeesService.createEmployee(employeeFormData);
 
         return data;
       }
@@ -40,11 +53,14 @@ const employeesSlice = createSlice({
   name: `employees`,
   initialState: {
     data: [],
-    status: `idle`,
+    isCustomersDataRequestPending: false,
     error: null,
     updateFormData: null,
     updateFormStatus: `idle`,
     updateFormErrors: null,
+    lastAppointments: null,
+    isLastAppointmentsPending: false,
+    lastAppointmentsError: null,
   },
   reducers: {
     cleanError: (state, action) => {
@@ -64,14 +80,14 @@ const employeesSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchEmployees.pending, (state) => {
-        state.status = `loading`;
+        state.isCustomersDataRequestPending = true;
       })
       .addCase(fetchEmployees.fulfilled, (state, action) => {
-        state.status = `succeeded`;
+        state.isCustomersDataRequestPending = false;
         state.data = action.payload;
       })
       .addCase(fetchEmployees.rejected, (state, action) => {
-        state.status = `failed`;
+        state.isCustomersDataRequestPending = false;
         state.error = action.payload;
       })
       .addCase(updateEmployee.pending, (state) => {
@@ -84,6 +100,19 @@ const employeesSlice = createSlice({
       .addCase(updateEmployee.rejected, (state, action) => {
         state.updateFormStatus = `failed`;
         state.updateFormErrors = action.payload;
+      })
+      .addCase(fetchEmployeeAppointments.pending, (state) => {
+        state.lastAppointments = null;
+        state.lastAppointmentsError = null;
+        state.isLastAppointmentsPending = true;
+      })
+      .addCase(fetchEmployeeAppointments.fulfilled, (state, action) => {
+        state.isLastAppointmentsPending = false;
+        state.lastAppointments = action.payload;
+      })
+      .addCase(fetchEmployeeAppointments.rejected, (state, action) => {
+        state.isLastAppointmentsPending = false;
+        state.lastAppointmentsError = action.payload;
       })
   }
 });

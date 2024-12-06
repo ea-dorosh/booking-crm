@@ -17,6 +17,19 @@ export const fetchCustomer = createAsyncThunk(
   }
 );
 
+export const fetchCustomerAppointments = createAsyncThunk(
+  `customer/fetchCustomerAppointments`,
+  async (id, thunkAPI) => {
+    try {
+      const data = await customersService.getCustomerAppointments(id);
+
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const updateCustomer = createAsyncThunk(
   `customer/updateCustomer`,
   async (formData, thunkAPI) => {    
@@ -43,6 +56,9 @@ const servicesSlice = createSlice({
     updateFormData: null,
     updateFormPending: false,
     updateFormErrors: null,
+    savedAppointments: null,
+    isSavedAppointmentsPending: false,
+    savedAppointmentsError: null,
   },
   reducers: {
     cleanError: (state, action) => {
@@ -57,6 +73,7 @@ const servicesSlice = createSlice({
     },
     resetCustomerData: (state) => {
       state.data = null;
+      state.savedAppointments = null;
     },
   },
   extraReducers: (builder) => {
@@ -84,6 +101,19 @@ const servicesSlice = createSlice({
       .addCase(updateCustomer.rejected, (state, action) => {
         state.updateFormPending = false;
         state.updateFormErrors = action.payload;
+      })
+      .addCase(fetchCustomerAppointments.pending, (state) => {
+        state.savedAppointments = null;
+        state.savedAppointmentsError = null;
+        state.isSavedAppointmentsPending = true;
+      })
+      .addCase(fetchCustomerAppointments.fulfilled, (state, action) => {
+        state.isSavedAppointmentsPending = false;
+        state.savedAppointments = action.payload;
+      })
+      .addCase(fetchCustomerAppointments.rejected, (state, action) => {
+        state.isSavedAppointmentsPending = false;
+        state.savedAppointmentsError = action.payload;
       })
   }
 });

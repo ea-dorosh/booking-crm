@@ -1,9 +1,7 @@
-import EditIcon from "@mui/icons-material/Edit";
+/* eslint-disable no-unused-vars */
 import {
   Box, 
   Button, 
-  List,
-  ListItemText,
   LinearProgress,
 } from "@mui/material";
 import {
@@ -13,11 +11,14 @@ import {
 } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
+import CustomerDetails from "@/components/CustomerDetails/CustomerDetails";
 import CustomerForm from "@/components/CustomerForm/CustomerForm";
+import CustomerSavedAppointments from "@/components/CustomerSavedAppointments/CustomerSavedAppointments";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { 
   fetchCustomer,
+  fetchCustomerAppointments,
   updateCustomer,
   resetCustomerData,
   cleanError,
@@ -34,13 +35,14 @@ export default function CustomerDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const {data: customer, isPending, updateFormPending } = useSelector(state => state.customer);
+  const {data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending } = useSelector(state => state.customer);
 
   const formErrors = useSelector(state => state.customer.updateFormErrors);
 
   useEffect(() => {    
     if (!isEditMode) {
       dispatch(fetchCustomer(customerId));
+      dispatch(fetchCustomerAppointments(customerId));
     }
 
     return () => {
@@ -81,7 +83,7 @@ export default function CustomerDetailPage() {
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {isPending && <Box mt={2}>
+      {(isPending || isSavedAppointmentsPending) && <Box mt={2}>
         <LinearProgress />
       </Box>}
 
@@ -115,56 +117,16 @@ export default function CustomerDetailPage() {
       </Box>}
 
       {!isEditMode && customer && <Box mt={3}>
-        <List>
-          <ListItemText
-            primary={`${customer.lastName} ${customer.firstName}`}
-            secondary="Name"
-            sx={{ 
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
-          />
+        <CustomerDetails 
+          customer={customer}
+          onChangeCustomerClick={() => setIsEditMode(true)}
+        />
+      </Box>}
 
-          <ListItemText
-            primary={customer.email}
-            secondary="Email"
-            sx={{ 
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
-          />
-
-          <ListItemText
-            primary={customer.phone || `-`}
-            secondary="Phone"
-            sx={{ 
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
-          />
-
-          <ListItemText
-            primary={customer.addedDate || `-`}
-            secondary="Added"
-            sx={{ 
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
-          />
-
-          <Button
-            startIcon={<EditIcon />}
-            onClick={() => setIsEditMode(true)}
-            variant="outlined"
-            sx={{ mt: 2 }}
-          >
-            Change Customer Details
-          </Button>
-        </List>
+      {!isEditMode && savedAppointments && <Box mt={3}>
+        <CustomerSavedAppointments 
+          appointments={savedAppointments}
+        />
       </Box>}
     </PageContainer>
   );
