@@ -2,18 +2,18 @@ import express from 'express';
 import dayjs from 'dayjs';
 import { ResultSetHeader } from 'mysql2/promise';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
-import { getServiceDuration } from '@/utils/timeUtils.js';
+import { getServiceDuration } from '@/utils/timeUtils';
 import { 
   formatName,
   formatPhone,
-} from '@/utils/formatters.js';
-import { getService } from '@/services/service/serviceService.js';
+} from '@/utils/formatters';
+import { getService } from '@/services/service/serviceService';
 import { 
   checkCustomerExists, 
   createCustomer,
-} from '@/services/customer/customerService.js';
-import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
-import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils.js';
+} from '@/services/customer/customerService';
+import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService';
+import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils';
 import { CustomerNewStatusEnum } from '@/enums/enums';
 import { 
   CustomRequestType, 

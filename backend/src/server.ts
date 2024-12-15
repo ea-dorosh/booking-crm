@@ -13,7 +13,7 @@ import employeesRouter from '@/routes/employeesRoutes/employeesRoute';
 import servicesRouter from '@/routes/services/servicesRoute';
 
 // routes for client site
-import appointmentsPublicRouter from '@/routes/appointmentsRoutes/appointmentsRoute.public.js';
+import appointmentsPublicRouter from '@/routes/appointmentsRoutes/appointmentsRoute.public';
 import calendarPublicRouter from '@/routes/calendar/calendarRoute.public';
 import employeesPublicRouter from '@/routes/employeesRoutes/employeesRoute.public';
 import servicesPublicRouter from '@/routes/services/servicesRoute.public';
