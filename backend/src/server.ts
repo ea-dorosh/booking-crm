@@ -6,16 +6,16 @@ import databaseMiddleware from '@/middlewares/databaseMiddleware';
 import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddleware';
 
 // routes for CRM
-import appointmentsRouter from '@/routes/appointmentsRoutes/appointmentsRoute';
-import authRouter from '@/routes/authRoutes/authRoute';
-import customersRouter from '@/routes/customersRoutes/customersRoute';
-import employeesRouter from '@/routes/employeesRoutes/employeesRoute';
+import appointmentsRouter from '@/routes/appointments/appointmentsRoute';
+import authRouter from '@/routes/auth/authRoute';
+import customersRouter from '@/routes/customers/customersRoute';
+import employeesRouter from '@/routes/employees/employeesRoute';
 import servicesRouter from '@/routes/services/servicesRoute';
 
 // routes for client site
-import appointmentsPublicRouter from '@/routes/appointmentsRoutes/appointmentsRoute.public';
+import appointmentsPublicRouter from '@/routes/appointments/appointmentsRoute.public';
 import calendarPublicRouter from '@/routes/calendar/calendarRoute.public';
-import employeesPublicRouter from '@/routes/employeesRoutes/employeesRoute.public';
+import employeesPublicRouter from '@/routes/employees/employeesRoute.public';
 import servicesPublicRouter from '@/routes/services/servicesRoute.public';
 
 dotenv.config();
