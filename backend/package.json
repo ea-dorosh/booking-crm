@@ -9,7 +9,7 @@
     "test-watch": "jest --watchAll",
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch src --exec \"tsx\" src/server.ts"
+    "dev": "tsx watch src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -44,7 +44,6 @@
     "jest": "^29.7.0",
     "supertest": "^6.3.4",
     "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
