@@ -21,7 +21,7 @@ async function databaseSelectionMiddleware(req: CustomRequest, res: Response, ne
     default:
       // Handle unknown or unspecified hostnames
       // return res.status(400).json({ message: "Invalid hostname" });
-      databaseName = 'first_egors_database';
+      databaseName = 'dorosh_studio_database';
   }
 
   req.dbPool = mysql.createPool({

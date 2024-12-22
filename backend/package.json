@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "test-watch": "jest --watchAll",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts"
   },
@@ -17,6 +17,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",
@@ -44,6 +45,7 @@
     "jest": "^29.7.0",
     "supertest": "^6.3.4",
     "ts-jest": "^29.2.5",
+    "tsc-alias": "^1.8.10",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

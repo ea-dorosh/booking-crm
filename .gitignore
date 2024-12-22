@@ -20,10 +20,12 @@
 # production
 /build
 /frontend/build/
-/backend/build/
 /frontend/build
+/backend/build/
+/backend/dist
+/backend/public
 /backend/build
-/backend/public/images
+/backend/src/migration
 
 # misc
 .DS_Store

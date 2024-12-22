@@ -35,10 +35,10 @@ app.use(`/auth`, authRouter);
 app.use(`/api/protected`, databaseMiddleware);
 
 // Use CRM routes
-app.use(`/api/protected/appointments`, appointmentsRouter);
-app.use(`/api/protected/customers`, customersRouter);
-app.use(`/api/protected/employees`, employeesRouter);
-app.use(`/api/protected/services`, servicesRouter);
+app.use(`/api/protected/appointments`, databaseSelectionMiddleware, appointmentsRouter);
+app.use(`/api/protected/customers`, databaseSelectionMiddleware, customersRouter);
+app.use(`/api/protected/employees`, databaseSelectionMiddleware, employeesRouter);
+app.use(`/api/protected/services`, databaseSelectionMiddleware, servicesRouter);
 
 // Use client site routes
 app.use(`/api/public/appointments`, databaseSelectionMiddleware, appointmentsPublicRouter);
