@@ -4,12 +4,14 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import duration from 'dayjs/plugin/duration';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 const TIME_FORMAT = 'HH:mm:ss';
 
@@ -32,7 +34,7 @@ interface DayData {
   availableTimeslots: TimeSlot[];
 }
 
-function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
+function getAppointmentEndTimeHours(startTime: string, serviceDuration: string): string {
   const parsedStartTime = dayjs(startTime, TIME_FORMAT);
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
 
@@ -44,6 +46,18 @@ function getAppointmentEndTime(startTime: string, serviceDuration: string): stri
   return endTime.format(TIME_FORMAT);
 }
 
+function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
+  const parsedStartTime = dayjs.utc(startTime);
+
+  const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
+  const endTime = parsedStartTime
+    .add(parsedServiceDuration.hour(), 'hour')
+    .add(parsedServiceDuration.minute(), 'minute')
+    .add(parsedServiceDuration.second(), 'second');
+
+  return endTime.toISOString(); // 2024-12-29T23:00:00.000Z
+}
+
 function disableTimeSlotsForServiceDuration(
   availableTimeSlots: TimeSlot[], 
   serviceDuration: string
@@ -53,7 +67,7 @@ function disableTimeSlotsForServiceDuration(
       return slot;
     }
 
-    const appointmentEndTime = getAppointmentEndTime(slot.startTime, serviceDuration);
+    const appointmentEndTime = getAppointmentEndTimeHours(slot.startTime, serviceDuration);
 
     for (let i = slotIndex; i <= availableTimeSlots.length - 1; i++) {
       const timeSlot = availableTimeSlots[i];

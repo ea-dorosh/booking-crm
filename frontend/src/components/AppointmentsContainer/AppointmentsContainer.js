@@ -5,7 +5,7 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { appointmentStatusEnum } from '@/enums/enums';
 import { 
-  formattedTime,
+  formattedDateToTime,
   formatCreatedDate,
   getDay,
   getMonth,
@@ -104,7 +104,7 @@ export default function AppointmentsContainer({
               <Typography sx={{
                 fontSize: `.8rem`,
               }}>
-                {getDayOfWeek(appointment.date)}, {formattedTime(appointment.timeStart)} ({formatTimeToString(appointment.serviceDuration)})
+                {getDayOfWeek(appointment.date)}, {formattedDateToTime(appointment.timeStart)} ({formatTimeToString(appointment.serviceDuration)})
               </Typography>
 
               <Typography sx={{

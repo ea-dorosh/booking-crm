@@ -4,7 +4,11 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import { appointmentStatusEnum } from '@/enums/enums';
-import { formatFromDateTimeToStringDate } from "@/utils/formatters";
+import {
+  formatTimeToString,
+  formatFromDateTimeToStringDate,
+  formattedDateToTime,
+} from "@/utils/formatters";
 
 export default function CustomerSavedAppointments({ appointments }) {
 
@@ -70,20 +74,28 @@ export default function CustomerSavedAppointments({ appointments }) {
               top: `-4px`,
             }}
           >
-          Added: {formatFromDateTimeToStringDate(appointment.createdDate)}
+            Added: {formatFromDateTimeToStringDate(appointment.createdDate)}
           </Typography>
     
           <Typography sx={{
             fontSize: `1rem`,
             fontWeight: `bold`,
           }}>
-            {appointment.date} {appointment.timeStart} - {appointment.timeEnd}
+            {formatFromDateTimeToStringDate(appointment.date)} 
+            <Typography 
+              component="span"
+              sx={{
+                color: `#777`,
+                ml: `.5rem`,
+              }}>
+              {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
+            </Typography>
           </Typography>
     
           <Typography sx={{
             fontSize: `.8rem`,
           }}>
-            {appointment.service.name} {appointment.service.duration}
+            {appointment.service.name} - <b>{formatTimeToString(appointment.service.duration)}</b>
           </Typography>
 
           <Typography sx={{

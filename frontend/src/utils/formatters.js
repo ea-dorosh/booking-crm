@@ -14,6 +14,16 @@ dayjs.locale(`de`);
 export const formattedTime = (parsedTime) => parsedTime.slice(0, 5);
 
 /**
+ * Formats date 2024-12-23T09:30:00.000Z to time 09:30
+ * @param {string} date - The date 2024-12-23T09:30:00.000Z to format
+ * @returns {string} - The formatted time '09:30'
+ */
+export const formattedDateToTime = (date) => {
+  const time = new Date(date).toLocaleTimeString(`de-DE`, { hour: `2-digit`, minute: `2-digit` });
+  return time;
+};
+
+/**
  * Formats ISO date to a more readable format
  * @param {*} dateString - The date '2021-01-01' to format
  * @returns {string} - The formatted date '01. Jan 21'
@@ -28,9 +38,9 @@ export const formatIsoDate = (dateString) => {
 };
 
 /**
- * Formats ISO date to a more readable format
+ * Formats ISO date to "day"
  * @param {*} dateString - The date '2021-01-01' to format
- * @returns {string} - The formatted date '01. Jan 21'
+ * @returns {string} - The formatted date '01'
  */
 export const getDay = (dateString) => {
   const date = new Date(dateString);
@@ -44,7 +54,7 @@ export const getDay = (dateString) => {
 /**
  * Formats ISO date to a day of the week (Mon, Tue, Wed, etc.)
  * @param {*} dateString - The date '2021-01-01' to format
- * @returns {string} - The formatted date '01. Jan 21'
+ * @returns {string} - The formatted date 'Mon'
  */
 export const getDayOfWeek = (dateString) => {
   const date = new Date(dateString);
@@ -55,9 +65,9 @@ export const getDayOfWeek = (dateString) => {
 };
 
 /**
- * Formats ISO date to a more readable format
+ * Formats ISO date to "month"
  * @param {*} dateString - The date '2021-01-01' to format
- * @returns {string} - The formatted date '01. Jan 21'
+ * @returns {string} - 'Dec'
  */
 export const getMonth = (dateString) => {
   const date = new Date(dateString);
@@ -72,25 +82,20 @@ export const formatCreatedDate = (createdDate) => {
   const date = dayjs(createdDate);
   const now = dayjs(); 
 
-  // If the date parsing failed, return a fallback message
   if (!date.isValid()) {
     return "Invalid date";
   }
 
-  // Calculate the difference in hours
   const hoursDifference = now.diff(date, `hours`);
 
-  // If createdDate is less than 1 hour ago, show minutes
   if (hoursDifference < 1) {
-    return `${now.diff(date, 'minutes')} minutes ago`;
+    return `${now.diff(date, `minutes`)} minutes ago`;
   }
 
-  // If createdDate is less than 24 hours ago, show hours
   if (hoursDifference < 24) {
     return `${hoursDifference} hours ago`;
   }
 
-  // If createdDate is 24 hours or more ago, show relative time (e.g., "1 day ago", "2 weeks ago")
   return date.fromNow();
 };
 

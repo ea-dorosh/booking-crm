@@ -21,10 +21,12 @@ import {
 } from '@/@types/expressTypes';
 import { ServiceDetailsDataType } from '@/@types/servicesTypes';
 import { AppointmentFormDataType } from '@/@types/appointmentsTypes';
+import utc from 'dayjs/plugin/utc.js'; 
 
 const router = express.Router();
 
 dayjs.extend(advancedFormat);
+dayjs.extend(utc);
 
 router.post(`/create`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
@@ -49,6 +51,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       errorMessage: `Error while fetching service`,
       error: (error as Error).message,
     });
+    return;
   }
 
   /** check customer already exists and create if not */
@@ -69,6 +72,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
             errorMessage: `Validation failed`,
             validationErrors,
           });
+          return;
       } else if (newCustomerId) {
         customerId = newCustomerId;
       }
@@ -78,13 +82,18 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       errorMessage: `Error while creating customer`,
       message: (error as Error).message,
     });
+    return;
   }
 
   const employeeId = appointmentFormData.employeeId;
   const date = appointmentFormData.date;
-  const timeStart = appointmentFormData.time;
-  const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
 
+  const timeStart = dayjs
+  .utc(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
+  .format(`YYYY-MM-DDTHH:mm:ss.SSS[Z]`);
+  
+  const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
+  
   try {
     const { isEmployeeAvailable } = await checkEmployeeTimeNotOverlap(request.dbPool, { date, employeeId, timeStart, timeEnd })
 
@@ -92,12 +101,14 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       response.status(409).json({ 
         errorMessage: `Employee is already busy at the specified date and time.`,
       });
+      return;
     }
   } catch (error) {
     response.status(500).json({ 
       errorMessage: `Error while checking employee availability`,
       message: (error as Error).message,
     });
+    return;
   }
 
   const appointmentQuery = `
@@ -156,11 +167,13 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
         salutation: appointmentFormData.salutation,
       },
     });
+    return;
   } catch (error) {
     response.status(500).json({ 
       errorMessage: `Error while creating appointment`,
       message: (error as Error).message,
     });
+    return;
   }
 });
 

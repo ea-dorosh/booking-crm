@@ -26,7 +26,7 @@ export default function BasicDatePicker({
           textField: {
             inputRef: inputRef,
             sx: {
-              width: `120px`,
+              width: `160px`,
               '& .MuiInputBase-input': {
                 padding: `6.75px 10px`,
               },

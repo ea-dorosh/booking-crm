@@ -57,6 +57,7 @@ export default function ServicesDetailPage() {
       setIsEditMode(true)
     }
   }, []);
+  console.log(`service`, service);
 
   useEffect(() => {
     (async () => {

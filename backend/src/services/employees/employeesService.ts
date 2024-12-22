@@ -3,6 +3,10 @@ import {
   EmployeeDetailRowType,
   EmployeeDetailDataType,
 } from '@/@types/employeesTypes';
+import utc from 'dayjs/plugin/utc';
+import dayjs from 'dayjs';
+
+dayjs.extend(utc);
 
 interface CheckEmployeeParams {
   date: string;
@@ -21,6 +25,10 @@ interface SavedAppointmentRow extends RowDataPacket {
 
 interface CheckEmployeeAvailabilityResult {
   isEmployeeAvailable: boolean;
+}
+
+function toMySQLDateTime(isoString: string): string {
+  return dayjs.utc(isoString).format('YYYY-MM-DD HH:mm:ss');
 }
 
 async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
@@ -52,26 +60,31 @@ async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
 }
 
 async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, timeStart, timeEnd }: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
+  const mysqlTimeStart = toMySQLDateTime(timeStart);
+  const mysqlTimeEnd   = toMySQLDateTime(timeEnd);
+
   const checkAvailabilityQuery = `
     SELECT * FROM SavedAppointments
     WHERE employee_id = ? 
-    AND date = ? 
-    AND (
-      (time_start >= ? AND time_start < ?) OR 
-      (time_end > ? AND time_end <= ?) OR 
-      (time_start <= ? AND time_end >= ?)
-    )
+      AND date = ? 
+      AND (
+        (time_start >= ? AND time_start < ?)
+        OR 
+        (time_end > ? AND time_end <= ?)
+        OR 
+        (time_start <= ? AND time_end >= ?)
+      )
   `;
 
   const checkAvailabilityValues = [
-    employeeId, 
-    date, 
-    timeStart, 
-    timeEnd, 
-    timeStart,
-    timeEnd, 
-    timeStart, 
-    timeEnd,
+    employeeId,
+    date,
+    mysqlTimeStart,
+    mysqlTimeEnd,
+    mysqlTimeStart,
+    mysqlTimeEnd,
+    mysqlTimeStart,
+    mysqlTimeEnd,
   ];
 
   const [existingAppointments] = await dbPool.query<SavedAppointmentRow[]>(checkAvailabilityQuery, checkAvailabilityValues);

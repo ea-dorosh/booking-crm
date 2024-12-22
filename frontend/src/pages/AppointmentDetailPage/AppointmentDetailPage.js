@@ -17,7 +17,7 @@ import {
   cancelAppointment,
 } from '@/features/appointments/appointmentSlice';
 import { 
-  formattedTime,
+  formattedDateToTime,
   formatCreatedDate,
   formatTimeToString,
   formatIsoDate,
@@ -111,7 +111,7 @@ export default function AppointmentDetailPage() {
             variant="subtitle1"
             mt={1}
           >
-            Time: {formattedTime(appointment.timeStart)} - {formattedTime(appointment.timeEnd)}       ({formatTimeToString(appointment.serviceDuration)})
+            Time: {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}       ({formatTimeToString(appointment.serviceDuration)})
           </Typography>
 
           <Typography
