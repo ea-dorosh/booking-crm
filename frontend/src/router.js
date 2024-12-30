@@ -8,6 +8,7 @@ import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
 import EmployeesPage from '@/pages/EmployeesPage/EmployeesPage';
 import ErrorPage from '@/pages/ErrorPage/ErrorPage';
+import InvoicesPage from '@/pages/InvoicesPage/InvoicesPage';
 import LoginPage from '@/pages/LoginPage/LoginPage';
 import ServiceCategoryDetailPage from '@/pages/ServiceCategoryDetailPage/ServiceCategoryDetailPage';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
@@ -62,6 +63,12 @@ export const router = createBrowserRouter([
     path: `/employees/:employeeId`,
     element: <ProtectedRoute>
       <EmployeeDetailPage />
+    </ProtectedRoute>,
+  },
+  {
+    path: `/invoices`,
+    element: <ProtectedRoute>
+      <InvoicesPage />
     </ProtectedRoute>,
   },
   {

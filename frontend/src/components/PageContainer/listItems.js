@@ -2,6 +2,7 @@ import {
   AccountCircle,
   Construction,
   Dashboard,
+  Description,
   Face4,
   People,
   Event,
@@ -59,6 +60,15 @@ export const mainListItems = (
           <Face4 />
         </ListItemIcon>
         <ListItemText primary="Customers" />
+      </ListItemButton>
+    </Link>
+
+    <Link to={`/invoices`}>
+      <ListItemButton>
+        <ListItemIcon>
+          <Description />
+        </ListItemIcon>
+        <ListItemText primary="Invoices" />
       </ListItemButton>
     </Link>
   </>

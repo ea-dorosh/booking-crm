@@ -6,6 +6,7 @@ import customerReducer from '@/features/customers/customerSlice';
 import customersReducer from '@/features/customers/customersSlice';
 import employeeAvailabilitySlice from '@/features/employees/employeeAvailabilitySlice';
 import employeesSlice from '@/features/employees/employeesSlice';
+import invoicesSlice from '@/features/invoices/invoicesSlice';
 import serviceCategoriesSlice from '@/features/serviceCategories/serviceCategoriesSlice';
 import servicesSlice from '@/features/services/servicesSlice';
 
@@ -18,6 +19,7 @@ export default configureStore({
     customers: customersReducer,
     employeeAvailability: employeeAvailabilitySlice,
     employees: employeesSlice,
+    invoices: invoicesSlice,
     serviceCategories: serviceCategoriesSlice,
     services: servicesSlice,
   },

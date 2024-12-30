@@ -10,6 +10,7 @@ import appointmentsRouter from '@/routes/appointments/appointmentsRoute';
 import authRouter from '@/routes/auth/authRoute';
 import customersRouter from '@/routes/customers/customersRoute';
 import employeesRouter from '@/routes/employees/employeesRoute';
+import invoicesRouter from '@/routes/invoices/invoicesRoute';
 import servicesRouter from '@/routes/services/servicesRoute';
 
 // routes for client site
@@ -38,6 +39,7 @@ app.use(`/api/protected`, databaseMiddleware);
 app.use(`/api/protected/appointments`, databaseSelectionMiddleware, appointmentsRouter);
 app.use(`/api/protected/customers`, databaseSelectionMiddleware, customersRouter);
 app.use(`/api/protected/employees`, databaseSelectionMiddleware, employeesRouter);
+app.use(`/api/protected/invoices`, databaseSelectionMiddleware, invoicesRouter);
 app.use(`/api/protected/services`, databaseSelectionMiddleware, servicesRouter);
 
 // Use client site routes

@@ -17,3 +17,21 @@ export enum CustomerSourceEnum {
   Manual = 0,
   Booking = 1,
 }
+
+export enum PaymentMethodEnum {
+  PayInPerson = 0,
+  ApplePay = 1,
+  CreditDebitCards = 2,
+  Giropay = 3,
+  OnlineBankTransfer = 4,
+}    
+
+export enum PaymentStatusEnum {
+  Declined = 0,
+  Refunded = 1,
+  Successful = 2,
+}
+
+export enum InvoiceStatusEnum {
+  Paid = 1,
+}
