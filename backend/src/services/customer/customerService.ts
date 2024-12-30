@@ -7,11 +7,22 @@ import {
   CustomerFormDataValidationErrors,
 } from '@/@types/customersTypes';
 import {DbPoolType} from '@/@types/expressTypes';
+import { SalutationEnum } from '@/enums/enums';
 
 interface GetCustomersResponse {
   id: number;
   firstName: string;
   lastName: string;
+  email: string;
+  phone: string;
+  addedDate: string;
+}
+
+interface GetCustomerResponse {
+  id: number;
+  salutation: SalutationEnum;
+  lastName: string;
+  firstName: string;
   email: string;
   phone: string;
   addedDate: string;
@@ -50,6 +61,35 @@ async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]>
   }));
 
   return customersResponse;
+}
+
+async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<GetCustomerResponse | null> {
+  const sql = `
+    SELECT 
+      customer_id, 
+      last_name, 
+      first_name,
+      salutation, 
+      email,
+      phone,
+      added_date
+    FROM Customers
+    WHERE customer_id = ?
+  `;
+
+  const [results] = await dbPool.query<CustomerRowType[]>(sql, [customerId]);
+
+  const customersResponse = results.map((row) => ({
+    id: row.customer_id,
+    salutation: row.salutation, 
+    lastName: row.last_name,
+    firstName: row.first_name, 
+    email: row.email,
+    phone: row.phone,
+    addedDate: row.added_date,
+  }));
+
+  return customersResponse.length > 0 ? customersResponse[0] : null;
 }
 
 async function createCustomer(dbPool: DbPoolType, customerData: CustomerDataType): Promise<CreateCustomerResult> {
@@ -130,7 +170,8 @@ async function checkCustomerExists(dbPool: DbPoolType, email: string): Promise<C
 }
 
 export {  
-  getCustomers, 
+  getCustomers,
+  getCustomerById,
   createCustomer, 
   updateCustomerData, 
   checkCustomerExists 

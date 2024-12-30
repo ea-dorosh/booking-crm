@@ -1,11 +1,10 @@
 import express from 'express';
-import { getCustomers, createCustomer, updateCustomerData } from '@/services/customer/customerService';
+import { getCustomers, getCustomerById, createCustomer, updateCustomerData } from '@/services/customer/customerService';
 import { getEmployees } from '@/services/employees/employeesService';
 import { 
   CustomRequestType, 
   CustomResponseType,
 } from '@/@types/expressTypes';
-import { CustomerRowType } from '@/@types/customersTypes';
 import { RowDataPacket } from 'mysql2';
 import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes';
 
@@ -49,33 +48,10 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
 
   const customerId = request.params.id;
 
-  const sql = `
-    SELECT 
-      customer_id, 
-      last_name, 
-      first_name,
-      salutation, 
-      email,
-      phone,
-      added_date
-    FROM Customers
-    WHERE customer_id = ?
-  `;
-
   try {
-    const [results] = await request.dbPool.query<CustomerRowType[]>(sql, [customerId]);
+    const customer = getCustomerById(request.dbPool, customerId);
 
-    const customersResponse = results.map((row) => ({
-      id: row.customer_id,
-      salutation: row.salutation, 
-      lastName: row.last_name,
-      firstName: row.first_name, 
-      email: row.email,
-      phone: row.phone,
-      addedDate: row.added_date,
-    }));
-
-    response.json(customersResponse[0]);
+    response.json(customer);
 
     return;
   } catch (error) {
