@@ -8,6 +8,7 @@ import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddlewa
 // routes for CRM
 import appointmentsRouter from '@/routes/appointments/appointmentsRoute';
 import authRouter from '@/routes/auth/authRoute';
+import companyRouter from '@/routes/company/companyRoute';
 import customersRouter from '@/routes/customers/customersRoute';
 import employeesRouter from '@/routes/employees/employeesRoute';
 import invoicesRouter from '@/routes/invoices/invoicesRoute';
@@ -37,6 +38,7 @@ app.use(`/api/protected`, databaseMiddleware);
 
 // Use CRM routes
 app.use(`/api/protected/appointments`, databaseSelectionMiddleware, appointmentsRouter);
+app.use(`/api/protected/company`, databaseSelectionMiddleware, companyRouter);
 app.use(`/api/protected/customers`, databaseSelectionMiddleware, customersRouter);
 app.use(`/api/protected/employees`, databaseSelectionMiddleware, employeesRouter);
 app.use(`/api/protected/invoices`, databaseSelectionMiddleware, invoicesRouter);

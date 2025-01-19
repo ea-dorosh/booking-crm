@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import appointmentSlice from '@/features/appointments/appointmentSlice';
 import appointmentsSlice from '@/features/appointments/appointmentsSlice';
+import companySlice from '@/features/company/companySlice';
 import counterReducer from '@/features/counter/counterSlice';
 import customerReducer from '@/features/customers/customerSlice';
 import customersReducer from '@/features/customers/customersSlice';
@@ -16,6 +17,7 @@ export default configureStore({
     appointment: appointmentSlice,
     appointments: appointmentsSlice,
     counter: counterReducer,
+    company: companySlice,
     customer: customerReducer,
     customers: customersReducer,
     employeeAvailability: employeeAvailabilitySlice,

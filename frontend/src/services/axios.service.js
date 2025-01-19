@@ -24,15 +24,19 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error) => {   
+  (error) => {
     return Promise.reject(error);
   }
 );
 
-export const handleAxiosError = (error) => {  
+export const handleAxiosError = (error) => {
   if (error?.status === ERRORS.VALIDATION_ERROR) {
     error.response.data.status = ERRORS.VALIDATION_ERROR;
     throw error.response.data;
+  }
+
+  if (error?.response?.data?.error) {
+    throw error.response.data.error;
   }
 
   throw error.message;

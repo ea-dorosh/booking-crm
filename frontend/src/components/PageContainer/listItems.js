@@ -5,6 +5,7 @@ import {
   Description,
   Face4,
   People,
+  Business,
   Event,
 } from '@mui/icons-material';
 import {
@@ -82,6 +83,15 @@ export const secondaryListItems = (
           <AccountCircle />
         </ListItemIcon>
         <ListItemText primary="Account" />
+      </ListItemButton>
+    </Link>
+
+    <Link to={`/company`}>
+      <ListItemButton>
+        <ListItemIcon>
+          <Business />
+        </ListItemIcon>
+        <ListItemText primary="Company" />
       </ListItemButton>
     </Link>
   </>
