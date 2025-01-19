@@ -3,7 +3,7 @@ import {
   SalutationEnum,
 } from '@/enums/enums';
 
-export interface CustomerRowType extends RowDataPacket {
+export interface CustomerRequestRow extends RowDataPacket {
   customer_id: number;
   last_name: string;
   first_name: string;
@@ -11,14 +11,15 @@ export interface CustomerRowType extends RowDataPacket {
   email: string;
   phone: string;
   added_date: string;
+  last_activity_date: string;
 }
 
-export interface CustomerDataType {
-  salutation: SalutationEnum;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
+export interface CustomerResponseData {
+  salutation?: SalutationEnum | null;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface CustomerFormDataValidationErrors {

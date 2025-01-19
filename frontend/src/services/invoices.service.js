@@ -10,8 +10,32 @@ const getInvoices = async () => {
   }
 };
 
+const getInvoiceById = async (id) => {
+  try {
+    const response = await axios.get(`/invoices/${id}`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const createInvoice = async (invoice) => {
+  console.log(`invoice`, invoice);
+  
+  try {
+    const response = await axios.post(`/invoices/create-invoice`, invoice);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const invoicesService = {
   getInvoices,
+  getInvoiceById,
+  createInvoice,
 };
 
 export default invoicesService;

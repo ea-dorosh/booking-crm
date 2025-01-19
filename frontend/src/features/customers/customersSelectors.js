@@ -30,3 +30,10 @@ export const selectSortedCustomers = createSelector(
     return orderBy(customers, [firstRule, secondRule], [sortDirection, sortDirection]);
   }
 );
+
+export const sortedByLastActivityDateCustomers = createSelector(
+  [data],
+  (customers) => {
+    return orderBy(customers, [`lastActivityDate`], [`desc`]);
+  }
+);

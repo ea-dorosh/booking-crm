@@ -15,7 +15,12 @@ const validatePhone = (phoneNumber: string) => {
   return true;
 }
 
+const validateIsoDate = (date: string) => {  
+  return validator.isISO8601(date);
+};
+
 export { 
   validateEmail,
   validatePhone,
+  validateIsoDate,
 };

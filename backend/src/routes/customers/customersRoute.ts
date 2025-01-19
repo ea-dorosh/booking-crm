@@ -49,7 +49,7 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
   const customerId = request.params.id;
 
   try {
-    const customer = getCustomerById(request.dbPool, customerId);
+    const customer = await getCustomerById(request.dbPool, customerId);
 
     response.json(customer);
 
@@ -86,7 +86,7 @@ router.post(`/create-customer`, async (request: CustomRequestType, response: Cus
       response.json({
         message: `Customer data inserted successfully`,
         data: newCustomerId,
-    });
+      });
     }
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error) {

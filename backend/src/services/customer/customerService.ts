@@ -2,11 +2,11 @@ import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { validateCustomerData } from '@/validators/customersValidators';
 import { formatName, formatPhone } from '@/utils/formatters';
 import { 
-  CustomerDataType,
-  CustomerRowType,
+  CustomerResponseData,
+  CustomerRequestRow,
   CustomerFormDataValidationErrors,
 } from '@/@types/customersTypes';
-import {DbPoolType} from '@/@types/expressTypes';
+import { DbPoolType } from '@/@types/expressTypes';
 import { SalutationEnum } from '@/enums/enums';
 
 interface GetCustomersResponse {
@@ -16,6 +16,7 @@ interface GetCustomersResponse {
   email: string;
   phone: string;
   addedDate: string;
+  lastActivityDate: string;
 }
 
 interface GetCustomerResponse {
@@ -28,7 +29,7 @@ interface GetCustomerResponse {
   addedDate: string;
 }
 
-interface CreateCustomerResult {
+export interface CreateCustomerResult {
   newCustomerId: number | null;
   validationErrors: CustomerFormDataValidationErrors | null;
 }
@@ -45,11 +46,11 @@ export interface CheckCustomerExistsResult {
 
 async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]> {
   const sql = `
-    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date
+    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date, last_activity_date
     FROM Customers
   `;
 
-  const [results] = await dbPool.query<CustomerRowType[]>(sql);
+  const [results] = await dbPool.query<CustomerRequestRow[]>(sql);
 
   const customersResponse = results.map((row) => ({
     id: row.customer_id,
@@ -58,6 +59,7 @@ async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]>
     email: row.email,
     phone: row.phone,
     addedDate: row.added_date,
+    lastActivityDate: row.last_activity_date,
   }));
 
   return customersResponse;
@@ -77,7 +79,7 @@ async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<
     WHERE customer_id = ?
   `;
 
-  const [results] = await dbPool.query<CustomerRowType[]>(sql, [customerId]);
+  const [results] = await dbPool.query<CustomerRequestRow[]>(sql, [customerId]);
 
   const customersResponse = results.map((row) => ({
     id: row.customer_id,
@@ -92,7 +94,7 @@ async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<
   return customersResponse.length > 0 ? customersResponse[0] : null;
 }
 
-async function createCustomer(dbPool: DbPoolType, customerData: CustomerDataType): Promise<CreateCustomerResult> {
+async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponseData): Promise<CreateCustomerResult> {
   const errors = validateCustomerData(customerData);
 
   if (Object.keys(errors).length > 0) {
@@ -109,10 +111,10 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerDataType
 
   const customerValues = [
     customerData.salutation,
-    formatName(customerData.firstName),
-    formatName(customerData.lastName),
+    formatName(customerData.firstName || ``),
+    formatName(customerData.lastName || ``),
     customerData.email,
-    formatPhone(customerData.phone),
+    formatPhone(customerData.phone || ``),
   ];
 
   const [customerResults] = await dbPool.query<ResultSetHeader>(customerQuery, customerValues);
@@ -123,7 +125,7 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerDataType
   };
 }
 
-async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerDataType, customerId: number): Promise<UpdateCustomerResult> {
+async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResponseData, customerId: number): Promise<UpdateCustomerResult> {
   const errors = validateCustomerData(customerData);
 
   if (Object.keys(errors).length > 0) {
@@ -140,10 +142,10 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerData
   `;
 
   const values = [
-    formatName(customerData.lastName),
-    formatName(customerData.firstName),
+    formatName(customerData.lastName || ``),
+    formatName(customerData.firstName || ``),
     customerData.email,
-    formatPhone(customerData.phone),
+    formatPhone(customerData.phone || ``),
     customerData.salutation,
     customerId,
   ];

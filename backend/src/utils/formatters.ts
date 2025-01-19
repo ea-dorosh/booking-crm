@@ -17,8 +17,14 @@ function toKebabCase(str: string): string {
     .replace(/\s+/g, '-');
 }
 
+function parseNumberWithComma(value: string): number {
+  const normalizedValue = value.replace(',', '.');
+  return parseFloat(normalizedValue);
+}
+
 export {
   formatName,
   formatPhone,
   toKebabCase,
+  parseNumberWithComma,
 };

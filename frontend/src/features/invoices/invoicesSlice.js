@@ -47,7 +47,9 @@ const invoicesSlice = createSlice({
       })
       .addCase(fetchInvoices.fulfilled, (state, action) => {
         state.isPending = false;
-        state.data = action.payload;
+
+        // reverse the array
+        state.data = action.payload.reverse();
       })
       .addCase(fetchInvoices.rejected, (state, action) => {
         state.isPending = false;

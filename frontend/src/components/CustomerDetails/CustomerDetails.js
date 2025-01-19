@@ -7,11 +7,10 @@ import {
 
 
 export default function CustomerDetails({ customer, onChangeCustomerClick }) {
-
   return (
     <List>
       <ListItemText
-        primary={`${customer.lastName} ${customer.firstName}`}
+        primary={`${customer.lastName || `-`} ${customer.firstName || `-`}`}
         secondary="Name"
         sx={{ 
           flex: `0 0 200px`,
