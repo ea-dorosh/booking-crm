@@ -1,15 +1,14 @@
-import { 
+import {
   AddCircle,
 } from "@mui/icons-material";
-import { 
+import {
   Box,
   IconButton,
   Typography,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
-import { formatIsoDate } from "@/utils/formatters";
 
-export default function InvoicesContainer({ 
+export default function InvoicesContainer({
   invoices,
 }) {
   return (
@@ -48,7 +47,7 @@ export default function InvoicesContainer({
       }}>
         {/* <CustomersSorting /> */}
       </Box>
-  
+
 
       <Box
         sx={{
@@ -67,49 +66,48 @@ export default function InvoicesContainer({
             sx={{
               display: `flex`,
               alignItems: `flex-start`,
-              flexDirection: `column`,
+              justifyContent: `space-between`,
               width: `100%`,
-              gap: `.4rem`,
-              padding: `.8rem 0 .4rem 0`,
+              gap: `1rem`,
+              padding: `.4rem 0 .4rem 0`,
               borderBottom: `1px solid #ddd`,
               textDecoration: `none`,
               color: `#333`,
               position: `relative`,
             }}
           >
-            <Typography 
-              sx={{
-                fontSize: `.8rem`,
-                color: `green`,
-                marginLeft: `auto`,
-                position: `absolute`,
-                right: `0`,
-                top: `-4px`,
-              }}
-            >
-              {invoice.status === 1 ? `Paid` : ``}
-            </Typography>
+            <Box>
+              <Typography sx={{
+                fontSize: `1.1rem`,
+                fontWeight: `bold`,
+              }}>
+                {invoice.customer.lastName} {invoice.customer.firstName}
+              </Typography>
 
-            <Typography sx={{
-              fontSize: `1rem`,
-              fontWeight: `bold`,
-            }}>
-              {invoice.invoiceNumber} {formatIsoDate(invoice.dateIssued)}
-            </Typography>
+              <Typography sx={{
+                fontSize: `1rem`,
+              }}>
+                {invoice.invoiceNumber}
+              </Typography>
+            </Box>
 
-            <Typography sx={{
-              fontSize: `1rem`,
-            }}>
-              {invoice.customer.lastName} {invoice.customer.firstName}
-            </Typography>
+            <Box textAlign="right">
+              <Typography sx={{
+                fontSize: `1.1rem`,
+              }}>
+                {invoice.totalAmount}€
+              </Typography>
 
-            <Typography sx={{
-              fontSize: `.8rem`,
-            }}>
-              Subtotal: <b>{invoice.subtotal} €</b> <br/> 
-              Tax: <b>{invoice.taxes ? `${invoice.taxes} €` : `-`}</b> <br/>
-              Total: <b>{invoice.totalAmount} €</b>
-            </Typography>
+              <Typography
+                sx={{
+                  fontSize: `.8rem`,
+                  color: `green`,
+                }}
+              >
+                {invoice.status === 1 ? `Paid` : ``}
+              </Typography>
+            </Box>
+
           </Box>
         ))}
       </Box>
