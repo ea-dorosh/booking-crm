@@ -15,83 +15,99 @@ import {
 } from '@mui/material';
 import { Link } from "react-router-dom";
 
-export const mainListItems = (
+export const MainListItems = ({location}) => (
   <>
-    <Link to={`/`}>
+    <Link to={`/`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <Dashboard />
+          <Dashboard sx={{ color: location?.pathname === `/` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
 
-        <ListItemText primary="Dashboard" />
+        <ListItemText primary="Dashboard" sx={{
+          color: location?.pathname === `/` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
 
-    <Link to={`/appointments`}>
+    <Link to={`/appointments`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <Event />
+          <Event sx={{ color: location?.pathname === `/appointments` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
-        <ListItemText primary="Appointments" />
+        <ListItemText primary="Appointments" sx={{
+          color: location?.pathname === `/appointments` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
 
-    <Link to={`/services`}>
+    <Link to={`/services`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <Construction />
+          <Construction sx={{ color: location?.pathname === `/services` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
-        <ListItemText primary="Services" />
+        <ListItemText primary="Services" sx={{
+          color: location?.pathname === `/services` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
 
-    <Link to={`/employees`}>
+    <Link to={`/employees`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <People />
+          <People sx={{ color: location?.pathname === `/employees` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
 
-        <ListItemText primary="Employees" />
+        <ListItemText primary="Employees" sx={{
+          color: location?.pathname === `/employees` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
 
-    <Link to={`/customers`}>
+    <Link to={`/customers`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <Face4 />
+          <Face4 sx={{ color: location?.pathname === `/customers` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
-        <ListItemText primary="Customers" />
+        <ListItemText primary="Customers" sx={{
+          color: location?.pathname === `/customers` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
 
-    <Link to={`/invoices`}>
+    <Link to={`/invoices`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <Description />
+          <Description sx={{ color: location?.pathname === `/invoices` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
-        <ListItemText primary="Invoices" />
+        <ListItemText primary="Invoices" sx={{
+          color: location?.pathname === `/invoices` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
   </>
 );
 
-export const secondaryListItems = (
+export const SecondaryListItems = ({location}) => (
   <>
-    <Link to={`/account`}>
+    <Link to={`/company`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <AccountCircle />
+          <Business sx={{ color: location?.pathname === `/company` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
-        <ListItemText primary="Account" />
+        <ListItemText primary="Company" sx={{
+          color: location?.pathname === `/company` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
 
-    <Link to={`/company`}>
+    <Link to={`/account`} style={{ textDecoration: `none`, color: `#0000008a` }}>
       <ListItemButton>
         <ListItemIcon>
-          <Business />
+          <AccountCircle sx={{ color: location?.pathname === `/account` ? `primary.main` : `#0000008a` }} />
         </ListItemIcon>
-        <ListItemText primary="Company" />
+        <ListItemText primary="Account" sx={{
+          color: location?.pathname === `/account` ? `primary.main` : `#0000008a`,
+        }}/>
       </ListItemButton>
     </Link>
   </>

@@ -1,45 +1,22 @@
-/* eslint-disable no-unused-vars */
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import MailIcon from '@mui/icons-material/Mail';
-import MenuIcon from '@mui/icons-material/Menu';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import MuiAppBar from '@mui/material/AppBar';
-import Badge from '@mui/material/Badge';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import MuiDrawer from '@mui/material/Drawer';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Paper from '@mui/material/Paper';
+import {
+  ChevronLeft,
+  Menu
+} from '@mui/icons-material';
+import {
+  AppBar as MuiAppBar,
+  Box,
+  CssBaseline,
+  Divider,
+  Drawer as MuiDrawer,
+  IconButton,
+  List,
+  Toolbar,
+  Typography
+} from '@mui/material';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import { mainListItems, secondaryListItems } from './listItems';
-
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+import { useLocation } from "react-router-dom";
+import { MainListItems, SecondaryListItems } from './listItems';
 
 const drawerWidth = 240;
 
@@ -62,7 +39,7 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 const DrawerFixed = styled(
-  MuiDrawer, 
+  MuiDrawer,
   { shouldForwardProp: (prop) => prop !== 'open' },
 )(
   ({ theme, open }) => ({
@@ -90,7 +67,7 @@ const DrawerFixed = styled(
   }),
 );
 const DrawerHidden = styled(
-  MuiDrawer, 
+  MuiDrawer,
 )(
   ({ theme, open }) => ({
     '& .MuiDrawer-paper': {
@@ -125,6 +102,7 @@ export default function PageContainer({
   hideSideNav,
   children,
 }) {
+  const location = useLocation();
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -150,7 +128,7 @@ export default function PageContainer({
                 ...(open && { display: 'none' }),
               }}
             >
-              <MenuIcon />
+              <Menu />
             </IconButton>
 
             <Typography
@@ -178,22 +156,22 @@ export default function PageContainer({
             }}
           >
             <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
+              <ChevronLeft />
             </IconButton>
           </Toolbar>
 
           <Divider />
 
           <List component="nav">
-            {mainListItems}
+            <MainListItems location={location} />
 
             <Divider sx={{ my: 1 }} />
 
-            {secondaryListItems}
+            <SecondaryListItems location={location} />
           </List>
         </DrawerFixed>}
 
-        {hideSideNav && <DrawerHidden 
+        {hideSideNav && <DrawerHidden
           variant={`temporary`}
           open={open}
         >
@@ -206,23 +184,23 @@ export default function PageContainer({
             }}
           >
             <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
+              <ChevronLeft />
             </IconButton>
           </Toolbar>
 
           <Divider />
 
           <List component="nav">
-            {mainListItems}
+            <MainListItems location={location} />
 
             <Divider sx={{ my: 1 }} />
 
-            {secondaryListItems}
+            <SecondaryListItems location={location} />
           </List>
         </DrawerHidden>}
 
         <Box sx={{
-          marginTop: `64px`, 
+          marginTop: `64px`,
           padding: `0 16px 20px 16px`,
           width: `100%`,
           maxWidth: `768px`,
