@@ -87,7 +87,7 @@ export default function InvoicesContainer({
               <Typography sx={{
                 fontSize: `1rem`,
               }}>
-                {invoice.invoiceNumber}
+                #{invoice.invoiceNumber}
               </Typography>
             </Box>
 

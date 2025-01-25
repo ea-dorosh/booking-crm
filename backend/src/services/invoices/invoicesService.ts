@@ -1,6 +1,6 @@
 import { DbPoolType } from '@/@types/expressTypes';
 import { ResultSetHeader } from 'mysql2';
-import { 
+import {
   InvoiceStatusEnum,
   SalutationEnum,
 } from '@/enums/enums';
@@ -19,7 +19,7 @@ import {
 import { validateInvoiceFormData } from '@/validators/invoicesValidators';
 import { getDueDate, toMySQLDate } from '@/utils/timeUtils';
 import { parseNumberWithComma } from '@/utils/formatters';
-
+import { getCompany } from '@/services/company/companyService';
 interface CreateInvoiceResult {
   createdInvoiceId: number | null;
   validationErrors: InvoiceFormDataValidationErrors | null;
@@ -69,7 +69,17 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
       subtotal,
       taxes,
       total_amount,
-      currency
+      currency,
+      company_name,
+      company_address_street,
+      company_address_zip,
+      company_address_city,
+      company_address_country,
+      company_phone,
+      company_email,
+      company_tax_number,
+      company_bank_account,
+      company_website
     FROM Invoices
     WHERE id = ?
   `;
@@ -84,6 +94,15 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
       lastName: customers.find(customer => customer.id === row.client_id)?.lastName || ``,
       email: customers.find(customer => customer.id === row.client_id)?.email || ``,
       phone: customers.find(customer => customer.id === row.client_id)?.phone || ``,
+    },
+    company: {
+      name: row.company_name,
+      address: `${row.company_address_street}, ${row.company_address_zip} ${row.company_address_city}, ${row.company_address_country}`,
+      phone: row.company_phone,
+      email: row.company_email,
+      taxNumber: row.company_tax_number,
+      bankAccount: row.company_bank_account,
+      website: row.company_website,
     },
     invoiceNumber: row.invoice_number,
     dateIssued: dayjs(row.date_issued).format(`YYYY-MM-DD`),
@@ -125,12 +144,11 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
 }
 
 async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData): Promise<CreateInvoiceResult> {
-
   if (invoiceData.isNewCustomer && invoiceData.email) {
     const checkCustomerResult = await checkCustomerExists(dbPool, invoiceData.email);
 
     if (checkCustomerResult.exists) {
-      return { 
+      return {
         createdInvoiceId: null,
         validationErrors: {
           email: `Customer with this email already exists`,
@@ -150,7 +168,7 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
   const errors = validateInvoiceFormData(invoiceData);
 
   if (Object.keys(errors).length > 0) {
-    return { 
+    return {
       createdInvoiceId: null,
       validationErrors: errors,
     };
@@ -159,9 +177,11 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
   let customerId = invoiceData.customerId;
   let customerResponse: CreateCustomerResult | null = null;
 
+  const companyInfo = await getCompany(dbPool);
+
   if (invoiceData.isNewCustomer) {
     customerResponse = await createCustomer(dbPool, {
-      salutation: invoiceData.salutation ? 
+      salutation: invoiceData.salutation ?
         (invoiceData.salutation in SalutationEnum ? invoiceData.salutation : null) :
         null,
       firstName: invoiceData.firstName || ``,
@@ -204,14 +224,15 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
 
   const [lastInvoiceNumberResult] = await dbPool.query<InvoicesRequestRow[]>(sqlLastInvoiceNumber);
   const lastInvoiceNumber = lastInvoiceNumberResult[0]?.invoice_number || `0000000`;
-  const numericValue = parseInt(lastInvoiceNumber, 10) + 1;  
+  const numericValue = parseInt(lastInvoiceNumber, 10) + 1;
   const newInvoiceNumber = numericValue.toString().padStart(7, `0`);
 
   const sql = `
     INSERT INTO Invoices (
-      currency, status, client_id, invoice_number, date_issued, due_date, subtotal, taxes, total_amount
+      currency, status, client_id, invoice_number, date_issued, due_date, subtotal, taxes, total_amount,
+      company_name, company_address_street, company_address_zip, company_address_city, company_address_country, company_phone, company_email, company_tax_number, company_bank_account, company_website
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -224,6 +245,16 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
     servicePriceSum.toFixed(2),
     serviceTaxAmountSum.toFixed(2),
     serviceTotalAmountSum.toFixed(2),
+    companyInfo.name,
+    companyInfo.addressStreet,
+    companyInfo.addressZip,
+    companyInfo.addressCity,
+    companyInfo.addressCountry,
+    companyInfo.phone,
+    companyInfo.email,
+    companyInfo.taxNumber,
+    companyInfo.bankAccount,
+    companyInfo.website,
   ];
 
   const [results] = await dbPool.query<ResultSetHeader>(sql, values);
@@ -238,7 +269,7 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
       serviceTaxAmount,
       serviceTotalAmount,
     } = calculateInvoiceTotals(invoiceDataService);
-  
+
     const invoiceItemsQuery = `
       INSERT INTO InvoiceItems (
         invoice_id, service_id, service_name, service_quantity, service_price,
@@ -246,7 +277,7 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-  
+
     const invoiceItemsValues = [
       results.insertId,
       serviceId,
@@ -257,7 +288,7 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
       serviceTaxAmount.toFixed(2),
       serviceTotalAmount.toFixed(2),
     ];
-  
+
     await dbPool.query<ResultSetHeader>(invoiceItemsQuery, invoiceItemsValues);
   };
 
@@ -289,9 +320,9 @@ const calculateInvoiceTotals = (invoiceDataService: InvoiceItemsData): InvoiceTo
   let finalTotal = 0;
 
   if (invoiceDataService.isTaxesIncluded) {
-    netPricePerUnit = priceNum / (1 + taxRateNum / 100); 
-    netTotal = netPricePerUnit * quantity; 
-    taxTotal = grossTotal - netTotal; 
+    netPricePerUnit = priceNum / (1 + taxRateNum / 100);
+    netTotal = netPricePerUnit * quantity;
+    taxTotal = grossTotal - netTotal;
     finalTotal = grossTotal;
   } else {
     netPricePerUnit = priceNum;

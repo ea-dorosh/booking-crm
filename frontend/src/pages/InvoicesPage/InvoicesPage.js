@@ -1,4 +1,4 @@
-import { 
+import {
   Box,
   LinearProgress,
 } from "@mui/material";
@@ -6,9 +6,8 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import InvoicesContainer from "@/components/InvoicesContainer/InvoicesContainer";
 import PageContainer from '@/components/PageContainer/PageContainer';
-import { 
+import {
   fetchInvoices,
-  resetInvoices,
 } from '@/features/invoices/invoicesSlice';
 
 export default function CustomersPage() {
@@ -18,11 +17,9 @@ export default function CustomersPage() {
   const { isPending} = useSelector(state => state.invoices);
 
   useEffect(() => {
-    dispatch(fetchInvoices());
-
-    return () => {
-      dispatch(resetInvoices());
-    };
+    if (!invoices) {
+      dispatch(fetchInvoices());
+    }
   }, []);
 
   return (
@@ -32,7 +29,7 @@ export default function CustomersPage() {
         <LinearProgress />
       </Box>}
 
-      {invoices && invoices.length > 0 && <InvoicesContainer 
+      {invoices && invoices.length > 0 && <InvoicesContainer
         invoices={invoices}
       />}
     </PageContainer>

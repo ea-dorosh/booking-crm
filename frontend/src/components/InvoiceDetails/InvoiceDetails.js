@@ -1,6 +1,7 @@
 import EditIcon from "@mui/icons-material/Edit";
 import {
-  Button, 
+  Button,
+  Chip,
   ListItemText,
   Box,
   Typography,
@@ -8,13 +9,30 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { formatIsoDate } from "@/utils/formatters";
 
-export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
+export default function InvoiceDetails({ invoice, onChangeInvoiceClick }) {
 
-  return (
+  return (<Box>
+    <Box sx={{
+      display: `flex`,
+      justifyContent: `space-between`,
+      alignItems: `center`,
+    }}>
+      <Typography variant="h4" sx={{ fontWeight: `bold`, fontSize: `1.2rem` }}>Status</Typography>
+
+      <Box sx={{
+        display: `flex`,
+        gap: `1rem`,
+        flexWrap: `wrap`,
+      }}>
+        {invoice.status === 1 ? <Chip label="Paid" color="success" /> : <Chip label="Unpaid" color="primary" />}
+      </Box>
+    </Box>
+
     <Box sx={{
       border: `1px solid #e0e0e0`,
       borderRadius: `4px`,
       p: `1rem`,
+      mt: `1rem`,
       backgroundColor: `#f5f5f5`,
     }}>
       <Box sx={{
@@ -22,26 +40,9 @@ export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
         gap: `1rem`,
         flexWrap: `wrap`,
       }}>
-        <ListItemText
-          primary={`${invoice.invoiceNumber}`}
-          secondary="Number"
-          sx={{ 
-            flex: `0 0 120px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
-        />
-
-        <ListItemText
-          primary={invoice.status === 1 ? `Paid` : `Unpaid`}
-          secondary="Status"
-          sx={{ 
-            flex: `0 0 120px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
-        />
-
+        <Typography variant="h5" sx={{ fontWeight: `bold` }}>
+          Invoice #{invoice.invoiceNumber}
+        </Typography>
       </Box>
 
       <Box sx={{
@@ -52,7 +53,7 @@ export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
         <ListItemText
           primary={formatIsoDate(invoice.dateIssued)}
           secondary="Date Issued"
-          sx={{ 
+          sx={{
             flex: `0 0 120px`,
             display: `flex`,
             flexDirection: `column-reverse`,
@@ -62,7 +63,7 @@ export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
         <ListItemText
           primary={formatIsoDate(invoice.dueDate)}
           secondary="Due Date"
-          sx={{ 
+          sx={{
             flex: `0 0 120px`,
             display: `flex`,
             flexDirection: `column-reverse`,
@@ -70,44 +71,58 @@ export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
         />
       </Box>
 
-      <RouterLink to={`/customers/${invoice.customer.id}`} style={{textDecoration: `none`, color: `inherit`}}>
-        <ListItemText
-          primary={`${invoice.customer.lastName} ${invoice.customer.firstName}`}
-          secondary="Client"
-          sx={{ 
-            flex: `0 0 100%`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
+      {/* company details */}
+      <Box mt={`1rem`}>
+        <Typography variant="h6" sx={{ fontWeight: `bold`, fontSize: `1rem` }}>
+          {invoice.company.name}
+        </Typography>
 
-            '& .MuiListItemText-primary': {
-              textDecoration: `underline`,
-              color: `#1976d2`, 
-            },
-          }}
-        />
+        <Typography variant="body1">
+          {invoice.company.address}
+        </Typography>
+
+        <Typography variant="body1">
+          {invoice.company.email}
+        </Typography>
+
+        <Typography variant="body1">
+          Phone: {invoice.company.phone}
+        </Typography>
+
+        <Typography variant="body1">
+          {invoice.company.website}
+        </Typography>
+
+        <Typography variant="body1">
+         Company ID: {invoice.company.taxNumber}
+        </Typography>
+
+        <Typography variant="body1" mt={`.5rem`}>
+          IBAN: {invoice.company.bankAccount}
+        </Typography>
+      </Box>
+
+
+      <Typography variant="h6" sx={{ fontWeight: `bold`, fontSize: `1rem`, mt: `1rem` }}>
+        Rechnung für:
+      </Typography>
+
+
+      <RouterLink to={`/customers/${invoice.customer.id}`} style={{textDecoration: `none`, color: `inherit`}}>
+        <Typography variant="body1" sx={{ textDecoration: `underline`, color: `#1976d2`, mt: `.5rem` }}>
+          {invoice.customer.lastName} {invoice.customer.firstName}
+        </Typography>
       </RouterLink>
 
-      <ListItemText
-        primary={invoice.customer.email}
-        secondary="Email"
-        sx={{ 
-          flex: `0 0 100%`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
-      />
+      <Typography variant="body1">
+        {invoice.customer.email}
+      </Typography>
 
-      <ListItemText
-        primary={invoice.customer.phone}
-        secondary="Phone"
-        sx={{ 
-          flex: `0 0 100%`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
-      />
+      <Typography variant="body1">
+        {invoice.customer.phone}
+      </Typography>
 
-      {invoice.servicesItems && <Box sx={{ borderTop: `1px solid #e0e0e0` }}>
+      {invoice.servicesItems && <Box sx={{ borderTop: `1px solid #e0e0e0`, mt: `1rem` }}>
         <Typography variant="h6" sx={{fontWeight: `bold`, mt: `1rem`}}>Products & Services</Typography>
 
         <Box sx={{ display: `flex`, flexDirection: `column`, gap: `1rem`, mt: `.5rem` }}>
@@ -122,7 +137,7 @@ export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
                 <Typography variant="body1"
                   sx={{ fontWeight: `bold`, mr: `1rem` }}
                 >{serviceItem.serviceName}</Typography>
-                <Typography variant="body1" 
+                <Typography variant="body1"
                   sx={{ fontWeight: `bold`, ml: `auto`, whiteSpace: `nowrap` }}
                 >{serviceItem.serviceTotalAmount} €</Typography>
               </Box>
@@ -166,5 +181,6 @@ export default function CustomerDetails({ invoice, onChangeInvoiceClick }) {
         Change Invoice Details
       </Button>
     </Box>
+  </Box>
   );
 }
