@@ -1,10 +1,10 @@
 import {
-  Box, 
-  Button, 
+  Box,
+  Button,
   LinearProgress,
 } from "@mui/material";
 import {
-  useState, 
+  useState,
   useEffect,
   useMemo,
 } from "react";
@@ -16,13 +16,14 @@ import InvoiceForm from "@/components/InvoiceForm/InvoiceForm";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { sortedByLastActivityDateCustomers } from '@/features/customers/customersSelectors';
 import { fetchCustomers } from "@/features/customers/customersSlice";
-import { 
+import {
   fetchInvoice,
   resetInvoiceData,
   updateInvoice,
   cleanError,
   cleanErrors,
   removeServiceErrorIndex,
+  downloadInvoicePdf,
 } from "@/features/invoices/invoiceSlice";
 import { fetchServices } from "@/features/services/servicesSlice";
 
@@ -42,7 +43,7 @@ export default function CustomerDetailPage() {
 
   const formErrors = useSelector(state => state.invoice.updateFormErrors);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (!isEditMode) {
       dispatch(fetchInvoice(invoiceId));
     } else {
@@ -55,10 +56,10 @@ export default function CustomerDetailPage() {
     };
   }, []);
 
-  const updateHandler = async (invoice) => {   
+  const updateHandler = async (invoice) => {
     try {
       const response = await dispatch(updateInvoice(invoice)).unwrap();
-      
+
       setIsEditMode(false);
 
       if (isNewInvoice) {
@@ -69,7 +70,7 @@ export default function CustomerDetailPage() {
     } catch (error) {
       console.error(error);
     }
-  };  
+  };
 
   const handleCleanError = (fieldName) => {
     dispatch(cleanError(fieldName));
@@ -83,9 +84,41 @@ export default function CustomerDetailPage() {
     dispatch(removeServiceErrorIndex(index));
   };
 
+  const handleDownloadInvoicePdf = async () => {
+    // const response = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
+
+    // const file = new Blob([response], { type: 'application/pdf' });
+
+    // const fileURL = URL.createObjectURL(file);
+    // const link = document.createElement('a');
+    // link.href = fileURL;
+    // link.target = `_blank`;
+    // link.setAttribute('download', `invoice-${invoiceId}.pdf`);
+    // document.body.appendChild(link);
+    // link.click();
+    // link.remove();
+    // URL.revokeObjectURL(fileURL);
+
+    const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
+
+    const fileURL = URL.createObjectURL(
+      new Blob([blobResponse], { type: 'application/pdf' })
+    );
+
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.target = '_blank';
+    link.download = `invoice-${invoiceId}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(fileURL);
+  };
+
+
   return (
-    <PageContainer 
-      pageTitle={invoice ? 
+    <PageContainer
+      pageTitle={invoice ?
         `Invoice: ${invoice.invoiceNumber}`: `New invoice`
       }
       hideSideNav
@@ -110,7 +143,7 @@ export default function CustomerDetailPage() {
         />
 
         <Box mt={2} sx={{width:`100%`}}>
-          {<Button 
+          {<Button
             variant="outlined"
             onClick={() => {
               if (isNewInvoice) {
@@ -129,9 +162,10 @@ export default function CustomerDetailPage() {
       </Box>}
 
       {!isEditMode && invoice && <Box mt={3}>
-        <InvoiceDetails 
+        <InvoiceDetails
           invoice={invoice}
           onChangeInvoiceClick={() => setIsEditMode(true)}
+          onDownloadInvoiceClick={handleDownloadInvoicePdf}
         />
       </Box>}
     </PageContainer>

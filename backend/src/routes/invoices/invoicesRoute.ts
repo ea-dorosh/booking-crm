@@ -1,13 +1,15 @@
 import express from 'express';
-import { 
-  getInvoices, 
-  geInvoiceById, 
+import {
+  getInvoices,
+  geInvoiceById,
   createInvoice,
 } from '@/services/invoices/invoicesService';
-import { 
-  CustomRequestType, 
+import {
+  CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes';
+import { generateInvoiceHtml } from '@/templates/invoiceTemplate';
+import puppeteer from 'puppeteer';
 
 const router = express.Router();
 
@@ -50,7 +52,7 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
 
     return;
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error fetching invoice details`,
       message: (error as Error).message,
     });
@@ -71,9 +73,9 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
 
   try {
     const { createdInvoiceId, validationErrors } = await createInvoice(request.dbPool, customer);
-  
+
     if (validationErrors) {
-      response.status(428).json({ 
+      response.status(428).json({
           errorMessage: `Validation failed`,
           validationErrors,
         });
@@ -103,7 +105,7 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
     }
 
     if (error instanceof Error) {
-      response.status(500).json({ 
+      response.status(500).json({
         errorMessage: `Error while creating Invoice`,
         message: error.message,
       });
@@ -111,8 +113,51 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
       return;
     }
 
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Unknown error occurred`,
+    });
+
+    return;
+  }
+});
+
+router.get('/:id/pdf', async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: 'Database connection not initialized' });
+
+    return;
+  }
+
+  const invoiceId = request.params.id;
+
+  try {
+    const invoice = await geInvoiceById(request.dbPool, invoiceId);
+
+    if (!invoice) {
+      response.status(404).json({ message: 'Invoice not found' });
+
+      return;
+    }
+
+    const invoiceHtml = generateInvoiceHtml(invoice);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setContent(invoiceHtml, { waitUntil: 'networkidle0' });
+
+
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader('Content-Disposition', `inline; filename=invoice-${invoiceId}.pdf`);
+    response.end(pdfBuffer);
+
+    return;
+  } catch (error) {
+    response.status(500).json({
+      errorMessage: 'Error generating invoice PDF',
+      message: (error as Error).message,
     });
 
     return;

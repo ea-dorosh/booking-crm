@@ -21,10 +21,20 @@ const getInvoiceById = async (id) => {
 };
 
 const createInvoice = async (invoice) => {
-  console.log(`invoice`, invoice);
-  
   try {
     const response = await axios.post(`/invoices/create-invoice`, invoice);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const downloadInvoicePdf = async (invoiceId) => {
+  try {
+    const response = await axios.get(`/invoices/${invoiceId}/pdf`, {
+      responseType: 'blob',
+    });
 
     return response.data;
   } catch (error) {
@@ -36,6 +46,9 @@ const invoicesService = {
   getInvoices,
   getInvoiceById,
   createInvoice,
+  downloadInvoicePdf,
 };
 
 export default invoicesService;
+
+

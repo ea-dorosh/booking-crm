@@ -1,4 +1,4 @@
-import { 
+import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
@@ -20,7 +20,7 @@ export const fetchInvoice = createAsyncThunk(
 
 export const updateInvoice = createAsyncThunk(
   `invoice/updateInvoice`,
-  async (formData, thunkAPI) => {    
+  async (formData, thunkAPI) => {
     try {
       if (formData.id !== undefined) {
         const response = await invoicesService.updateCustomer(formData);
@@ -29,6 +29,18 @@ export const updateInvoice = createAsyncThunk(
         const response = await invoicesService.createInvoice(formData);
         return response;
       }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const downloadInvoicePdf = createAsyncThunk(
+  `invoice/downloadInvoicePdf`,
+  async (id, thunkAPI) => {
+    try {
+      const pdfBlob = await invoicesService.downloadInvoicePdf(id);
+      return pdfBlob;
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
@@ -44,6 +56,8 @@ const invoiceSlice = createSlice({
     updateFormData: null,
     updateFormPending: false,
     updateFormErrors: null,
+    downloadInvoicePdfPending: false,
+    downloadInvoicePdfError: null,
   },
   reducers: {
     cleanError: (state, action) => {
@@ -55,7 +69,7 @@ const invoiceSlice = createSlice({
     },
     removeServiceErrorIndex: (state, action) => {
       const index = action.payload;
-      
+
       if (state.updateFormErrors?.validationErrors) {
         if (
           state.updateFormErrors?.validationErrors?.services &&
@@ -63,7 +77,7 @@ const invoiceSlice = createSlice({
         ) {
           state.updateFormErrors.validationErrors.services.splice(index, 1);
         }
-    
+
         state.updateFormErrors.validationErrors = removeEmptyRecursivelyKeepArray(
           state.updateFormErrors.validationErrors
         );
@@ -95,18 +109,29 @@ const invoiceSlice = createSlice({
         state.updateFormPending = true;
       })
       .addCase(updateInvoice.fulfilled, (state, action) => {
-        state.updateFormPending = false; 
-        state.updateFormData = action.payload.data;      
+        state.updateFormPending = false;
+        state.updateFormData = action.payload.data;
       })
       .addCase(updateInvoice.rejected, (state, action) => {
         state.updateFormPending = false;
         state.updateFormErrors = action.payload;
       })
+      .addCase(downloadInvoicePdf.pending, (state) => {
+        state.downloadInvoicePdfError = null;
+        state.downloadInvoicePdfPending = true;
+      })
+      .addCase(downloadInvoicePdf.fulfilled, (state) => {
+        state.downloadInvoicePdfPending = false;
+      })
+      .addCase(downloadInvoicePdf.rejected, (state, action) => {
+        state.downloadInvoicePdfPending = false;
+        state.downloadInvoicePdfError = action.payload;
+      })
   }
 });
 
-export const { 
-  cleanError, 
+export const {
+  cleanError,
   cleanErrors,
   removeServiceErrorIndex,
   resetInvoiceData

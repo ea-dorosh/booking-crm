@@ -29,6 +29,7 @@
     "mysql2": "^3.6.2",
     "nodemon": "^3.0.1",
     "phone": "^3.1.42",
+    "puppeteer": "^24.1.1",
     "validator": "^13.11.0"
   },
   "devDependencies": {

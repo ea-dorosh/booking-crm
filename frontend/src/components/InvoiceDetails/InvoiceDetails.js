@@ -1,5 +1,9 @@
-import EditIcon from "@mui/icons-material/Edit";
 import {
+  Edit as EditIcon,
+  PictureAsPdf as DownloadIcon,
+} from "@mui/icons-material";
+import {
+  IconButton,
   Button,
   Chip,
   ListItemText,
@@ -9,22 +13,36 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { formatIsoDate } from "@/utils/formatters";
 
-export default function InvoiceDetails({ invoice, onChangeInvoiceClick }) {
+export default function InvoiceDetails({ invoice, onChangeInvoiceClick, onDownloadInvoiceClick }) {
 
   return (<Box>
     <Box sx={{
       display: `flex`,
-      justifyContent: `space-between`,
       alignItems: `center`,
     }}>
-      <Typography variant="h4" sx={{ fontWeight: `bold`, fontSize: `1.2rem` }}>Status</Typography>
-
       <Box sx={{
         display: `flex`,
-        gap: `1rem`,
-        flexWrap: `wrap`,
+        justifyContent: `space-between`,
+        alignItems: `center`,
+        flexGrow: 1,
       }}>
-        {invoice.status === 1 ? <Chip label="Paid" color="success" /> : <Chip label="Unpaid" color="primary" />}
+        <Typography variant="h4" sx={{ fontWeight: `bold`, fontSize: `1.2rem` }}>Status</Typography>
+
+        <Box sx={{
+          display: `flex`,
+          gap: `1rem`,
+          flexWrap: `wrap`,
+        }}>
+          {invoice.status === 1 ? <Chip label="Paid" color="success" /> : <Chip label="Unpaid" color="primary" />}
+        </Box>
+      </Box>
+
+      <Box>
+        <IconButton
+          onClick={onDownloadInvoiceClick}
+        >
+          <DownloadIcon />
+        </IconButton>
       </Box>
     </Box>
 
@@ -71,7 +89,6 @@ export default function InvoiceDetails({ invoice, onChangeInvoiceClick }) {
         />
       </Box>
 
-      {/* company details */}
       <Box mt={`1rem`}>
         <Typography variant="h6" sx={{ fontWeight: `bold`, fontSize: `1rem` }}>
           {invoice.company.name}

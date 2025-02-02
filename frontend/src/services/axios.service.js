@@ -1,14 +1,8 @@
 import axios from 'axios';
 import ERRORS from '@/constants/errors';
 
-const token = localStorage.getItem(`token`);
-
 const axiosInstance = axios.create({
   baseURL: `${process.env.REACT_APP_API_URL}api/protected`,
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  },
 });
 
 axiosInstance.interceptors.request.use(
@@ -18,8 +12,12 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (config.data instanceof FormData) {
-      config.headers['Content-Type'] = 'multipart/form-data';
+    if (config.method !== 'get' && config.method !== 'head') {
+      if (config.data instanceof FormData) {
+        config.headers['Content-Type'] = 'multipart/form-data';
+      } else {
+        config.headers['Content-Type'] = 'application/json';
+      }
     }
 
     return config;

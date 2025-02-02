@@ -1,5 +1,5 @@
 import { RowDataPacket } from 'mysql2';
-import { 
+import {
   InvoiceStatusEnum,
   SalutationEnum,
 } from '@/enums/enums';
@@ -68,6 +68,16 @@ export interface InvoiceByIdResponseData {
     lastName: string;
     email: string;
     phone: string;
+    address: string;
+  }
+  company: {
+    name: string;
+    address: string;
+    phone: string;
+    email: string;
+    taxNumber: string;
+    bankAccount: string;
+    website: string;
   }
   invoiceNumber: string;
   dateIssued: string;
@@ -77,7 +87,7 @@ export interface InvoiceByIdResponseData {
   taxes: string;
   totalAmount: string;
   currency: string;
-  servicesItems: Array<InvoiceServiceItem>| null; 
+  servicesItems: Array<InvoiceServiceItem>| null;
 }
 
 export interface InvoiceServiceItem {
