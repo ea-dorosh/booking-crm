@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 import {
-  Box, 
-  Button, 
+  Box,
+  Button,
   LinearProgress,
 } from "@mui/material";
 import {
-  useState, 
+  useState,
   useEffect,
   useMemo,
 } from "react";
@@ -16,7 +16,7 @@ import CustomerForm from "@/components/CustomerForm/CustomerForm";
 import CustomerSavedAppointments from "@/components/CustomerSavedAppointments/CustomerSavedAppointments";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
-import { 
+import {
   fetchCustomer,
   fetchCustomerAppointments,
   updateCustomer,
@@ -38,8 +38,9 @@ export default function CustomerDetailPage() {
   const {data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending } = useSelector(state => state.customer);
 
   const formErrors = useSelector(state => state.customer.updateFormErrors);
+  console.log(`formErrors`, formErrors);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (!isEditMode) {
       dispatch(fetchCustomer(customerId));
       dispatch(fetchCustomerAppointments(customerId));
@@ -50,10 +51,10 @@ export default function CustomerDetailPage() {
     };
   }, []);
 
-  const updateHandler = async (customer) => {   
+  const updateHandler = async (customer) => {
     try {
       const response = await dispatch(updateCustomer(customer)).unwrap();
-      
+
       setIsEditMode(false);
 
       if (isNewCustomer) {
@@ -64,7 +65,7 @@ export default function CustomerDetailPage() {
     } catch (error) {
       console.error(error);
     }
-  };  
+  };
 
   const handleCleanError = (fieldName) => {
     dispatch(cleanError(fieldName));
@@ -75,8 +76,8 @@ export default function CustomerDetailPage() {
   };
 
   return (
-    <PageContainer 
-      pageTitle={customer ? 
+    <PageContainer
+      pageTitle={customer ?
         `${customer.lastName} ${customer.firstName}`: `New Customer`
       }
       hideSideNav
@@ -95,10 +96,11 @@ export default function CustomerDetailPage() {
           cleanError={handleCleanError}
           cleanErrors={handleCleanErrors}
           isPending={updateFormPending}
+          errorMessage={formErrors && typeof formErrors === `string` && formErrors}
         />
 
         <Box mt={2} sx={{width:`100%`}}>
-          {<Button 
+          {<Button
             variant="outlined"
             onClick={() => {
               if (isNewCustomer) {
@@ -117,14 +119,14 @@ export default function CustomerDetailPage() {
       </Box>}
 
       {!isEditMode && customer && <Box mt={3}>
-        <CustomerDetails 
+        <CustomerDetails
           customer={customer}
           onChangeCustomerClick={() => setIsEditMode(true)}
         />
       </Box>}
 
       {!isEditMode && savedAppointments && <Box mt={3}>
-        <CustomerSavedAppointments 
+        <CustomerSavedAppointments
           appointments={savedAppointments}
         />
       </Box>}

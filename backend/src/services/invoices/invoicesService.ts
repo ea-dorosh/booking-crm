@@ -94,6 +94,7 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
       lastName: customers.find(customer => customer.id === row.client_id)?.lastName || ``,
       email: customers.find(customer => customer.id === row.client_id)?.email || ``,
       phone: customers.find(customer => customer.id === row.client_id)?.phone || ``,
+      address: customers.find(customer => customer.id === row.client_id)?.address || ``,
     },
     company: {
       name: row.company_name,

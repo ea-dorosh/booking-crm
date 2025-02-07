@@ -1,4 +1,4 @@
-import { 
+import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
@@ -25,14 +25,14 @@ export const fetchCustomerAppointments = createAsyncThunk(
 
       return data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 export const updateCustomer = createAsyncThunk(
   `customer/updateCustomer`,
-  async (formData, thunkAPI) => {    
+  async (formData, thunkAPI) => {
     try {
       if (formData.id !== undefined) {
         const response = await customersService.updateCustomer(formData);
@@ -95,8 +95,8 @@ const servicesSlice = createSlice({
         state.updateFormPending = true;
       })
       .addCase(updateCustomer.fulfilled, (state, action) => {
-        state.updateFormPending = false; 
-        state.updateFormData = action.payload.data;      
+        state.updateFormPending = false;
+        state.updateFormData = action.payload.data;
       })
       .addCase(updateCustomer.rejected, (state, action) => {
         state.updateFormPending = false;
@@ -118,8 +118,8 @@ const servicesSlice = createSlice({
   }
 });
 
-export const { 
-  cleanError, 
+export const {
+  cleanError,
   cleanErrors,
   resetCustomerData
 } = servicesSlice.actions;

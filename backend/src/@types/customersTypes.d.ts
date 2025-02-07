@@ -1,5 +1,5 @@
 import { RowDataPacket } from 'mysql2';
-import { 
+import {
   SalutationEnum,
 } from '@/enums/enums';
 
@@ -20,6 +20,10 @@ export interface CustomerResponseData {
   lastName?: string;
   email?: string;
   phone?: string;
+  addressStreet?: string;
+  addressZip?: string;
+  addressCity?: string;
+  addressCountry?: string;
 }
 
 export interface CustomerFormDataValidationErrors {

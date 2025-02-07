@@ -1,7 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { validateCustomerData } from '@/validators/customersValidators';
 import { formatName, formatPhone } from '@/utils/formatters';
-import { 
+import {
   CustomerResponseData,
   CustomerRequestRow,
   CustomerFormDataValidationErrors,
@@ -17,6 +17,7 @@ interface GetCustomersResponse {
   phone: string;
   addedDate: string;
   lastActivityDate: string;
+  address: string;
 }
 
 interface GetCustomerResponse {
@@ -27,6 +28,10 @@ interface GetCustomerResponse {
   email: string;
   phone: string;
   addedDate: string;
+  addressStreet: string;
+  addressZip: string;
+  addressCity: string;
+  addressCountry: string;
 }
 
 export interface CreateCustomerResult {
@@ -46,13 +51,27 @@ export interface CheckCustomerExistsResult {
 
 async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]> {
   const sql = `
-    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date, last_activity_date
+    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date, last_activity_date, address_street, address_zip, address_city, address_country
     FROM Customers
   `;
 
   const [results] = await dbPool.query<CustomerRequestRow[]>(sql);
 
-  const customersResponse = results.map((row) => ({
+  const customersResponse = results.map((row) => {
+    let address = ``;
+    if (row.address_street) {
+      address += `${row.address_street}, `;
+    }
+    if (row.address_zip) {
+      address += `${row.address_zip} `;
+    }
+    if (row.address_city) {
+      address += `${row.address_city}, `;
+    }
+    if (row.address_country) {
+      address += `${row.address_country}`;
+    }
+   return {
     id: row.customer_id,
     firstName: row.first_name,
     lastName: row.last_name,
@@ -60,21 +79,26 @@ async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]>
     phone: row.phone,
     addedDate: row.added_date,
     lastActivityDate: row.last_activity_date,
-  }));
+    address,
+  }});
 
   return customersResponse;
 }
 
 async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<GetCustomerResponse | null> {
   const sql = `
-    SELECT 
-      customer_id, 
-      last_name, 
+    SELECT
+      customer_id,
+      last_name,
       first_name,
-      salutation, 
+      salutation,
       email,
       phone,
-      added_date
+      added_date,
+      address_street,
+      address_city,
+      address_zip,
+      address_country
     FROM Customers
     WHERE customer_id = ?
   `;
@@ -83,12 +107,16 @@ async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<
 
   const customersResponse = results.map((row) => ({
     id: row.customer_id,
-    salutation: row.salutation, 
+    salutation: row.salutation,
     lastName: row.last_name,
-    firstName: row.first_name, 
+    firstName: row.first_name,
     email: row.email,
     phone: row.phone,
     addedDate: row.added_date,
+    addressStreet: row.address_street,
+    addressCity: row.address_city,
+    addressZip: row.address_zip,
+    addressCountry: row.address_country,
   }));
 
   return customersResponse.length > 0 ? customersResponse[0] : null;
@@ -98,15 +126,15 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponse
   const errors = validateCustomerData(customerData);
 
   if (Object.keys(errors).length > 0) {
-    return { 
+    return {
       newCustomerId: null,
       validationErrors: errors,
     };
   }
 
   const customerQuery = `
-    INSERT INTO Customers (salutation, first_name, last_name, email, phone)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO Customers (salutation, first_name, last_name, email, phone, address_street, address_zip, address_city, address_country)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const customerValues = [
@@ -115,11 +143,15 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponse
     formatName(customerData.lastName || ``),
     customerData.email,
     formatPhone(customerData.phone || ``),
+    customerData.addressStreet || ``,
+    customerData.addressZip || ``,
+    customerData.addressCity || ``,
+    customerData.addressCountry || ``,
   ];
 
   const [customerResults] = await dbPool.query<ResultSetHeader>(customerQuery, customerValues);
 
-  return { 
+  return {
     newCustomerId: customerResults.insertId,
     validationErrors: null,
   };
@@ -137,9 +169,12 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResp
 
   const sql = `
     UPDATE Customers
-    SET last_name = ?, first_name = ?, email = ?, phone = ?, salutation = ?
+    SET last_name = ?, first_name = ?, email = ?, phone = ?, salutation = ?, address_street = ?, address_zip = ?, address_city = ?, address_country = ?
     WHERE customer_id = ?;
   `;
+
+
+  // TODO: Fix the problem when customer provides updated email, and this email already exists in the database for another customer
 
   const values = [
     formatName(customerData.lastName || ``),
@@ -147,12 +182,16 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResp
     customerData.email,
     formatPhone(customerData.phone || ``),
     customerData.salutation,
+    customerData.addressStreet || ``,
+    customerData.addressZip || ``,
+    customerData.addressCity || ``,
+    customerData.addressCountry || ``,
     customerId,
   ];
 
   await dbPool.query(sql, values);
 
-  return { 
+  return {
     updatedCustomerId: customerId,
     validationErrors: null,
   };
@@ -162,7 +201,7 @@ async function checkCustomerExists(dbPool: DbPoolType, email: string): Promise<C
   const customerCheckQuery = `SELECT customer_id FROM Customers WHERE email = ?`;
 
   const [customerResults] = await dbPool.query<RowDataPacket[]>(customerCheckQuery, [email]);
-  
+
   if (customerResults.length >= 1) {
     const row = customerResults[0] as { customer_id: number };
     return { exists: true, customerId: row.customer_id };
@@ -171,10 +210,10 @@ async function checkCustomerExists(dbPool: DbPoolType, email: string): Promise<C
   }
 }
 
-export {  
+export {
   getCustomers,
   getCustomerById,
-  createCustomer, 
-  updateCustomerData, 
-  checkCustomerExists 
+  createCustomer,
+  updateCustomerData,
+  checkCustomerExists
 };

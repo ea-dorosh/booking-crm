@@ -1,7 +1,7 @@
 import {
   Box,
   Button,
-  FormControl, 
+  FormControl,
   FormLabel,
   FormControlLabel,
   FormHelperText,
@@ -9,6 +9,7 @@ import {
   Radio,
   RadioGroup,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 
@@ -19,6 +20,7 @@ export default function CustomerForm({
   cleanError,
   cleanErrors,
   isPending,
+  errorMessage,
 }) {
   const isEditMode = Boolean(customer);
 
@@ -28,11 +30,15 @@ export default function CustomerForm({
     lastName: isEditMode ? customer.lastName : ``,
     email: isEditMode ? customer.email : ``,
     phone: isEditMode ? customer.phone : ``,
+    addressStreet: isEditMode ? customer.addressStreet : ``,
+    addressZip: isEditMode ? customer.addressZip : ``,
+    addressCity: isEditMode ? customer.addressCity : ``,
+    addressCountry: isEditMode ? customer.addressCountry : ``,
   });
 
   useEffect(() => {
     return () => cleanErrors()
-  }, []); 
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -40,7 +46,7 @@ export default function CustomerForm({
     if(formErrors && formErrors[name]) {
       cleanError(name);
     }
-    
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -71,7 +77,7 @@ export default function CustomerForm({
           alignItems: `center`,
           gap: 3,
         }}>
-          <FormLabel 
+          <FormLabel
             id="salutation-group-label"
             sx={{ mr: 4 }}
           >
@@ -94,7 +100,7 @@ export default function CustomerForm({
           </RadioGroup>
         </Box>
 
-        {formErrors?.salutation && 
+        {formErrors?.salutation &&
           <FormHelperText>
             {formErrors.salutation}
           </FormHelperText>
@@ -110,13 +116,13 @@ export default function CustomerForm({
           onChange={handleChange}
           disabled={isPending}
         />
-        {formErrors?.lastName && 
+        {formErrors?.lastName &&
           <FormHelperText>
             {formErrors.lastName}
           </FormHelperText>
         }
       </FormControl>
-      
+
       <FormControl error={Boolean(formErrors?.firstName)}>
         <TextField
           value={formData.firstName}
@@ -126,7 +132,7 @@ export default function CustomerForm({
           onChange={handleChange}
           disabled={isPending}
         />
-        {formErrors?.firstName && 
+        {formErrors?.firstName &&
           <FormHelperText>
             {formErrors.firstName}
           </FormHelperText>
@@ -142,7 +148,7 @@ export default function CustomerForm({
           onChange={handleChange}
           disabled={isPending}
         />
-        {formErrors?.email && 
+        {formErrors?.email &&
           <FormHelperText>
             {formErrors.email}
           </FormHelperText>
@@ -158,12 +164,90 @@ export default function CustomerForm({
           onChange={handleChange}
           disabled={isPending}
         />
-        {formErrors?.phone && 
+        {formErrors?.phone &&
           <FormHelperText>
             {formErrors.phone}
           </FormHelperText>
         }
       </FormControl>
+
+      <Typography variant="h6" color="text.secondary">
+        Address
+      </Typography>
+
+      <FormControl error={Boolean(formErrors?.addressStreet)}>
+        <TextField
+          value={formData.addressStreet}
+          label="Street"
+          variant="outlined"
+          name="addressStreet"
+          onChange={handleChange}
+          disabled={isPending}
+        />
+
+        {formErrors?.addressStreet &&
+          <FormHelperText>
+            {formErrors.addressStreet}
+          </FormHelperText>
+        }
+      </FormControl>
+
+      <FormControl error={Boolean(formErrors?.addressZip)}>
+        <TextField
+          value={formData.addressZip}
+          label="Zip"
+          variant="outlined"
+          name="addressZip"
+          onChange={handleChange}
+          disabled={isPending}
+        />
+
+        {formErrors?.addressZip &&
+          <FormHelperText>
+            {formErrors.addressZip}
+          </FormHelperText>
+        }
+      </FormControl>
+
+      <FormControl error={Boolean(formErrors?.addressCity)}>
+        <TextField
+          value={formData.addressCity}
+          label="City"
+          variant="outlined"
+          name="addressCity"
+          onChange={handleChange}
+          disabled={isPending}
+        />
+
+        {formErrors?.addressCity &&
+          <FormHelperText>
+            {formErrors.addressCity}
+          </FormHelperText>
+        }
+      </FormControl>
+
+      <FormControl error={Boolean(formErrors?.addressCountry)}>
+        <TextField
+          value={formData.addressCountry}
+          label="Country"
+          variant="outlined"
+          name="addressCountry"
+          onChange={handleChange}
+          disabled={isPending}
+        />
+
+        {formErrors?.addressCountry &&
+          <FormHelperText>
+            {formErrors.addressCountry}
+          </FormHelperText>
+        }
+      </FormControl>
+
+      {errorMessage &&
+        <FormHelperText sx={{ color: `red`, fontSize: `16px` }}>
+          {errorMessage}
+        </FormHelperText>
+      }
 
       <Button
         type="submit"

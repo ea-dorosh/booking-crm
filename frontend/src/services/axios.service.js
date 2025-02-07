@@ -33,8 +33,10 @@ export const handleAxiosError = (error) => {
     throw error.response.data;
   }
 
-  if (error?.response?.data?.error) {
-    throw error.response.data.error;
+  if (error?.response?.data?.errorMessage) {
+    throw error.response.data.errorMessage;
+  } else if (error?.response?.data?.message) {
+    throw error.response.data.message;
   }
 
   throw error.message;
