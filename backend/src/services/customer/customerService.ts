@@ -132,6 +132,20 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponse
     };
   }
 
+  const checkCustomerResult = await checkCustomerExists(dbPool, {
+    email: customerData.email || ``,
+    customerId: null,
+  });
+
+  if (checkCustomerResult.exists) {
+    return {
+      newCustomerId: null,
+      validationErrors: {
+        email: `Customer with this email already exists`,
+      },
+    };
+  }
+
   const customerQuery = `
     INSERT INTO Customers (salutation, first_name, last_name, email, phone, address_street, address_zip, address_city, address_country)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -167,6 +181,20 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResp
     };
   }
 
+  const checkCustomerResult = await checkCustomerExists(dbPool, {
+    email: customerData.email || ``,
+    customerId,
+  });
+
+  if (checkCustomerResult.exists) {
+    return {
+      updatedCustomerId: null,
+      validationErrors: {
+        email: `You cannot use this email, because it already exists`,
+      },
+    };
+  }
+
   const sql = `
     UPDATE Customers
     SET last_name = ?, first_name = ?, email = ?, phone = ?, salutation = ?, address_street = ?, address_zip = ?, address_city = ?, address_country = ?
@@ -197,13 +225,23 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResp
   };
 }
 
-async function checkCustomerExists(dbPool: DbPoolType, email: string): Promise<CheckCustomerExistsResult> {
+interface CheckCustomerExistsParams {
+  email: string;
+  customerId: number | null;
+}
+
+async function checkCustomerExists(dbPool: DbPoolType, params: CheckCustomerExistsParams): Promise<CheckCustomerExistsResult> {
   const customerCheckQuery = `SELECT customer_id FROM Customers WHERE email = ?`;
 
-  const [customerResults] = await dbPool.query<RowDataPacket[]>(customerCheckQuery, [email]);
+  const [customerResults] = await dbPool.query<RowDataPacket[]>(customerCheckQuery, [params.email]);
 
   if (customerResults.length >= 1) {
     const row = customerResults[0] as { customer_id: number };
+
+    if (params.customerId && row.customer_id === params.customerId) {
+      return { exists: false, customerId: null };
+    }
+
     return { exists: true, customerId: row.customer_id };
   } else {
     return { exists: false, customerId: null };

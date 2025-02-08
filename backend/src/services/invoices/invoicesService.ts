@@ -146,7 +146,7 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
 
 async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData): Promise<CreateInvoiceResult> {
   if (invoiceData.isNewCustomer && invoiceData.email) {
-    const checkCustomerResult = await checkCustomerExists(dbPool, invoiceData.email);
+    const checkCustomerResult = await checkCustomerExists(dbPool, {email: invoiceData.email, customerId: null});
 
     if (checkCustomerResult.exists) {
       return {

@@ -3,25 +3,25 @@ import dayjs from 'dayjs';
 import { ResultSetHeader } from 'mysql2/promise';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import { getServiceDuration } from '@/utils/timeUtils';
-import { 
+import {
   formatName,
   formatPhone,
 } from '@/utils/formatters';
 import { getService } from '@/services/service/serviceService';
-import { 
-  checkCustomerExists, 
+import {
+  checkCustomerExists,
   createCustomer,
 } from '@/services/customer/customerService';
 import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService';
 import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils';
 import { CustomerNewStatusEnum } from '@/enums/enums';
-import { 
-  CustomRequestType, 
+import {
+  CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes';
 import { ServiceDetailsDataType } from '@/@types/servicesTypes';
 import { AppointmentFormDataType } from '@/@types/appointmentsTypes';
-import utc from 'dayjs/plugin/utc.js'; 
+import utc from 'dayjs/plugin/utc.js';
 
 const router = express.Router();
 
@@ -33,7 +33,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     response.status(500).json({ message: `Database connection not initialized` });
     return;
   }
-  
+
   const appointmentFormData: AppointmentFormDataType = request.body.appointment;
 
   let serviceDurationAndBufferTimeInMinutes: string = ``;
@@ -59,7 +59,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   let customerId;
 
   try {
-    const checkCustomerResult = await checkCustomerExists(request.dbPool, appointmentFormData.email);
+    const checkCustomerResult = await checkCustomerExists(request.dbPool, {email: appointmentFormData.email, customerId: null});
 
     if (checkCustomerResult.exists) {
       isCustomerNew = CustomerNewStatusEnum.Existing;
@@ -68,7 +68,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       const { newCustomerId, validationErrors } = await createCustomer(request.dbPool, appointmentFormData);
 
       if (validationErrors) {
-        response.status(428).json({ 
+        response.status(428).json({
             errorMessage: `Validation failed`,
             validationErrors,
           });
@@ -78,7 +78,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       }
     }
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error while creating customer`,
       message: (error as Error).message,
     });
@@ -91,20 +91,20 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   const timeStart = dayjs
   .utc(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
   .format(`YYYY-MM-DDTHH:mm:ss.SSS[Z]`);
-  
+
   const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
-  
+
   try {
     const { isEmployeeAvailable } = await checkEmployeeTimeNotOverlap(request.dbPool, { date, employeeId, timeStart, timeEnd })
 
     if (!isEmployeeAvailable) {
-      response.status(409).json({ 
+      response.status(409).json({
         errorMessage: `Employee is already busy at the specified date and time.`,
       });
       return;
     }
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error while checking employee availability`,
       message: (error as Error).message,
     });
@@ -113,20 +113,20 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
   const appointmentQuery = `
     INSERT INTO SavedAppointments (
-      date, 
-      time_start, 
-      time_end, 
-      service_id, 
-      service_name, 
-      customer_id, 
-      service_duration, 
-      employee_id, 
+      date,
+      time_start,
+      time_end,
+      service_id,
+      service_name,
+      customer_id,
+      service_duration,
+      employee_id,
       created_date,
-      customer_salutation, 
-      customer_first_name, 
-      customer_last_name, 
-      customer_email, 
-      customer_phone, 
+      customer_salutation,
+      customer_first_name,
+      customer_last_name,
+      customer_email,
+      customer_phone,
       is_customer_new
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -154,7 +154,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   try {
     const [appointmentResults] = await request.dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);
 
-    response.json({ 
+    response.json({
       message: `Appointment has been saved successfully`,
       data: {
         id: appointmentResults.insertId,
@@ -169,7 +169,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     });
     return;
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error while creating appointment`,
       message: (error as Error).message,
     });
