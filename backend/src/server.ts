@@ -13,6 +13,7 @@ import customersRouter from '@/routes/customers/customersRoute';
 import employeesRouter from '@/routes/employees/employeesRoute';
 import invoicesRouter from '@/routes/invoices/invoicesRoute';
 import servicesRouter from '@/routes/services/servicesRoute';
+import userRouter from '@/routes/user/userRoute';
 
 // routes for client site
 import appointmentsPublicRouter from '@/routes/appointments/appointmentsRoute.public';
@@ -34,15 +35,15 @@ app.use(express.static(`public`));
 
 // Use authentication routes
 app.use(`/auth`, authRouter);
-app.use(`/api/protected`, databaseMiddleware);
 
 // Use CRM routes
-app.use(`/api/protected/appointments`, databaseSelectionMiddleware, appointmentsRouter);
-app.use(`/api/protected/company`, databaseSelectionMiddleware, companyRouter);
-app.use(`/api/protected/customers`, databaseSelectionMiddleware, customersRouter);
-app.use(`/api/protected/employees`, databaseSelectionMiddleware, employeesRouter);
-app.use(`/api/protected/invoices`, databaseSelectionMiddleware, invoicesRouter);
-app.use(`/api/protected/services`, databaseSelectionMiddleware, servicesRouter);
+app.use(`/api/protected/appointments`, databaseMiddleware, appointmentsRouter);
+app.use(`/api/protected/company`, databaseMiddleware, companyRouter);
+app.use(`/api/protected/customers`, databaseMiddleware, customersRouter);
+app.use(`/api/protected/employees`, databaseMiddleware, employeesRouter);
+app.use(`/api/protected/invoices`, databaseMiddleware, invoicesRouter);
+app.use(`/api/protected/services`, databaseMiddleware, servicesRouter);
+app.use(`/api/protected/user`, databaseMiddleware, userRouter);
 
 // Use client site routes
 app.use(`/api/public/appointments`, databaseSelectionMiddleware, appointmentsPublicRouter);

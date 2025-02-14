@@ -76,7 +76,6 @@ export default function CompanyDetailPage() {
       pageTitle={company ?
         `${company.name}`: `New Company`
       }
-      hideSideNav
     >
       {!isEditMode && <GoBackNavigation />}
 
