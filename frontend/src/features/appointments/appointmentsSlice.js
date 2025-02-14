@@ -1,8 +1,8 @@
-import { 
+import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
-import { 
+import {
   APPOINTMENTS_SORT_RULE,
   SORT_DIRECTION,
 } from '@/constants/sorting';
@@ -11,7 +11,7 @@ import appointmentsService from "@/services/appointments.service";
 
 export const fetchAppointments = createAsyncThunk(
   `appointments/fetchAppointments`,
-  async (_arg, thunkAPI) => {    
+  async (_arg, thunkAPI) => {
     try {
       const state = thunkAPI.getState();
 
@@ -42,10 +42,10 @@ const appointmentsSlice = createSlice({
       state.sortRule = action.payload.sortRule;
       state.sortDirection = action.payload.sortDirection;
     },
-    setStartDate: (state, action) => {      
+    setStartDate: (state, action) => {
       state.startDate = action.payload.startDate;
     },
-    setStatus: (state, action) => {      
+    setStatus: (state, action) => {
       state.status = action.payload.status;
     },
   },
@@ -65,8 +65,8 @@ const appointmentsSlice = createSlice({
   }
 });
 
-export const { 
-  setSortingRule, 
+export const {
+  setSortingRule,
   setStartDate,
   setStatus,
   resetAppointmentsData,

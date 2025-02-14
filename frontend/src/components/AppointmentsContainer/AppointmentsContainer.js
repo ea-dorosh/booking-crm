@@ -1,10 +1,10 @@
-import { 
+import {
   Box,
   Typography,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import { appointmentStatusEnum } from '@/enums/enums';
-import { 
+import {
   formattedDateToTime,
   formatCreatedDate,
   getDay,
@@ -13,9 +13,11 @@ import {
   formatTimeToString,
 } from '@/utils/formatters';
 
-export default function AppointmentsContainer({ 
+export default function AppointmentsContainer({
   appointments,
 }) {
+  console.log(appointments);
+
   return (
     <Box>
       <Box
@@ -27,6 +29,15 @@ export default function AppointmentsContainer({
           maxWidth: `768px`,
         }}
       >
+        {appointments.length === 0 && <Typography
+          variant="h5"
+          sx={{
+            textAlign: `center`,
+            marginTop: `2rem`,
+          }}
+        >
+          No upcoming appointments
+        </Typography>}
         {appointments && appointments.map((appointment) => (
           <Box
             component={RouterLink}
@@ -81,7 +92,7 @@ export default function AppointmentsContainer({
                 canceled
               </Box>}
 
-              <Typography 
+              <Typography
                 sx={{
                   fontSize: `.8rem`,
                   color: `green`,
@@ -93,7 +104,7 @@ export default function AppointmentsContainer({
               >
                 {formatCreatedDate(appointment.createdDate)}
               </Typography>
-                    
+
               <Typography sx={{
                 fontSize: `1rem`,
                 fontWeight: `bold`,

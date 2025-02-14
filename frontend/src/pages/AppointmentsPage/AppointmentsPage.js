@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { 
+import {
   Box,
   LinearProgress,
 } from "@mui/material";
@@ -12,7 +12,7 @@ import AppointmentsStartDate from "@/components/AppointmentsStartDate/Appointmen
 import AppointmentsStatus from "@/components/AppointmentsStatus/AppointmentsStatus";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { selectSortedAppointments } from '@/features/appointments/appointmentsSelectors';
-import { 
+import {
   fetchAppointments,
   resetAppointmentsData,
   setStartDate,
@@ -24,16 +24,14 @@ export default function AppointmentsPage() {
   const appointments = useSelector(selectSortedAppointments);
   const { startDate, isPending } = useSelector((state) => state.appointments);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (!startDate) {
       dispatch(setStartDate({ startDate: dayjs(new Date()).format(`YYYY-MM-DD`) }));
     }
-    
-    dispatch(fetchAppointments());
 
-    return () => {
+    if (!appointments) {
       dispatch(resetAppointmentsData());
-    };
+    }
   }, []);
 
   const onStartDateChange = (newStartDate) => {
@@ -42,7 +40,7 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <PageContainer 
+    <PageContainer
       pageTitle="Appointments"
       hideSideNav
     >
@@ -53,7 +51,7 @@ export default function AppointmentsPage() {
         mt: 1.5,
         gap: 2,
       }}>
-        {startDate && <AppointmentsStartDate 
+        {startDate && <AppointmentsStartDate
           startDate={startDate}
           onStartDateChange={onStartDateChange}
         />}
@@ -61,14 +59,14 @@ export default function AppointmentsPage() {
         <AppointmentsStatus />
 
         <Box ml="auto">
-          <AppointmentsSorting /> 
+          <AppointmentsSorting />
         </Box>
       </Box>
 
       {isPending && <Box mt={2}>
         <LinearProgress />
       </Box>}
-      
+
       {appointments && <AppointmentsContainer
         appointments={appointments}
       />}

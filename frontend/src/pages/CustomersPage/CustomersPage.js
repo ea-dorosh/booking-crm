@@ -1,4 +1,4 @@
-import { 
+import {
   Box,
   LinearProgress,
 } from "@mui/material";
@@ -7,23 +7,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import CustomersContainer from "@/components/CustomersContainer/CustomersContainer";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { selectSortedCustomers } from '@/features/customers/customersSelectors';
-import { 
-  fetchCustomers,
-  resetCustomers,
-} from '@/features/customers/customersSlice';
+import { fetchCustomers } from '@/features/customers/customersSlice';
 
 export default function CustomersPage() {
   const dispatch = useDispatch();
 
   const customers = useSelector(selectSortedCustomers);
-  const { isPending} = useSelector(state => state.customers);
+  const { isPending, data: customersData } = useSelector(state => state.customers);
 
   useEffect(() => {
-    dispatch(fetchCustomers());
-
-    return () => {
-      dispatch(resetCustomers());
-    };
+    if (!customersData) {
+      dispatch(fetchCustomers());
+    }
   }, []);
 
   return (
@@ -33,7 +28,7 @@ export default function CustomersPage() {
         <LinearProgress />
       </Box>}
 
-      {customers && customers.length > 0 && <CustomersContainer 
+      {customers && customers.length > 0 && <CustomersContainer
         customers={customers}
       />}
     </PageContainer>
