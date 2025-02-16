@@ -70,6 +70,18 @@ export default function LoginPage() {
     }
   };
 
+  const handleResetPassword = async (event) => {
+    event.preventDefault();
+
+    await fetch(`${process.env.REACT_APP_API_URL}auth/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: 'user@example.com' }),
+    });
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
@@ -123,7 +135,7 @@ export default function LoginPage() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link href="#" variant="body2" onClick={handleResetPassword}>
                   Forgot password?
                 </Link>
               </Grid>

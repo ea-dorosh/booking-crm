@@ -16,8 +16,6 @@ import {
 export default function AppointmentsContainer({
   appointments,
 }) {
-  console.log(appointments);
-
   return (
     <Box>
       <Box

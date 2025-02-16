@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mysql, { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import dotenv from 'dotenv';
+import { sendPasswordResetEmail } from '@/mailer/mailer.js';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 const router = express.Router();
@@ -98,6 +100,16 @@ router.post('/register', async (req: Request, res: Response) => {
     console.error('Error during user registration:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+router.post('/reset-password', async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  const resetToken = uuidv4();
+
+  await sendPasswordResetEmail(email, resetToken);
+
+  res.json({ message: 'Если указанный email существует, на него отправлено письмо для сброса пароля.' });
 });
 
 export default router;

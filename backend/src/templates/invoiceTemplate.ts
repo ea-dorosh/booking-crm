@@ -98,6 +98,10 @@ export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
         }
       }
 
+      .table-row {
+        border-bottom: 1px solid #ddd;
+      }
+
       .table-header-end {
         position: relative;
 
@@ -175,7 +179,7 @@ export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
         </thead>
         <tbody>
           ${params.servicesItems?.map(item => `
-            <tr>
+            <tr key=${item.id} class="table-row">
               <td style="text-align: left;">${item.serviceName}</td>
               <td style="text-align: right;">${item.serviceQuantity}</td>
               <td style="text-align: right;">${item.servicePrice} ${params.currency === 'EUR' ? '€' : ''}</td>

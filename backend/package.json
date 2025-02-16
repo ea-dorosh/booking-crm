@@ -27,9 +27,11 @@
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.6.2",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.0.1",
     "phone": "^3.1.42",
     "puppeteer": "^24.1.1",
+    "uuid": "^11.0.5",
     "validator": "^13.11.0"
   },
   "devDependencies": {
