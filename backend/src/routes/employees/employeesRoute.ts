@@ -1,15 +1,15 @@
 import express from 'express';
-import { formatName, formatPhone } from '@/utils/formatters';
-import { validateEmployeeData } from '@/validators/employeesValidators';
-import { upload } from '@/utils/uploadFile';
-import { getEmployees } from '@/services/employees/employeesService';
-import { getCustomers } from '@/services/customer/customerService';
-import { 
-  CustomRequestType, 
+import { formatName, formatPhone } from '@/utils/formatters.js';
+import { validateEmployeeData } from '@/validators/employeesValidators.js';
+import { upload } from '@/utils/uploadFile.js';
+import { getEmployees } from '@/services/employees/employeesService.js';
+import { getCustomers } from '@/services/customer/customerService.js';
+import {
+  CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
+} from '@/@types/expressTypes.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes';
+import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
 
 const router = express.Router();
 
@@ -104,7 +104,7 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
     return;
   }
 
-  const query = `UPDATE Employees 
+  const query = `UPDATE Employees
     SET first_name = ?, last_name = ?, email = ?, phone = ?, image = COALESCE(?, image)
     WHERE employee_id = ?
   `;
@@ -170,7 +170,7 @@ router.get(`/:employeeId/availabilities`, async (req: CustomRequestType, res: Cu
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: `Error fetching EmployeeAvailability` });
-    
+
     return;
   }
 });
@@ -185,7 +185,7 @@ router.post(`/availability`, async (req: CustomRequestType, res: CustomResponseT
   const availability = req.body;
 
   const upsertQuery = `
-  INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time) 
+  INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time)
   VALUES ?
   ON DUPLICATE KEY UPDATE start_time = VALUES(start_time), end_time = VALUES(end_time)
 `;
@@ -200,7 +200,7 @@ router.post(`/availability`, async (req: CustomRequestType, res: CustomResponseT
   try {
     const [result] = await req.dbPool.query<ResultSetHeader>(upsertQuery, [values]);
 
-    res.json({ 
+    res.json({
       message: `Availability data inserted successfully`,
       data: result,
     });
@@ -255,14 +255,14 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
   const customers = await getCustomers(request.dbPool);
 
   const sql = `
-    SELECT 
-      id, 
-      date, 
-      time_start, 
-      time_end, 
-      service_id, 
+    SELECT
+      id,
+      date,
+      time_start,
+      time_end,
+      service_id,
       service_name,
-      created_date, 
+      created_date,
       service_duration,
       customer_id,
       status
@@ -314,7 +314,7 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
 
     return;
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error fetching Saved Appointments`,
       message: (error as Error).message,
     });

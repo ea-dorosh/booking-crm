@@ -1,20 +1,20 @@
 import express from 'express';
 import url from 'url';
 import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import advancedFormat from 'dayjs/plugin/advancedFormat';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 import {
   addTimeSlotsAccordingEmployeeAvailability,
   disableTimeSlotsForServiceDuration,
   replaceExistingDayWithNewEmployeeData,
-} from '@/routes/calendar/calendarUtils';
-import { getServiceDuration } from '@/utils/timeUtils';
-import { 
-  CustomRequestType, 
+} from '@/routes/calendar/calendarUtils.js';
+import { getServiceDuration } from '@/utils/timeUtils.js';
+import {
+  CustomRequestType,
   CustomResponseType,
   DbPoolType,
-} from '@/@types/expressTypes';
-import { getService } from '@/services/service/serviceService';
+} from '@/@types/expressTypes.js';
+import { getService } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
 
 const router = express.Router();
@@ -54,7 +54,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
   try {
     const parsedUrl = url.parse(req.url, true);
-  
+
     // getting request query params
     const paramDate = parsedUrl.query.date;
     if (typeof paramDate !== 'string') {
@@ -91,7 +91,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       startTime: row.start_time,
       endTime: row.end_time,
     }));
-    
+
     // Iterate through all employeeAvailability from the database
     const dateObj = dayjs(paramDate, { format: DATE_FORMAT });
     const today = dayjs().startOf(`day`);
@@ -114,8 +114,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           });
 
           let availableTimeslots = addTimeSlotsAccordingEmployeeAvailability({
-            startTime: availability.startTime, 
-            endTime: availability.endTime, 
+            startTime: availability.startTime,
+            endTime: availability.endTime,
             blockedTimes,
             employeeId: availability.employeeId,
           });
@@ -136,7 +136,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
             })
           } else {
             availableDays.push(
-              { 
+              {
                 day: currentDay.format(DATE_FORMAT),
                 startTime: availability.startTime,
                 endTime: availability.endTime,

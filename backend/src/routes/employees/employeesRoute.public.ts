@@ -1,9 +1,9 @@
 import express from "express";
-import { 
-  CustomRequestType, 
+import {
+  CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
-import { getEmployees } from '@/services/employees/employeesService';
+} from '@/@types/expressTypes.js';
+import { getEmployees } from '@/services/employees/employeesService.js';
 
 const router = express.Router();
 

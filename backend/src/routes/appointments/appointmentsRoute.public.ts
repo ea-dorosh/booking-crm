@@ -1,26 +1,26 @@
 import express from 'express';
 import dayjs from 'dayjs';
 import { ResultSetHeader } from 'mysql2/promise';
-import advancedFormat from 'dayjs/plugin/advancedFormat';
-import { getServiceDuration } from '@/utils/timeUtils';
+import advancedFormat from 'dayjs/plugin/advancedFormat.js';
+import { getServiceDuration } from '@/utils/timeUtils.js';
 import {
   formatName,
   formatPhone,
-} from '@/utils/formatters';
-import { getService } from '@/services/service/serviceService';
+} from '@/utils/formatters.js';
+import { getService } from '@/services/service/serviceService.js';
 import {
   checkCustomerExists,
   createCustomer,
-} from '@/services/customer/customerService';
-import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService';
-import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils';
-import { CustomerNewStatusEnum } from '@/enums/enums';
+} from '@/services/customer/customerService.js';
+import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
+import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils.js';
+import { CustomerNewStatusEnum } from '@/enums/enums.js';
 import {
   CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
-import { ServiceDetailsDataType } from '@/@types/servicesTypes';
-import { AppointmentFormDataType } from '@/@types/appointmentsTypes';
+} from '@/@types/expressTypes.js';
+import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
+import { AppointmentFormDataType } from '@/@types/appointmentsTypes.js';
 import utc from 'dayjs/plugin/utc.js';
 
 const router = express.Router();

@@ -1,11 +1,11 @@
 import express from 'express';
-import { toKebabCase } from '@/utils/formatters';
-import { 
-  CustomRequestType, 
+import { toKebabCase } from '@/utils/formatters.js';
+import {
+  CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
-import { CategoryRow } from '@/@types/categoriesTypes';
-import { getEmployees } from '@/services/employees/employeesService';
+} from '@/@types/expressTypes.js';
+import { CategoryRow } from '@/@types/categoriesTypes.js';
+import { getEmployees } from '@/services/employees/employeesService.js';
 import { RowDataPacket } from 'mysql2';
 
 const router = express.Router();
@@ -36,14 +36,14 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
     // get all services and map with categories and employee prices
     const sql = `
-      SELECT 
-        s.id, 
+      SELECT
+        s.id,
         s.name,
         s.category_id,
-        s.duration_time, 
+        s.duration_time,
         s.buffer_time,
         s.booking_note,
-        sep.employee_id, 
+        sep.employee_id,
         sep.price
       FROM Services s
       LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
@@ -54,7 +54,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
     // Process results
     results.forEach(row => {
-      const { 
+      const {
         id,
         name,
         category_id,
@@ -81,8 +81,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       }
       // Push employee ID and price into the array
       if (employee_id) {
-        servicesMap.get(id).employees.push({ 
-          id: employee_id, 
+        servicesMap.get(id).employees.push({
+          id: employee_id,
           price,
           firstName: employeesData.find(employee => employee.employeeId === employee_id)?.firstName || '',
           lastName: employeesData.find(employee => employee.employeeId === employee_id)?.lastName || '',

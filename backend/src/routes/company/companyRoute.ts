@@ -1,13 +1,13 @@
 import express from 'express';
-import { 
+import {
   getCompany,
   createCompany,
   updateCompanyData,
- } from '@/services/company/companyService';
-import { 
-  CustomRequestType, 
+ } from '@/services/company/companyService.js';
+import {
+  CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
+} from '@/@types/expressTypes.js';
 
 const router = express.Router();
 
@@ -51,9 +51,9 @@ router.post(`/create-company`, async (request: CustomRequestType, response: Cust
 
   try {
     const { newCompanyId, validationErrors } = await createCompany(request.dbPool, company);
-  
+
     if (validationErrors) {
-      response.status(428).json({ 
+      response.status(428).json({
           errorMessage: `Validation failed`,
           validationErrors,
         });
@@ -83,7 +83,7 @@ router.post(`/create-company`, async (request: CustomRequestType, response: Cust
     }
 
     if (error instanceof Error) {
-      response.status(500).json({ 
+      response.status(500).json({
         errorMessage: `Error while creating company`,
         message: error.message,
       });
@@ -91,7 +91,7 @@ router.post(`/create-company`, async (request: CustomRequestType, response: Cust
       return;
     }
 
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Unknown error occurred`,
     });
 
@@ -116,7 +116,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
     const { updatedCompanyId, validationErrors } = await updateCompanyData(request.dbPool, company, companyId);
 
     if (validationErrors) {
-      response.status(428).json({ 
+      response.status(428).json({
           errorMessage: `Validation failed`,
           validationErrors,
         });
@@ -129,7 +129,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error) {
       const mysqlError = error as { code?: string; message?: string };
-      
+
       if (mysqlError.code === `ER_DUP_ENTRY`) {
         response.status(409).json({
           errorMessage: `Company with this name already exists`,
@@ -147,7 +147,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
     }
 
     if (error instanceof Error) {
-      response.status(500).json({ 
+      response.status(500).json({
         errorMessage: `Error while updating company`,
         message: error.message,
       });
@@ -155,7 +155,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
       return;
     }
 
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Unknown error occurred`,
     });
 

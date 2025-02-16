@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import duration from 'dayjs/plugin/duration';
-import isBetween from 'dayjs/plugin/isBetween';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-import utc from 'dayjs/plugin/utc';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore.js';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js';
+import duration from 'dayjs/plugin/duration.js';
+import isBetween from 'dayjs/plugin/isBetween.js';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import utc from 'dayjs/plugin/utc.js';
 
 dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
@@ -59,7 +59,7 @@ function getAppointmentEndTime(startTime: string, serviceDuration: string): stri
 }
 
 function disableTimeSlotsForServiceDuration(
-  availableTimeSlots: TimeSlot[], 
+  availableTimeSlots: TimeSlot[],
   serviceDuration: string
 ): TimeSlot[] {
   const modifiedTimeSlots = availableTimeSlots.map((slot, slotIndex) => {
@@ -97,7 +97,7 @@ function disableTimeSlotsForServiceDuration(
 
     return slot;
   });
-  
+
   return modifiedTimeSlots;
 }
 
@@ -109,9 +109,9 @@ interface AddTimeSlotsParams {
 }
 
 function addTimeSlotsAccordingEmployeeAvailability({
-  startTime, 
-  endTime, 
-  blockedTimes, 
+  startTime,
+  endTime,
+  blockedTimes,
   employeeId,
 }: AddTimeSlotsParams): TimeSlot[] {
   const parsedStartTime = dayjs(startTime, TIME_FORMAT);

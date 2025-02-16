@@ -1,10 +1,10 @@
-import { DbPoolType } from '@/@types/expressTypes';
+import { DbPoolType } from '@/@types/expressTypes.js';
 import { ResultSetHeader } from 'mysql2';
 import {
   InvoiceStatusEnum,
   SalutationEnum,
-} from '@/enums/enums';
-import { getCustomers, createCustomer, CreateCustomerResult, checkCustomerExists } from '@/services/customer/customerService';
+} from '@/enums/enums.js';
+import { getCustomers, createCustomer, CreateCustomerResult, checkCustomerExists } from '@/services/customer/customerService.js';
 import dayjs from 'dayjs';
 import {
   InvoicesRequestRow,
@@ -15,11 +15,11 @@ import {
   InvoiceFormDataValidationErrors,
   InvoiceItemsData,
   InvoiceItemsRequestRow,
- } from '@/@types/invoicesTypes';
-import { validateInvoiceFormData } from '@/validators/invoicesValidators';
-import { getDueDate, toMySQLDate } from '@/utils/timeUtils';
-import { parseNumberWithComma } from '@/utils/formatters';
-import { getCompany } from '@/services/company/companyService';
+ } from '@/@types/invoicesTypes.js';
+import { validateInvoiceFormData } from '@/validators/invoicesValidators.js';
+import { getDueDate, toMySQLDate } from '@/utils/timeUtils.js';
+import { parseNumberWithComma } from '@/utils/formatters.js';
+import { getCompany } from '@/services/company/companyService.js';
 interface CreateInvoiceResult {
   createdInvoiceId: number | null;
   validationErrors: InvoiceFormDataValidationErrors | null;

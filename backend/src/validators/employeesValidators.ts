@@ -1,5 +1,5 @@
-import { EmployeeDetailDataType, EmployeeFormDataValidationErrors } from '@/@types/employeesTypes';
-import { validateEmail, validatePhone } from '@/utils/validators';
+import { EmployeeDetailDataType, EmployeeFormDataValidationErrors } from '@/@types/employeesTypes.js';
+import { validateEmail, validatePhone } from '@/utils/validators.js';
 
 const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDataValidationErrors => {
   const errors: EmployeeFormDataValidationErrors = {};

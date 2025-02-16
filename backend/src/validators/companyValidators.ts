@@ -1,5 +1,5 @@
-import { validateEmail, validatePhone } from '@/utils/validators';
-import { CompanyResponseData, CompanyFormDataValidationErrors } from '@/@types/companyTypes';
+import { validateEmail, validatePhone } from '@/utils/validators.js';
+import { CompanyResponseData, CompanyFormDataValidationErrors } from '@/@types/companyTypes.js';
 
 const validateCompanyData = (formData: CompanyResponseData): CompanyFormDataValidationErrors => {
   const errors: CompanyFormDataValidationErrors = {};
@@ -35,6 +35,6 @@ const validateCompanyData = (formData: CompanyResponseData): CompanyFormDataVali
   return errors;
 };
 
-export { 
+export {
   validateCompanyData,
 };

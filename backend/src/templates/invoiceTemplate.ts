@@ -1,4 +1,4 @@
-import { InvoiceByIdResponseData } from "@/@types/invoicesTypes";
+import { InvoiceByIdResponseData } from "@/@types/invoicesTypes.js";
 
 export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
   const formatDate = (dateStr: string): string => {

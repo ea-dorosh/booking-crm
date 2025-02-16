@@ -3,12 +3,12 @@ import {
   getInvoices,
   geInvoiceById,
   createInvoice,
-} from '@/services/invoices/invoicesService';
+} from '@/services/invoices/invoicesService.js';
 import {
   CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
-import { generateInvoiceHtml } from '@/templates/invoiceTemplate';
+} from '@/@types/expressTypes.js';
+import { generateInvoiceHtml } from '@/templates/invoiceTemplate.js';
 import puppeteer from 'puppeteer';
 
 const router = express.Router();

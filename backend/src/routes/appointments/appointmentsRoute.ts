@@ -1,21 +1,21 @@
 import express from 'express';
-import { 
+import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
-} from '@/enums/enums';
-import { 
-  CustomRequestType, 
+} from '@/enums/enums.js';
+import {
+  CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes';
 import {
-  AppointmentRowType, 
+  AppointmentRowType,
   AppointmentDataType,
   AppointmentDetailsRowType,
   AppointmentDetailType,
- } from '@/@types/appointmentsTypes';
+ } from '@/@types/appointmentsTypes.js';
 import {
   EmployeeDetailRowType,
-} from '@/@types/employeesTypes';
+} from '@/@types/employeesTypes.js';
 
 const router = express.Router();
 
@@ -33,18 +33,18 @@ router.get('/', async (request: CustomRequestType, response: CustomResponseType)
   }
 
   const appointmentsSql = `
-    SELECT 
-      id, 
-      date, 
-      created_date, 
-      service_name, 
-      time_start, 
+    SELECT
+      id,
+      date,
+      created_date,
+      service_name,
+      time_start,
       service_duration,
-      customer_last_name, 
+      customer_last_name,
       customer_first_name,
       status
     FROM SavedAppointments
-    WHERE 
+    WHERE
       date >= ?
       AND (status = COALESCE(?, status))
   `;
@@ -82,18 +82,18 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
   const appointmentId = request.params.id;
 
   const sql = `
-    SELECT 
-      id, 
-      employee_id, 
-      date, 
-      time_start, 
-      time_end, 
+    SELECT
+      id,
+      employee_id,
+      date,
+      time_start,
+      time_end,
       service_duration,
-      service_id, 
-      service_name, 
-      customer_id, 
-      created_date, 
-      customer_last_name, 
+      service_id,
+      service_name,
+      customer_id,
+      created_date,
+      customer_last_name,
       customer_first_name,
       is_customer_new,
       status
@@ -107,11 +107,11 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
     const appointment: AppointmentDetailType[] = results.map((row) => ({
       id: row.id,
       date: row.date,
-      timeStart: row.time_start, 
-      timeEnd: row.time_end, 
+      timeStart: row.time_start,
+      timeEnd: row.time_end,
       serviceDuration: row.service_duration,
-      serviceId: row.service_id, 
-      serviceName: row.service_name, 
+      serviceId: row.service_id,
+      serviceName: row.service_name,
       createdDate: row.created_date,
       employee: {
         id: row.employee_id,
@@ -128,8 +128,8 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
     }));
 
     const employeeSql = `
-      SELECT employee_id, first_name, last_name 
-      FROM Employees 
+      SELECT employee_id, first_name, last_name
+      FROM Employees
       WHERE employee_id = ?
     `;
 

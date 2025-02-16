@@ -1,6 +1,6 @@
 import { Pool } from 'mysql2/promise';
 import { RowDataPacket } from 'mysql2';
-import { ServiceDetailsDataType } from '@/@types/servicesTypes';
+import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
 
 interface CategoryRow extends RowDataPacket {
   id: number;
@@ -56,11 +56,11 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
   }));
 
   const servicesQuery = `
-    SELECT 
-      s.id, 
-      s.name, 
-      s.category_id, 
-      s.duration_time, 
+    SELECT
+      s.id,
+      s.name,
+      s.category_id,
+      s.duration_time,
       s.buffer_time,
       s.booking_note,
       sep.employee_id,
@@ -74,11 +74,11 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
   const servicesMap = new Map<number, ServiceData>();
 
   for (const row of servicesResults) {
-    const { 
-      id, 
-      name, 
-      category_id, 
-      duration_time, 
+    const {
+      id,
+      name,
+      category_id,
+      duration_time,
       buffer_time,
       booking_note,
       employee_id,
@@ -117,8 +117,8 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
 
 async function getService(dbPool: Pool, serviceId: number): Promise<ServiceDetailsDataType> {
   const serviceQuery = `
-    SELECT * 
-    FROM Services 
+    SELECT *
+    FROM Services
     WHERE id = ?
   `;
 

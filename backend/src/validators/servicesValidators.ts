@@ -1,4 +1,4 @@
-import { ServiceDataType, ServiceFormDataValidationErrors } from "@/@types/servicesTypes";
+import { ServiceDataType, ServiceFormDataValidationErrors } from "@/@types/servicesTypes.js";
 
 const validateServiceData = (service: ServiceDataType): ServiceFormDataValidationErrors => {
   const errors: ServiceFormDataValidationErrors = {};

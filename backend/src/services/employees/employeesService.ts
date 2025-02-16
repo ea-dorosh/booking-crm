@@ -1,9 +1,9 @@
 import { Pool, RowDataPacket } from 'mysql2/promise';
-import { 
+import {
   EmployeeDetailRowType,
   EmployeeDetailDataType,
-} from '@/@types/employeesTypes';
-import utc from 'dayjs/plugin/utc';
+} from '@/@types/employeesTypes.js';
+import utc from 'dayjs/plugin/utc.js';
 import dayjs from 'dayjs';
 
 dayjs.extend(utc);
@@ -33,13 +33,13 @@ function toMySQLDateTime(isoString: string): string {
 
 async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
   const sql = `
-    SELECT 
-      employee_id, 
-      first_name, 
-      last_name, 
-      email, 
-      phone, 
-      image 
+    SELECT
+      employee_id,
+      first_name,
+      last_name,
+      email,
+      phone,
+      image
     FROM Employees
   `;
 
@@ -51,8 +51,8 @@ async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
     lastName: row.last_name,
     email: row.email,
     phone: row.phone,
-    image: row.image 
-      ? `${process.env.SERVER_API_URL}/images/${row.image}` 
+    image: row.image
+      ? `${process.env.SERVER_API_URL}/images/${row.image}`
       : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
   }));
 
@@ -65,13 +65,13 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
 
   const checkAvailabilityQuery = `
     SELECT * FROM SavedAppointments
-    WHERE employee_id = ? 
-      AND date = ? 
+    WHERE employee_id = ?
+      AND date = ?
       AND (
         (time_start >= ? AND time_start < ?)
-        OR 
+        OR
         (time_end > ? AND time_end <= ?)
-        OR 
+        OR
         (time_start <= ? AND time_end >= ?)
       )
   `;

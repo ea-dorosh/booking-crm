@@ -1,13 +1,13 @@
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
-import { validateCustomerData } from '@/validators/customersValidators';
-import { formatName, formatPhone } from '@/utils/formatters';
+import { validateCustomerData } from '@/validators/customersValidators.js';
+import { formatName, formatPhone } from '@/utils/formatters.js';
 import {
   CustomerResponseData,
   CustomerRequestRow,
   CustomerFormDataValidationErrors,
-} from '@/@types/customersTypes';
-import { DbPoolType } from '@/@types/expressTypes';
-import { SalutationEnum } from '@/enums/enums';
+} from '@/@types/customersTypes.js';
+import { DbPoolType } from '@/@types/expressTypes.js';
+import { SalutationEnum } from '@/enums/enums.js';
 
 interface GetCustomersResponse {
   id: number;

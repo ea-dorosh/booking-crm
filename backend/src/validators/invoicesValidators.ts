@@ -1,8 +1,7 @@
-import { validateIsoDate } from '@/utils/validators';
-import { InvoiceUpdatedData, InvoiceFormDataValidationErrors } from '@/@types/invoicesTypes';
-import { InvoiceStatusEnum } from '@/enums/enums';
-import { validateCustomerData } from '@/validators/customersValidators';
-import { parseNumberWithComma } from '@/utils/formatters';
+import { validateIsoDate } from '@/utils/validators.js';
+import { InvoiceUpdatedData, InvoiceFormDataValidationErrors } from '@/@types/invoicesTypes.js';
+import { validateCustomerData } from '@/validators/customersValidators.js';
+import { parseNumberWithComma } from '@/utils/formatters.js';
 
 const validateInvoiceFormData = (formData: InvoiceUpdatedData): InvoiceFormDataValidationErrors => {
   let errors: InvoiceFormDataValidationErrors = {};
@@ -13,16 +12,16 @@ const validateInvoiceFormData = (formData: InvoiceUpdatedData): InvoiceFormDataV
     if (Object.keys(customerErrors).length) {
       if (customerErrors.email) {
         errors.email = customerErrors.email;
-      } 
-      
+      }
+
       if (customerErrors.firstName) {
         errors.firstName = customerErrors.firstName;
       }
 
       if (customerErrors.lastName) {
         errors.lastName = customerErrors.lastName;
-      } 
-      
+      }
+
       if (customerErrors.phone) {
         errors.phone = customerErrors.phone;
       }
@@ -95,7 +94,7 @@ const validateInvoiceFormData = (formData: InvoiceUpdatedData): InvoiceFormDataV
   }
 
   errors = removeEmptyRecursivelyKeepArray(errors);
-  
+
   return errors;
 };
 
@@ -139,6 +138,6 @@ function isEmpty(value: any): boolean {
   return false;
 }
 
-export { 
+export {
   validateInvoiceFormData,
 };

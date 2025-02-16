@@ -1,12 +1,12 @@
 import express from 'express';
-import { getCustomers, getCustomerById, createCustomer, updateCustomerData } from '@/services/customer/customerService';
-import { getEmployees } from '@/services/employees/employeesService';
-import { 
-  CustomRequestType, 
+import { getCustomers, getCustomerById, createCustomer, updateCustomerData } from '@/services/customer/customerService.js';
+import { getEmployees } from '@/services/employees/employeesService.js';
+import {
+  CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
+} from '@/@types/expressTypes.js';
 import { RowDataPacket } from 'mysql2';
-import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes';
+import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
 
 const router = express.Router();
 
@@ -55,7 +55,7 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
 
     return;
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error fetching customer details`,
       message: (error as Error).message,
     });
@@ -76,9 +76,9 @@ router.post(`/create-customer`, async (request: CustomRequestType, response: Cus
 
   try {
     const { newCustomerId, validationErrors } = await createCustomer(request.dbPool, customer);
-  
+
     if (validationErrors) {
-      response.status(428).json({ 
+      response.status(428).json({
           errorMessage: `Validation failed`,
           validationErrors,
         });
@@ -108,7 +108,7 @@ router.post(`/create-customer`, async (request: CustomRequestType, response: Cus
     }
 
     if (error instanceof Error) {
-      response.status(500).json({ 
+      response.status(500).json({
         errorMessage: `Error while creating customer`,
         message: error.message,
       });
@@ -116,7 +116,7 @@ router.post(`/create-customer`, async (request: CustomRequestType, response: Cus
       return;
     }
 
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Unknown error occurred`,
     });
 
@@ -141,7 +141,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
     const { updatedCustomerId, validationErrors } = await updateCustomerData(request.dbPool, customer, customerId);
 
     if (validationErrors) {
-      response.status(428).json({ 
+      response.status(428).json({
           errorMessage: `Validation failed`,
           validationErrors,
         });
@@ -154,7 +154,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error) {
       const mysqlError = error as { code?: string; message?: string };
-      
+
       if (mysqlError.code === `ER_DUP_ENTRY`) {
         response.status(409).json({
           errorMessage: `Customer with this email already exists`,
@@ -172,7 +172,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
     }
 
     if (error instanceof Error) {
-      response.status(500).json({ 
+      response.status(500).json({
         errorMessage: `Error while creating customer`,
         message: error.message,
       });
@@ -180,7 +180,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
       return;
     }
 
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Unknown error occurred`,
     });
 
@@ -197,19 +197,19 @@ router.get(`/:id/saved-appointments`, async (request: CustomRequestType, respons
 
     return;
   }
-  
+
   const customerId = request.params.id;
   const employees = await getEmployees(request.dbPool);
 
   const sql = `
-    SELECT 
-      id, 
-      date, 
-      time_start, 
-      time_end, 
-      service_id, 
+    SELECT
+      id,
+      date,
+      time_start,
+      time_end,
+      service_id,
       service_name,
-      created_date, 
+      created_date,
       service_duration,
       employee_id,
       status
@@ -261,7 +261,7 @@ router.get(`/:id/saved-appointments`, async (request: CustomRequestType, respons
 
     return;
   } catch (error) {
-    response.status(500).json({ 
+    response.status(500).json({
       errorMessage: `Error fetching Saved Appointments`,
       message: (error as Error).message,
     });

@@ -1,15 +1,15 @@
 import express from 'express';
-import { getServices } from '@/services/service/serviceService';
-import { validateServiceData } from '@/validators/servicesValidators';
-import { upload } from '@/utils/uploadFile';
-import { 
-  CustomRequestType, 
+import { getServices } from '@/services/service/serviceService.js';
+import { validateServiceData } from '@/validators/servicesValidators.js';
+import { upload } from '@/utils/uploadFile.js';
+import {
+  CustomRequestType,
   CustomResponseType,
   DbPoolType,
 } from '@/@types/expressTypes';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { EmployeePriceType, ServiceDataType } from '@/@types/servicesTypes';
-import { CategoryRow } from '@/@types/categoriesTypes';
+import { EmployeePriceType, ServiceDataType } from '@/@types/servicesTypes.js';
+import { CategoryRow } from '@/@types/categoriesTypes.js';
 
 const router = express.Router();
 
@@ -86,11 +86,11 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
 
   const serviceQuery = `
     INSERT INTO Services (
-      employee_id, 
-      name, 
-      category_id, 
-      duration_time, 
-      buffer_time, 
+      employee_id,
+      name,
+      category_id,
+      duration_time,
+      buffer_time,
       booking_note
     )
     VALUES (?, ?, ?, ?, ?, ?)
@@ -140,7 +140,7 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
 
         return;
       }
-        
+
       res.status(500).json({
         errorMessage: `Error while creating service`,
         message: mysqlError.message,
@@ -149,7 +149,7 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
       return;
     }
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         errorMessage: `Error while creating service`,
         message: error.message,
       });
@@ -157,7 +157,7 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
       return;
     }
 
-    res.status(500).json({ 
+    res.status(500).json({
       errorMessage: `Unknown error occurred while creating service`,
     });
 
@@ -231,7 +231,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
 
         return;
       }
-        
+
       res.status(500).json({
         errorMessage: `Error while creating service`,
         message: mysqlError.message,
@@ -240,7 +240,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
       return;
     }
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         errorMessage: `Error while creating service`,
         message: error.message,
       });
@@ -248,7 +248,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
       return;
     }
 
-    res.status(500).json({ 
+    res.status(500).json({
       errorMessage: `Unknown error occurred while creating service`,
     });
 
@@ -265,7 +265,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
 
   const categoryId = req.params.id;
   const { name } = req.body;
-  
+
   const imgPath = req.file?.filename || null;
 
   const updateServiceCategoryQuery = `
@@ -298,7 +298,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
 
         return;
       }
-        
+
       res.status(500).json({
         errorMessage: `Error while editing Category`,
         message: mysqlError.message,
@@ -307,7 +307,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
       return;
     }
     if (error instanceof Error) {
-      res.status(500).json({ 
+      res.status(500).json({
         errorMessage: `Error while editing Category`,
         message: error.message,
       });
@@ -315,7 +315,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
       return;
     }
 
-    res.status(500).json({ 
+    res.status(500).json({
       errorMessage: `Unknown error occurred while editing Category`,
     });
 
@@ -346,7 +346,7 @@ router.delete(`/:id`, async (req: CustomRequestType, res: CustomResponseType) =>
 
       return;
     }
-    
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: `Error deleting service` });

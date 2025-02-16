@@ -1,6 +1,6 @@
-import { validateEmail, validatePhone } from '@/utils/validators';
-import { SalutationEnum } from '@/enums/enums';
-import { CustomerResponseData, CustomerFormDataValidationErrors } from '@/@types/customersTypes';
+import { validateEmail, validatePhone } from '@/utils/validators.js';
+import { SalutationEnum } from '@/enums/enums.js';
+import { CustomerResponseData, CustomerFormDataValidationErrors } from '@/@types/customersTypes.js';
 
 const validateCustomerData = (formData: CustomerResponseData): CustomerFormDataValidationErrors => {
   const errors: CustomerFormDataValidationErrors = {};
@@ -32,6 +32,6 @@ const validateCustomerData = (formData: CustomerResponseData): CustomerFormDataV
   return errors;
 };
 
-export { 
+export {
   validateCustomerData,
 };

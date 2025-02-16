@@ -2,24 +2,24 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import databaseMiddleware from '@/middlewares/databaseMiddleware';
-import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddleware';
+import databaseMiddleware from '@/middlewares/databaseMiddleware.js';
+import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddleware.js';
 
 // routes for CRM
-import appointmentsRouter from '@/routes/appointments/appointmentsRoute';
-import authRouter from '@/routes/auth/authRoute';
-import companyRouter from '@/routes/company/companyRoute';
-import customersRouter from '@/routes/customers/customersRoute';
-import employeesRouter from '@/routes/employees/employeesRoute';
-import invoicesRouter from '@/routes/invoices/invoicesRoute';
-import servicesRouter from '@/routes/services/servicesRoute';
-import userRouter from '@/routes/user/userRoute';
+import appointmentsRouter from '@/routes/appointments/appointmentsRoute.js';
+import authRouter from '@/routes/auth/authRoute.js';
+import companyRouter from '@/routes/company/companyRoute.js';
+import customersRouter from '@/routes/customers/customersRoute.js';
+import employeesRouter from '@/routes/employees/employeesRoute.js';
+import invoicesRouter from '@/routes/invoices/invoicesRoute.js';
+import servicesRouter from '@/routes/services/servicesRoute.js';
+import userRouter from '@/routes/user/userRoute.js';
 
 // routes for client site
-import appointmentsPublicRouter from '@/routes/appointments/appointmentsRoute.public';
-import calendarPublicRouter from '@/routes/calendar/calendarRoute.public';
-import employeesPublicRouter from '@/routes/employees/employeesRoute.public';
-import servicesPublicRouter from '@/routes/services/servicesRoute.public';
+import appointmentsPublicRouter from '@/routes/appointments/appointmentsRoute.public.js';
+import calendarPublicRouter from '@/routes/calendar/calendarRoute.public.js';
+import employeesPublicRouter from '@/routes/employees/employeesRoute.public.js';
+import servicesPublicRouter from '@/routes/services/servicesRoute.public.js';
 
 dotenv.config();
 

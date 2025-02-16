@@ -1,13 +1,13 @@
 import { ResultSetHeader } from 'mysql2/promise';
-import { validateCompanyData } from '@/validators/companyValidators';
-import { formatPhone } from '@/utils/formatters';
+import { validateCompanyData } from '@/validators/companyValidators.js';
+import { formatPhone } from '@/utils/formatters.js';
 import {
   CompanyResponseData,
   CompanyRequestRow,
   CreateCompanyResult,
   UpdateCompanyResult,
-} from '@/@types/companyTypes';
-import { DbPoolType } from '@/@types/expressTypes';
+} from '@/@types/companyTypes.js';
+import { DbPoolType } from '@/@types/expressTypes.js';
 
 async function getCompany(dbPool: DbPoolType): Promise<CompanyResponseData> {
   const sql = `
