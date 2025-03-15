@@ -142,8 +142,9 @@ router.get('/:id/pdf', async (request: CustomRequestType, response: CustomRespon
     const invoiceHtml = generateInvoiceHtml(invoice);
 
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium-browser',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: true,
+      executablePath: '/usr/bin/google-chrome-stable',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     const page = await browser.newPage();
 
