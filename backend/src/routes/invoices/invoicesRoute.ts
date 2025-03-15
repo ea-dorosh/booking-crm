@@ -141,7 +141,10 @@ router.get('/:id/pdf', async (request: CustomRequestType, response: CustomRespon
 
     const invoiceHtml = generateInvoiceHtml(invoice);
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      executablePath: '/usr/bin/chromium-browser',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
 
     await page.setContent(invoiceHtml, { waitUntil: 'networkidle0' });
