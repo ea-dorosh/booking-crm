@@ -33,6 +33,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(`public`));
 
+app.use(`/images`, express.static(`public/images`, {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
+
 // Use authentication routes
 app.use(`/auth`, authRouter);
 
