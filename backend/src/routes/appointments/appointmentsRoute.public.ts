@@ -22,11 +22,16 @@ import {
 import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
 import { AppointmentFormDataType } from '@/@types/appointmentsTypes.js';
 import utc from 'dayjs/plugin/utc.js';
-
+import {
+  validateAppointmentCustomerData,
+  validateAppointmentDetailsData,
+} from '@/validators/appointmentValidators.js';
 const router = express.Router();
 
 dayjs.extend(advancedFormat);
 dayjs.extend(utc);
+
+const GENERAL_ERROR_MESSAGE = `Beim Erstellen des Datensatzes ist ein Fehler aufgetreten, bitte versuchen Sie es erneut oder versuchen Sie es später noch einmal.`;
 
 router.post(`/create`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
@@ -35,6 +40,25 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   }
 
   const appointmentFormData: AppointmentFormDataType = request.body.appointment;
+
+  const invalidAppointmentDetailsData = validateAppointmentDetailsData(appointmentFormData);
+  if (Object.keys(invalidAppointmentDetailsData).length > 0) {
+    response.status(428).json({
+      errorMessage: GENERAL_ERROR_MESSAGE,
+      errors: invalidAppointmentDetailsData,
+    });
+    return;
+  }
+
+  const validationErrors = validateAppointmentCustomerData(appointmentFormData, true);
+
+  if (Object.keys(validationErrors).length > 0) {
+    response.status(428).json({
+        errorMessage: `Validation failed`,
+        validationErrors,
+    });
+    return;
+  }
 
   let serviceDurationAndBufferTimeInMinutes: string = ``;
   let serviceName: string = ``;
@@ -48,7 +72,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceDetails.durationTime, serviceDetails.bufferTime);
   } catch (error) {
     response.status(500).json({
-      errorMessage: `Error while fetching service`,
+      errorMessage: GENERAL_ERROR_MESSAGE,
       error: (error as Error).message,
     });
     return;
@@ -90,7 +114,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
   const timeStart = dayjs
   .utc(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
-  .format('YYYY-MM-DD HH:mm:ss');
+  .format(`YYYY-MM-DD HH:mm:ss`);
 
   const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
 

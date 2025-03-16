@@ -1,36 +1,36 @@
 import { RowDataPacket } from 'mysql2';
-import { 
+import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
 } from '@/enums/enums';
 
 export interface AppointmentRowType extends RowDataPacket {
   id: number;
-  date: string; 
-  created_date: string; 
-  service_name: string; 
-  time_start: string; 
+  date: string;
+  created_date: string;
+  service_name: string;
+  time_start: string;
   service_duration: number;
-  customer_last_name: string; 
+  customer_last_name: string;
   customer_first_name: string;
   status: AppointmentStatusEnum;
 }
 
 export interface AppointmentDataType {
   id: number;
-  date: string; 
-  createdDate: string; 
-  serviceName: string; 
-  timeStart: string; 
+  date: string;
+  createdDate: string;
+  serviceName: string;
+  timeStart: string;
   serviceDuration: number;
-  customerLastName: string; 
+  customerLastName: string;
   customerFirstName: string;
   status: AppointmentStatusEnum;
 }
 
 export interface AppointmentDetailsRowType extends RowDataPacket {
   id: number;
-  employee_id: number; 
+  employee_id: number;
   date: string;
   time_start: string;
   time_end: string;
@@ -78,6 +78,20 @@ export interface AppointmentFormDataType {
   salutation: number;
   serviceId: number;
   time: string;
+}
+
+export interface AppointmentFormDataValidationErrorsType {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  salutation?: string;
+}
+export interface AppointmentFormDataErrorsType {
+  date?: string;
+  employeeId?: string;
+  serviceId?: string;
+  time?: string;
 }
 
 export interface SavedAppointmentItemDataType {
