@@ -3,7 +3,7 @@ const {
   disableTimeSlotsForServiceDuration,
   addTimeSlotsAccordingEmployeeAvailability,
   replaceExistingDayWithNewEmployeeData,
-} = require('./calendarUtils.js');
+} = require('./calendarUtils.ts');
 
 describe(`getAppointmentEndTime`, () => {
   it(`should correctly calculate the end time of an appointment`, () => {
