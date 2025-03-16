@@ -31,7 +31,11 @@ const router = express.Router();
 dayjs.extend(advancedFormat);
 dayjs.extend(utc);
 
-const GENERAL_ERROR_MESSAGE = `Beim Erstellen des Datensatzes ist ein Fehler aufgetreten, bitte versuchen Sie es erneut oder versuchen Sie es später noch einmal.`;
+const ERROR_MESSAGE = {
+  VALIDATION_FAILED: `Validation failed`,
+  GENERAL_ERROR_MESSAGE: `Beim Erstellen des Datensatzes ist ein Fehler aufgetreten, bitte versuchen Sie es erneut oder versuchen Sie es später noch einmal.`,
+  EMPLOYEE_IS_ALREADY_BUSY: `Leider hat sich schon jemand die Zeit genommen. Versuchen Sie, eine andere Zeit oder einen anderen Tag zu wählen und versuchen Sie es erneut`,
+};
 
 router.post(`/create`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
@@ -44,7 +48,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   const invalidAppointmentDetailsData = validateAppointmentDetailsData(appointmentFormData);
   if (Object.keys(invalidAppointmentDetailsData).length > 0) {
     response.status(428).json({
-      errorMessage: GENERAL_ERROR_MESSAGE,
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
       errors: invalidAppointmentDetailsData,
     });
     return;
@@ -54,7 +58,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
   if (Object.keys(validationErrors).length > 0) {
     response.status(428).json({
-        errorMessage: `Validation failed`,
+        errorMessage: ERROR_MESSAGE.VALIDATION_FAILED,
         validationErrors,
     });
     return;
@@ -72,7 +76,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     serviceDurationAndBufferTimeInMinutes = getServiceDuration(serviceDetails.durationTime, serviceDetails.bufferTime);
   } catch (error) {
     response.status(500).json({
-      errorMessage: GENERAL_ERROR_MESSAGE,
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
       error: (error as Error).message,
     });
     return;
@@ -93,7 +97,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
       if (validationErrors) {
         response.status(428).json({
-            errorMessage: `Validation failed`,
+            errorMessage: ERROR_MESSAGE.VALIDATION_FAILED, // probably not possible
             validationErrors,
           });
           return;
@@ -103,7 +107,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     }
   } catch (error) {
     response.status(500).json({
-      errorMessage: `Error while creating customer`,
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
       message: (error as Error).message,
     });
     return;
@@ -123,13 +127,13 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
     if (!isEmployeeAvailable) {
       response.status(409).json({
-        errorMessage: `Employee is already busy at the specified date and time.`,
+        errorMessage: ERROR_MESSAGE.EMPLOYEE_IS_ALREADY_BUSY,
       });
       return;
     }
   } catch (error) {
     response.status(500).json({
-      errorMessage: `Error while checking employee availability`,
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
       message: (error as Error).message,
     });
     return;
@@ -193,7 +197,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     return;
   } catch (error) {
     response.status(500).json({
-      errorMessage: `Beim Erstellen des Datensatzes ist ein Fehler aufgetreten, bitte versuchen Sie es erneut oder versuchen Sie es später noch einmal.`,
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
       message: (error as Error).message,
     });
     return;
