@@ -55,7 +55,7 @@ function getAppointmentEndTime(startTime: string, serviceDuration: string): stri
     .add(parsedServiceDuration.minute(), 'minute')
     .add(parsedServiceDuration.second(), 'second');
 
-  return endTime.toISOString(); // 2024-12-29T23:00:00.000Z
+  return endTime.format('YYYY-MM-DD HH:mm:ss');
 }
 
 function disableTimeSlotsForServiceDuration(

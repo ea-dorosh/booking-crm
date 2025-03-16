@@ -90,7 +90,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
   const timeStart = dayjs
   .utc(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
-  .format(`YYYY-MM-DDTHH:mm:ss.SSS[Z]`);
+  .format('YYYY-MM-DD HH:mm:ss');
 
   const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
 
@@ -150,7 +150,6 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     isCustomerNew,
   ];
 
-
   try {
     const [appointmentResults] = await request.dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);
 
@@ -170,7 +169,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     return;
   } catch (error) {
     response.status(500).json({
-      errorMessage: `Error while creating appointment`,
+      errorMessage: `Beim Erstellen des Datensatzes ist ein Fehler aufgetreten, bitte versuchen Sie es erneut oder versuchen Sie es später noch einmal.`,
       message: (error as Error).message,
     });
     return;

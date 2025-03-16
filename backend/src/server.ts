@@ -57,6 +57,6 @@ app.use(`/api/public/calendar`, databaseSelectionMiddleware, calendarPublicRoute
 app.use(`/api/public/employees`, databaseSelectionMiddleware, employeesPublicRouter);
 app.use(`/api/public/services`, databaseSelectionMiddleware, servicesPublicRouter);
 
-app.listen(port, `0.0.0.0`, () => {
-  console.log(`Server is running on port ${process.env.SERVER_API_URL}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on internal port ${port} and externally accessible as ${process.env.SERVER_API_URL}`);
 });

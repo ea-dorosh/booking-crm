@@ -9,7 +9,7 @@
     "test-watch": "jest --watchAll",
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
-    "dev": "tsx watch src/server.ts"
+    "serve": "tsx watch src/server.ts"
   },
   "keywords": [],
   "author": "",
