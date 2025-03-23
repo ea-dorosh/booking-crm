@@ -124,10 +124,10 @@ function addTimeSlotsAccordingEmployeeAvailability({
     const nextTime = currentTime.add(30, 'minute');
     let disabled = false;
 
-    // Проверяем перекрытие со "заблокированным" временем
     for (const block of blockedTimes) {
       const blockStart = dayjs(block.startBlockedTime, TIME_FORMAT);
       const blockEnd = dayjs(block.endBlockedTime, TIME_FORMAT);
+
       if (
         (currentTime.isBefore(blockEnd) && nextTime.isAfter(blockStart)) ||
         (currentTime.isSame(blockStart) && nextTime.isSame(blockEnd))
