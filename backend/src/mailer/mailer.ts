@@ -1,9 +1,17 @@
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import Handlebars from 'handlebars';
 
 dotenv.config();
 
 let transporter: nodemailer.Transporter;
+
+// Register helper for comparing values
+Handlebars.registerHelper('eq', function(this: unknown, arg1: unknown, arg2: unknown, options: Handlebars.HelperOptions) {
+  return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+});
 
 /**
  * Creates and initializes email transporter
@@ -41,13 +49,31 @@ async function createTransporter() {
  * @returns Sender information for email headers
  */
 function getSenderInfo() {
-  const appName = process.env.APP_NAME || 'Booking CRM';
-  const senderEmail = process.env.SMTP_USER || 'no-reply@booking-crm.com';
+  const appName = process.env.APP_NAME || 'Dorosh Studio';
+  const senderEmail = process.env.SMTP_USER || 'no-reply@dorosh-studio.com';
   return {
     name: appName,
     email: senderEmail,
     formatted: `"${appName}" <${senderEmail}>`
   };
+}
+
+/**
+ * Render a template with context data using Handlebars
+ * @param templateName Template file name without extension
+ * @param context Data to be used in the template
+ * @returns Rendered HTML string
+ */
+function renderTemplate(templateName: string, context: Record<string, any>): string {
+  try {
+    const templatePath = path.join(process.cwd(), 'src', 'templates', 'emails', `${templateName}.html`);
+    const source = fs.readFileSync(templatePath, 'utf8');
+    const template = Handlebars.compile(source);
+    return template(context);
+  } catch (error) {
+    console.error(`Error rendering template ${templateName}:`, error);
+    throw new Error(`Failed to render template ${templateName}`);
+  }
 }
 
 /**
@@ -64,17 +90,19 @@ export async function sendPasswordResetEmail(recipientEmail: string, token: stri
   const resetUrl = `${appDomain}/reset-password?token=${token}`;
   const sender = getSenderInfo();
 
+  const htmlContent = renderTemplate('password-reset', { resetUrl });
+
   const mailOptions = {
     from: sender.formatted,
     to: recipientEmail,
-    subject: 'Password Reset',
-    text: `To reset your password, please follow this link: ${resetUrl}`,
-    html: `<p>To reset your password, please click on this link: <a href="${resetUrl}">${resetUrl}</a></p>`,
+    subject: 'Passwort zurücksetzen - Dorosh Studio',
+    text: `Um Ihr Passwort zurückzusetzen, klicken Sie bitte auf diesen Link: ${resetUrl}`,
+    html: htmlContent,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: %s', info.messageId);
+    console.log('Password reset email sent: %s', info.messageId);
 
     // If using Ethereal test account, get preview URL
     const previewUrl = nodemailer.getTestMessageUrl(info);
@@ -102,35 +130,57 @@ export async function sendAppointmentConfirmationEmail(
     service?: string;
     specialist?: string;
     location?: string;
+    salutation?: string;
+    lastName?: string;
   }
 ) {
   if (!transporter) {
     await createTransporter();
   }
 
-  const { date, time, service = "", specialist = "", location = "" } = appointmentData;
+  const {
+    date,
+    time,
+    service = "",
+    specialist = "",
+    location = "Kastanienallee 22, Berlin",
+    salutation = "female",
+    lastName = ""
+  } = appointmentData;
+
+  const salutationText = salutation === 'male' ? 'geehrter Herr' : 'geehrte Frau';
   const sender = getSenderInfo();
+
+  const templateContext = {
+    salutationText,
+    lastName,
+    date,
+    time,
+    service,
+    specialist,
+    location
+  };
+
+  const htmlContent = renderTemplate('appointment-confirmation', templateContext);
 
   const mailOptions = {
     from: sender.formatted,
     to: recipientEmail,
-    subject: 'Appointment Confirmation',
+    subject: 'Terminbestätigung - Dorosh Studio',
     text:
-      `Your appointment has been confirmed!\n\n` +
-      `Date: ${date}\n` +
-      `Time: ${time}\n` +
-      (service ? `Service: ${service}\n` : '') +
-      (specialist ? `Specialist: ${specialist}\n` : '') +
-      (location ? `Location: ${location}\n` : '') +
-      `\nThank you for choosing our service!`,
-    html:
-      `<h2>Your appointment has been confirmed!</h2>` +
-      `<p><strong>Date:</strong> ${date}</p>` +
-      `<p><strong>Time:</strong> ${time}</p>` +
-      (service ? `<p><strong>Service:</strong> ${service}</p>` : '') +
-      (specialist ? `<p><strong>Specialist:</strong> ${specialist}</p>` : '') +
-      (location ? `<p><strong>Location:</strong> ${location}</p>` : '') +
-      `<p>Thank you for choosing our service!</p>`,
+      `Terminbestätigung\n\n` +
+      `Sehr ${salutationText} ${lastName},\n\n` +
+      `vielen Dank für Ihre Buchung bei Dorosh Studio. Hiermit bestätigen wir Ihren Termin:\n\n` +
+      `Datum: ${date}\n` +
+      `Uhrzeit: ${time} Uhr\n` +
+      (service ? `Behandlung: ${service}\n` : '') +
+      (specialist ? `Stylist: ${specialist}\n` : '') +
+      `Adresse: ${location}\n` +
+      `\nFalls Sie Ihren Termin verschieben oder absagen möchten, kontaktieren Sie uns bitte mindestens 24 Stunden im Voraus.\n\n` +
+      `Wir freuen uns auf Ihren Besuch!\n\n` +
+      `Mit freundlichen Grüßen,\n` +
+      `Ihr Dorosh Studio Team`,
+    html: htmlContent,
   };
 
   try {

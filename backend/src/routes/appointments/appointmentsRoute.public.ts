@@ -192,6 +192,8 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
           service: serviceName,
           specialist: '', // Add specialist name if available
           location: '', // Add location if available
+          lastName: formatName(appointmentFormData.lastName),
+          salutation: appointmentFormData.salutation.toString() === 'Mr' ? 'male' : 'female',
         }
       );
       console.log(`Confirmation email sent to ${appointmentFormData.email}`);
