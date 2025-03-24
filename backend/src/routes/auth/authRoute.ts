@@ -1,10 +1,11 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mysql, { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import dotenv from 'dotenv';
 import { sendPasswordResetEmail } from '@/mailer/mailer.js';
 import { v4 as uuidv4 } from 'uuid';
+import { CustomRequestType, CustomResponseType } from '@/@types/expressTypes.js';
 
 dotenv.config();
 const router = express.Router();
@@ -33,11 +34,11 @@ function createUserDbPool() {
   });
 }
 
-router.post('/login', async (req: Request, res: Response) => {
-  const { email, password } = req.body as { email?: string; password?: string };
+router.post('/login', async (request: CustomRequestType, response: CustomResponseType) => {
+  const { email, password } = request.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    res.status(400).json({ message: 'Email and password are required.' });
+    response.status(400).json({ message: 'Email and password are required.' });
     return;
   }
 
@@ -49,37 +50,37 @@ router.post('/login', async (req: Request, res: Response) => {
     connection.release();
 
     if (rows.length === 0) {
-      res.status(401).json({ message: 'Invalid credentials' });
+      response.status(401).json({ message: 'Invalid credentials' });
       return;
     }
 
     const user = rows[0];
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      res.status(401).json({ message: 'Invalid credentials' });
+      response.status(401).json({ message: 'Invalid credentials' });
       return;
     }
 
     if (!process.env.JWT_SECRET) {
-      res.status(500).json({ message: 'JWT_SECRET not defined' });
+      response.status(500).json({ message: 'JWT_SECRET not defined' });
       return;
     }
 
     const token = jwt.sign({ email: user.email, database: user.database_name }, process.env.JWT_SECRET);
-    res.json({ token });
+    response.json({ token });
   } catch (error: unknown) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    response.status(500).json({ message: 'Internal server error' });
   } finally {
     await pool.end();
   }
 });
 
-router.post('/register', async (req: Request, res: Response) => {
-  const { email, password } = req.body as { email?: string; password?: string };
+router.post('/register', async (request: CustomRequestType, response: CustomResponseType) => {
+  const { email, password } = request.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    res.status(400).json({ message: 'Email and password are required.' });
+    response.status(400).json({ message: 'Email and password are required.' });
     return;
   }
 
@@ -99,26 +100,27 @@ router.post('/register', async (req: Request, res: Response) => {
     await pool.end();
 
     if (result.affectedRows === 1) {
-      res.status(201).json({ message: 'User registered successfully.' });
+      response.status(201).json({ message: 'User registered successfully.' });
     } else {
-      res.status(500).json({ message: 'Failed to register user.' });
+      response.status(500).json({ message: 'Failed to register user.' });
     }
   } catch (error: any) {
     if (error && error.code === 'ER_DUP_ENTRY') {
-      res.status(409).json({ message: 'Email already in use.' });
+      response.status(409).json({ message: 'Email already in use.' });
       return;
     }
     console.error('Error during user registration:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    response.status(500).json({ message: 'Internal server error' });
   }
 });
 
 // Request password reset
-router.post('/forgot-password', async (req: Request, res: Response) => {
-  const { email } = req.body;
+router.post('/forgot-password', async (request: CustomRequestType, response: CustomResponseType) => {
+  const { email } = request.body;
 
   if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
+     response.status(400).json({ message: 'Email is required' });
+     return;
   }
 
   const pool = createUserDbPool();
@@ -132,9 +134,10 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     if (users.length === 0) {
       connection.release();
       await pool.end();
-      return res.json({
+       response.json({
         message: 'If the email exists in our system, a password reset link has been sent.'
       });
+      return;
     }
 
     const user = users[0];
@@ -161,31 +164,33 @@ router.post('/forgot-password', async (req: Request, res: Response) => {
     // Send password reset email
     await sendPasswordResetEmail(email, resetToken);
 
-    res.json({
+    response.json({
       message: 'If the email exists in our system, a password reset link has been sent.'
     });
   } catch (error) {
     console.error('Error during password reset request:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    response.status(500).json({ message: 'Internal server error' });
   } finally {
     await pool.end();
   }
 });
 
 // Reset password with token
-router.post('/reset-password', async (req: Request, res: Response) => {
-  const { token, newPassword } = req.body;
+router.post('/reset-password', async (request: CustomRequestType, response: CustomResponseType) => {
+  const { token, newPassword } = request.body;
 
   if (!token || !newPassword) {
-    return res.status(400).json({
+    response.status(400).json({
       message: 'Token and new password are required'
     });
+    return;
   }
 
   if (newPassword.length < 8) {
-    return res.status(400).json({
+    response.status(400).json({
       message: 'Password must be at least 8 characters long'
     });
+    return;
   }
 
   const pool = createUserDbPool();
@@ -201,9 +206,10 @@ router.post('/reset-password', async (req: Request, res: Response) => {
 
     if (tokens.length === 0) {
       connection.release();
-      return res.status(400).json({
+      response.status(400).json({
         message: 'Invalid or expired token'
       });
+      return;
     }
 
     const resetToken = tokens[0];
@@ -226,12 +232,12 @@ router.post('/reset-password', async (req: Request, res: Response) => {
 
     connection.release();
 
-    res.json({
+    response.json({
       message: 'Password has been reset successfully'
     });
   } catch (error) {
     console.error('Error during password reset:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    response.status(500).json({ message: 'Internal server error' });
   } finally {
     await pool.end();
   }
