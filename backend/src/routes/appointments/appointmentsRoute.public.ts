@@ -26,6 +26,7 @@ import {
   validateAppointmentCustomerData,
   validateAppointmentDetailsData,
 } from '@/validators/appointmentValidators.js';
+import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
 const router = express.Router();
 
 dayjs.extend(advancedFormat);
@@ -180,6 +181,28 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
 
   try {
     const [appointmentResults] = await request.dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);
+
+    // Send confirmation email
+    try {
+      const emailResult = await sendAppointmentConfirmationEmail(
+        appointmentFormData.email,
+        {
+          date: dayjs(date).format('DD.MM.YYYY'),
+          time: dayjs(timeStart).format('HH:mm'),
+          service: serviceName,
+          specialist: '', // Add specialist name if available
+          location: '', // Add location if available
+        }
+      );
+      console.log(`Confirmation email sent to ${appointmentFormData.email}`);
+
+      if (emailResult?.previewUrl) {
+        console.log(`Email preview available at: ${emailResult.previewUrl}`);
+      }
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+      // Continue execution - user will still get confirmation via the interface
+    }
 
     response.json({
       message: `Appointment has been saved successfully`,

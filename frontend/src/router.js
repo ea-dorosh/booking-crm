@@ -12,6 +12,8 @@ import ErrorPage from '@/pages/ErrorPage/ErrorPage';
 import InvoiceDetailPage from '@/pages/InvoiceDetailPage/InvoiceDetailPage';
 import InvoicesPage from '@/pages/InvoicesPage/InvoicesPage';
 import LoginPage from '@/pages/LoginPage/LoginPage';
+import ForgotPasswordPage from '@/pages/PasswordResetPage/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/PasswordResetPage/ResetPasswordPage';
 import ServiceCategoryDetailPage from '@/pages/ServiceCategoryDetailPage/ServiceCategoryDetailPage';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
@@ -21,6 +23,14 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPasswordPage />,
   },
   {
     path: "/",
