@@ -3,10 +3,7 @@ import {
   EmployeeDetailRowType,
   EmployeeDetailDataType,
 } from '@/@types/employeesTypes.js';
-import utc from 'dayjs/plugin/utc.js';
 import dayjs from 'dayjs';
-
-dayjs.extend(utc);
 
 interface CheckEmployeeParams {
   date: string;
@@ -28,7 +25,7 @@ interface CheckEmployeeAvailabilityResult {
 }
 
 function toMySQLDateTime(isoString: string): string {
-  return dayjs.utc(isoString).format('YYYY-MM-DD HH:mm:ss');
+  return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss');
 }
 
 async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {

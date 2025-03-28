@@ -4,14 +4,12 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js';
 import duration from 'dayjs/plugin/duration.js';
 import isBetween from 'dayjs/plugin/isBetween.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-import utc from 'dayjs/plugin/utc.js';
 
 dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
-dayjs.extend(utc);
 
 const TIME_FORMAT = 'HH:mm:ss';
 
@@ -47,7 +45,7 @@ function getAppointmentEndTimeHours(startTime: string, serviceDuration: string):
 }
 
 function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
-  const parsedStartTime = dayjs.utc(startTime);
+  const parsedStartTime = dayjs(startTime);
 
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
   const endTime = parsedStartTime

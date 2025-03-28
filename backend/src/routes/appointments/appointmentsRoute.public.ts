@@ -21,7 +21,6 @@ import {
 } from '@/@types/expressTypes.js';
 import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
 import { AppointmentFormDataType } from '@/@types/appointmentsTypes.js';
-import utc from 'dayjs/plugin/utc.js';
 import {
   validateAppointmentCustomerData,
   validateAppointmentDetailsData,
@@ -30,7 +29,6 @@ import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
 const router = express.Router();
 
 dayjs.extend(advancedFormat);
-dayjs.extend(utc);
 
 const ERROR_MESSAGE = {
   VALIDATION_FAILED: `Validation failed`,
@@ -117,9 +115,8 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   const employeeId = appointmentFormData.employeeId;
   const date = appointmentFormData.date;
 
-  const timeStart = dayjs
-  .utc(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
-  .format(`YYYY-MM-DD HH:mm:ss`);
+  const timeStart = dayjs(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
+    .format(`YYYY-MM-DD HH:mm:ss`);
 
   const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
 

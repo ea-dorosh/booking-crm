@@ -1,7 +1,4 @@
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc.js';
-
-dayjs.extend(utc);
 
 function getServiceDuration(durationTime: string, bufferTime?: string): string {
   if (!bufferTime) return durationTime;
@@ -20,7 +17,7 @@ function getServiceDuration(durationTime: string, bufferTime?: string): string {
 
 // form 2024-12-31T13:12:57.865Z create ISO string 2024-12-31
 function toMySQLDate(string: string): string {
-  return dayjs.utc(string).format(`YYYY-MM-DD`);
+  return dayjs(string).format(`YYYY-MM-DD`);
 }
 
 
