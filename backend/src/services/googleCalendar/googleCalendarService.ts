@@ -26,7 +26,7 @@ interface GoogleEvent {
   };
 }
 
-const getOAuth2Client = () => {
+export const getOAuth2Client = () => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
@@ -57,7 +57,7 @@ export const getAuthUrl = () => {
     clientId: clientId ? `${clientId.substring(0, 15)}...` : `missing`,
     clientSecret: clientSecret ? `set` : `missing`,
     redirectUri,
-    isDesktopApp: clientId?.includes(`m3i6sqp1clt5`) // Проверка на Desktop App клиент
+    isDesktopApp: clientId?.includes(`m3i6sqp1clt5`)
   });
 
   if (!clientId || !clientSecret || !redirectUri) {
@@ -173,9 +173,18 @@ export const getEmployeeCalendarClient = async (
 
     try {
       const tokens = await oauth2Client.getAccessToken();
-      console.log(`Access token refreshed successfully:`);
+      console.log(`Access token refreshed successfully:`, !!tokens.token);
     } catch (authError: any) {
       console.error(`Error refreshing access token:`, authError.message);
+
+      if (authError.message === `invalid_grant` ||
+          (authError.response?.data?.error === `invalid_grant`)) {
+
+        await removeEmployeeGoogleCalendarCredentials(dbPool, employeeId);
+
+        console.log(`Removed expired Google Calendar credentials for employee ID: ${employeeId}`);
+        return null;
+      }
     }
 
     return {
@@ -503,5 +512,75 @@ export const getGoogleCalendarEvents = async (
   } catch (error: any) {
     console.error(`Error fetching Google Calendar events for employee ${employeeId}:`, error.message);
     return null;
+  }
+};
+
+export const removeEmployeeGoogleCalendarCredentials = async (
+  dbPool: Pool,
+  employeeId: number
+): Promise<boolean> => {
+  try {
+    const query = `
+      DELETE FROM EmployeeGoogleCalendar
+      WHERE employee_id = ?
+    `;
+
+    await dbPool.query(query, [employeeId]);
+    return true;
+  } catch (error: any) {
+    console.error(`Error removing Google Calendar credentials: ${error.message}`);
+    return false;
+  }
+};
+
+export const checkAllGoogleCalendarIntegrations = async (
+  dbPool: Pool
+): Promise<{ employeeId: number; calendarId: string }[]> => {
+  try {
+    const query = `
+      SELECT employee_id, calendar_id
+      FROM EmployeeGoogleCalendar
+    `;
+
+    const [rows] = await dbPool.query<GoogleCalendarCredentialsRow[]>(query);
+
+    console.log(`Found ${rows.length} Google Calendar integrations to check`);
+
+    const expiredIntegrations: { employeeId: number; calendarId: string }[] = [];
+
+    for (const row of rows) {
+      const employeeId = row.employee_id;
+      const calendarId = row.calendar_id;
+
+      try {
+        const credentials = await getEmployeeGoogleCalendarCredentials(dbPool, employeeId);
+
+        if (!credentials) {
+          console.log(`No credentials found for employee ID: ${employeeId}`);
+          continue;
+        }
+
+        const oauth2Client = getOAuth2Client();
+        oauth2Client.setCredentials({
+          refresh_token: credentials.refreshToken
+        });
+
+        await oauth2Client.getAccessToken();
+        console.log(`Successfully refreshed token for employee ID: ${employeeId}`);
+      } catch (error: any) {
+        if (error.message === 'invalid_grant' ||
+            (error.response?.data?.error === 'invalid_grant')) {
+          console.log(`Token expired for employee ID: ${employeeId}, calendar ID: ${calendarId}`);
+          expiredIntegrations.push({ employeeId, calendarId });
+        } else {
+          console.error(`Error checking calendar integration for employee ID: ${employeeId}:`, error);
+        }
+      }
+    }
+
+    return expiredIntegrations;
+  } catch (error: any) {
+    console.error(`Error checking Google Calendar integrations:`, error);
+    return [];
   }
 };

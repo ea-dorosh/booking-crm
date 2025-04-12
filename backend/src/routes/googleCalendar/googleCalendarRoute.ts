@@ -8,6 +8,8 @@ import {
   getTokensByCode,
   saveEmployeeGoogleCalendarCredentials,
   getEmployeeGoogleCalendarCredentials,
+  getOAuth2Client,
+  checkAllGoogleCalendarIntegrations,
 } from '@/services/googleCalendar/googleCalendarService.js';
 
 const router = express.Router();
@@ -104,9 +106,44 @@ router.get(`/:employeeId/google-calendar-status`, async (req: CustomRequestType,
 
   try {
     const credentials = await getEmployeeGoogleCalendarCredentials(req.dbPool, employeeId);
+
+    if (credentials) {
+      try {
+        const oauth2Client = getOAuth2Client();
+        oauth2Client.setCredentials({
+          refresh_token: credentials.refreshToken
+        });
+
+        await oauth2Client.getAccessToken();
+
+        res.json({
+          enabled: true,
+          calendarId: credentials.calendarId,
+          tokenExpired: false
+        });
+        return;
+      } catch (tokenError: any) {
+        if (tokenError.message === `invalid_grant` ||
+            (tokenError.response?.data?.error === `invalid_grant`)) {
+
+          console.log(`Token expired for employee ID: ${employeeId}`);
+
+          res.json({
+            enabled: false,
+            calendarId: credentials.calendarId,
+            tokenExpired: true
+          });
+          return;
+        }
+
+        console.error(`Error refreshing Google token:`, tokenError);
+      }
+    }
+
     res.json({
-      enabled: !!credentials,
+      enabled: false,
       calendarId: credentials?.calendarId || null,
+      tokenExpired: false
     });
   } catch (error) {
     console.error(`Error checking Google Calendar status:`, error);
@@ -129,6 +166,28 @@ router.delete(`/:employeeId/google-calendar`, async (req: CustomRequestType, res
   } catch (error) {
     console.error(`Error removing Google Calendar integration:`, error);
     res.status(500).json({ error: `Failed to remove Google Calendar integration` });
+  }
+});
+
+router.post(`/check-all-integrations`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    console.log(`Manual check of all Google Calendar integrations requested`);
+    const expiredIntegrations = await checkAllGoogleCalendarIntegrations(req.dbPool);
+
+    res.json({
+      success: true,
+      message: `Manual check of all Google Calendar integrations completed`,
+      expiredCount: expiredIntegrations.length,
+      expiredIntegrations
+    });
+  } catch (error) {
+    console.error(`Error running manual check of Google Calendar integrations:`, error);
+    res.status(500).json({ error: `Failed to check Google Calendar integrations` });
   }
 });
 

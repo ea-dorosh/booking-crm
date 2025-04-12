@@ -4,6 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import databaseMiddleware from '@/middlewares/databaseMiddleware.js';
 import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddleware.js';
+import { initScheduler } from '@/services/scheduler/schedulerService.js';
+import mysql from 'mysql2/promise';
 
 // routes for CRM
 import appointmentsRouter from '@/routes/appointments/appointmentsRoute.js';
@@ -89,4 +91,17 @@ app.use(`/api/public/services`, databaseSelectionMiddleware, servicesPublicRoute
 
 app.listen(port, `0.0.0.0`, () => {
   console.log(`Server is running on internal port ${port} and externally accessible as ${process.env.SERVER_API_URL}`);
+
+  try {
+    const schedulerDbPool = mysql.createPool({
+      host: process.env.DB_HOST as string,
+      user: process.env.DB_USER as string,
+      password: process.env.DB_PASSWORD as string,
+      database: process.env.DB_SCHEDULER_DATABASE || process.env.DB_DEFAULT_DATABASE,
+    });
+
+    initScheduler(schedulerDbPool);
+  } catch (error) {
+    console.error(`Failed to initialize scheduler:`, error);
+  }
 });
