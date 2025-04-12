@@ -28,7 +28,7 @@ async function createTransporter() {
         pass: process.env.SMTP_PASS,
       },
     });
-    console.log('Using provided SMTP settings');
+    console.log(`Using provided SMTP settings`);
   } else {
     const testAccount = await nodemailer.createTestAccount();
     transporter = nodemailer.createTransport({
@@ -44,13 +44,9 @@ async function createTransporter() {
   }
 }
 
-/**
- * Prepares sender information based on environment settings
- * @returns Sender information for email headers
- */
 function getSenderInfo() {
-  const appName = process.env.APP_NAME || 'Dorosh Studio';
-  const senderEmail = process.env.SMTP_USER || 'no-reply@dorosh-studio.com';
+  const appName = process.env.APP_NAME || `Dorosh Studio`;
+  const senderEmail = process.env.SMTP_USER || `no-reply@dorosh-studio.com`;
   return {
     name: appName,
     email: senderEmail,
@@ -58,16 +54,10 @@ function getSenderInfo() {
   };
 }
 
-/**
- * Render a template with context data using Handlebars
- * @param templateName Template file name without extension
- * @param context Data to be used in the template
- * @returns Rendered HTML string
- */
 function renderTemplate(templateName: string, context: Record<string, any>): string {
   try {
-    const templatePath = path.join(process.cwd(), 'src', 'templates', 'emails', `${templateName}.html`);
-    const source = fs.readFileSync(templatePath, 'utf8');
+    const templatePath = path.join(process.cwd(), `src`, `templates`, `emails`, `${templateName}.html`);
+    const source = fs.readFileSync(templatePath, `utf8`);
     const template = Handlebars.compile(source);
     return template(context);
   } catch (error) {
@@ -76,52 +66,42 @@ function renderTemplate(templateName: string, context: Record<string, any>): str
   }
 }
 
-/**
- * Send a password reset email with reset link
- * @param recipientEmail Email of the recipient
- * @param token Password reset token
- */
 export async function sendPasswordResetEmail(recipientEmail: string, token: string) {
   if (!transporter) {
     await createTransporter();
   }
 
-  const appDomain = process.env.APP_DOMAIN || 'http://18.153.95.5:3000';
+  const appDomain = process.env.APP_DOMAIN || `http://18.153.95.5:3000`;
   const resetUrl = `${appDomain}/reset-password?token=${token}`;
   const sender = getSenderInfo();
 
-  const htmlContent = renderTemplate('password-reset', { resetUrl });
+  const htmlContent = renderTemplate(`password-reset`, { resetUrl });
 
   const mailOptions = {
     from: sender.formatted,
     to: recipientEmail,
-    subject: 'Passwort zurücksetzen - Dorosh Studio',
+    subject: `Passwort zurücksetzen - Dorosh Studio`,
     text: `Um Ihr Passwort zurückzusetzen, klicken Sie bitte auf diesen Link: ${resetUrl}`,
     html: htmlContent,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent: %s', info.messageId);
+    console.log(`Password reset email sent: %s`, info.messageId);
 
     // If using Ethereal test account, get preview URL
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log('Email preview: %s', previewUrl);
+      console.log(`Email preview: %s`, previewUrl);
     }
 
     return { success: true, messageId: info.messageId, previewUrl };
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error(`Error sending password reset email:`, error);
     return { success: false, error };
   }
 }
 
-/**
- * Send an appointment confirmation email
- * @param recipientEmail Email of the recipient
- * @param appointmentData Appointment details
- */
 export async function sendAppointmentConfirmationEmail(
   recipientEmail: string,
   appointmentData: {
@@ -141,14 +121,14 @@ export async function sendAppointmentConfirmationEmail(
   const {
     date,
     time,
-    service = "",
-    specialist = "",
+    service = ``,
+    specialist = ``,
     location = "Kastanienallee 22, Berlin",
     salutation = "female",
     lastName = ""
   } = appointmentData;
 
-  const salutationText = salutation === 'male' ? 'geehrter Herr' : 'geehrte Frau';
+  const salutationText = salutation === `male` ? `geehrter Herr` : `geehrte Frau`;
   const sender = getSenderInfo();
 
   const templateContext = {
@@ -161,12 +141,12 @@ export async function sendAppointmentConfirmationEmail(
     location
   };
 
-  const htmlContent = renderTemplate('appointment-confirmation', templateContext);
+  const htmlContent = renderTemplate(`appointment-confirmation`, templateContext);
 
   const mailOptions = {
     from: sender.formatted,
     to: recipientEmail,
-    subject: 'Terminbestätigung - Dorosh Studio',
+    subject: `Terminbestätigung - Dorosh Studio`,
     text:
       `Terminbestätigung\n\n` +
       `Sehr ${salutationText} ${lastName},\n\n` +
@@ -185,17 +165,73 @@ export async function sendAppointmentConfirmationEmail(
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Appointment confirmation email sent: %s', info.messageId);
+    console.log(`Appointment confirmation email sent: %s`, info.messageId);
 
     // If using Ethereal test account, get preview URL
     const previewUrl = nodemailer.getTestMessageUrl(info);
     if (previewUrl) {
-      console.log('Email preview: %s', previewUrl);
+      console.log(`Email preview: %s`, previewUrl);
     }
 
     return { success: true, messageId: info.messageId, previewUrl };
   } catch (error) {
-    console.error('Error sending appointment confirmation email:', error);
+    console.error(`Error sending appointment confirmation email:`, error);
+    return { success: false, error };
+  }
+}
+
+export async function sendGoogleCalendarReconnectEmail(
+  recipientEmail: string,
+  userData: {
+    userName: string;
+    calendarId: string;
+    employeeId: number;
+    expiredEmployees?: Array<{
+      employeeId: number;
+      name: string;
+      calendarId: string;
+    }>;
+  }
+) {
+  if (!transporter) {
+    await createTransporter();
+  }
+
+  const currentYear = new Date().getFullYear();
+  const appDomain = process.env.APP_DOMAIN || `http://18.153.95.5:3000`;
+  const crmLoginUrl = `${appDomain}`;
+  const sender = getSenderInfo();
+
+  const htmlContent = renderTemplate(`google-calendar-reconnect`, {
+    ...userData,
+    hasMultipleExpired: userData.expiredEmployees && userData.expiredEmployees.length > 0,
+    currentYear,
+    crmLoginUrl
+  });
+
+  const mailOptions = {
+    from: sender.formatted,
+    to: recipientEmail,
+    subject: `Требуется переподключение Google Calendar - Booking CRM`,
+    text: userData.expiredEmployees && userData.expiredEmployees.length > 0
+      ? `Здравствуйте, ${userData.userName}! Наша система обнаружила, что интеграция с Google Calendar истекла у ${userData.expiredEmployees.length} мастеров. Пожалуйста, войдите в CRM и переподключите Google Calendar для этих мастеров: ${crmLoginUrl}`
+      : `Здравствуйте, ${userData.userName}! Наша система обнаружила, что интеграция вашего аккаунта с Google Calendar более не активна. Пожалуйста, войдите в CRM и переподключите ваш Google Calendar: ${crmLoginUrl}`,
+    html: htmlContent,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Google Calendar reconnect email sent: %s`, info.messageId);
+
+    // If using Ethereal test account, get preview URL
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`Email preview: %s`, previewUrl);
+    }
+
+    return { success: true, messageId: info.messageId, previewUrl };
+  } catch (error) {
+    console.error(`Error sending Google Calendar reconnect email:`, error);
     return { success: false, error };
   }
 }
