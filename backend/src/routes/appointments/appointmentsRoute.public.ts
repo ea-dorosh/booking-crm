@@ -26,6 +26,8 @@ import {
   validateAppointmentDetailsData,
 } from '@/validators/appointmentValidators.js';
 import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
+import { createGoogleCalendarEvent } from '@/services/googleCalendar/googleCalendarService.js';
+
 const router = express.Router();
 
 dayjs.extend(advancedFormat);
@@ -153,9 +155,10 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       customer_last_name,
       customer_email,
       customer_phone,
-      is_customer_new
+      is_customer_new,
+      google_calendar_event_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const appointmentValues = [
@@ -174,12 +177,41 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     appointmentFormData.email,
     formatPhone(appointmentFormData.phone),
     isCustomerNew,
+    null, // placeholder for google_calendar_event_id
   ];
 
   try {
     const [appointmentResults] = await request.dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);
 
-    // Send confirmation email
+    const appointmentId = appointmentResults.insertId;
+
+    try {
+      const googleEventId = await createGoogleCalendarEvent(
+        request.dbPool,
+        employeeId,
+        {
+          id: appointmentId,
+          customerId: Number(customerId),
+          customerName: `${formatName(appointmentFormData.firstName)} ${formatName(appointmentFormData.lastName)}`,
+          serviceName: serviceName,
+          date: date,
+          timeStart: timeStart,
+          timeEnd: timeEnd
+        }
+      );
+
+      if (googleEventId) {
+        const updateGoogleEventQuery = `
+          UPDATE SavedAppointments
+          SET google_calendar_event_id = ?
+          WHERE id = ?
+        `;
+        await request.dbPool.query(updateGoogleEventQuery, [googleEventId, appointmentId]);
+      }
+    } catch (error) {
+      console.error(`Failed to create Google Calendar event:`, error);
+    }
+
     try {
       const emailResult = await sendAppointmentConfirmationEmail(
         appointmentFormData.email,
@@ -198,26 +230,26 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       if (emailResult?.previewUrl) {
         console.log(`Email preview available at: ${emailResult.previewUrl}`);
       }
-    } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError);
-      // Continue execution - user will still get confirmation via the interface
+    } catch (error) {
+      console.error(`Failed to send confirmation email:`, error);
     }
 
     response.json({
-      message: `Appointment has been saved successfully`,
+      message: `Appointment created successfully`,
       data: {
         id: appointmentResults.insertId,
-        date,
-        timeStart,
-        timeEnd,
-        serviceName,
-        firstName: formatName(appointmentFormData.firstName),
-        lastName: formatName(appointmentFormData.lastName),
+        date: date,
+        timeStart: timeStart,
+        serviceName: serviceName,
         salutation: appointmentFormData.salutation,
-      },
+        lastName: formatName(appointmentFormData.lastName),
+        firstName: formatName(appointmentFormData.firstName)
+      }
     });
+
     return;
   } catch (error) {
+    console.error(`Failed to create appointment:`, error);
     response.status(500).json({
       errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
       message: (error as Error).message,

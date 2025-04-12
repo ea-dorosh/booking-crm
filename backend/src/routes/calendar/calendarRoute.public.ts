@@ -15,6 +15,7 @@ import {
 } from '@/@types/expressTypes.js';
 import { getService } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
+import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
 
 const router = express.Router();
 
@@ -117,6 +118,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     ]);
 
     const groupedAppointments: Record<string, SavedAppointmentRow[]> = {};
+
     appointmentResults.forEach((appointment) => {
       const dateFormatted = dayjs(appointment.date).format(DATE_FORMAT);
       const key = `${dateFormatted}_${appointment.employee_id}`;
@@ -124,18 +126,54 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       groupedAppointments[key].push(appointment);
     });
 
+    const googleCalendarEvents: Record<number, {start: Date; end: Date; summary: string}[]> = {};
+
+    for (const employeeId of employeeIds) {
+      const startDateString = firstDayOfSearch.format(DATE_FORMAT);
+      const endDateString = lastDayOfSearch.add(1, 'day').format(DATE_FORMAT);
+
+      const employeeEvents = await getGoogleCalendarEvents(
+        req.dbPool,
+        employeeId,
+        startDateString,
+        endDateString
+      );
+
+      if (employeeEvents) {
+        googleCalendarEvents[employeeId] = employeeEvents;
+      }
+    }
+
     for (const availability of employeeAvailability) {
       let currentDay = firstDayOfSearch;
 
-      // Iterate through the days of the period for each row
       while (currentDay.isBefore(lastDayOfSearch) || currentDay.isSame(lastDayOfSearch, `day`)) {
-        // Check if the day is in the future (excluding today)
         if (currentDay.isAfter(today) && currentDay.day() === availability.dayId) {
-          const key = `${currentDay.format(DATE_FORMAT)}_${availability.employeeId}`;
+          const dateFormatted = currentDay.format(DATE_FORMAT);
+          const key = `${dateFormatted}_${availability.employeeId}`;
+
           const blockedTimes = (groupedAppointments[key] || []).map((appointment) => ({
             startBlockedTime: dayjs(appointment.time_start).format(TIME_FORMAT),
             endBlockedTime: dayjs(appointment.time_end).format(TIME_FORMAT),
           }));
+
+          const employeeGoogleEvents = googleCalendarEvents[availability.employeeId] || [];
+
+          employeeGoogleEvents.forEach(event => {
+            const eventDate = dayjs(event.start).format(DATE_FORMAT);
+
+            if (eventDate === dateFormatted) {
+              const startBlockedTime = dayjs(event.start).format(TIME_FORMAT);
+              const endBlockedTime = dayjs(event.end).format(TIME_FORMAT);
+
+              console.log(`Adding Google event to blockedTimes: ${event.summary}, ${startBlockedTime}-${endBlockedTime}`);
+
+              blockedTimes.push({
+                startBlockedTime,
+                endBlockedTime
+              });
+            }
+          });
 
           let availableTimeslots = addTimeSlotsAccordingEmployeeAvailability({
             startTime: availability.startTime,
@@ -146,13 +184,13 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
           availableTimeslots = disableTimeSlotsForServiceDuration(availableTimeslots, serviceDurationWithBuffer);
 
-          let currentDayIndex = availableDays.findIndex((availableDay: { day: string; }) => availableDay.day === currentDay.format(DATE_FORMAT));
+          let currentDayIndex = availableDays.findIndex((availableDay: { day: string; }) => availableDay.day === dateFormatted);
 
           if (currentDayIndex >= 0) {
             availableDays[currentDayIndex] = replaceExistingDayWithNewEmployeeData({
               existingDay: availableDays[currentDayIndex],
               newDay: {
-                day: currentDay.format(DATE_FORMAT),
+                day: dateFormatted,
                 startTime: availability.startTime,
                 endTime: availability.endTime,
                 availableTimeslots,
@@ -161,7 +199,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           } else {
             availableDays.push(
               {
-                day: currentDay.format(DATE_FORMAT),
+                day: dateFormatted,
                 startTime: availability.startTime,
                 endTime: availability.endTime,
                 availableTimeslots,

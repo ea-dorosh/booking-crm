@@ -16,6 +16,9 @@ import {
 import {
   EmployeeDetailRowType,
 } from '@/@types/employeesTypes.js';
+import { deleteGoogleCalendarEvent } from '@/services/googleCalendar/googleCalendarService.js';
+import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import dayjs from 'dayjs';
 
 const router = express.Router();
 
@@ -69,7 +72,7 @@ router.get('/', async (request: CustomRequestType, response: CustomResponseType)
     response.json(appointmentsData);
   } catch (error) {
     console.error(error);
-    response.status(500).json({ error: 'Error fetching employees' });
+    response.status(500).json({ error: `Error fetching employees` });
   }
 });
 
@@ -156,14 +159,42 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
 
   const appointmentId = request.params.id;
 
-  const sql = `
-    UPDATE SavedAppointments
-    SET status = ?
+  const getAppointmentQuery = `
+    SELECT employee_id, google_calendar_event_id
+    FROM SavedAppointments
     WHERE id = ?
   `;
 
+  interface AppointmentRow extends RowDataPacket {
+    employee_id: number;
+    google_calendar_event_id: string | null;
+  }
+
   try {
-    await request.dbPool.query(sql, [AppointmentStatusEnum.Canceled, appointmentId]);
+    const [rows] = await request.dbPool.query<AppointmentRow[]>(getAppointmentQuery, [appointmentId]);
+
+    if (rows.length === 0) {
+      response.status(404).json({ error: `Appointment not found` });
+      return;
+    }
+
+    const { employee_id, google_calendar_event_id } = rows[0];
+
+    const updateQuery = `
+      UPDATE SavedAppointments
+      SET status = ?
+      WHERE id = ?
+    `;
+
+    await request.dbPool.query(updateQuery, [AppointmentStatusEnum.Canceled, appointmentId]);
+
+    if (google_calendar_event_id) {
+      try {
+        await deleteGoogleCalendarEvent(request.dbPool, employee_id, google_calendar_event_id);
+      } catch (error) {
+        console.error(`Error deleting Google Calendar event:`, error);
+      }
+    }
 
     response.json({ message: `Appointment status updated successfully` });
   } catch (error) {
@@ -172,7 +203,6 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
   }
 });
 
-// TODO: add route for editing appointments from crm
 router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
     response.status(500).json({ message: `Database connection not initialized` });
@@ -180,12 +210,204 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
   }
 
   const appointmentId = request.params.id;
+  const appointmentData = request.body;
+
+  const getAppointmentQuery = `
+    SELECT
+      employee_id, service_id, service_name, customer_id,
+      customer_first_name, customer_last_name, google_calendar_event_id
+    FROM SavedAppointments
+    WHERE id = ?
+  `;
+
+  interface AppointmentEditRow extends RowDataPacket {
+    employee_id: number;
+    service_id: number;
+    service_name: string;
+    customer_id: number;
+    customer_first_name: string;
+    customer_last_name: string;
+    google_calendar_event_id: string | null;
+  }
+
+  try {
+    const [rows] = await request.dbPool.query<AppointmentEditRow[]>(getAppointmentQuery, [appointmentId]);
+
+    if (rows.length === 0) {
+      response.status(404).json({ error: `Appointment not found` });
+      return;
+    }
+
+    const appointment = rows[0];
+
+    const updateQuery = `
+      UPDATE SavedAppointments
+      SET
+        date = ?,
+        time_start = ?,
+        time_end = ?,
+        employee_id = ?
+      WHERE id = ?
+    `;
+
+    await request.dbPool.query(updateQuery, [
+      appointmentData.date,
+      appointmentData.timeStart,
+      appointmentData.timeEnd,
+      appointmentData.employeeId,
+      appointmentId
+    ]);
+
+    if (appointment.google_calendar_event_id) {
+      try {
+        if (appointment.employee_id !== appointmentData.employeeId) {
+          const { deleteGoogleCalendarEvent, createGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
+
+          await deleteGoogleCalendarEvent(request.dbPool, appointment.employee_id, appointment.google_calendar_event_id);
+
+          const newGoogleEventId = await createGoogleCalendarEvent(
+            request.dbPool,
+            appointmentData.employeeId,
+            {
+              id: Number(appointmentId),
+              customerId: appointment.customer_id,
+              customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
+              serviceName: appointment.service_name,
+              date: appointmentData.date,
+              timeStart: appointmentData.timeStart,
+              timeEnd: appointmentData.timeEnd
+            }
+          );
+
+          if (newGoogleEventId) {
+            const updateGoogleEventQuery = `
+              UPDATE SavedAppointments
+              SET google_calendar_event_id = ?
+              WHERE id = ?
+            `;
+            await request.dbPool.query(updateGoogleEventQuery, [newGoogleEventId, appointmentId]);
+          }
+        } else {
+          const { updateGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
+
+          await updateGoogleCalendarEvent(
+            request.dbPool,
+            appointment.employee_id,
+            appointment.google_calendar_event_id,
+            {
+              id: Number(appointmentId),
+              customerId: appointment.customer_id,
+              customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
+              serviceName: appointment.service_name,
+              date: appointmentData.date,
+              timeStart: appointmentData.timeStart,
+              timeEnd: appointmentData.timeEnd
+            }
+          );
+        }
+      } catch (error) {
+        console.error(`Error updating Google Calendar event:`, error);
+      }
+    }
+
+    response.json({ message: `Appointment updated successfully` });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ error: `Error updating appointment` });
+  }
 });
 
-
-// TODO: add route for creating appointments from crm
 router.post(`/create`, async (request: CustomRequestType, response: CustomResponseType) => {
-  const appointment = request.body;
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const appointmentData = request.body;
+
+  try {
+    const insertQuery = `
+      INSERT INTO SavedAppointments (
+        date,
+        time_start,
+        time_end,
+        service_id,
+        service_name,
+        customer_id,
+        service_duration,
+        employee_id,
+        created_date,
+        customer_salutation,
+        customer_first_name,
+        customer_last_name,
+        customer_email,
+        customer_phone,
+        is_customer_new,
+        google_calendar_event_id,
+        status
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const [insertResult] = await request.dbPool.query<ResultSetHeader>(insertQuery, [
+      appointmentData.date,
+      appointmentData.timeStart,
+      appointmentData.timeEnd,
+      appointmentData.serviceId,
+      appointmentData.serviceName,
+      appointmentData.customerId,
+      appointmentData.serviceDuration,
+      appointmentData.employeeId,
+      dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      appointmentData.customerSalutation,
+      appointmentData.customerFirstName,
+      appointmentData.customerLastName,
+      appointmentData.customerEmail,
+      appointmentData.customerPhone,
+      appointmentData.isCustomerNew || CustomerNewStatusEnum.Existing,
+      null, // google_calendar_event_id
+      appointmentData.status || AppointmentStatusEnum.Active
+    ]);
+
+    const appointmentId = insertResult.insertId;
+
+    try {
+      const { createGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
+
+      const googleEventId = await createGoogleCalendarEvent(
+        request.dbPool,
+        appointmentData.employeeId,
+        {
+          id: appointmentId,
+          customerId: appointmentData.customerId,
+          customerName: `${appointmentData.customerFirstName} ${appointmentData.customerLastName}`,
+          serviceName: appointmentData.serviceName,
+          date: appointmentData.date,
+          timeStart: appointmentData.timeStart,
+          timeEnd: appointmentData.timeEnd
+        }
+      );
+
+      if (googleEventId) {
+        const updateGoogleEventQuery = `
+          UPDATE SavedAppointments
+          SET google_calendar_event_id = ?
+          WHERE id = ?
+        `;
+        await request.dbPool.query(updateGoogleEventQuery, [googleEventId, appointmentId]);
+      }
+    } catch (error) {
+      console.error('Failed to create Google Calendar event:', error);
+    }
+
+    response.json({
+      message: `Appointment created successfully`,
+      id: appointmentId
+    });
+  } catch (error) {
+    console.error(`Error creating appointment:`, error);
+    response.status(500).json({ error: `Error creating appointment` });
+  }
 });
 
 export default router;

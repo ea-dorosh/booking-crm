@@ -11,6 +11,7 @@ import authRouter from '@/routes/auth/authRoute.js';
 import companyRouter from '@/routes/company/companyRoute.js';
 import customersRouter from '@/routes/customers/customersRoute.js';
 import employeesRouter from '@/routes/employees/employeesRoute.js';
+import googleCalendarRouter from '@/routes/googleCalendar/googleCalendarRoute.js';
 import invoicesRouter from '@/routes/invoices/invoicesRoute.js';
 import servicesRouter from '@/routes/services/servicesRoute.js';
 import userRouter from '@/routes/user/userRoute.js';
@@ -29,7 +30,35 @@ app.use(morgan(`dev`));
 
 const port = parseInt(process.env.PORT || `3500`, 10);
 
-app.use(cors());
+const allowedOrigins = [
+  `http://localhost:3000`,
+  `http://127.0.0.1:3000`,
+  `http://192.168.178.40:3000`,
+  process.env.PRODUCTION_CLIENT_URL,
+  process.env.PRODUCTION_ADMIN_URL,
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (process.env.NODE_ENV === 'development' || allowedOrigins.some(allowedOrigin => origin.startsWith(String(allowedOrigin)))) {
+      return callback(null, true);
+    } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      return callback(new Error(`Origin ${origin} not allowed by CORS`), false);
+    }
+  },
+  methods: [`GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 86400,
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.static(`public`));
 
@@ -47,6 +76,7 @@ app.use(`/api/protected/appointments`, databaseMiddleware, appointmentsRouter);
 app.use(`/api/protected/company`, databaseMiddleware, companyRouter);
 app.use(`/api/protected/customers`, databaseMiddleware, customersRouter);
 app.use(`/api/protected/employees`, databaseMiddleware, employeesRouter);
+app.use(`/api/protected/google-calendar`, databaseMiddleware, googleCalendarRouter);
 app.use(`/api/protected/invoices`, databaseMiddleware, invoicesRouter);
 app.use(`/api/protected/services`, databaseMiddleware, servicesRouter);
 app.use(`/api/protected/user`, databaseMiddleware, userRouter);
@@ -57,6 +87,6 @@ app.use(`/api/public/calendar`, databaseSelectionMiddleware, calendarPublicRoute
 app.use(`/api/public/employees`, databaseSelectionMiddleware, employeesPublicRouter);
 app.use(`/api/public/services`, databaseSelectionMiddleware, servicesPublicRouter);
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, `0.0.0.0`, () => {
   console.log(`Server is running on internal port ${port} and externally accessible as ${process.env.SERVER_API_URL}`);
 });
