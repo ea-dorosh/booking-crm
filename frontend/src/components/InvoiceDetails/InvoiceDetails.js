@@ -1,6 +1,7 @@
 import {
   Edit as EditIcon,
   PictureAsPdf as DownloadIcon,
+  Visibility as ViewIcon,
 } from "@mui/icons-material";
 import {
   IconButton,
@@ -9,11 +10,12 @@ import {
   ListItemText,
   Box,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import { formatIsoDate } from "@/utils/formatters";
 
-export default function InvoiceDetails({ invoice, onChangeInvoiceClick, onDownloadInvoiceClick }) {
+export default function InvoiceDetails({ invoice, onChangeInvoiceClick, onDownloadInvoiceClick, onViewInvoiceClick }) {
 
   return (<Box>
     <Box sx={{
@@ -37,12 +39,21 @@ export default function InvoiceDetails({ invoice, onChangeInvoiceClick, onDownlo
         </Box>
       </Box>
 
-      <Box>
-        <IconButton
-          onClick={onDownloadInvoiceClick}
-        >
-          <DownloadIcon />
-        </IconButton>
+      <Box sx={{ display: `flex` }}>
+        <Tooltip title="View PDF">
+          <IconButton
+            onClick={onViewInvoiceClick}
+          >
+            <ViewIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Download PDF">
+          <IconButton
+            onClick={onDownloadInvoiceClick}
+          >
+            <DownloadIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
 

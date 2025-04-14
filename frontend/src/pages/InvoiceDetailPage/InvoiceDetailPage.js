@@ -7,12 +7,14 @@ import {
   useState,
   useEffect,
   useMemo,
+  useRef,
 } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import InvoiceDetails from "@/components/InvoiceDetails/InvoiceDetails";
 import InvoiceForm from "@/components/InvoiceForm/InvoiceForm";
+import Loader from '@/components/Loader/Loader';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { sortedByLastActivityDateCustomers } from '@/features/customers/customersSelectors';
 import { fetchCustomers } from "@/features/customers/customersSlice";
@@ -31,6 +33,11 @@ export default function CustomerDetailPage() {
   const { invoiceId } = useParams();
   const isNewInvoice = useMemo(() => invoiceId === `create-invoice`, [invoiceId]);
   const [isEditMode, setIsEditMode] = useState(isNewInvoice);
+  const [pdfViewerUrl, setPdfViewerUrl] = useState(null);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const iframeRef = useRef(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -44,6 +51,16 @@ export default function CustomerDetailPage() {
   const formErrors = useSelector(state => state.invoice.updateFormErrors);
 
   useEffect(() => {
+    // Check if device is mobile
+    const checkMobile = () => {
+      const userAgent =
+        typeof window.navigator === "undefined" ? "" : navigator.userAgent;
+      setIsMobileDevice(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
     if (!isEditMode) {
       dispatch(fetchInvoice(invoiceId));
     } else {
@@ -53,6 +70,10 @@ export default function CustomerDetailPage() {
 
     return () => {
       dispatch(resetInvoiceData());
+      if (pdfViewerUrl) {
+        URL.revokeObjectURL(pdfViewerUrl);
+      }
+      window.removeEventListener("resize", checkMobile);
     };
   }, []);
 
@@ -85,36 +106,66 @@ export default function CustomerDetailPage() {
   };
 
   const handleDownloadInvoicePdf = async () => {
-    // const response = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
+    try {
+      setIsPdfLoading(true);
+      const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
 
-    // const file = new Blob([response], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(
+        new Blob([blobResponse], { type: 'application/pdf' })
+      );
 
-    // const fileURL = URL.createObjectURL(file);
-    // const link = document.createElement('a');
-    // link.href = fileURL;
-    // link.target = `_blank`;
-    // link.setAttribute('download', `invoice-${invoiceId}.pdf`);
-    // document.body.appendChild(link);
-    // link.click();
-    // link.remove();
-    // URL.revokeObjectURL(fileURL);
-
-    const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
-
-    const fileURL = URL.createObjectURL(
-      new Blob([blobResponse], { type: 'application/pdf' })
-    );
-
-    const link = document.createElement('a');
-    link.href = fileURL;
-    link.target = '_blank';
-    link.download = `invoice-${invoiceId}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(fileURL);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.target = `_blank`;
+      link.download = `invoice-${invoiceId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(fileURL);
+    } catch (error) {
+      console.error(`Failed to download PDF`, error);
+    } finally {
+      setIsPdfLoading(false);
+    }
   };
 
+  const handleViewInvoicePdf = async () => {
+    try {
+      setIsPdfLoading(true);
+      const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
+
+      // Clear previous URL if it exists
+      if (pdfViewerUrl) {
+        URL.revokeObjectURL(pdfViewerUrl);
+      }
+
+      // Create a blob with the correct MIME type
+      const blob = new Blob([blobResponse], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(blob);
+
+      if (isMobileDevice) {
+        // On mobile, we directly download or open in a new window
+        window.open(fileURL, `_blank`);
+        setIsPdfLoading(false);
+      } else {
+        // On desktop, show in iframe
+        setPdfViewerUrl(fileURL);
+        setShowPdfViewer(true);
+        setIsPdfLoading(false);
+      }
+    } catch (error) {
+      console.error(`Failed to view PDF`, error);
+      setIsPdfLoading(false);
+    }
+  };
+
+  const closePdfViewer = () => {
+    if (pdfViewerUrl) {
+      URL.revokeObjectURL(pdfViewerUrl);
+    }
+    setPdfViewerUrl(null);
+    setShowPdfViewer(false);
+  };
 
   return (
     <PageContainer
@@ -128,6 +179,8 @@ export default function CustomerDetailPage() {
       {(isPending || isCustomersRequestPending) && <Box mt={2}>
         <LinearProgress />
       </Box>}
+
+      <Loader isOpen={isPdfLoading} message={`Processing PDF...`} />
 
       {isEditMode && <Box mt={3}>
         <InvoiceForm
@@ -166,8 +219,60 @@ export default function CustomerDetailPage() {
           invoice={invoice}
           onChangeInvoiceClick={() => setIsEditMode(true)}
           onDownloadInvoiceClick={handleDownloadInvoicePdf}
+          onViewInvoiceClick={handleViewInvoicePdf}
         />
       </Box>}
+
+      {showPdfViewer && (
+        <Box
+          sx={{
+            position: `fixed`,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: `rgba(0,0,0,0.7)`,
+            zIndex: 1300,
+            display: `flex`,
+            flexDirection: `column`,
+            alignItems: `center`,
+            padding: 2
+          }}
+        >
+          <Box sx={{
+            display: `flex`,
+            justifyContent: `flex-end`,
+            width: `100%`,
+            marginBottom: 1
+          }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={closePdfViewer}
+            >
+              Close
+            </Button>
+          </Box>
+          <Box sx={{
+            width: `100%`,
+            height: `calc(100% - 50px)`,
+            backgroundColor: `white`,
+            overflow: `hidden`
+          }}>
+            {pdfViewerUrl && (
+              <iframe
+                ref={iframeRef}
+                src={pdfViewerUrl}
+                width="100%"
+                height="100%"
+                title="Invoice PDF"
+                frameBorder="0"
+                allowFullScreen
+              />
+            )}
+          </Box>
+        </Box>
+      )}
     </PageContainer>
   );
 }
