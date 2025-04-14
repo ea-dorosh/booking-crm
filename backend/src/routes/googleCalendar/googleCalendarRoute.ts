@@ -28,8 +28,8 @@ router.get(`/auth-url`, (req: CustomRequestType, res: CustomResponseType) => {
     console.log(`Getting auth URL for employeeId: ${employeeId}`);
 
     const deviceParams: Record<string, string> = {
-      device_id: `dev_booking_crm_${employeeId}_${Date.now()}`,
-      device_name: `Booking CRM Development`
+      device_id: `booking_crm_client_${employeeId}_${Date.now()}`,
+      device_name: `Booking CRM Client`
     };
 
     console.log(`Adding device params:`, deviceParams);

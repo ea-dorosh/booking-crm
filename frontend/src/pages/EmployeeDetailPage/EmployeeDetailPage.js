@@ -1,11 +1,12 @@
 import { Edit } from "@mui/icons-material";
-import { 
-  Button, 
+import {
+  Button,
   Typography,
   Box,
   List,
   ListItemText,
   LinearProgress,
+  Divider
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,8 +15,9 @@ import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppo
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
 import EmployeeForm from "@/components/EmployeeForm/EmployeeForm";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
+import GoogleCalendarIntegration from '@/components/GoogleCalendarIntegration/GoogleCalendarIntegration';
 import PageContainer from '@/components/PageContainer/PageContainer';
-import { 
+import {
   fetchEmployees,
   fetchEmployeeAppointments,
   updateEmployee,
@@ -76,9 +78,9 @@ export default function EmployeeDetailPage() {
   };
 
   return (
-    <PageContainer 
-      pageTitle={employee ? 
-        `${employee.lastName} ${employee.firstName}` 
+    <PageContainer
+      pageTitle={employee ?
+        `${employee.lastName} ${employee.firstName}`
         :
         `New employee`
       }
@@ -100,7 +102,7 @@ export default function EmployeeDetailPage() {
         />
 
         <Box mt={2}>
-          {!shouldShowCreateEmployeeForm && <Button 
+          {!shouldShowCreateEmployeeForm && <Button
             variant="outlined"
             onClick={() => setIsEditMode(false)}
           >
@@ -120,7 +122,7 @@ export default function EmployeeDetailPage() {
           <ListItemText
             primary={`${employee.firstName} ${employee.lastName}`}
             secondary="Name"
-            sx={{ 
+            sx={{
               display: `flex`,
               flexDirection: `column-reverse`,
             }}
@@ -129,7 +131,7 @@ export default function EmployeeDetailPage() {
           <ListItemText
             primary={employee.email}
             secondary="Email"
-            sx={{ 
+            sx={{
               display: `flex`,
               flexDirection: `column-reverse`,
             }}
@@ -138,7 +140,7 @@ export default function EmployeeDetailPage() {
           <ListItemText
             primary={employee.phone}
             secondary="Phone"
-            sx={{ 
+            sx={{
               display: `flex`,
               flexDirection: `column-reverse`,
             }}
@@ -146,8 +148,8 @@ export default function EmployeeDetailPage() {
         </List>
 
         <Box sx={{width: `40%`}}>
-          <img 
-            src={employee.image} 
+          <img
+            src={employee.image}
             alt={`${employee.firstName} ${employee.lastName}`}
             style={{ width: `100%` }}
           />
@@ -164,9 +166,9 @@ export default function EmployeeDetailPage() {
       >
         Update Employee
       </Button>}
-      
 
       {employee && <Box mt={2.5}>
+        <Divider sx={{ mb: 2, mt: 2 }} />
         <Typography variant="h6">
           Availability
         </Typography>
@@ -174,8 +176,13 @@ export default function EmployeeDetailPage() {
         <EmployeeAvailability employeeId={employee.employeeId} />
       </Box>}
 
+      {employee && !isEditMode && (
+        <GoogleCalendarIntegration employeeId={employee.employeeId} />
+      )}
+
       {!isEditMode && lastAppointments && <Box mt={3}>
-        <EmployeeAppointments 
+        <Divider sx={{ mb: 2, mt: 2 }} />
+        <EmployeeAppointments
           appointments={lastAppointments}
         />
       </Box>}

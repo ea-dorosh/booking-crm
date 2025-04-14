@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
-import AppointmentDetailPage from './pages/AppointmentDetailPage/AppointmentDetailPage';
-import AppointmentsPage from './pages/AppointmentsPage/AppointmentsPage';
 import AccountPage from '@/pages/AccountPage/AccountPage';
+import AppointmentDetailPage from '@/pages/AppointmentDetailPage/AppointmentDetailPage';
+import AppointmentsPage from '@/pages/AppointmentsPage/AppointmentsPage';
 import CompanyDetailPage from '@/pages/CompanyDetailPage/CompanyDetailPage';
 import CustomerDetailPage from '@/pages/CustomerDetailPage/CustomerDetailPage';
 import CustomersPage from '@/pages/CustomersPage/CustomersPage';
@@ -12,8 +12,10 @@ import ErrorPage from '@/pages/ErrorPage/ErrorPage';
 import InvoiceDetailPage from '@/pages/InvoiceDetailPage/InvoiceDetailPage';
 import InvoicesPage from '@/pages/InvoicesPage/InvoicesPage';
 import LoginPage from '@/pages/LoginPage/LoginPage';
+import OAuthCallbackPage from '@/pages/OAuthCallbackPage/OAuthCallbackPage';
 import ForgotPasswordPage from '@/pages/PasswordResetPage/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/PasswordResetPage/ResetPasswordPage';
+import RootPageWithOAuthHandler from '@/pages/RootPageWithOAuthHandler/RootPageWithOAuthHandler';
 import ServiceCategoryDetailPage from '@/pages/ServiceCategoryDetailPage/ServiceCategoryDetailPage';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
@@ -21,25 +23,37 @@ import { ProtectedRoute } from '@/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
+    path: `/login`,
     element: <LoginPage />,
   },
   {
-    path: "/forgot-password",
+    path: `/forgot-password`,
     element: <ForgotPasswordPage />,
   },
   {
-    path: "/reset-password",
+    path: `/reset-password`,
     element: <ResetPasswordPage />,
   },
   {
-    path: "/",
+    path: `/`,
+    element: (
+      <ProtectedRoute>
+        <RootPageWithOAuthHandler />
+      </ProtectedRoute>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: `/dashboard`,
     element: (
       <ProtectedRoute>
         <DashboardPage />
       </ProtectedRoute>
     ),
-    errorElement: <ErrorPage />,
+  },
+  {
+    path: `/google-callback`,
+    element: <OAuthCallbackPage />,
   },
   {
     path: `/appointments`,
