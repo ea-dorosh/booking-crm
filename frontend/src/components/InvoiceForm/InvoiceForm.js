@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { 
+import {
   AddCircle,
   ArrowBackIos,
   Cancel,
@@ -7,7 +6,7 @@ import {
 import {
   Box,
   Button,
-  FormControl, 
+  FormControl,
   FormLabel,
   FormControlLabel,
   FormHelperText,
@@ -32,6 +31,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from "dayjs";
 import { useState, useEffect } from "react";
 import "dayjs/locale/de";
+import { useSearchParams } from "react-router-dom";
 
 dayjs.locale(`de`);
 
@@ -60,6 +60,10 @@ export default function InvoiceForm({
 }) {
   const isEditMode = Boolean(invoice);
   const [isNewCustomer, setIsNewCustomer] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const urlCustomerId = Number(searchParams.get(`customerId`));
+  const urlServiceId = Number(searchParams.get(`serviceId`));
 
   const [formData, setFormData] = useState({
     customerId: isEditMode && invoice?.customerId ? invoice.customerId : ``,
@@ -97,10 +101,24 @@ export default function InvoiceForm({
 
   useEffect(() => {
     console.log(`formData.services: `, JSON.stringify(formData.services, null, 4));
-    
   }, [formData]);
 
   useEffect(() => {
+    /**
+     * If the customerId and serviceId are set in the url, prefill the form
+     */
+    if (urlCustomerId) {
+      handleCustomerChange(null, {id: urlCustomerId, isCreateNew: false});
+    }
+
+    if (urlServiceId) {
+      const preSelectedService = services.find((s) => s.id === urlServiceId);
+
+      handleServiceFieldChange(0, `id`, preSelectedService?.id);
+      handleServiceFieldChange(0, `name`, preSelectedService?.name);
+      handleServiceFieldChange(0, `price`, preSelectedService?.employeePrices[0]?.price.toString());
+    }
+
     return () => cleanErrors()
   }, []);
 
@@ -152,22 +170,22 @@ export default function InvoiceForm({
     });
   };
 
-  const handleServiceAutocompleteChange = (_event, newValue, index) => {   
+  const handleServiceAutocompleteChange = (_event, newValue, index) => {
     if (!newValue) {
       handleServiceFieldChange(index, `id`, ``);
       handleServiceFieldChange(index, `name`, ``);
       return;
     }
 
-    if (typeof newValue === "string") {
-      handleServiceFieldChange(index, "id", "");
-      handleServiceFieldChange(index, "name", newValue);
+    if (typeof newValue === `string`) {
+      handleServiceFieldChange(index, `id`, ``);
+      handleServiceFieldChange(index, `name`, newValue);
       return;
     }
 
-    handleServiceFieldChange(index, "id", newValue.id);
-    handleServiceFieldChange(index, "name", newValue.name);
-    handleServiceFieldChange(index, "price", newValue.employeePrices[0].price.toString());
+    handleServiceFieldChange(index, `id`, newValue.id);
+    handleServiceFieldChange(index, `name`, newValue.name);
+    handleServiceFieldChange(index, `price`, newValue.employeePrices[0].price.toString());
   };
 
   const handleChange = (event) => {
@@ -176,7 +194,7 @@ export default function InvoiceForm({
     if(formErrors && formErrors[name]) {
       cleanError(name);
     }
-    
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -187,7 +205,7 @@ export default function InvoiceForm({
     if (formErrors?.dateIssued) {
       cleanError(`dateIssued`);
     }
-  
+
     setFormData((prev) => ({
       ...prev,
       dateIssued: newValue,
@@ -338,7 +356,7 @@ export default function InvoiceForm({
         </IconButton>
       </FormControl>}
 
-      {formErrors?.customerId && 
+      {formErrors?.customerId &&
         <FormHelperText sx={{width: `100%`, color: `#d32f2f`, mt: `-.8rem`}} >
           {formErrors.customerId}
         </FormHelperText>
@@ -369,7 +387,7 @@ export default function InvoiceForm({
               alignItems: `center`,
               gap: 3,
             }}>
-              <FormLabel 
+              <FormLabel
                 id="salutation-group-label"
                 sx={{ mr: 4 }}
               >
@@ -392,7 +410,7 @@ export default function InvoiceForm({
               </RadioGroup>
             </Box>
 
-            {formErrors?.salutation && 
+            {formErrors?.salutation &&
               <FormHelperText>
                 {formErrors.salutation}
               </FormHelperText>
@@ -409,13 +427,13 @@ export default function InvoiceForm({
               disabled={isPending}
             />
 
-            {formErrors?.lastName && 
+            {formErrors?.lastName &&
               <FormHelperText>
                 {formErrors.lastName}
               </FormHelperText>
             }
           </FormControl>
-      
+
           <FormControl error={Boolean(formErrors?.firstName)}>
             <TextField
               value={formData.firstName}
@@ -426,7 +444,7 @@ export default function InvoiceForm({
               disabled={isPending}
             />
 
-            {formErrors?.firstName && 
+            {formErrors?.firstName &&
               <FormHelperText>
                 {formErrors.firstName}
               </FormHelperText>
@@ -443,7 +461,7 @@ export default function InvoiceForm({
               disabled={isPending}
             />
 
-            {formErrors?.email && 
+            {formErrors?.email &&
               <FormHelperText>
                 {formErrors.email}
               </FormHelperText>
@@ -460,7 +478,7 @@ export default function InvoiceForm({
               disabled={isPending}
             />
 
-            {formErrors?.phone && 
+            {formErrors?.phone &&
               <FormHelperText>
                 {formErrors.phone}
               </FormHelperText>
@@ -520,7 +538,7 @@ export default function InvoiceForm({
 
       <Box>
         {formData.services.map((service, index, servicesArray) => {
-          return <Box 
+          return <Box
             key={index}
             sx={{
               position: `relative`,
@@ -553,11 +571,11 @@ export default function InvoiceForm({
                 <Cancel />
               </IconButton>
 
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  fontWeight: `bold`, 
-                  textAlign: `center`, 
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: `bold`,
+                  textAlign: `center`,
                   width: `3rem`,
                 }}
               >
@@ -565,7 +583,7 @@ export default function InvoiceForm({
                 {index + 1}
               </Typography>
 
-              <FormControl 
+              <FormControl
                 sx={{width: `100%`}}
                 error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.name)}
               >
@@ -609,7 +627,7 @@ export default function InvoiceForm({
                   )}
                 />
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.name && 
+                {formErrors?.services?.length > 0 && formErrors?.services[index]?.name &&
               <FormHelperText>
                 {formErrors.services[index].name}
               </FormHelperText>
@@ -623,7 +641,7 @@ export default function InvoiceForm({
               mt: `2rem`,
               alignItems: `flex-start`,
             }}>
-              <FormControl 
+              <FormControl
                 error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity)}
                 sx={{position: `relative`, flexGrow: 1}}
               >
@@ -639,7 +657,7 @@ export default function InvoiceForm({
                   }}
                 />
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity && 
+                {formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity &&
                 <FormHelperText>
                   {formErrors.services[index].quantity}
                 </FormHelperText>
@@ -694,14 +712,14 @@ export default function InvoiceForm({
                   endAdornment={<InputAdornment position="end"> € </InputAdornment>}
                   onChange={(event) => handleServiceFieldChange(index, `price`, event.target.value)}
                   disabled={isPending}
-                  type="text" 
+                  type="text"
                   inputProps={{
                     inputMode: 'decimal',
                     pattern: '[0-9]+([.,][0-9]+)?'
                   }}
                 />
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.price && 
+                {formErrors?.services?.length > 0 && formErrors?.services[index]?.price &&
                 <FormHelperText>
                   {formErrors.services[index].price}
                 </FormHelperText>
@@ -716,7 +734,7 @@ export default function InvoiceForm({
                   label="Tax MwSt."
                   endAdornment={<InputAdornment position="end"> % </InputAdornment>}
                   name="taxRate"
-                  type="text" 
+                  type="text"
                   inputProps={{
                     inputMode: 'decimal',
                     pattern: '[0-9]+([.,][0-9]+)?'
@@ -725,7 +743,7 @@ export default function InvoiceForm({
                   disabled={isPending}
                 />
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate && 
+                {formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate &&
                 <FormHelperText>
                   {formErrors.services[index].taxRate}
                 </FormHelperText>
@@ -757,7 +775,7 @@ export default function InvoiceForm({
         color="secondary"
         size="large"
         endIcon={<AddCircle size={30} />}
-        sx={{ 
+        sx={{
           alignSelf: `flex-end`,
           padding: 0,
         }}

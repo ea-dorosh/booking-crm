@@ -93,6 +93,17 @@ export default function CustomerDetailPage() {
     }
   };
 
+  const changeInvoiceHandler = async () => {
+    const promise = Promise.all([
+      dispatch(fetchCustomers()),
+      dispatch(fetchServices()),
+    ]);
+
+    await promise;
+
+    setIsEditMode(true);
+  };
+
   const handleCleanError = (fieldName) => {
     dispatch(cleanError(fieldName));
   };
@@ -182,7 +193,7 @@ export default function CustomerDetailPage() {
 
       <Loader isOpen={isPdfLoading} message={`Processing PDF...`} />
 
-      {isEditMode && <Box mt={3}>
+      {isEditMode && customers && services.length > 0 && <Box mt={3}>
         <InvoiceForm
           invoice={invoice}
           customers={customers}
@@ -217,7 +228,7 @@ export default function CustomerDetailPage() {
       {!isEditMode && invoice && <Box mt={3}>
         <InvoiceDetails
           invoice={invoice}
-          onChangeInvoiceClick={() => setIsEditMode(true)}
+          onChangeInvoiceClick={changeInvoiceHandler}
           onDownloadInvoiceClick={handleDownloadInvoicePdf}
           onViewInvoiceClick={handleViewInvoicePdf}
         />

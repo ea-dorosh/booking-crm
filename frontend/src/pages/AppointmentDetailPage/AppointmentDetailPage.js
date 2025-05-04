@@ -1,12 +1,28 @@
-import { 
+import {
+  Schedule as ScheduleIcon,
+  CalendarToday as CalendarIcon,
+  AccessTime as TimeIcon,
+  Person as PersonIcon,
+  Badge as BadgeIcon,
+  Receipt as ReceiptIcon,
+  Cancel as CancelIcon,
+} from '@mui/icons-material';
+import {
   Typography,
   Box,
   LinearProgress,
   Button,
+  Card,
+  CardContent,
+  Divider,
+  Chip,
+  Stack,
+  Paper,
+  Grid,
 } from "@mui/material";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useParams } from "react-router-dom";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
@@ -16,7 +32,7 @@ import {
   clearAppointment,
   cancelAppointment,
 } from '@/features/appointments/appointmentSlice';
-import { 
+import {
   formattedDateToTime,
   formatCreatedDate,
   formatTimeToString,
@@ -25,10 +41,11 @@ import {
 
 export default function AppointmentDetailPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { appointmentId } = useParams();
-  
-  const {data: appointment, isPending} = useSelector(state => state.appointment);  
+
+  const {data: appointment, isPending} = useSelector(state => state.appointment);
 
   useEffect(() => {
     dispatch(fetchAppointment(appointmentId));
@@ -43,8 +60,19 @@ export default function AppointmentDetailPage() {
     dispatch(fetchAppointment(appointmentId));
   };
 
+  const handleCreateInvoice = () => {
+    const queryParams = new URLSearchParams();
+
+    queryParams.append(`appointmentId`, appointmentId);
+    queryParams.append(`customerId`, appointment?.customer?.id);
+    queryParams.append(`serviceId`, appointment?.serviceId);
+
+    // Navigate to invoice creation with all parameters
+    navigate(`/invoices/create-invoice?${queryParams.toString()}`);
+  };
+
   return (
-    <PageContainer 
+    <PageContainer
       pageTitle="Appointment Detail"
       hideSideNav
     >
@@ -52,176 +80,156 @@ export default function AppointmentDetailPage() {
 
       {isPending && <LinearProgress />}
 
-      {appointment && <Box mt={3}
-        sx={{
-          display: `flex`,
-          flexDirection: `column`,
-        }}
-      >
-        <Box sx={{
-          display: `flex`,
-          flexDirection: `column`,
-        }}>
-          <Typography
-            variant="h4"  
-            sx={{
-              fontSize: `1.5rem`,
-              fontWeight: `bold`,
-            }}
-          >
-            {appointment.serviceName}
-          </Typography>
-
-          <Box sx={{
-            display: `flex`,
-            alignItems: `center`,
-            gap: `10px`,
-            mt: `1rem`,
-          }}>
-            <Typography
-              variant="subtitle1"
+      {appointment && (
+        <Box sx={{ mt: 3, mb: 5 }}>
+          <Card elevation={3} sx={{ mb: 4, overflow: `visible` }}>
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: `primary.main`,
+                color: `white`,
+                position: `relative`,
+              }}
             >
-              Date: {formatIsoDate(appointment.date)}
-            </Typography>
-
-            {appointment.status === appointmentStatusEnum.active && <Box sx={{
-              backgroundColor: `green`,
-              color: `#fff`,
-              padding: `4px 10px`,
-              borderRadius: `3px`,
-              fontSize: `.8rem`,
-              ml: `auto`,
-            }}>
-              Active
-            </Box>}
-
-            {appointment.status === appointmentStatusEnum.canceled && <Box sx={{
-              backgroundColor: `red`,
-              color: `#fff`,
-              padding: `4px 10px`,
-              borderRadius: `3px`,
-              fontSize: `.8rem`,
-              ml: `auto`,
-            }}>
-              Canceled
-            </Box>}
-          </Box>
-
-          <Typography
-            variant="subtitle1"
-            mt={1}
-          >
-            Time: {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}       ({formatTimeToString(appointment.serviceDuration)})
-          </Typography>
-
-          <Typography
-            variant="subtitle1"
-            sx={{
-              display: `flex`,
-              alignItems: `center`,
-              mt: `1rem`,
-            }}
-          >
-            Was created: 
-            
-            <Box>
-              <Typography
-                sx={{
-                  color: `green`,
-                  ml: `1rem`,
-                }}
-              >
-                {formatCreatedDate(appointment.createdDate)}
-              </Typography>   
-
-              <Typography
-                sx={{
-                  ml: `1rem`,
-                }}
-              >
-                {appointment.createdDate}
+              <Typography variant="h5" fontWeight="bold">
+                {appointment.serviceName}
               </Typography>
-            </Box>   
-          </Typography>
+              <Chip
+                label={appointment.status === appointmentStatusEnum.active ? "Active" : "Canceled"}
+                color={appointment.status === appointmentStatusEnum.active ? "success" : "error"}
+                sx={{
+                  position: `absolute`,
+                  top: 16,
+                  right: 16,
+                  fontWeight: `bold`,
+                }}
+              />
+            </Box>
 
-          <Box
-            sx={{
-              display: `flex`,
-              alignItems: `center`,
-              gap: `10px`,
-              mt: `20px`,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
+            <CardContent sx={{ p: 3 }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ display: `flex`, alignItems: `center`, mb: 2 }}>
+                    <CalendarIcon sx={{ mr: 1, color: `primary.main` }} />
+                    <Typography variant="body1">
+                      <strong>Date:</strong> {formatIsoDate(appointment.date)}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: `flex`, alignItems: `center`, mb: 2 }}>
+                    <TimeIcon sx={{ mr: 1, color: `primary.main` }} />
+                    <Typography variant="body1">
+                      <strong>Time:</strong> {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: `flex`, alignItems: `center`, mb: 2 }}>
+                    <ScheduleIcon sx={{ mr: 1, color: `primary.main` }} />
+                    <Typography variant="body1">
+                      <strong>Duration:</strong> {formatTimeToString(appointment.serviceDuration)}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Paper elevation={1} sx={{ p: 2, bgcolor: `grey.50` }}>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      APPOINTMENT CREATED
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium" color="primary.main">
+                      {formatCreatedDate(appointment.createdDate)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {appointment.createdDate}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 3 }} />
+
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ display: `flex`, alignItems: `center` }}>
+                    <PersonIcon sx={{ mr: 1, color: `primary.main` }} />
+                    <Typography variant="body1" sx={{ mr: 1 }}>
+                      <strong>Client:</strong>
+                    </Typography>
+                    <Typography
+                      component={RouterLink}
+                      to={`/customers/${appointment.customer.id}`}
+                      sx={{
+                        color: `primary.main`,
+                        textDecoration: `none`,
+                        fontWeight: `medium`,
+                        '&:hover': {
+                          textDecoration: `underline`,
+                        }
+                      }}
+                    >
+                      {appointment.customer.lastName} {appointment.customer.firstName}
+                    </Typography>
+
+                    {appointment.customer.isCustomerNew && (
+                      <Chip
+                        label="New Client"
+                        size="small"
+                        color="success"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ display: `flex`, alignItems: `center` }}>
+                    <BadgeIcon sx={{ mr: 1, color: `primary.main` }} />
+                    <Typography variant="body1" sx={{ mr: 1 }}>
+                      <strong>Master:</strong>
+                    </Typography>
+                    <Typography
+                      component={RouterLink}
+                      to={`/employees/${appointment.employee.id}`}
+                      sx={{
+                        color: `primary.main`,
+                        textDecoration: `none`,
+                        fontWeight: `medium`,
+                        '&:hover': {
+                          textDecoration: `underline`,
+                        }
+                      }}
+                    >
+                      {appointment.employee.lastName} {appointment.employee.firstName}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          <Stack direction={{ xs: `column`, sm: `row` }} spacing={2}>
+            {appointment.status === appointmentStatusEnum.active && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<CancelIcon />}
+                onClick={() => handleCancelAppointment(appointment.id)}
+              >
+                Cancel Appointment
+              </Button>
+            )}
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<ReceiptIcon />}
+              onClick={handleCreateInvoice}
             >
-              Client: 
-            </Typography>
-
-            <Typography
-              component={RouterLink}
-              to={`/customers/${appointment.customer.id}`}
-              variant="subtitle1"
-              sx={{
-                color: `#1976d2`,
-                textDecoration: `none`,
-              }}
-            >
-              {appointment.customer.lastName} {appointment.customer.firstName}
-            </Typography>
-
-            {appointment.customer.isCustomerNew && <Box sx={{
-              backgroundColor: `green`,
-              color: `#fff`,
-              padding: `3px 6px`,
-              borderRadius: `3px`,
-              fontSize: `.7rem`,
-            }}>
-              New Client
-            </Box>}
-          </Box>
-
-          <Box
-            sx={{
-              display: `flex`,
-              alignItems: `center`,
-              gap: `10px`,
-              mt: `20px`,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-            >
-              Master:
-            </Typography>
-
-            <Typography
-              component={RouterLink}
-              to={`/employees/${appointment.employee.id}`}
-              variant="subtitle1"
-              sx={{
-                color: `#1976d2`,
-                textDecoration: `none`,
-              }}
-            >
-              {appointment.employee.lastName} {appointment.employee.firstName}
-            </Typography>
-          </Box>
+              Create Invoice
+            </Button>
+          </Stack>
         </Box>
-
-        {appointment.status === appointmentStatusEnum.active && <Button
-          variant="outlined"
-          sx={{
-            width: `fit-content`,
-            mt: `20px`,
-          }}
-          color="error"
-          onClick={()=>handleCancelAppointment(appointment.id)}
-        >
-          Cancel Appointment
-        </Button>}
-
-      </Box>}
+      )}
     </PageContainer>
   );
 }
