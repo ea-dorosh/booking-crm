@@ -7,28 +7,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       # ------ Backend ------
-      - name: Setup Node.js (backend)
+      - name: Setup Node.js for backend
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Install dependencies (backend)
+      - name: Build and pack backend
+        working-directory: ./backend
         run: |
-          cd backend
           npm ci
-      - name: Build backend (TS → dist)
-        run: |
-          cd backend
           npm run build
-      - name: Pack backend artifact
-        run: |
-          cd backend
-          # include dist, package.json and lockfile so npm ci works on EC2
+          # упаковываем dist + package.json + lockfile
           tar czf ../backend.tar.gz dist package.json package-lock.json
       - name: Upload backend artifact
         uses: actions/upload-artifact@v3
@@ -36,22 +29,16 @@ jobs:
           name: backend-build
           path: backend.tar.gz
 
-      # ------ Frontend (CRM) ------
-      - name: Setup Node.js (frontend)
+      # ------ Frontend ------
+      - name: Setup Node.js for frontend
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Install dependencies (frontend)
+      - name: Build and pack frontend
+        working-directory: ./frontend
         run: |
-          cd frontend
           npm ci
-      - name: Build frontend (React-App-Rewired)
-        run: |
-          cd frontend
           npm run build
-      - name: Pack frontend artifact
-        run: |
-          cd frontend
           tar czf ../frontend.tar.gz build
       - name: Upload frontend artifact
         uses: actions/upload-artifact@v3
@@ -63,17 +50,18 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
-
     steps:
       - name: Download backend artifact
         uses: actions/download-artifact@v3
         with:
           name: backend-build
+          path: .
 
       - name: Download frontend artifact
         uses: actions/download-artifact@v3
         with:
           name: frontend-build
+          path: .
 
       - name: Copy artifacts to EC2
         uses: appleboy/scp-action@v0.1.3
@@ -94,20 +82,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-
             cd ${{ secrets.EC2_DEPLOY_PATH }}
 
-            # --- Backend deployment ---
+            # Backend
             mkdir -p backend
             tar xzf backend.tar.gz -C backend --strip-components=1
-
-            # Copy production env and activate it
             cp backend/.env.production backend/.env
-
             cd backend
             npm ci --omit=dev
-
-            # Restart PM2 with correct CWD and env
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
               --name booking-backend \
@@ -115,9 +97,9 @@ jobs:
               --env production
             cd ..
 
-            # --- Frontend deployment ---
+            # Frontend
             mkdir -p frontend
             tar xzf frontend.tar.gz -C frontend --strip-components=1
 
-            # --- Clean up archives ---
+            # Cleanup
             rm -f backend.tar.gz frontend.tar.gz
