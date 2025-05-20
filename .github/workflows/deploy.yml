@@ -57,13 +57,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-build
-          path: .
+          path: backend-build
 
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: .
+          path: frontend-build
+
+      - name: Flatten artifacts
+        run: |
+          mv backend-build/backend.tar.gz ./backend.tar.gz
+          mv frontend-build/frontend.tar.gz ./frontend.tar.gz
 
       - name: Copy artifacts to EC2
         uses: appleboy/scp-action@v0.1.3
@@ -71,9 +76,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: |
-            backend.tar.gz
-            frontend.tar.gz
+          source: backend.tar.gz,frontend.tar.gz
           target: ${{ secrets.EC2_DEPLOY_PATH }}
 
       - name: Deploy on EC2 via SSH
