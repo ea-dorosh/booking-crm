@@ -26,13 +26,18 @@
 /backend/public
 /backend/build
 /backend/src/migration
+*.tar.gz
 
 # misc
 .DS_Store
 *.pem
+*.env*
 .env
+.env.development
 frontend/.env
+frontend/.env.development
 backend/.env
+backend/.env.development
 .env.local
 .env.development.local
 .env.test.local
