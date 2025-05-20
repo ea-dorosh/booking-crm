@@ -1,51 +1,3 @@
-name: Build & Deploy Booking CRM
-
-on:
-  push:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # ------ Backend ------
-      - name: Setup Node.js for backend
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - name: Build and pack backend
-        working-directory: backend
-        run: |
-          npm ci
-          npm run build
-          tar czf ../backend.tar.gz dist package.json package-lock.json
-      - name: Upload backend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: backend.tar.gz
-
-      # ------ Frontend ------
-      - name: Setup Node.js for frontend
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - name: Build and pack frontend
-        working-directory: frontend
-        run: |
-          npm ci
-          npm run build
-          tar czf ../frontend.tar.gz build
-      - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend.tar.gz
-
   deploy:
     needs: build
     if: github.ref == 'refs/heads/master'
@@ -70,7 +22,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "backend.tar.gz,frontend.tar.gz"
+          source: |
+            backend.tar.gz
+            frontend.tar.gz
           target: ${{ secrets.EC2_DEPLOY_PATH }}
 
       - name: Deploy on EC2 via SSH
@@ -97,6 +51,7 @@ jobs:
             cd ..
 
             # --- Frontend deployment ---
+            rm -rf frontend
             mkdir -p frontend
             tar xzf frontend.tar.gz -C frontend --strip-components=1
 
