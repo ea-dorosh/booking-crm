@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -17,11 +18,10 @@ jobs:
         with:
           node-version: '18'
       - name: Build and pack backend
-        working-directory: ./backend
+        working-directory: backend
         run: |
           npm ci
           npm run build
-          # упаковываем dist + package.json + lockfile
           tar czf ../backend.tar.gz dist package.json package-lock.json
       - name: Upload backend artifact
         uses: actions/upload-artifact@v3
@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: '18'
       - name: Build and pack frontend
-        working-directory: ./frontend
+        working-directory: frontend
         run: |
           npm ci
           npm run build
@@ -50,6 +50,7 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+
     steps:
       - name: Download backend artifact
         uses: actions/download-artifact@v3
@@ -84,7 +85,7 @@ jobs:
             set -e
             cd ${{ secrets.EC2_DEPLOY_PATH }}
 
-            # Backend
+            # --- Backend deployment ---
             mkdir -p backend
             tar xzf backend.tar.gz -C backend --strip-components=1
             cp backend/.env.production backend/.env
@@ -97,9 +98,9 @@ jobs:
               --env production
             cd ..
 
-            # Frontend
+            # --- Frontend deployment ---
             mkdir -p frontend
             tar xzf frontend.tar.gz -C frontend --strip-components=1
 
-            # Cleanup
+            # --- Clean up archives ---
             rm -f backend.tar.gz frontend.tar.gz
