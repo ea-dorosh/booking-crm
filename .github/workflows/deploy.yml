@@ -89,6 +89,8 @@ jobs:
             set -e
             cd ${{ secrets.EC2_DEPLOY_PATH }}
 
+            sudo chown -R $USER:$USER .
+
             # --- Backend deployment ---
             mkdir -p backend
             tar xzf backend.tar.gz -C backend --strip-components=1
