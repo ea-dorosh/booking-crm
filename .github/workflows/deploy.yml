@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # ------ Backend ------
       - name: Setup Node.js for backend
@@ -24,7 +24,7 @@ jobs:
           npm run build
           tar czf ../backend.tar.gz dist package.json package-lock.json
       - name: Upload backend artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: backend.tar.gz
@@ -41,7 +41,7 @@ jobs:
           npm run build
           tar czf ../frontend.tar.gz build
       - name: Upload frontend artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: frontend.tar.gz
@@ -53,13 +53,13 @@ jobs:
 
     steps:
       - name: Download backend artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: backend-build
           path: .
 
       - name: Download frontend artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: .
@@ -75,7 +75,7 @@ jobs:
             frontend.tar.gz
           target: ${{ secrets.EC2_DEPLOY_PATH }}
 
-      - name: Deploy on EC2
+      - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.EC2_HOST }}
