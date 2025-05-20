@@ -28,7 +28,7 @@ jobs:
       - name: Pack backend artifact
         run: |
           cd backend
-          # include package.json and lockfile so npm ci works on EC2
+          # include dist, package.json and lockfile so npm ci works on EC2
           tar czf ../backend.tar.gz dist package.json package-lock.json
       - name: Upload backend artifact
         uses: actions/upload-artifact@v3
