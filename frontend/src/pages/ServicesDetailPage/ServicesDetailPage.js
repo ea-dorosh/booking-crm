@@ -1,7 +1,7 @@
 import EditIcon from "@mui/icons-material/Edit";
 import {
-  Box, 
-  Button, 
+  Box,
+  Button,
   Typography,
   List,
   ListItemText,
@@ -12,7 +12,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceForm from "@/components/ServiceForm/ServiceForm";
-import { 
+import {
   fetchEmployees,
   selectEmployeeNameById,
 } from '@/features/employees/employeesSlice';
@@ -41,7 +41,6 @@ export default function ServicesDetailPage() {
   const newServiceId = useSelector(state => state.services.updateFormData);
   const state = useSelector(state => state);
   const serviceCategories = useSelector(state => state.services.serviceCategories);
-  console.log(`serviceCategories`, serviceCategories);
   const shouldShowServiceForm = serviceId === `create-service`;
 
   useEffect(() => {
@@ -57,7 +56,6 @@ export default function ServicesDetailPage() {
       setIsEditMode(true)
     }
   }, []);
-  console.log(`service`, service);
 
   useEffect(() => {
     (async () => {
@@ -100,9 +98,9 @@ export default function ServicesDetailPage() {
   };
 
   return (
-    <PageContainer 
-      pageTitle={service ? 
-        `${service.name}` 
+    <PageContainer
+      pageTitle={service ?
+        `${service.name}`
         :
         `New Service`
       }
@@ -122,7 +120,7 @@ export default function ServicesDetailPage() {
         />
 
         <Box mt={2} sx={{width:`100%`}}>
-          {!shouldShowServiceForm && <Button 
+          {!shouldShowServiceForm && <Button
             variant="outlined"
             onClick={() => setIsEditMode(false)}
             sx={{width:`100%`}}
@@ -132,7 +130,7 @@ export default function ServicesDetailPage() {
         </Box>
 
         <Box mt={2} sx={{ width: `100%` }}>
-          <Button 
+          <Button
             variant="outlined"
             onClick={onDeleteServiceClick}
             sx={{width:`100%`}}
@@ -148,7 +146,7 @@ export default function ServicesDetailPage() {
           <ListItemText
             primary={service.name}
             secondary="Service Name"
-            sx={{ 
+            sx={{
               flex: `0 0 200px`,
               display: `flex`,
               flexDirection: `column-reverse`,
@@ -158,7 +156,7 @@ export default function ServicesDetailPage() {
           <ListItemText
             primary={serviceCategories.find(category => category.id === service.categoryId).name || `-`}
             secondary="Service Category"
-            sx={{ 
+            sx={{
               flex: `0 0 200px`,
               display: `flex`,
               flexDirection: `column-reverse`,
@@ -168,7 +166,7 @@ export default function ServicesDetailPage() {
           <ListItemText
             primary={service.durationTime}
             secondary="Duration Time"
-            sx={{ 
+            sx={{
               flex: `0 0 200px`,
               display: `flex`,
               flexDirection: `column-reverse`,
@@ -178,7 +176,7 @@ export default function ServicesDetailPage() {
           <ListItemText
             primary={service.bufferTime || `-`}
             secondary="Buffer Time"
-            sx={{ 
+            sx={{
               flex: `0 0 200px`,
               display: `flex`,
               flexDirection: `column-reverse`,
@@ -188,7 +186,7 @@ export default function ServicesDetailPage() {
           <ListItemText
             primary={service.bookingNote || `-`}
             secondary="Note"
-            sx={{ 
+            sx={{
               flex: `0 0 200px`,
               display: `flex`,
               flexDirection: `column-reverse`,

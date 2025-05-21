@@ -28,11 +28,8 @@ export default function AppointmentsPage() {
     if (!startDate) {
       dispatch(setStartDate({ startDate: dayjs(new Date()).format(`YYYY-MM-DD`) }));
     }
-    console.log(`appointments`, appointments);
 
     if (!appointments || appointments.length === 0) {
-      console.log(`resetAppointmentsData`);
-
       dispatch(fetchAppointments());
     }
   }, []);

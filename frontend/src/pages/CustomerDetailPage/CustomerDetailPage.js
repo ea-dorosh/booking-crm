@@ -38,7 +38,6 @@ export default function CustomerDetailPage() {
   const {data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending } = useSelector(state => state.customer);
 
   const formErrors = useSelector(state => state.customer.updateFormErrors);
-  console.log(`formErrors`, formErrors);
 
   useEffect(() => {
     if (!isEditMode) {

@@ -88,8 +88,6 @@ export default function InvoiceForm({
     total: ``,
   });
 
-  console.log(`formErrors`, JSON.stringify(formErrors, null, 4));
-
   /** TODO: Use AutoComplete for service prices, if they are more than 1
    create a new state for service prices like this:
    const [servicePrices, setServicePrices] = useState([
@@ -98,10 +96,6 @@ export default function InvoiceForm({
    ]);
    where the first array is for the first service and the second array is for the second service in formData.services
  */
-
-  useEffect(() => {
-    console.log(`formData.services: `, JSON.stringify(formData.services, null, 4));
-  }, [formData]);
 
   useEffect(() => {
     /**
@@ -263,7 +257,6 @@ export default function InvoiceForm({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(`SUBMIT formData`, JSON.stringify(formData, null, 4));
     await submitForm({
       // ...invoice,
       ...formData,

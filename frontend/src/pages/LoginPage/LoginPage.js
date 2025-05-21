@@ -17,12 +17,13 @@ import { useNavigate } from 'react-router-dom';
 function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
+      Copyright ©
+
       <Link color="inherit" href="https://mui.com/">
         Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
+      </Link>{` `}
+
+      {`${new Date().getFullYear()}.`}
     </Typography>
   );
 }
@@ -40,13 +41,13 @@ export default function LoginPage() {
     const data = new FormData(event.currentTarget);
 
     const loginDetails = {
-      email: data.get('email'),
-      password: data.get('password'),
+      email: data.get(`email`),
+      password: data.get(`password`),
     };
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}auth/login`, {
-        method: 'POST',
+        method: `POST`,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -56,23 +57,22 @@ export default function LoginPage() {
       const responseBody = await response.json();
       if (response.ok) {
         // Store the token, for example in localStorage (consider more secure storage options for production)
-        localStorage.setItem('token', responseBody.token);
-        console.log('responseBody', responseBody);
+        localStorage.setItem(`token`, responseBody.token);
         // Redirect the user to a protected route/dashboard
         navigate('/');
       } else {
         // Handle errors, such as displaying a message to the user
-        setError(responseBody.message || 'An error occurred. Please try again.');
+        setError(responseBody.message || `An error occurred. Please try again.`);
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setError('An error occurred. Please try again later.');
+      console.error(`Login error:`, error);
+      setError(`An error occurred. Please try again later.`);
     }
   };
 
   const handleResetPassword = (event) => {
     event.preventDefault();
-    navigate('/forgot-password');
+    navigate(`/forgot-password`);
   };
 
   return (
@@ -82,12 +82,12 @@ export default function LoginPage() {
         <Box
           sx={{
             marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: `flex`,
+            flexDirection: `column`,
+            alignItems: `center`,
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <Avatar sx={{ m: 1, bgcolor: `secondary.main` }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -140,7 +140,9 @@ export default function LoginPage() {
             </Grid>
           </Box>
         </Box>
+
         {error && <Typography color="error">{error}</Typography>}
+
         <Copyright sx={{ mt: 8, mb: 4 }} />
       </Container>
     </ThemeProvider>
