@@ -6,6 +6,7 @@ import databaseMiddleware from '@/middlewares/databaseMiddleware.js';
 import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddleware.js';
 import { initScheduler } from '@/services/scheduler/schedulerService.js';
 import mysql from 'mysql2/promise';
+import path from "path";
 
 // routes for CRM
 import appointmentsRouter from '@/routes/appointments/appointmentsRoute.js';
@@ -24,7 +25,10 @@ import calendarPublicRouter from '@/routes/calendar/calendarRoute.public.js';
 import employeesPublicRouter from '@/routes/employees/employeesRoute.public.js';
 import servicesPublicRouter from '@/routes/services/servicesRoute.public.js';
 
-dotenv.config();
+const envFile = process.env.NODE_ENV === `production`
+  ? `.env.production`
+  : `.env.development`;
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 const app = express();
 
