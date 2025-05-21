@@ -121,9 +121,9 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
   }
 });
 
-router.get('/:id/pdf', async (request: CustomRequestType, response: CustomResponseType) => {
+router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
-    response.status(500).json({ message: 'Database connection not initialized' });
+    response.status(500).json({ message: `Database connection not initialized` });
 
     return;
   }
@@ -134,7 +134,7 @@ router.get('/:id/pdf', async (request: CustomRequestType, response: CustomRespon
     const invoice = await geInvoiceById(request.dbPool, invoiceId);
 
     if (!invoice) {
-      response.status(404).json({ message: 'Invoice not found' });
+      response.status(404).json({ message: `Invoice not found` });
 
       return;
     }
@@ -143,7 +143,7 @@ router.get('/:id/pdf', async (request: CustomRequestType, response: CustomRespon
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: process.env.LOCAL_TESTING ? undefined : '/usr/bin/google-chrome-stable',
+      executablePath: process.env.NODE_ENV === `development` ? undefined : '/usr/bin/google-chrome-stable',
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
     const page = await browser.newPage();

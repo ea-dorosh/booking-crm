@@ -100,6 +100,7 @@ jobs:
 
             # --- Backend deployment ---
             mkdir -p backend
+            mkdir -p backend/public/images
             tar xzf backend.tar.gz -C backend --strip-components=1
             cp backend/.env.production backend/.env
             cd backend
