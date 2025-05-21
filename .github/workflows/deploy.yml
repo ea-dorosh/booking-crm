@@ -35,6 +35,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+      - name: Inject production env for frontend
+        run: |
+          cat > frontend/.env.production << 'EOF'
+          REACT_APP_API_URL=${{ secrets.FRONTEND_API_URL }}
+          EOF
+
       - name: Build and pack frontend
         working-directory: frontend
         run: |
