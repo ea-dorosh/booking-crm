@@ -102,7 +102,7 @@ jobs:
             mkdir -p backend
             mkdir -p backend/public/images
             sudo chown -R $USER:$USER backend/public/images
-            sudo chmod -R 755 backend/public/images
+            sudo chmod -R 777 backend/public/images
             tar xzf backend.tar.gz -C backend --strip-components=1
             cp backend/.env.production backend/.env
             cd backend
