@@ -1,24 +1,52 @@
-import { 
+/* eslint-disable no-unused-vars */
+import {
   AddCircle,
-  Edit,
 } from "@mui/icons-material";
-import { 
+import {
   IconButton,
   List,
-  ListItemButton,
-  ListItemIcon,
   Typography,
   Box,
-  Card, 
-  CardHeader,
 } from "@mui/material";
+import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import Tabs from '../Tabs/Tabs';
 
-export default function ServicesContainer({ 
+const SERVICES = `services`;
+const CATEGORIES = `categories`;
+
+const TABS = {
+  [SERVICES]: {
+    label: `Services`,
+    value: SERVICES,
+    url: `create-service`,
+    buttonText: `add service`,
+  },
+  [CATEGORIES]: {
+    label: `Categories`,
+    value: CATEGORIES,
+    url: `create-category`,
+    buttonText: `add category`,
+  },
+};
+
+export default function ServicesContainer({
   services,
+  categories,
 }) {
+  const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
+
+  const handleTabChange = (newValue) => {
+    setActiveTab(newValue);
+  };
+
   return (
     <Box>
+      <Tabs
+        tabs={[TABS[SERVICES], TABS[CATEGORIES]]}
+        onChange={handleTabChange}
+      />
+
       <Box
         sx={{
           display: `flex`,
@@ -31,13 +59,15 @@ export default function ServicesContainer({
           borderRadius: `50px`,
         }}
       >
-        <Typography variant="button"
-          sx={{color: `#fff`}}
+        <Typography
+          variant="button"
+          sx={{ color: `#fff` }}
         >
-          add service
+          {TABS[activeTab].buttonText}
+
         </Typography>
 
-        <RouterLink to={`/services/create-service`}>
+        <RouterLink to={`/services/${TABS[activeTab].url}`}>
           <IconButton
             sx={{color: `#fff`}}
           >
@@ -46,68 +76,89 @@ export default function ServicesContainer({
         </RouterLink>
       </Box>
 
-      <List
+      <Box
         sx={{
           display: `flex`,
           flexDirection: `column`,
-          gap: `1.5rem`,
+          gap: `.5rem`,
           marginTop: `2rem`,
           maxWidth: `768px`,
         }}
       >
-        {services &&
-            services.map((service) => (
-              <Card 
-                key={service.id}
-                sx={{
-                  display: `flex`,
-                  alignItems: `center`,
-                  gap: `1rem`,
-                }}
-              >
-                <Box sx={{
-                  width: `80%`,
-                  paddingRight: `1rem`,
-                }}>
-                  <CardHeader
-                    sx={{
-                      '& .MuiCardHeader-title': {
-                        fontSize: `1.2rem`,
-                      },
-                    }}
-                    title={service.name}
-                    subheader={service.categoryName}
-                  />
-                </Box>
+        {activeTab === TABS[SERVICES].value && services && services.map((service) => (
+          <Box
+            key={service.id}
+            component={RouterLink}
+            to={`/services/${service.id}`}
+            sx={{
+              display: `flex`,
+              alignItems: `flex-start`,
+              justifyContent: `space-between`,
+              width: `100%`,
+              gap: `1rem`,
+              padding: `.4rem 0 .4rem 0`,
+              borderBottom: `1px solid #ddd`,
+              textDecoration: `none`,
+              color: `#333`,
+              position: `relative`,
+            }}
+          >
+            <Box>
+              <Typography sx={{
+                fontSize: `1.1rem`,
+                fontWeight: `bold`,
+              }}>
+                {service.name}
+              </Typography>
 
-                <Box>
-                  <RouterLink
-                    style={{
-                      height: `100%`,
-                      width: `100%`,
-                      display: `flex`,
-                      alignItems: `center`,
-                      justifyContent: `center`,
-                    }}
-                    to={`/services/${service.id}`}>
-                    <ListItemButton
-                      sx={{
-                        padding: `0`,
-                        display: `flex`,
-                        flexGrow: `0`,
-                      }}
-                    >
-                      <ListItemIcon sx={{
-                        minWidth: `0`,
-                      }}>
-                        <Edit />
-                      </ListItemIcon>
-                    </ListItemButton>
-                  </RouterLink>
-                </Box>
-              </Card>
-            ))}
-      </List>
+              <Typography sx={{
+                fontSize: `1rem`,
+              }}>
+                {service.categoryName}
+              </Typography>
+            </Box>
+
+          </Box>
+        ))}
+
+        {activeTab === TABS[CATEGORIES].value && categories && categories.map((category) => (
+          <Box
+            key={category.id}
+            component={RouterLink}
+            to={`/categories/${category.id}`}
+            sx={{
+              display: `flex`,
+              alignItems: `flex-start`,
+              justifyContent: `space-between`,
+              width: `100%`,
+              minHeight: `60px`,
+              textDecoration: `none`,
+              color: `#333`,
+              padding: `.4rem 0 .6rem 0`,
+              borderBottom: `1px solid #ddd`,
+            }}
+          >
+            <Typography sx={{
+              fontSize: `1.1rem`,
+            }}>
+              {category.name}
+            </Typography>
+
+            <Box
+              sx={{
+                width: `60px`,
+                height: `60px`,
+                overflow: `hidden`,
+              }}
+            >
+              <img
+                src={category.image}
+                style={{ width: `100%` }}
+              />
+            </Box>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 }
