@@ -59,7 +59,7 @@ export default function CustomerDetailPage() {
     };
 
     checkMobile();
-    window.addEventListener("resize", checkMobile);
+    window.addEventListener(`resize`, checkMobile);
 
     if (!isEditMode) {
       dispatch(fetchInvoice(invoiceId));
@@ -70,10 +70,12 @@ export default function CustomerDetailPage() {
 
     return () => {
       dispatch(resetInvoiceData());
+
       if (pdfViewerUrl) {
         URL.revokeObjectURL(pdfViewerUrl);
       }
-      window.removeEventListener("resize", checkMobile);
+
+      window.removeEventListener(`resize`, checkMobile);
     };
   }, []);
 

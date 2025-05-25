@@ -19,13 +19,13 @@ const TABS = {
   [SERVICES]: {
     label: `Services`,
     value: SERVICES,
-    url: `create-service`,
+    url: `/services/create-service`,
     buttonText: `add service`,
   },
   [CATEGORIES]: {
     label: `Categories`,
     value: CATEGORIES,
-    url: `create-category`,
+    url: `/categories/create-category`,
     buttonText: `add category`,
   },
 };
@@ -67,7 +67,7 @@ export default function ServicesContainer({
 
         </Typography>
 
-        <RouterLink to={`/services/${TABS[activeTab].url}`}>
+        <RouterLink to={`${TABS[activeTab].url}`}>
           <IconButton
             sx={{color: `#fff`}}
           >

@@ -7,12 +7,12 @@ import { useState, useEffect } from "react";
 
 export default function ServiceCategoryForm({
   category,
-  createNewCategory,
+  submitForm,
   formErrors,
   cleanError,
   cleanErrors,
 }) {
-  const isEditMode = Boolean(category);  
+  const isEditMode = Boolean(category);
 
   const [formData, setFormData] = useState({
     name: isEditMode ? category.name : ``,
@@ -32,7 +32,7 @@ export default function ServiceCategoryForm({
     if(formErrors && formErrors[name]) {
       cleanError(name);
     }
-    
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -54,7 +54,7 @@ export default function ServiceCategoryForm({
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    await createNewCategory({
+    await submitForm({
       ...category,
       ...formData,
     });
@@ -63,8 +63,8 @@ export default function ServiceCategoryForm({
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
+        display: `flex`,
+        flexDirection: `column`,
       }}
     >
       <FormControl error={Boolean(formErrors?.name)}>
@@ -75,32 +75,37 @@ export default function ServiceCategoryForm({
           name="name"
           onChange={handleChange}
         />
-        {formErrors?.name && 
+
+        {formErrors?.name &&
           <FormHelperText>
             {formErrors.name}
           </FormHelperText>
         }
       </FormControl>
-      {(temporaryImage || category?.image) && 
-        <Box 
+
+      {(temporaryImage || category?.image) &&
+        <Box
           sx={{
-            padding: `20px`, 
-            margin: `20px 0`, 
+            padding: `20px`,
+            margin: `20px 0`,
             width: `100%`,
             backgroundColor: `#f5f5f5`,
+            display: `flex`,
+            justifyContent: `center`,
+            alignItems: `center`,
           }}
         >
-          {temporaryImage && 
-            <img 
+          {temporaryImage &&
+            <img
               src={temporaryImage}
-              style={{ width: `100%` }}
+              style={{ width: `60%`, margin: `0 auto` }}
             />
           }
 
-          {!temporaryImage && category?.image && 
-            <img 
-              src={category.image} 
-              style={{ width: `100%` }}
+          {!temporaryImage && category?.image &&
+            <img
+              src={category.image}
+              style={{ width: `60%`, margin: `0 auto` }}
             />
           }
         </Box>}

@@ -1,4 +1,4 @@
-import { 
+import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
@@ -17,12 +17,14 @@ export const fetchServiceCategories = createAsyncThunk(
   }
 );
 
-export const updateService = createAsyncThunk(
-  `services/updateService`,
+export const updateCategory = createAsyncThunk(
+  `serviceCategories/updateCategory`,
   async (formData, thunkAPI) => {
     try {
-      if (formData.id !== undefined) {
-        await servicesService.updateServiceCategory(formData);
+      if (formData.id) {
+        const { data } = await servicesService.updateServiceCategory(formData);
+
+        return data;
       } else {
         const { data } = await servicesService.createServiceCategory(formData);
 
@@ -36,7 +38,7 @@ export const updateService = createAsyncThunk(
 );
 
 export const deleteService = createAsyncThunk(
-  `services/deleteService`,
+  `serviceCategories/deleteCategory`,
   async (serviceId, thunkAPI) => {
     try {
       const { data } = await servicesService.deleteService(serviceId);
@@ -50,13 +52,13 @@ export const deleteService = createAsyncThunk(
 );
 
 const serviceCategoriesSlice = createSlice({
-  name: `services`,
+  name: `serviceCategories`,
   initialState: {
     data: null,
-    loading: false,
+    areCategoriesFetching: false,
     error: null,
+    isUpdateCategoryRequestPending: false,
     updateFormData: null,
-    updateFormStatus: `idle`,
     updateFormErrors: null,
   },
   reducers: {
@@ -70,41 +72,37 @@ const serviceCategoriesSlice = createSlice({
     cleanErrors: (state) => {
       state.updateFormErrors = null;
     },
-    resetUpdateFormStatus: (state) => {
-      state.updateFormStatus = `idle`;
-    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchServiceCategories.pending, (state) => {
-        state.loading = true;
+        state.areCategoriesFetching = true;
       })
       .addCase(fetchServiceCategories.fulfilled, (state, action) => {
-        state.loading = false;
+        state.areCategoriesFetching = false;
         state.data = action.payload;
       })
       .addCase(fetchServiceCategories.rejected, (state, action) => {
-        state.loading = false;
+        state.areCategoriesFetching = false;
         state.error = action.payload;
       })
-      .addCase(updateService.pending, (state) => {
-        state.updateFormStatus = `loading`;
+      .addCase(updateCategory.pending, (state) => {
+        state.isUpdateCategoryRequestPending = true;
       })
-      .addCase(updateService.fulfilled, (state, action) => {
-        state.updateFormStatus = `succeeded`;
+      .addCase(updateCategory.fulfilled, (state, action) => {
+        state.isUpdateCategoryRequestPending = false;
         state.updateFormData = action.payload;
       })
-      .addCase(updateService.rejected, (state, action) => {
-        state.updateFormStatus = `failed`;
+      .addCase(updateCategory.rejected, (state, action) => {
+        state.isUpdateCategoryRequestPending = true;
         state.updateFormErrors = action.payload;
       })
   }
 });
 
-export const { 
-  cleanError, 
+export const {
+  cleanError,
   cleanErrors,
-  resetUpdateFormStatus,
-  resetDeleteServiceStatus,
 } = serviceCategoriesSlice.actions;
+
 export default serviceCategoriesSlice.reducer;

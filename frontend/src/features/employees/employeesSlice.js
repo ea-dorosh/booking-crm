@@ -1,4 +1,4 @@
-import { 
+import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
@@ -117,16 +117,9 @@ const employeesSlice = createSlice({
   }
 });
 
-export const { 
-  cleanError, 
+export const {
+  cleanError,
   cleanErrors,
   resetUpdateFormStatus,
 } = employeesSlice.actions;
 export default employeesSlice.reducer;
-
-export const selectEmployeeNameById = (state, employeeId) => {
-  const firstName = state.employees.data.find(employee => employee.employeeId === employeeId)?.firstName;
-  const lastName = state.employees.data.find(employee => employee.employeeId === employeeId)?.lastName;
-
-  return `${firstName} ${lastName}`;
-}

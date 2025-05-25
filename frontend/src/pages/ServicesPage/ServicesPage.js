@@ -3,25 +3,32 @@ import { useDispatch, useSelector } from 'react-redux';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServicesContainer from "@/components/ServicesContainer/ServicesContainer";
 import { fetchEmployees } from '@/features/employees/employeesSlice';
-import { fetchServices, fetchServiceCategories } from '@/features/services/servicesSlice';
+import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
+import { fetchServices } from '@/features/services/servicesSlice';
 
 
 export default function ServicesPage() {
   const dispatch = useDispatch();
   const services = useSelector(state => state.services.data);
   const employees = useSelector(state => state.employees.data);
-  const serviceCategories = useSelector(state => state.services.serviceCategories);
+  const serviceCategories = useSelector(state => state.serviceCategories.data);
 
   useEffect(() => {
-    if (!services.length) {
-      dispatch(fetchServices());
+    const promises = [];
+
+    if (!services) {
+      console.log(`ServicesPage fetchServices`);
+
+      promises.push(dispatch(fetchServices()));
     }
     if (!employees.length) {
-      dispatch(fetchEmployees());
+      promises.push(dispatch(fetchEmployees()));
     }
     if (!serviceCategories) {
-      dispatch(fetchServiceCategories());
+      promises.push(dispatch(fetchServiceCategories()));
     }
+
+    Promise.all(promises);
   }, []);
 
   return (

@@ -61,10 +61,22 @@ const updateServiceCategory = async (serviceCategory) => {
   }
 };
 
+const createServiceCategory = async (serviceCategory) => {
+  const formData = appendFormData(serviceCategory);
+
+  try {
+    const response = await axios.post(`/services/category/create`, formData);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const deleteService = async (id) => {
   try {
     const response = await axios.delete(`/services/${id}`);
-    
+
     return response.data;
   } catch (error) {
     handleAxiosError(error);
@@ -77,6 +89,7 @@ const serviceService = {
   createService,
   updateService,
   updateServiceCategory,
+  createServiceCategory,
   deleteService,
 };
 

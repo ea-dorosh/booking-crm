@@ -11,9 +11,8 @@ export default function Tabs({
 }) {
   const [value, setValue] = useState(tabs[0].value);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (_event, newValue) => {
     setValue(newValue);
-    console.log(newValue);
 
     if (onChange) {
       onChange(newValue);

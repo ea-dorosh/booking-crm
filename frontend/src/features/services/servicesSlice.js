@@ -1,4 +1,4 @@
-import { 
+import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
@@ -9,19 +9,6 @@ export const fetchServices = createAsyncThunk(
   async (_arg, thunkAPI) => {
     try {
       const data = await servicesService.getServices();
-
-      return data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
-    }
-  }
-);
-
-export const fetchServiceCategories = createAsyncThunk(
-  `services/fetchServiceCategories`,
-  async (thunkAPI) => {
-    try {
-      const data = await servicesService.getServiceCategories();
 
       return data;
     } catch (error) {
@@ -52,9 +39,7 @@ export const deleteService = createAsyncThunk(
   `services/deleteService`,
   async (serviceId, thunkAPI) => {
     try {
-      const { data } = await servicesService.deleteService(serviceId);
-
-      return data;
+      return await servicesService.deleteService(serviceId);
     } catch (error) {
       const parsedErrors = await JSON.parse(error.message);
       return thunkAPI.rejectWithValue(parsedErrors);
@@ -65,16 +50,12 @@ export const deleteService = createAsyncThunk(
 const servicesSlice = createSlice({
   name: `services`,
   initialState: {
-    data: [],
-    serviceCategories: null,
-    status: `idle`,
+    data: null,
+    isServicesRequestPending: false,
     error: null,
     updateFormData: null,
-    updateFormStatus: `idle`,
+    isUpdateServiceRequestPending: false,
     updateFormErrors: null,
-    deleteServiceData: null,
-    deleteServiceStatus: `idle`,
-    deleteServiceErrors: null,
   },
   reducers: {
     cleanError: (state, action) => {
@@ -87,59 +68,47 @@ const servicesSlice = createSlice({
     cleanErrors: (state) => {
       state.updateFormErrors = null;
     },
-    resetUpdateFormStatus: (state) => {
-      state.updateFormStatus = `idle`;
-    },
-    resetDeleteServiceStatus: (state) => {
-      state.deleteServiceStatus = `idle`;
-    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchServices.pending, (state) => {
-        state.status = `loading`;
+        state.isServicesRequestPending = true;
+        state.data = null;
       })
       .addCase(fetchServices.fulfilled, (state, action) => {
-        state.status = `succeeded`;
+        state.isServicesRequestPending = false;
         state.data = action.payload;
       })
       .addCase(fetchServices.rejected, (state, action) => {
-        state.status = `failed`;
+        state.isServicesRequestPending = false;
         state.error = action.payload;
       })
-      .addCase(fetchServiceCategories.fulfilled, (state, action) => {
-        state.serviceCategories = action.payload;
-      })
       .addCase(updateService.pending, (state) => {
-        state.updateFormStatus = `loading`;
+        state.isUpdateServiceRequestPending = true;
       })
       .addCase(updateService.fulfilled, (state, action) => {
-        state.updateFormStatus = `succeeded`;
+        state.isUpdateServiceRequestPending = false;
         state.updateFormData = action.payload;
       })
       .addCase(updateService.rejected, (state, action) => {
-        state.updateFormStatus = `failed`;
+        state.isUpdateServiceRequestPending = false;
         state.updateFormErrors = action.payload;
       })
       .addCase(deleteService.pending, (state) => {
-        state.deleteServiceStatus = `loading`;
+        state.isUpdateServiceRequestPending = true;
         state.deleteServiceErrors = null;
       })
-      .addCase(deleteService.fulfilled, (state, action) => {
-        state.deleteServiceStatus = `succeeded`;
-        state.deleteServiceData = action.payload;
+      .addCase(deleteService.fulfilled, (state) => {
+        state.isUpdateServiceRequestPending = false;
       })
-      .addCase(deleteService.rejected, (state, action) => {
-        state.deleteServiceStatus = `failed`;
-        state.deleteServiceErrors = action.payload;
+      .addCase(deleteService.rejected, (state) => {
+        state.isUpdateServiceRequestPending = false;
       })
   }
 });
 
-export const { 
-  cleanError, 
+export const {
+  cleanError,
   cleanErrors,
-  resetUpdateFormStatus,
-  resetDeleteServiceStatus,
 } = servicesSlice.actions;
 export default servicesSlice.reducer;

@@ -26,3 +26,8 @@ export interface ServiceDataType {
   bookingNote: string;
   employeePrices: EmployeePriceType[];
 }
+
+export interface CategoryDataType {
+  name: string;
+  image: string;
+}

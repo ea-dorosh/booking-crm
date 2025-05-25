@@ -8,7 +8,7 @@ import {
   DbPoolType,
 } from '@/@types/expressTypes';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { EmployeePriceType, ServiceDataType } from '@/@types/servicesTypes.js';
+import { EmployeePriceType, ServiceDataType, CategoryDataType } from '@/@types/servicesTypes.js';
 import { CategoryRow } from '@/@types/categoriesTypes.js';
 
 const router = express.Router();
@@ -250,6 +250,74 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
 
     res.status(500).json({
       errorMessage: `Unknown error occurred while creating service`,
+    });
+
+    return;
+  }
+});
+
+router.post(`/category/create`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+
+    return;
+  }
+
+  const category: CategoryDataType = req.body;
+
+  const imgPath = req.file?.filename || null;
+
+  const categoryQuery = `
+    INSERT INTO ServiceCategories (
+      name,
+      img
+    )
+    VALUES (?, ?)
+  `;
+
+  const categoryValues = [
+    category.name,
+    imgPath,
+  ];
+
+  try {
+    const [results] = await req.dbPool.query<ResultSetHeader>(categoryQuery, categoryValues);
+    const categoryId = results.insertId;
+
+    res.json({
+      message: `Category data inserted successfully`,
+      data: categoryId,
+    });
+
+    return;
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const mysqlError = error as { code?: string; message?: string };
+
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
+        res.status(428).json({ errors: { name: `Category with this name already exists` } });
+
+        return;
+      }
+
+      res.status(500).json({
+        errorMessage: `Error while editing Category`,
+        message: mysqlError.message,
+      });
+
+      return;
+    }
+    if (error instanceof Error) {
+      res.status(500).json({
+        errorMessage: `Error while editing Category`,
+        message: error.message,
+      });
+
+      return;
+    }
+
+    res.status(500).json({
+      errorMessage: `Unknown error occurred while editing Category`,
     });
 
     return;

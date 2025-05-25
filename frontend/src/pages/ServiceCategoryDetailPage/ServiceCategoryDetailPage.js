@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, LinearProgress } from "@mui/material";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
@@ -7,10 +7,9 @@ import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceCategoryForm from "@/components/ServiceCategoryForm/ServiceCategoryForm";
 import {
   fetchServiceCategories,
-  updateService,
+  updateCategory,
   cleanError,
   cleanErrors,
-  resetUpdateFormStatus,
 } from '@/features/serviceCategories/serviceCategoriesSlice';
 
 export default function ServicesDetailPage() {
@@ -19,25 +18,24 @@ export default function ServicesDetailPage() {
   const { categoryId } = useParams();
 
   const serviceCategory = useSelector(state => state.serviceCategories.data?.find(category => category.id === Number(categoryId)));
-  const { loading } = useSelector(state => state.serviceCategories);
-  const formErrors = useSelector(state => state.services.updateFormErrors);
-  const updateFormStatus = useSelector(state => state.services.updateFormStatus);
+  const {
+    areCategoriesFetching,
+    isUpdateCategoryRequestPending,
+    formErrors,
+  } = useSelector(state => state.serviceCategories);
 
   useEffect(() => {
-    dispatch(fetchServiceCategories());
+    if (!serviceCategory) {
+      dispatch(fetchServiceCategories());
+    }
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      if (updateFormStatus === `succeeded`) {
-        navigate(-1);
-        dispatch(resetUpdateFormStatus());
-      }
-    })();
-  }, [updateFormStatus]);
+  const categoryHandler = async (category) => {
+    const categoryId = await dispatch(updateCategory(category)).unwrap();
 
-  const updateServiceCategoryHandler = (service) => {
-    dispatch(updateService(service));
+    navigate(`/categories/${categoryId}`, { replace: true });
+
+    dispatch(fetchServiceCategories());
   };
 
   const handleCleanError = (fieldName) => {
@@ -49,20 +47,24 @@ export default function ServicesDetailPage() {
   };
 
   return (
-    <PageContainer 
-      pageTitle={serviceCategory ? 
-        `${serviceCategory.name}` 
+    <PageContainer
+      pageTitle={serviceCategory ?
+        `${serviceCategory.name}`
         :
-        `New Service Category`
+        `New Category`
       }
       hideSideNav
     >
       <GoBackNavigation />
 
+      {(areCategoriesFetching || isUpdateCategoryRequestPending) && <Box mt={2}>
+        <LinearProgress />
+      </Box>}
+
       <Box mt={3}>
-        {!loading && <ServiceCategoryForm
+        {!areCategoriesFetching && <ServiceCategoryForm
           category={serviceCategory}
-          createNewCategory={updateServiceCategoryHandler}
+          submitForm={categoryHandler}
           formErrors={formErrors}
           cleanError={handleCleanError}
           cleanErrors={handleCleanErrors}

@@ -1,10 +1,11 @@
-import EditIcon from "@mui/icons-material/Edit";
+import { Edit as EditIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
   Typography,
   List,
   ListItemText,
+  LinearProgress,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,19 +13,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceForm from "@/components/ServiceForm/ServiceForm";
-import {
-  fetchEmployees,
-  selectEmployeeNameById,
-} from '@/features/employees/employeesSlice';
+import { fetchEmployees } from '@/features/employees/employeesSlice';
+import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
   fetchServices,
-  fetchServiceCategories,
   updateService,
   cleanError,
   cleanErrors,
-  resetUpdateFormStatus,
   deleteService,
-  resetDeleteServiceStatus,
 } from '@/features/services/servicesSlice';
 
 export default function ServicesDetailPage() {
@@ -33,56 +29,53 @@ export default function ServicesDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { serviceId } = useParams();
-  const service = useSelector(state => state.services.data.find(service => service.id === Number(serviceId)));
-  const employees = useSelector(state => state.employees.data);
-  const formErrors = useSelector(state => state.services.updateFormErrors);
-  const updateFormStatus = useSelector(state => state.services.updateFormStatus);
-  const deleteServiceStatus = useSelector(state => state.services.deleteServiceStatus);
-  const newServiceId = useSelector(state => state.services.updateFormData);
-  const state = useSelector(state => state);
-  const serviceCategories = useSelector(state => state.services.serviceCategories);
   const shouldShowServiceForm = serviceId === `create-service`;
 
+  const service = useSelector(state => state.services.data?.find(service => service.id === Number(serviceId)));
+  const employees = useSelector(state => state.employees.data);
+  const {
+    updateFormErrors,
+    isServicesRequestPending,
+    isUpdateServiceRequestPending,
+  } = useSelector(state => state.services);
+
+  const serviceCategories = useSelector(state => state.serviceCategories.data);
+
   useEffect(() => {
-    dispatch(fetchServiceCategories());
+    const promises = [];
+
+    if (!serviceCategories) {
+      promises.push(dispatch(fetchServiceCategories()));
+    }
 
     if (!employees.length) {
-      dispatch(fetchEmployees());
+      promises.push(dispatch(fetchEmployees()));
     }
 
     if (!service && !shouldShowServiceForm) {
-      dispatch(fetchServices());
+      promises.push(dispatch(fetchServices()));
     } else if (shouldShowServiceForm) {
       setIsEditMode(true)
     }
+
+    Promise.all(promises);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      if (deleteServiceStatus === `succeeded`) {
-        await dispatch(fetchServices());
-        dispatch(resetDeleteServiceStatus());
-        navigate(`/services`);
-      }
-    })();
-  }, [deleteServiceStatus]);
+  const getEmployeeName = (employeeId) => {
+    const employee = employees.find(emp => emp.employeeId === employeeId);
+    return employee ? `${employee.firstName} ${employee.lastName}` : '';
+  };
 
-  useEffect(() => {
-    (async () => {
-      if (updateFormStatus === `succeeded`) {
-        await dispatch(fetchServices());
-        setIsEditMode(false);
-        dispatch(resetUpdateFormStatus());
+  const updateServiceHandler = async (service) => {
+    const serviceId = await dispatch(updateService(service)).unwrap();
 
-        if (newServiceId) {
-          navigate(`/services/${newServiceId}`);
-        }
-      }
-    })();
-  }, [updateFormStatus]);
+    if (!service.id) {
+      navigate(`/services/${serviceId}`);
+    }
 
-  const updateServiceHandler = (service) => {
-    dispatch(updateService(service));
+    dispatch(fetchServices());
+
+    setIsEditMode(false);
   };
 
   const handleCleanError = (fieldName) => {
@@ -93,8 +86,11 @@ export default function ServicesDetailPage() {
     dispatch(cleanErrors());
   };
 
-  const onDeleteServiceClick = () => {
-    dispatch(deleteService(service.id));
+  const onDeleteServiceClick = async () => {
+    await dispatch(deleteService(service.id)).unwrap();
+    await dispatch(fetchServices()).unwrap();
+
+    navigate(`/services`);
   };
 
   return (
@@ -108,13 +104,17 @@ export default function ServicesDetailPage() {
     >
       <GoBackNavigation />
 
+      {(isUpdateServiceRequestPending || isServicesRequestPending) && <Box mt={2}>
+        <LinearProgress />
+      </Box>}
+
       {isEditMode && serviceCategories && <Box mt={3}>
         <ServiceForm
           employees={employees || []}
           service={service}
           serviceCategories={serviceCategories}
           createNewService={updateServiceHandler}
-          formErrors={formErrors}
+          formErrors={updateFormErrors}
           cleanError={handleCleanError}
           cleanErrors={handleCleanErrors}
         />
@@ -202,7 +202,7 @@ export default function ServicesDetailPage() {
               {service.employeePrices.map((employeePrice) => (
                 <ListItemText
                   key={employeePrice.employeeId}
-                  primary={selectEmployeeNameById(state, employeePrice.employeeId)}
+                  primary={getEmployeeName(employeePrice.employeeId)}
                   secondary={employeePrice.price}
                   sx={{ flex: `0 0 200px` }}
                 />
