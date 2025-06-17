@@ -17,8 +17,6 @@ export default function ServicesPage() {
     const promises = [];
 
     if (!services) {
-      console.log(`ServicesPage fetchServices`);
-
       promises.push(dispatch(fetchServices()));
     }
     if (!employees.length) {
