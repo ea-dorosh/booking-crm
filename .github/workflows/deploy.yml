@@ -23,7 +23,15 @@ jobs:
         run: |
           npm ci
           npm run build
+          echo "🔍 Checking what files exist after build:"
+          ls -la
+          echo "🔍 Checking dist directory:"
+          ls -la dist/ || echo "❌ dist directory not found"
+          echo "🔍 Creating archive with files:"
+          ls -la dist package.json package-lock.json
           tar czf ../backend.tar.gz dist package.json package-lock.json
+          echo "🔍 Archive contents:"
+          tar -tzf ../backend.tar.gz
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
@@ -122,7 +130,7 @@ jobs:
               rm /tmp/.env.production.backup
             fi
             cd backend
-            npm ci --omit=dev
+            npm install --omit=dev
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
               --name booking-backend \
