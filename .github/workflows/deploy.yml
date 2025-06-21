@@ -23,7 +23,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          tar czf ../backend.tar.gz dist package.json package-lock.json migrations scripts knexfile.js .env.production
+          tar czf ../backend.tar.gz dist package.json package-lock.json migrations scripts knexfile.js
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
