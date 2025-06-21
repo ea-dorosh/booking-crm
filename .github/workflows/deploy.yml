@@ -21,9 +21,24 @@ jobs:
       - name: Build and pack backend
         working-directory: backend
         run: |
+          # DEBUG: Check package.json before npm ci
+          echo "🔍 DEBUG: Checking package.json scripts BEFORE npm ci:"
+          grep -A3 -B3 "migrate:deploy" package.json || echo "❌ migrate:deploy not found before npm ci!"
+
           npm ci
           npm run build
+
+          # DEBUG: Check package.json after npm ci but before tar
+          echo "🔍 DEBUG: Checking package.json scripts AFTER npm ci:"
+          grep -A3 -B3 "migrate:deploy" package.json || echo "❌ migrate:deploy not found after npm ci!"
+
           tar czf ../backend.tar.gz dist package.json package-lock.json migrations scripts knexfile.js
+
+          # DEBUG: Check what's in the tar file
+          echo "🔍 DEBUG: Checking tar contents:"
+          tar -tzf ../backend.tar.gz | head -20
+          echo "🔍 DEBUG: Checking package.json from tar:"
+          tar -xzf ../backend.tar.gz -O package.json | grep -A3 -B3 "migrate:deploy" || echo "❌ migrate:deploy not found in tar!"
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
