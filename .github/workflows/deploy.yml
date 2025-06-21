@@ -23,7 +23,12 @@ jobs:
         run: |
           npm ci
           npm run build
-          tar czf ../backend.tar.gz dist package.json package-lock.json
+          mkdir -p ../temp-backend
+          cp -r dist/* ../temp-backend/
+          cp package.json package-lock.json ../temp-backend/
+          cd ..
+          tar czf backend.tar.gz -C temp-backend .
+          rm -rf temp-backend
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
