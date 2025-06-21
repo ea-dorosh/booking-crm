@@ -188,7 +188,8 @@ jobs:
             cd backend
 
             # Install all dependencies (including dev for migrations)
-            npm ci
+            # Use npm install instead of npm ci because we modified package.json
+            npm install
 
             # Always run migrations (knex migrate:latest is safe - it only runs new migrations)
             echo "🔄 Running database migrations..."
