@@ -23,30 +23,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          echo "🔍 Checking what files exist after build:"
-          ls -la
-          echo "🔍 Checking dist directory:"
-          ls -la dist/ || echo "❌ dist directory not found"
-          echo "🔍 Checking if package.json exists before archiving:"
-          if [ -f "package.json" ]; then
-            echo "✅ package.json exists, first 10 lines:"
-            head -10 package.json
-          else
-            echo "❌ package.json NOT found"
-          fi
-          echo "🔍 Checking if package-lock.json exists:"
-          if [ -f "package-lock.json" ]; then
-            echo "✅ package-lock.json exists"
-          else
-            echo "❌ package-lock.json NOT found"
-          fi
-          echo "🔍 Creating archive with files:"
-          ls -la dist package.json package-lock.json
           tar czf ../backend.tar.gz dist package.json package-lock.json
-          echo "🔍 Archive contents:"
-          tar -tzf ../backend.tar.gz
-          echo "🔍 Archive size:"
-          ls -lh ../backend.tar.gz
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
@@ -121,50 +98,15 @@ jobs:
 
             sudo chown -R $USER:$USER .
 
-            echo "🔍 Debugging: What files are in the deploy directory?"
-            ls -la
-
-            echo "🔍 Debugging: Checking backend.tar.gz contents:"
-            tar -tzf backend.tar.gz
-
             # --- Backend deployment ---
-            # Backup .env files before cleaning
-            if [ -f "backend/.env.production" ]; then
-              cp backend/.env.production /tmp/.env.production.backup
-            fi
-
-            # Clean old backend files (except public/ which contains uploaded files)
-            if [ -d "backend" ]; then
-              find backend -mindepth 1 -not -path "backend/public" -not -path "backend/public/*" -delete
-            fi
-
             mkdir -p backend
             mkdir -p backend/public/images
             sudo chown -R $USER:$USER backend/public/images
             sudo chmod -R 777 backend/public/images
-
-            echo "🔍 Debugging: Extracting backend.tar.gz..."
             tar xzf backend.tar.gz -C backend --strip-components=1
-
-            echo "🔍 Debugging: What files are in backend directory after extraction?"
-            ls -la backend/
-
-            echo "🔍 Debugging: Checking if package.json exists:"
-            if [ -f "backend/package.json" ]; then
-              echo "✅ package.json exists"
-              head -10 backend/package.json
-            else
-              echo "❌ package.json NOT found"
-            fi
-
-            # Restore .env.production if it existed
-            if [ -f "/tmp/.env.production.backup" ]; then
-              cp /tmp/.env.production.backup backend/.env.production
-              cp backend/.env.production backend/.env
-              rm /tmp/.env.production.backup
-            fi
+            cp backend/.env.production backend/.env
             cd backend
-            npm install --omit=dev
+            npm ci --omit=dev
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
               --name booking-backend \
