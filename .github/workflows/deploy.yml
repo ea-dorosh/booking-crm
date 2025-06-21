@@ -27,7 +27,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          tar czf ../backend.tar.gz dist package.json package-lock.json migrations scripts knexfile.js
+          tar czf ../backend.tar.gz dist package.json package-lock.json migrations scripts knexfile.js MIGRATIONS.md
 
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
@@ -129,7 +129,7 @@ jobs:
                 "migrate:create:clients": "knex migrate:make --env=client_databases",
                 "migrate:run:client": "knex migrate:latest --env=client_databases",
                 "migrate:run:clients": "node scripts/migrate-clients.js",
-                "migrate:run:users:prod": "NODE_ENV=production knex migrate:latest --env=production",
+                "migrate:run:users:prod": "NODE_ENV=production knex migrate:latest --env=production --knexfile=./knexfile.js",
                 "migrate:run:clients:prod": "NODE_ENV=production node scripts/migrate-clients.js",
                 "migrate:deploy": "npm run migrate:run:users:prod && npm run migrate:run:clients:prod"
               },
@@ -191,10 +191,12 @@ jobs:
             # Use npm install instead of npm ci because we modified package.json
             npm install
 
-            # Always run migrations (knex migrate:latest is safe - it only runs new migrations)
-            echo "🔄 Running database migrations..."
-            npm run migrate:deploy
-            echo "✅ Migrations completed successfully!"
+            # Migrations are available but not run automatically
+            # To run migrations manually on EC2:
+            # 1. cd to backend directory
+            # 2. npm run migrate:deploy
+            echo "ℹ️  Migrations are available but not run automatically for safety"
+            echo "ℹ️  To run migrations manually: cd backend && npm run migrate:deploy"
 
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
