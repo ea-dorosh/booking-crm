@@ -86,7 +86,7 @@ jobs:
           source: backend.tar.gz,frontend.tar.gz
           target: ${{ secrets.EC2_DEPLOY_PATH }}
 
-      - name: Deploy on EC2 via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -104,11 +104,23 @@ jobs:
             sudo chown -R $USER:$USER backend/public/images
             sudo chmod -R 777 backend/public/images
             tar xzf backend.tar.gz -C backend --strip-components=1
+
+            # DEBUG: Check what files we have
+            echo "🔍 Files in backend after extraction:"
+            ls -la backend/
+            echo "🔍 Checking package.json scripts:"
+            grep -A3 -B3 "migrate:deploy" backend/package.json || echo "❌ migrate:deploy not found!"
+
+            # Copy environment file
             cp backend/.env.production backend/.env
             cd backend
 
             # Install all dependencies (including dev for migrations)
             npm ci
+
+            # DEBUG: Check package.json after npm ci
+            echo "🔍 Checking package.json scripts after npm ci:"
+            grep -A3 -B3 "migrate:deploy" package.json || echo "❌ migrate:deploy not found after npm ci!"
 
             # Always run migrations (knex migrate:latest is safe - it only runs new migrations)
             echo "🔄 Running database migrations..."
@@ -118,7 +130,7 @@ jobs:
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
               --name booking-backend \
-              --cwd /var/www/booking-crm/backend \
+              --cwd ${{ secrets.EC2_DEPLOY_PATH }}/backend \
               --env production
             cd ..
 
