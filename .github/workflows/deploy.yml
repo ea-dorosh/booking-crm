@@ -104,9 +104,9 @@ jobs:
             sudo chown -R $USER:$USER .
 
             # --- Backend deployment ---
-            # Clean old backend files (except public/images which contains uploaded files)
+            # Clean old backend files (except public/ and .env files which contain uploaded files and secrets)
             if [ -d "backend" ]; then
-              find backend -mindepth 1 -not -path "backend/public" -not -path "backend/public/*" -delete
+              find backend -mindepth 1 -not -path "backend/public" -not -path "backend/public/*" -not -name ".env*" -delete
             fi
             mkdir -p backend
             mkdir -p backend/public/images
@@ -187,8 +187,7 @@ jobs:
             }
             EOF
 
-            # Copy environment file
-            cp backend/.env.production backend/.env
+            # Environment file should already exist on server
             cd backend
 
             # Install all dependencies (including dev for migrations)
