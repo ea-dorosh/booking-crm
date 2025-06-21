@@ -104,6 +104,10 @@ jobs:
             sudo chown -R $USER:$USER .
 
             # --- Backend deployment ---
+            # Clean old backend files (except public/images which contains uploaded files)
+            if [ -d "backend" ]; then
+              find backend -mindepth 1 -not -path "backend/public" -not -path "backend/public/*" -delete
+            fi
             mkdir -p backend
             mkdir -p backend/public/images
             sudo chown -R $USER:$USER backend/public/images
