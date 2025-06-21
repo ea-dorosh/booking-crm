@@ -113,7 +113,7 @@ jobs:
             cd backend
             npm ci --omit=dev
             pm2 delete booking-backend || true
-            pm2 start dist/server.js \
+            pm2 start server.js \
               --name booking-backend \
               --cwd ${{ secrets.EC2_DEPLOY_PATH }}/backend \
               --env production
