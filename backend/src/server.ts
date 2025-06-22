@@ -42,6 +42,7 @@ const allowedOrigins = [
   `http://192.168.178.40:3000`,
   process.env.PRODUCTION_CLIENT_URL,
   process.env.PRODUCTION_ADMIN_URL,
+  process.env.STUDIO_CLIENT_URL,
 ].filter(Boolean);
 
 const corsOptions = {
