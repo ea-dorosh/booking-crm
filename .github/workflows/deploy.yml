@@ -130,9 +130,6 @@ jobs:
             cd backend
             npm ci --omit=dev
 
-            # Run database migrations
-            npm run migrate:deploy
-
             pm2 delete booking-backend || true
             pm2 start server.js \
               --name booking-backend \
