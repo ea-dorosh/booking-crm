@@ -26,6 +26,9 @@ jobs:
           mkdir -p ../temp-backend
           cp -r dist/* ../temp-backend/
           cp package.json package-lock.json ../temp-backend/
+          cp knexfile.js ../temp-backend/
+          cp -r migrations ../temp-backend/
+          cp -r scripts ../temp-backend/
           cd ..
           tar czf backend.tar.gz -C temp-backend .
           rm -rf temp-backend
@@ -104,14 +107,32 @@ jobs:
             sudo chown -R $USER:$USER .
 
             # --- Backend deployment ---
+            # Backup .env.production before cleaning backend folder
+            if [ -f "backend/.env.production" ]; then
+              cp backend/.env.production /tmp/.env.production.backup
+            fi
+
             mkdir -p backend
             mkdir -p backend/public/images
             sudo chown -R $USER:$USER backend/public/images
             sudo chmod -R 777 backend/public/images
             tar xzf backend.tar.gz -C backend --strip-components=1
-            cp backend/.env.production backend/.env
+
+            # Restore .env.production and copy to .env
+            if [ -f "/tmp/.env.production.backup" ]; then
+              cp /tmp/.env.production.backup backend/.env.production
+              cp backend/.env.production backend/.env
+              rm /tmp/.env.production.backup
+            else
+              echo "⚠️  Warning: backend/.env.production not found on server!"
+            fi
+
             cd backend
             npm ci --omit=dev
+
+            # Run database migrations
+            npm run migrate:deploy
+
             pm2 delete booking-backend || true
             pm2 start server.js \
               --name booking-backend \
