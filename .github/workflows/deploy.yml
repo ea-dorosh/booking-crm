@@ -29,6 +29,8 @@ jobs:
           cp knexfile.js ../temp-backend/
           cp -r migrations ../temp-backend/
           cp -r scripts ../temp-backend/
+          mkdir -p ../temp-backend/src/templates
+          cp -r src/templates/emails ../temp-backend/src/templates/
           cd ..
           tar czf backend.tar.gz -C temp-backend .
           rm -rf temp-backend
