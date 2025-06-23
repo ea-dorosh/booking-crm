@@ -10,12 +10,7 @@ import {
   Card,
   CardContent,
   Stack,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle
+  Chip
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import axios from '../../services/axios.service.js';
@@ -27,8 +22,6 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
   const [calendarId, setCalendarId] = useState('');
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [authCode, setAuthCode] = useState('');
 
   // Effect to load integration status when component mounts
   useEffect(() => {
@@ -40,14 +33,14 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
   // Effect to check for OAuth code in localStorage on load
   useEffect(() => {
     const oauthCode = localStorage.getItem('google_oauth_code');
-    const savedCalendarId = localStorage.getItem('google_calendar_id');
+    const savedCalendarId = localStorage.getItem('google_calendar_id') || calendarId;
 
     if (oauthCode && employeeId && savedCalendarId) {
-      handleAuthWithCode(oauthCode, savedCalendarId);
+      handleAuthCallback(oauthCode, savedCalendarId);
       localStorage.removeItem('google_oauth_code');
       localStorage.removeItem('google_calendar_id');
     }
-  }, [employeeId]);  // Dependency on employeeId
+  }, []);  // Only runs on component mount
 
   const fetchStatus = async () => {
     try {
@@ -78,9 +71,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
     try {
       setLoading(true);
 
-      // Save calendarId to localStorage before opening auth window
+      // Save calendarId to localStorage before redirecting
       localStorage.setItem('temp_calendar_id', calendarId);
-      localStorage.setItem('google_calendar_id', calendarId);
 
       // Save current path for return
       localStorage.setItem('google_oauth_return_path', window.location.pathname);
@@ -89,9 +81,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       const response = await axios.get(`/google-calendar/auth-url?employeeId=${employeeId}`);
 
       if (response.data && response.data.url) {
-        // Instead of redirecting, open a dialog and show instructions
-        setAuthDialogOpen(true);
-        window.open(response.data.url, '_blank', 'width=600,height=700');
+        window.location.href = response.data.url;
       } else {
         setError(`Failed to get Google authorization URL`);
       }
@@ -103,7 +93,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
     }
   };
 
-  const handleAuthWithCode = async (code, idToUse) => {
+  const handleAuthCallback = async (code, idToUse) => {
     if (!code || !idToUse) {
       setError(`Authorization code and calendar ID are required`);
       return;
@@ -111,19 +101,19 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
 
     try {
       setLoading(true);
-      setAuthDialogOpen(false);
 
-      // Call auth-callback endpoint with code and calendar ID
+      // Ensure employeeId is passed as a number
+      const numericEmployeeId = Number(employeeId);
+
       await axios.post(`/google-calendar/auth-callback`, {
         code,
-        employeeId: Number(employeeId),
+        employeeId: numericEmployeeId,
         calendarId: idToUse
       });
 
       // Update status after successful integration
       await fetchStatus();
       setError(null);
-      setAuthCode('');
     } catch (error) {
       console.error(`Error handling Google auth callback:`, error);
       console.error(`Error details:`, error.response?.data || error.message);
@@ -131,17 +121,6 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAuthSubmit = async () => {
-    if (!authCode) {
-      setError('Authorization code is required');
-      return;
-    }
-
-    const savedCalendarId = localStorage.getItem('google_calendar_id') || calendarId;
-
-    await handleAuthWithCode(authCode, savedCalendarId);
   };
 
   const removeIntegration = async () => {
@@ -317,38 +296,10 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
           </Box>
 
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 2 }}>
-            You will be directed to Google to authorize access to the calendar.
+            You will be redirected to Google to authorize access to the calendar.
           </Typography>
         </Box>
       )}
-
-      {/* Dialog for entering authorization code */}
-      <Dialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)}>
-        <DialogTitle>Google Calendar Authorization</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            A new window has opened where you need to authorize access to Google Calendar. After authorization, you will receive an authentication code. Please copy that code and paste it below:
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="authCode"
-            label="Authorization Code"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={authCode}
-            onChange={(e) => setAuthCode(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAuthDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAuthSubmit} variant="contained" color="primary" disabled={!authCode}>
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
