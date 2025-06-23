@@ -24,13 +24,22 @@ jobs:
           npm ci
           npm run build
           mkdir -p ../temp-backend
-          cp -r src ../temp-backend/
+          # Копируем только скомпилированные файлы и необходимые настройки
           cp -r dist ../temp-backend/
           cp package.json package-lock.json ../temp-backend/
           cp knexfile.js ../temp-backend/
           cp -r migrations ../temp-backend/
           cp -r scripts ../temp-backend/
           mkdir -p ../temp-backend/public/images
+
+          # Копируем только шаблоны писем в директорию dist
+          mkdir -p ../temp-backend/dist/src/templates/emails
+          cp src/templates/emails/*.html ../temp-backend/dist/src/templates/emails/
+
+          # Проверяем наличие шаблонов
+          echo "Email templates copied:"
+          ls -la ../temp-backend/dist/src/templates/emails/
+
           cd ..
           tar czf backend.tar.gz -C temp-backend .
           rm -rf temp-backend
@@ -133,6 +142,10 @@ jobs:
 
             cd backend
             npm ci --omit=dev
+
+            # Проверяем наличие шаблонов писем
+            echo "Checking email templates..."
+            ls -la dist/src/templates/emails/
 
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
