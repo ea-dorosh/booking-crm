@@ -24,13 +24,11 @@ jobs:
           npm ci
           npm run build
           mkdir -p ../temp-backend
-          cp -r dist/* ../temp-backend/
+          cp -r dist ../temp-backend/
           cp package.json package-lock.json ../temp-backend/
           cp knexfile.js ../temp-backend/
           cp -r migrations ../temp-backend/
           cp -r scripts ../temp-backend/
-          mkdir -p ../temp-backend/src/templates
-          cp -r src/templates/emails ../temp-backend/src/templates/
           cd ..
           tar czf backend.tar.gz -C temp-backend .
           rm -rf temp-backend
@@ -133,7 +131,7 @@ jobs:
             npm ci --omit=dev
 
             pm2 delete booking-backend || true
-            pm2 start server.js \
+            pm2 start dist/server.js \
               --name booking-backend \
               --cwd ${{ secrets.EC2_DEPLOY_PATH }}/backend \
               --env production
