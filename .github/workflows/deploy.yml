@@ -32,13 +32,13 @@ jobs:
           cp -r scripts ../temp-backend/
           mkdir -p ../temp-backend/public/images
 
-          # Копируем только шаблоны писем в директорию dist
-          mkdir -p ../temp-backend/dist/src/templates/emails
-          cp src/templates/emails/*.html ../temp-backend/dist/src/templates/emails/
+          # Копируем шаблоны писем в директорию dist/templates/emails
+          mkdir -p ../temp-backend/dist/templates/emails
+          cp src/templates/emails/*.html ../temp-backend/dist/templates/emails/
 
           # Проверяем наличие шаблонов
           echo "Email templates copied:"
-          ls -la ../temp-backend/dist/src/templates/emails/
+          ls -la ../temp-backend/dist/templates/emails/
 
           cd ..
           tar czf backend.tar.gz -C temp-backend .
@@ -145,7 +145,7 @@ jobs:
 
             # Проверяем наличие шаблонов писем
             echo "Checking email templates..."
-            ls -la dist/src/templates/emails/
+            ls -la dist/templates/emails/
 
             pm2 delete booking-backend || true
             pm2 start dist/server.js \
