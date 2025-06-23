@@ -27,17 +27,23 @@ router.get(`/auth-url`, (req: CustomRequestType, res: CustomResponseType) => {
 
     console.log(`Getting auth URL for employeeId: ${employeeId}`);
 
-    const deviceParams: Record<string, string> = {
-      device_id: `booking_crm_client_${employeeId}_${Date.now()}`,
-      device_name: `Booking CRM Client`
-    };
-
-    console.log(`Adding device params:`, deviceParams);
-
+    // Get base auth URL
     const authUrl = getAuthUrl();
     console.log(`Generated auth URL:`, authUrl);
 
-    const finalAuthUrl = `${authUrl}&${new URLSearchParams(deviceParams).toString()}`;
+    let finalAuthUrl = authUrl;
+
+    // Add device params only in development environment
+    if (process.env.NODE_ENV !== 'production') {
+      const deviceParams: Record<string, string> = {
+        device_id: `booking_crm_client_${employeeId}_${Date.now()}`,
+        device_name: `Booking CRM Client`
+      };
+
+      console.log(`Adding device params (development only):`, deviceParams);
+      finalAuthUrl = `${authUrl}&${new URLSearchParams(deviceParams).toString()}`;
+    }
+
     console.log(`Final auth URL with parameters:`, finalAuthUrl);
 
     res.json({ url: finalAuthUrl });
