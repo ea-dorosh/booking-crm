@@ -24,13 +24,13 @@ jobs:
           npm ci
           npm run build
           mkdir -p ../temp-backend
+          cp -r src ../temp-backend/
           cp -r dist ../temp-backend/
           cp package.json package-lock.json ../temp-backend/
           cp knexfile.js ../temp-backend/
           cp -r migrations ../temp-backend/
           cp -r scripts ../temp-backend/
-          mkdir -p ../temp-backend/dist/src/templates
-          cp -r src/templates/emails ../temp-backend/dist/src/templates/
+          mkdir -p ../temp-backend/public/images
           cd ..
           tar czf backend.tar.gz -C temp-backend .
           rm -rf temp-backend
@@ -114,11 +114,13 @@ jobs:
               cp backend/.env.production /tmp/.env.production.backup
             fi
 
+            rm -rf backend
             mkdir -p backend
+            tar xzf backend.tar.gz -C backend
+
             mkdir -p backend/public/images
             sudo chown -R $USER:$USER backend/public/images
             sudo chmod -R 777 backend/public/images
-            tar xzf backend.tar.gz -C backend --strip-components=1
 
             # Restore .env.production and copy to .env
             if [ -f "/tmp/.env.production.backup" ]; then
