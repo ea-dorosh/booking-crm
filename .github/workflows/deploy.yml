@@ -123,11 +123,24 @@ jobs:
               cp backend/.env.production /tmp/.env.production.backup
             fi
 
+            if [ -d "backend/public/images" ]; then
+              echo "Preserving images directory..."
+              mv backend/public/images /tmp/booking-images
+            fi
+
             rm -rf backend
             mkdir -p backend
             tar xzf backend.tar.gz -C backend
 
-            mkdir -p backend/public/images
+            mkdir -p backend/public
+            if [ -d "/tmp/booking-images" ]; then
+              echo "Restoring images directory..."
+              rm -rf backend/public/images
+              mv /tmp/booking-images backend/public/images
+            else
+              mkdir -p backend/public/images
+            fi
+
             sudo chown -R $USER:$USER backend/public/images
             sudo chmod -R 777 backend/public/images
 

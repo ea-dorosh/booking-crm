@@ -1,122 +1,122 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminbestätigung - Dorosh Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-          margin: 0;
-          padding: 0;
-          font-family: 'Poppins', sans-serif;
-          background-color: #f8f8f8;
-          color: #333333;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          font-size: 16px;
-          line-height: 1.5;
-        }
-        .container {
-          max-width: 600px;
-          margin: 0 auto;
-          background-color: #ffffff;
-        }
-        .header {
-          padding: 30px 20px;
-          text-align: center;
-          background-color: #333333;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminbestätigung - Dorosh Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f8f8;
+        color: #333333;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+      .header {
+        padding: 30px 20px;
+        text-align: center;
+        background-color: #333333;
+        color: #ffffff;
+      }
+      .header h1 {
+        margin: 0;
+        font-family: 'Cinzel', serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+      .content {
+        padding: 40px 30px;
+      }
+      .greeting {
+        font-size: 28px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+      h2 {
+        font-family: 'Cinzel', serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #333333;
+        margin-top: 30px;
+        margin-bottom: 20px;
+      }
+      .appointment-details {
+        background-color: #f8f8f8;
+        border-left: 4px solid #D6796C;
+        padding: 20px;
+        margin: 25px 0;
+      }
+      .detail-row {
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+      .detail-label {
+        font-weight: 600;
+      }
+      .detail-value {
+        flex: 1;
+      }
+      .message {
+        margin-bottom: 30px;
+        line-height: 1.6;
+        font-size: 16px;
+      }
+      .footer {
+        background-color: #333333;
+        color: #ffffff;
+        padding: 30px 20px;
+        text-align: center;
+        font-size: 14px;
+      }
+      .footer-logo {
+        font-family: 'Cinzel', serif;
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .footer-info {
+        margin-bottom: 15px;
+        color: #ffffff !important;
+      }
+      .footer-location {
+        margin-bottom: 15px;
+        color: #ffffff !important;
+      }
+      .social-links {
+          margin: 20px 0;
+      }
+      .social-links a {
+          display: inline-block;
+          margin: 0 10px;
           color: #ffffff;
-        }
-        .header h1 {
-          margin: 0;
-          font-family: 'Cinzel', serif;
-          font-size: 28px;
-          font-weight: 700;
-          color: #ffffff;
-        }
-        .content {
-          padding: 40px 30px;
-        }
-        .greeting {
-          font-size: 28px;
-          font-weight: 500;
-          margin-bottom: 20px;
-          font-weight: 600;
-        }
-        h2 {
-          font-family: 'Cinzel', serif;
-          font-size: 24px;
-          font-weight: 700;
-          color: #333333;
-          margin-top: 30px;
-          margin-bottom: 20px;
-        }
-        .appointment-details {
-          background-color: #f8f8f8;
-          border-left: 4px solid #D6796C;
-          padding: 20px;
-          margin: 25px 0;
-        }
-        .detail-row {
-          font-size: 16px;
-          margin-bottom: 16px;
-        }
-        .detail-label {
-          font-weight: 600;
-        }
-        .detail-value {
-          flex: 1;
-        }
-        .message {
-          margin-bottom: 30px;
-          line-height: 1.6;
-          font-size: 16px;
-        }
-        .footer {
-          background-color: #333333;
-          color: #ffffff;
-          padding: 30px 20px;
-          text-align: center;
-          font-size: 14px;
-        }
-        .footer-logo {
-          font-family: 'Cinzel', serif;
-          font-size: 22px;
-          font-weight: 700;
-        }
-        .footer-info {
-          margin-bottom: 15px;
-          color: #ffffff !important;
-        }
-        .footer-location {
-          margin-bottom: 15px;
-          color: #ffffff !important;
-        }
-        .social-links {
-            margin: 20px 0;
-        }
-        .social-links a {
-            display: inline-block;
-            margin: 0 10px;
-            color: #ffffff;
-            text-decoration: none;
-        }
-        @media only screen and (max-width: 480px) {
-            .header h1 {
-                font-size: 24px;
-            }
-            .content {
-                padding: 30px 20px;
-            }
-            .detail-row {
-                flex-direction: column;
-            }
-            .detail-label {
-                margin-bottom: 5px;
-            }
-        }
-    </style>
+          text-decoration: none;
+      }
+      @media only screen and (max-width: 480px) {
+          .header h1 {
+              font-size: 24px;
+          }
+          .content {
+              padding: 30px 20px;
+          }
+          .detail-row {
+              flex-direction: column;
+          }
+          .detail-label {
+              margin-bottom: 5px;
+          }
+      }
+  </style>
 </head>
 
 <body>
@@ -195,8 +195,8 @@
             </div>
 
             <div class="social-links">
-                <a href="https://instagram.com/dorosh_studio">Instagram</a> |
-                <a href="https://facebook.com/doroshstudio">Facebook</a>
+              <a href="https://instagram.com/dorosh_studio">Instagram</a> |
+              <a href="https://facebook.com/doroshstudio">Facebook</a>
             </div>
 
             <div>© {{currentYear}} Dorosh Studio. Alle Rechte vorbehalten.</div>
