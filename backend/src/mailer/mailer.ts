@@ -150,6 +150,7 @@ export async function sendAppointmentConfirmationEmail(
     phone,
     email,
     companyData,
+    currentYear: new Date().getFullYear(),
   };
 
   const htmlContent = renderTemplate(`appointment-confirmation`, templateContext);
@@ -159,18 +160,29 @@ export async function sendAppointmentConfirmationEmail(
     to: recipientEmail,
     subject: `Terminbestätigung - Dorosh Studio`,
     text:
-      `Terminbestätigung\n\n` +
-      `Sehr ${lastName},\n\n` +
-      `vielen Dank für Ihre Buchung bei Dorosh Studio. Hiermit bestätigen wir Ihren Termin:\n\n` +
-      `Datum: ${date}\n` +
-      `Uhrzeit: ${time} Uhr\n` +
-      (service ? `Behandlung: ${service}\n` : '') +
-      (specialist ? `Stylist: ${specialist}\n` : '') +
-      `Adresse: ${location}\n` +
-      `\nFalls Sie Ihren Termin verschieben oder absagen möchten, kontaktieren Sie uns bitte mindestens 24 Stunden im Voraus.\n\n` +
-      `Wir freuen uns auf Ihren Besuch!\n\n` +
-      `Mit freundlichen Grüßen,\n` +
-      `Ihr Dorosh Studio Team`,
+      `DOROSH STUDIO\n\n` +
+      `Vielen Dank für die Buchung\n\n` +
+      `Hallo ${firstName} ${lastName},\n` +
+      `die Buchung für "${service}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.\n\n` +
+      `Ihre Terminbestätigung\n` +
+      `---------------------\n` +
+      `Datum: ${date} um ${time} Uhr\n` +
+      `Service: ${service}\n` +
+      `Standort: ${location}\n` +
+      `Spezialist: ${specialist}\n\n` +
+      `Kundenangaben\n` +
+      `-------------\n` +
+      `Name: ${firstName} ${lastName}\n` +
+      `Telefonnummer: ${phone || 'Keine Angabe'}\n` +
+      `Email: ${email}\n\n` +
+      `DOROSH STUDIO\n` +
+      `${location}\n\n` +
+      `${companyData.name}\n` +
+      `Telefonnummer: ${companyData.phone}\n` +
+      `E-Mail: ${companyData.email}\n` +
+      `Website: ${companyData.website}\n` +
+      `${companyData.addressStreet}, ${companyData.addressZip} ${companyData.addressCity}, ${companyData.addressCountry}\n\n` +
+      `© ${new Date().getFullYear()} Dorosh Studio. Alle Rechte vorbehalten.`,
     html: htmlContent,
   };
 
