@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import Handlebars from 'handlebars';
+import { CompanyResponseData } from '@/@types/companyTypes.js';
 
 dotenv.config();
 
@@ -110,12 +111,15 @@ export async function sendAppointmentConfirmationEmail(
   appointmentData: {
     date: string;
     time: string;
-    service?: string;
-    specialist?: string;
-    location?: string;
-    salutation?: string;
-    lastName?: string;
-  }
+    service: string;
+    specialist: string;
+    location: string;
+    lastName: string;
+    firstName: string;
+    phone: string | null;
+    email: string;
+  },
+  companyData: CompanyResponseData,
 ) {
   if (!transporter) {
     await createTransporter();
@@ -124,24 +128,28 @@ export async function sendAppointmentConfirmationEmail(
   const {
     date,
     time,
-    service = ``,
-    specialist = ``,
-    location = "Kastanienallee 22, Berlin",
-    salutation = "female",
-    lastName = ""
+    service,
+    specialist,
+    location,
+    lastName,
+    firstName,
+    phone,
+    email,
   } = appointmentData;
 
-  const salutationText = salutation === `male` ? `geehrter Herr` : `geehrte Frau`;
   const sender = getSenderInfo();
 
   const templateContext = {
-    salutationText,
     lastName,
+    firstName,
     date,
     time,
     service,
     specialist,
-    location
+    location,
+    phone,
+    email,
+    companyData,
   };
 
   const htmlContent = renderTemplate(`appointment-confirmation`, templateContext);
@@ -152,7 +160,7 @@ export async function sendAppointmentConfirmationEmail(
     subject: `Terminbestätigung - Dorosh Studio`,
     text:
       `Terminbestätigung\n\n` +
-      `Sehr ${salutationText} ${lastName},\n\n` +
+      `Sehr ${lastName},\n\n` +
       `vielen Dank für Ihre Buchung bei Dorosh Studio. Hiermit bestätigen wir Ihren Termin:\n\n` +
       `Datum: ${date}\n` +
       `Uhrzeit: ${time} Uhr\n` +

@@ -56,6 +56,28 @@ async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
   return employees;
 }
 
+async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDetailDataType> {
+  const sql = `
+    SELECT * FROM Employees
+    WHERE employee_id = ?
+  `;
+
+  const [employeeRows] = await dbPool.query<EmployeeDetailRowType[]>(sql, [employeeId]);
+
+  const employeeData: EmployeeDetailDataType[] = employeeRows.map((row) => ({
+    employeeId: row.employee_id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email,
+    phone: row.phone,
+    image: row.image
+      ? `${process.env.SERVER_API_URL}/images/${row.image}`
+      : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
+  }));
+
+  return employeeData[0];
+}
+
 async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, timeStart, timeEnd }: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
   const mysqlTimeStart = toMySQLDateTime(timeStart);
   const mysqlTimeEnd   = toMySQLDateTime(timeEnd);
@@ -95,5 +117,6 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
 
 export {
   getEmployees,
+  getEmployee,
   checkEmployeeTimeNotOverlap,
 };

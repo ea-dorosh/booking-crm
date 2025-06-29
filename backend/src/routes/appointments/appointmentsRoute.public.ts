@@ -12,7 +12,11 @@ import {
   checkCustomerExists,
   createCustomer,
 } from '@/services/customer/customerService.js';
-import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
+import {
+  checkEmployeeTimeNotOverlap,
+  getEmployee,
+} from '@/services/employees/employeesService.js';
+import { getCompany } from '@/services/company/companyService.js';
 import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils.js';
 import { CustomerNewStatusEnum } from '@/enums/enums.js';
 import {
@@ -213,17 +217,23 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     }
 
     try {
+      const employee = await getEmployee(request.dbPool, appointmentFormData.employeeId);
+      const company = await getCompany(request.dbPool);
+
       const emailResult = await sendAppointmentConfirmationEmail(
         appointmentFormData.email,
         {
           date: dayjs(date).format('DD.MM.YYYY'),
           time: dayjs(timeStart).format('HH:mm'),
           service: serviceName,
-          specialist: '', // Add specialist name if available
-          location: '', // Add location if available
+          specialist: `${employee.firstName} ${employee.lastName}`,
+          location: `Harburger Str. 10, 22765 Hamburg`,
           lastName: formatName(appointmentFormData.lastName),
-          salutation: appointmentFormData.salutation.toString() === 'Mr' ? 'male' : 'female',
-        }
+          firstName: formatName(appointmentFormData.firstName),
+          phone: formatPhone(appointmentFormData.phone),
+          email: appointmentFormData.email,
+        },
+        company,
       );
       console.log(`Confirmation email sent to ${appointmentFormData.email}`);
 
