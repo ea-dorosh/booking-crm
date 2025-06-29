@@ -28,6 +28,10 @@
 /backend/src/migration
 *.tar.gz
 
+# Загруженные файлы из public/images (кроме .gitkeep)
+/backend/public/images/*
+!/backend/public/images/.gitkeep
+
 # misc
 .DS_Store
 *.pem
@@ -65,3 +69,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminbestätigung - Dorosh Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f8f8;
+            color: #333333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            padding: 30px 20px;
+            text-align: center;
+            background-color: #333333;
+            color: #ffffff;
+        }
+        .header h1 {
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #333333;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        .appointment-details {
+            background-color: #f8f8f8;
+            border-left: 4px solid #D6796C;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            flex: 0 0 140px;
+            font-weight: 600;
+        }
+        .detail-value {
+            flex: 1;
+        }
+        .message {
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #D6796C;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .note {
+            font-size: 14px;
+            color: #666666;
+            margin-top: 30px;
+            font-style: italic;
+        }
+        .footer {
+            background-color: #333333;
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer-logo {
+            margin-bottom: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .footer-info {
+            margin-bottom: 15px;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        @media only screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DOROSH STUDIO</h1>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                {{#if salutation}}
+                    {{#eq salutation "male"}}
+                        Sehr geehrter Herr {{lastName}},
+                    {{else}}
+                        Sehr geehrte Frau {{lastName}},
+                    {{/eq}}
+                {{else}}
+                    Sehr geehrte(r) {{lastName}},
+                {{/if}}
+            </div>
+
+            <div class="message">
+                Vielen Dank für Ihre Terminbuchung. Wir freuen uns, Sie bei uns im Studio begrüßen zu dürfen.
+            </div>
+
+            <h2>Ihre Terminbestätigung</h2>
+
+            <div class="appointment-details">
+                <div class="detail-row">
+                    <div class="detail-label">Datum:</div>
+                    <div class="detail-value">{{date}}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Uhrzeit:</div>
+                    <div class="detail-value">{{time}} Uhr</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Service:</div>
+                    <div class="detail-value">{{service}}</div>
+                </div>
+                {{#if specialist}}
+                <div class="detail-row">
+                    <div class="detail-label">Spezialist:</div>
+                    <div class="detail-value">{{specialist}}</div>
+                </div>
+                {{/if}}
+                {{#if location}}
+                <div class="detail-row">
+                    <div class="detail-label">Adresse:</div>
+                    <div class="detail-value">{{location}}</div>
+                </div>
+                {{/if}}
+            </div>
+
+            <div class="message">
+                Falls Sie Fragen haben oder Ihren Termin ändern oder stornieren möchten, kontaktieren Sie uns bitte telefonisch oder per E-Mail.
+            </div>
+
+            <a href="tel:+49301234567" class="cta-button">Anrufen</a>
+
+            <div class="note">
+                Bitte beachten Sie: Bei Verhinderung bitten wir um rechtzeitige Absage (mind. 24 Stunden vorher), damit wir den Termin anderweitig vergeben können.
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-logo">DOROSH STUDIO</div>
+            <div class="footer-info">
+                Musterstraße 123<br>
+                10115 Berlin
+            </div>
+            <div class="footer-info">
+                Tel: +49 30 1234567<br>
+                E-Mail: info@dorosh-studio.de
+            </div>
+            <div class="social-links">
+                <a href="https://instagram.com/dorosh_studio">Instagram</a> |
+                <a href="https://facebook.com/doroshstudio">Facebook</a>
+            </div>
+            <div>© 2023 Dorosh Studio. Alle Rechte vorbehalten.</div>
+        </div>
+    </div>
+</body>
+</html>

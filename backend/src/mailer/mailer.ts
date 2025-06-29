@@ -56,16 +56,9 @@ function getSenderInfo() {
 
 function renderTemplate(templateName: string, context: Record<string, any>): string {
   try {
-    // Для совместимости с локальной разработкой и продакшеном
-    let templatePath;
-    try {
-      // Сначала проверяем путь для продакшена (dist/templates/emails)
-      templatePath = path.join(process.cwd(), `templates`, `emails`, `${templateName}.html`);
-      fs.accessSync(templatePath); // Проверяем существует ли файл
-    } catch (err) {
-      // Если файл не найден, используем путь для разработки (src/templates/emails)
-      templatePath = path.join(process.cwd(), `src`, `templates`, `emails`, `${templateName}.html`);
-    }
+    // Использование единого пути для ресурсов с возможностью переопределения через ENV
+    const RESOURCES_PATH = process.env.RESOURCES_PATH || path.join(process.cwd(), 'resources');
+    const templatePath = path.join(RESOURCES_PATH, 'templates', 'emails', `${templateName}.html`);
 
     const source = fs.readFileSync(templatePath, `utf8`);
     const template = Handlebars.compile(source);

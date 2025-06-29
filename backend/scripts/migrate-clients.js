@@ -2,10 +2,8 @@ import { config as loadEnv } from 'dotenv';
 import path from 'path';
 import { spawn } from 'child_process';
 
-// Определяем какой .env файл загружать
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 
-// Загружаем переменные из нужного файла
 loadEnv({ path: path.resolve(envFile) });
 
 const clientDatabases = process.env.CLIENT_DATABASES?.split(',').map(db => db.trim()) || [];
