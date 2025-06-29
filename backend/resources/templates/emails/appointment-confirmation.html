@@ -74,19 +74,22 @@
           font-size: 16px;
         }
         .footer {
-            background-color: #333333;
-            color: #ffffff;
-            padding: 30px 20px;
-            text-align: center;
-            font-size: 14px;
+          background-color: #333333;
+          color: #ffffff;
+          padding: 30px 20px;
+          text-align: center;
+          font-size: 14px;
         }
         .footer-logo {
-            margin-bottom: 20px;
-            font-family: 'Cinzel', serif;
-            font-size: 22px;
-            font-weight: 700;
+          font-family: 'Cinzel', serif;
+          font-size: 22px;
+          font-weight: 700;
         }
         .footer-info {
+          margin-bottom: 15px;
+          color: #ffffff !important;
+        }
+        .footer-location {
           margin-bottom: 15px;
           color: #ffffff !important;
         }
@@ -179,11 +182,12 @@
 
         <div class="footer">
             <div class="footer-logo">DOROSH STUDIO</div>
-            <div class="footer-info">
+            <div class="footer-location">
               {{location}}
             </div>
 
             <div class="footer-info">
+              {{ companyData.name }}<br>
               Telefonnummer: <a href="tel:{{companyData.phone}}">{{companyData.phone}}</a><br>
               E-Mail: {{companyData.email}}<br>
               Website: {{companyData.website}}<br>
