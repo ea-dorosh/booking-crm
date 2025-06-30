@@ -3,7 +3,7 @@ import {
   EmployeeDetailRowType,
   EmployeeDetailDataType,
 } from '@/@types/employeesTypes.js';
-import dayjs from 'dayjs';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 interface CheckEmployeeParams {
   date: string;

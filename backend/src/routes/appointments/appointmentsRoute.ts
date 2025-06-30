@@ -18,7 +18,7 @@ import {
 } from '@/@types/employeesTypes.js';
 import { deleteGoogleCalendarEvent } from '@/services/googleCalendar/googleCalendarService.js';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import dayjs from 'dayjs';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 const router = express.Router();
 

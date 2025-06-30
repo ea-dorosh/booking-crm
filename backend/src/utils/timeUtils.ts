@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 function getServiceDuration(durationTime: string, bufferTime?: string): string {
   if (!bufferTime) return durationTime;

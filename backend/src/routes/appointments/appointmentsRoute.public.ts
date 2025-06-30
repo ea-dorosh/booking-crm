@@ -1,7 +1,5 @@
 import express from 'express';
-import dayjs from 'dayjs';
 import { ResultSetHeader } from 'mysql2/promise';
-import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 import { getServiceDuration } from '@/utils/timeUtils.js';
 import {
   formatName,
@@ -31,10 +29,9 @@ import {
 } from '@/validators/appointmentValidators.js';
 import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
 import { createGoogleCalendarEvent } from '@/services/googleCalendar/googleCalendarService.js';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 const router = express.Router();
-
-dayjs.extend(advancedFormat);
 
 const ERROR_MESSAGE = {
   VALIDATION_FAILED: `Validation failed`,

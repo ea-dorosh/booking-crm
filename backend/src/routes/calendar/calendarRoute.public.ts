@@ -1,8 +1,6 @@
 import express from 'express';
 import url from 'url';
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-import advancedFormat from 'dayjs/plugin/advancedFormat.js';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 import {
   addTimeSlotsAccordingEmployeeAvailability,
   disableTimeSlotsForServiceDuration,
@@ -18,10 +16,6 @@ import { RowDataPacket } from 'mysql2';
 import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
 
 const router = express.Router();
-
-dayjs.extend(advancedFormat);
-dayjs.extend(customParseFormat);
-dayjs.locale(`de`);
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;

@@ -5,7 +5,7 @@ import {
   SalutationEnum,
 } from '@/enums/enums.js';
 import { getCustomers, createCustomer, CreateCustomerResult, checkCustomerExists } from '@/services/customer/customerService.js';
-import dayjs from 'dayjs';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 import {
   InvoicesRequestRow,
   InvoiceByIdRequestRow,

@@ -1,15 +1,4 @@
-import dayjs from 'dayjs';
-import isSameOrBefore from 'dayjs/plugin/isSameOrBefore.js';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js';
-import duration from 'dayjs/plugin/duration.js';
-import isBetween from 'dayjs/plugin/isBetween.js';
-import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-
-dayjs.extend(duration);
-dayjs.extend(isSameOrBefore);
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isBetween);
-dayjs.extend(customParseFormat);
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 const TIME_FORMAT = 'HH:mm:ss';
 
