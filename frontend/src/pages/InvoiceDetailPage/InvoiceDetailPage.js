@@ -195,7 +195,7 @@ export default function CustomerDetailPage() {
 
       <Loader isOpen={isPdfLoading} message={`Processing PDF...`} />
 
-      {isEditMode && customers && services.length > 0 && <Box mt={3}>
+      {isEditMode && customers?.length > 0 && services?.length > 0 && <Box mt={3}>
         <InvoiceForm
           invoice={invoice}
           customers={customers}

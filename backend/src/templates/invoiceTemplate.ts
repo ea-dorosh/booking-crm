@@ -1,13 +1,16 @@
 import { InvoiceByIdResponseData } from "@/@types/invoicesTypes.js";
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
   const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    // const date = new Date(dateStr);
+    // return date.toLocaleDateString('de-DE', {
+    //   day: '2-digit',
+    //   month: 'short',
+    //   year: 'numeric'
+    // });
+
+    return dayjs(dateStr).format('DD. MMM YYYY');
   };
 
   const formattedDateIssued = formatDate(params.dateIssued);

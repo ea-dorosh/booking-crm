@@ -27,11 +27,11 @@ const validatePhone = (phoneNumber: string) => {
 
 /**
  * Validate ISO date format
- * @param date - The date string to validate (YYYY-MM-DD)
+ * @param date - The date string to validate (ISO 8601 format)
  * @returns true if the date is valid, false otherwise
  */
 const validateIsoDate = (date: string) => {
-  return /^\d{4}-\d{2}-\d{2}$/.test(date) && validator.isISO8601(date);
+  return validator.isISO8601(date);
 };
 
 /**
