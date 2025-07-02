@@ -118,7 +118,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   const employeeId = appointmentFormData.employeeId;
   const date = appointmentFormData.date;
 
-  const timeStart = dayjs(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`)
+  const timeStart = dayjs.tz(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`, 'Europe/Berlin')
     .format(`YYYY-MM-DD HH:mm:ss`);
 
   const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
@@ -220,8 +220,8 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       const emailResult = await sendAppointmentConfirmationEmail(
         appointmentFormData.email,
         {
-          date: dayjs(date).format('DD.MM.YYYY'),
-          time: dayjs(timeStart).format('HH:mm'),
+          date: dayjs.tz(date, 'Europe/Berlin').format('DD.MM.YYYY'),
+          time: dayjs.tz(timeStart, 'Europe/Berlin').format('HH:mm'),
           service: serviceName,
           specialist: `${employee.firstName} ${employee.lastName}`,
           location: `Harburger Str. 10, 22765 Hamburg`,

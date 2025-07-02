@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { Pool, RowDataPacket } from 'mysql2/promise';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 interface GoogleCalendarCredentials {
   employeeId: number;
@@ -393,14 +394,11 @@ export const checkGoogleCalendarAvailability = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const isoStartTime = new Date(startTime).toISOString();
-  const isoEndTime = new Date(endTime).toISOString();
+  const isoStartTime = dayjs.tz(startTime, 'Europe/Berlin').toISOString();
+  const isoEndTime = dayjs.tz(endTime, 'Europe/Berlin').toISOString();
 
-  const startOfDay = new Date(startTime);
-  startOfDay.setHours(0, 0, 0, 0);
-
-  const endOfDay = new Date(startTime);
-  endOfDay.setHours(23, 59, 59, 999);
+  const startOfDay = dayjs.tz(startTime, 'Europe/Berlin').startOf('day');
+  const endOfDay = dayjs.tz(startTime, 'Europe/Berlin').endOf('day');
 
   const isoDayStart = startOfDay.toISOString();
   const isoDayEnd = endOfDay.toISOString();
@@ -419,8 +417,8 @@ export const checkGoogleCalendarAvailability = async (
       singleEvents: true,
     });
 
-    const requestStart = new Date(startTime);
-    const requestEnd = new Date(endTime);
+    const requestStart = dayjs.tz(startTime, 'Europe/Berlin');
+    const requestEnd = dayjs.tz(endTime, 'Europe/Berlin');
 
     let hasConflict = false;
 
@@ -430,8 +428,8 @@ export const checkGoogleCalendarAvailability = async (
       for (const event of response.data.items as GoogleCalendarEvent[]) {
         if (!event.start?.dateTime || !event.end?.dateTime) continue;
 
-        const eventStart = new Date(event.start.dateTime);
-        const eventEnd = new Date(event.end.dateTime);
+        const eventStart = dayjs(event.start.dateTime);
+        const eventEnd = dayjs(event.end.dateTime);
 
         console.log(`Checking event:`, {
           summary: event.summary,
@@ -439,7 +437,7 @@ export const checkGoogleCalendarAvailability = async (
           end: eventEnd.toISOString()
         });
 
-        const overlaps = (requestStart < eventEnd && requestEnd > eventStart);
+        const overlaps = (requestStart.isBefore(eventEnd) && requestEnd.isAfter(eventStart));
 
         if (overlaps) {
           console.log(`Conflict detected with event:`, event.summary);
@@ -490,8 +488,8 @@ export const createGoogleCalendarEvent = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const startDateTime = new Date(appointment.timeStart).toISOString();
-  const endDateTime = new Date(appointment.timeEnd).toISOString();
+  const startDateTime = dayjs.tz(appointment.timeStart, 'Europe/Berlin').toISOString();
+  const endDateTime = dayjs.tz(appointment.timeEnd, 'Europe/Berlin').toISOString();
 
   console.log(`Creating Google Calendar event:`, {
     calendarId,
@@ -558,8 +556,8 @@ export const updateGoogleCalendarEvent = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const startDateTime = new Date(appointment.timeStart).toISOString();
-  const endDateTime = new Date(appointment.timeEnd).toISOString();
+  const startDateTime = dayjs.tz(appointment.timeStart, 'Europe/Berlin').toISOString();
+  const endDateTime = dayjs.tz(appointment.timeEnd, 'Europe/Berlin').toISOString();
 
   console.log(`Updating Google Calendar event:`, {
     calendarId,
