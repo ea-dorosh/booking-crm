@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { Pool, RowDataPacket, createPool } from 'mysql2/promise';
-import { checkAllGoogleCalendarIntegrations } from '../googleCalendar/googleCalendarService.js';
+import { checkAllGoogleCalendarIntegrations, proactivelyRefreshTokens } from '../googleCalendar/googleCalendarService.js';
 import { sendGoogleCalendarReconnectEmail } from '@/mailer/mailer.js';
 import dotenv from 'dotenv';
 
@@ -22,6 +22,10 @@ interface UserRow extends RowDataPacket {
 export const initScheduler = (dbPool: Pool): void => {
   console.log(`Initializing scheduler tasks...`);
 
+  // Proactively refresh tokens every 4 hours
+  scheduleProactiveTokenRefresh(dbPool);
+
+  // Check for problematic integrations daily
   scheduleGoogleCalendarTokenRefresh(dbPool);
 }
 
@@ -51,6 +55,36 @@ async function getAdminEmailForDatabase(databaseName: string): Promise<string | 
     return null;
   }
 }
+
+export const scheduleProactiveTokenRefresh = (dbPool: Pool): void => {
+  // Run every 4 hours to proactively refresh tokens
+  cron.schedule(`0 0 */4 * * *`, async () => {
+    console.log(`Running proactive Google Calendar token refresh...`);
+
+    try {
+      const [databaseRows] = await dbPool.query<RowDataPacket[]>(`SELECT DATABASE() as dbName`);
+      const databaseName = databaseRows[0]?.dbName as string;
+
+      console.log(`Refreshing tokens for database: ${databaseName}`);
+
+      const result = await proactivelyRefreshTokens(dbPool);
+
+      console.log(`Proactive refresh completed for ${databaseName}:`, result);
+
+      // If there are many failures, log a warning
+      if (result.failed > result.refreshed) {
+        console.warn(`High failure rate in token refresh for ${databaseName}: ${result.failed} failed, ${result.refreshed} succeeded`);
+      }
+    } catch (error) {
+      console.error(`Error running proactive token refresh task:`, error);
+    }
+  }, {
+    scheduled: true,
+    timezone: `Europe/Berlin`,
+  });
+
+  console.log(`Proactive token refresh task scheduled to run every 4 hours`);
+};
 
 export const scheduleGoogleCalendarTokenRefresh = (dbPool: Pool): void => {
   cron.schedule(`0 0 3 * * *`, async () => {

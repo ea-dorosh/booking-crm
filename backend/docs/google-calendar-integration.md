@@ -66,8 +66,34 @@ Key features include:
 4. Add scopes:
    - `https://www.googleapis.com/auth/calendar`
    - `https://www.googleapis.com/auth/calendar.events`
+   - `https://www.googleapis.com/auth/userinfo.profile` (optional, for better user identification)
+   - `https://www.googleapis.com/auth/userinfo.email` (optional, for better user identification)
 5. Add test users if necessary
 6. Complete the verification process if needed
+
+**ВАЖНО для продакшена:**
+- Убедитесь что приложение verified (проверено Google)
+- Используйте Internal user type если у вас Google Workspace
+- Настройте правильные домены в authorized origins
+
+### Улучшенные настройки для надежности
+
+Для максимальной надежности refresh токенов добавьте следующие настройки:
+
+1. **В Google Cloud Console:**
+   - Включите "Google Calendar API"
+   - Включите "People API" (для лучшей идентификации пользователей)
+   - В OAuth consent screen установите Internal если возможно
+   - Добавьте все необходимые домены и поддомены
+
+2. **Дополнительные scopes для лучшей интеграции:**
+   ```
+   https://www.googleapis.com/auth/calendar
+   https://www.googleapis.com/auth/calendar.events
+   https://www.googleapis.com/auth/calendar.readonly
+   https://www.googleapis.com/auth/userinfo.profile
+   https://www.googleapis.com/auth/userinfo.email
+   ```
 
 ## Environment Variables
 

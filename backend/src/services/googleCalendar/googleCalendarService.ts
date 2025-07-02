@@ -5,12 +5,24 @@ interface GoogleCalendarCredentials {
   employeeId: number;
   refreshToken: string;
   calendarId: string;
+  isActive?: boolean;
+  lastUsedAt?: Date;
+  errorCount?: number;
+  lastError?: string;
+  googleEmail?: string;
+  expiresAt?: Date;
 }
 
 interface GoogleCalendarCredentialsRow extends RowDataPacket {
   employee_id: number;
   refresh_token: string;
   calendar_id: string;
+  is_active: boolean;
+  last_used_at: string | null;
+  error_count: number;
+  last_error: string | null;
+  google_email: string | null;
+  expires_at: string | null;
 }
 
 interface GoogleEvent {
@@ -23,6 +35,22 @@ interface GoogleEvent {
   end: {
     dateTime: string;
     timeZone: string;
+  };
+}
+
+interface GoogleCalendarEvent {
+  id?: string;
+  summary?: string;
+  description?: string;
+  start?: {
+    dateTime?: string;
+    date?: string;
+    timeZone?: string;
+  };
+  end?: {
+    dateTime?: string;
+    date?: string;
+    timeZone?: string;
   };
 }
 
@@ -68,7 +96,10 @@ export const getAuthUrl = () => {
 
   const scopes = [
     `https://www.googleapis.com/auth/calendar`,
-    `https://www.googleapis.com/auth/calendar.events`
+    `https://www.googleapis.com/auth/calendar.events`,
+    `https://www.googleapis.com/auth/calendar.readonly`,
+    `https://www.googleapis.com/auth/userinfo.profile`,
+    `https://www.googleapis.com/auth/userinfo.email`
   ];
 
   const authUrl = oauth2Client.generateAuthUrl({
@@ -93,33 +124,69 @@ export const saveEmployeeGoogleCalendarCredentials = async (
   dbPool: Pool,
   employeeId: number,
   refreshToken: string,
-  calendarId: string
+  calendarId: string,
+  googleEmail?: string
 ): Promise<void> => {
   console.log(`Saving Google Calendar credentials:`, {
     employeeId,
     refreshTokenLength: refreshToken.length,
-    calendarId
+    calendarId,
+    googleEmail
   });
 
   try {
+    // Get user info if we have the proper tokens
+    let userEmail = googleEmail;
+    if (!userEmail && refreshToken) {
+      try {
+        const oauth2Client = getOAuth2Client();
+        oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+        const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+        const userInfo = await oauth2.userinfo.get();
+        userEmail = userInfo.data.email || undefined;
+        console.log(`Retrieved user email from Google:`, userEmail);
+      } catch (error) {
+        console.log(`Could not retrieve user email:`, error);
+      }
+    }
+
     const query = `
-      INSERT INTO EmployeeGoogleCalendar (employee_id, refresh_token, calendar_id)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE refresh_token = ?, calendar_id = ?
+      INSERT INTO EmployeeGoogleCalendar (
+        employee_id,
+        refresh_token,
+        calendar_id,
+        google_email,
+        is_active,
+        error_count,
+        last_used_at,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, true, 0, NOW(), NOW(), NOW())
+      ON DUPLICATE KEY UPDATE
+        refresh_token = VALUES(refresh_token),
+        calendar_id = VALUES(calendar_id),
+        google_email = VALUES(google_email),
+        is_active = true,
+        error_count = 0,
+        last_error = NULL,
+        last_used_at = NOW(),
+        updated_at = NOW()
     `;
 
     console.log(`Executing SQL query with params:`, {
       employeeId,
       refreshTokenTruncated: refreshToken.substring(0, 10) + `...`,
-      calendarId
+      calendarId,
+      googleEmail: userEmail
     });
 
     const result = await dbPool.query(query, [
       employeeId,
       refreshToken,
       calendarId,
-      refreshToken,
-      calendarId
+      userEmail
     ]);
 
     console.log(`Query executed successfully:`, result);
@@ -134,9 +201,18 @@ export const getEmployeeGoogleCalendarCredentials = async (
   employeeId: number
 ): Promise<GoogleCalendarCredentials | null> => {
   const query = `
-    SELECT employee_id, refresh_token, calendar_id
+    SELECT
+      employee_id,
+      refresh_token,
+      calendar_id,
+      is_active,
+      last_used_at,
+      error_count,
+      last_error,
+      google_email,
+      expires_at
     FROM EmployeeGoogleCalendar
-    WHERE employee_id = ?
+    WHERE employee_id = ? AND is_active = true
   `;
 
   const [rows] = await dbPool.query<GoogleCalendarCredentialsRow[]>(query, [employeeId]);
@@ -145,26 +221,104 @@ export const getEmployeeGoogleCalendarCredentials = async (
     return null;
   }
 
+  const row = rows[0];
   return {
-    employeeId: rows[0].employee_id,
-    refreshToken: rows[0].refresh_token,
-    calendarId: rows[0].calendar_id
+    employeeId: row.employee_id,
+    refreshToken: row.refresh_token,
+    calendarId: row.calendar_id,
+    isActive: row.is_active,
+    lastUsedAt: row.last_used_at ? new Date(row.last_used_at) : undefined,
+    errorCount: row.error_count,
+    lastError: row.last_error || undefined,
+    googleEmail: row.google_email || undefined,
+    expiresAt: row.expires_at ? new Date(row.expires_at) : undefined
   };
+};
+
+export const updateTokenStatus = async (
+  dbPool: Pool,
+  employeeId: number,
+  isSuccess: boolean,
+  error?: string
+): Promise<void> => {
+  try {
+    if (isSuccess) {
+      const query = `
+        UPDATE EmployeeGoogleCalendar
+        SET
+          last_used_at = NOW(),
+          error_count = 0,
+          last_error = NULL,
+          updated_at = NOW()
+        WHERE employee_id = ?
+      `;
+      await dbPool.query(query, [employeeId]);
+    } else {
+      const query = `
+        UPDATE EmployeeGoogleCalendar
+        SET
+          error_count = error_count + 1,
+          last_error = ?,
+          is_active = CASE
+            WHEN error_count >= 5 THEN false
+            ELSE is_active
+          END,
+          updated_at = NOW()
+        WHERE employee_id = ?
+      `;
+      await dbPool.query(query, [error, employeeId]);
+    }
+  } catch (updateError) {
+    console.error(`Error updating token status:`, updateError);
+  }
+};
+
+export const markTokenAsInactive = async (
+  dbPool: Pool,
+  employeeId: number,
+  reason: string
+): Promise<void> => {
+  try {
+    const query = `
+      UPDATE EmployeeGoogleCalendar
+      SET
+        is_active = false,
+        last_error = ?,
+        updated_at = NOW()
+      WHERE employee_id = ?
+    `;
+    await dbPool.query(query, [reason, employeeId]);
+    console.log(`Marked token as inactive for employee ${employeeId}: ${reason}`);
+  } catch (error) {
+    console.error(`Error marking token as inactive:`, error);
+  }
 };
 
 export const getEmployeeCalendarClient = async (
   dbPool: Pool,
-  employeeId: number
-) => {
+  employeeId: number,
+  retryCount: number = 0
+): Promise<{
+  calendarClient: any;
+  calendarId: string;
+  credentials?: GoogleCalendarCredentials;
+} | null> => {
   try {
     const credentials = await getEmployeeGoogleCalendarCredentials(dbPool, employeeId);
 
     if (!credentials) {
-      console.log(`No Google Calendar credentials found for employee ID: ${employeeId}`);
+      console.log(`No active Google Calendar credentials found for employee ID: ${employeeId}`);
       return null;
     }
 
-    console.log(`Retrieved credentials for employee ID: ${employeeId}, calendarId: ${credentials.calendarId}`);
+    console.log(`Retrieved credentials for employee ID: ${employeeId}, calendarId: ${credentials.calendarId}, errorCount: ${credentials.errorCount}`);
+
+    // If too many errors, don't retry
+    if (credentials.errorCount && credentials.errorCount >= 5) {
+      console.log(`Too many errors for employee ${employeeId}, marking as inactive`);
+      await markTokenAsInactive(dbPool, employeeId, 'Too many consecutive errors');
+      return null;
+    }
 
     const oauth2Client = getOAuth2Client();
     oauth2Client.setCredentials({
@@ -173,26 +327,54 @@ export const getEmployeeCalendarClient = async (
 
     try {
       const tokens = await oauth2Client.getAccessToken();
-      console.log(`Access token refreshed successfully:`, !!tokens.token);
+      console.log(`Access token refreshed successfully for employee ${employeeId}:`, !!tokens.token);
+
+      // Update success status
+      await updateTokenStatus(dbPool, employeeId, true);
+
+      return {
+        calendarClient: google.calendar({ version: `v3`, auth: oauth2Client }),
+        calendarId: credentials.calendarId,
+        credentials
+      };
     } catch (authError: any) {
-      console.error(`Error refreshing access token:`, authError.message);
+      console.error(`Error refreshing access token for employee ${employeeId}:`, authError.message);
 
-      if (authError.message === `invalid_grant` ||
-          (authError.response?.data?.error === `invalid_grant`)) {
+      const errorMessage = authError.message || 'Unknown error';
+      const isInvalidGrant = errorMessage === `invalid_grant` ||
+                           (authError.response?.data?.error === `invalid_grant`);
 
-        await removeEmployeeGoogleCalendarCredentials(dbPool, employeeId);
-
-        console.log(`Removed expired Google Calendar credentials for employee ID: ${employeeId}`);
+      if (isInvalidGrant) {
+        console.log(`Invalid grant error for employee ${employeeId} - token likely revoked`);
+        await markTokenAsInactive(dbPool, employeeId, 'Token revoked or expired (invalid_grant)');
         return null;
       }
-    }
 
-    return {
-      calendarClient: google.calendar({ version: `v3`, auth: oauth2Client }),
-      calendarId: credentials.calendarId
-    };
+      // For other errors, update error count but don't remove token immediately
+      await updateTokenStatus(dbPool, employeeId, false, errorMessage);
+
+      // Retry once for transient errors
+      if (retryCount === 0 && (
+        errorMessage.includes('network') ||
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('503') ||
+        errorMessage.includes('502')
+      )) {
+        console.log(`Retrying token refresh for employee ${employeeId} due to transient error`);
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        return getEmployeeCalendarClient(dbPool, employeeId, retryCount + 1);
+      }
+
+      throw authError;
+    }
   } catch (error: any) {
     console.error(`Error getting Google Calendar client for employee ID: ${employeeId}`, error);
+
+    // Update error status
+    if (error.message !== 'invalid_grant') {
+      await updateTokenStatus(dbPool, employeeId, false, error.message);
+    }
+
     return null;
   }
 };
@@ -245,7 +427,7 @@ export const checkGoogleCalendarAvailability = async (
     if (response.data.items && response.data.items.length > 0) {
       console.log(`Found ${response.data.items.length} events for this day`);
 
-      for (const event of response.data.items) {
+      for (const event of response.data.items as GoogleCalendarEvent[]) {
         if (!event.start?.dateTime || !event.end?.dateTime) continue;
 
         const eventStart = new Date(event.start.dateTime);
@@ -499,9 +681,9 @@ export const getGoogleCalendarEvents = async (
       return [];
     }
 
-    const events = response.data.items
-      .filter(event => event.start?.dateTime && event.end?.dateTime)
-      .map(event => ({
+    const events = (response.data.items as GoogleCalendarEvent[])
+      .filter((event: GoogleCalendarEvent) => event.start?.dateTime && event.end?.dateTime)
+      .map((event: GoogleCalendarEvent) => ({
         start: new Date(event.start!.dateTime as string),
         end: new Date(event.end!.dateTime as string),
         summary: event.summary || `Busy`
@@ -533,52 +715,81 @@ export const removeEmployeeGoogleCalendarCredentials = async (
   }
 };
 
+export const proactivelyRefreshTokens = async (
+  dbPool: Pool
+): Promise<{ refreshed: number; failed: number; inactive: number }> => {
+  try {
+    console.log(`Starting proactive token refresh...`);
+
+    const query = `
+      SELECT employee_id, calendar_id, error_count, last_used_at, google_email
+      FROM EmployeeGoogleCalendar
+      WHERE is_active = true
+    `;
+
+    const [rows] = await dbPool.query<GoogleCalendarCredentialsRow[]>(query);
+
+    console.log(`Found ${rows.length} active Google Calendar integrations to refresh`);
+
+    let refreshed = 0;
+    let failed = 0;
+    let inactive = 0;
+
+    for (const row of rows) {
+      const employeeId = row.employee_id;
+
+      try {
+        const calendarClient = await getEmployeeCalendarClient(dbPool, employeeId);
+
+        if (calendarClient) {
+          console.log(`Successfully refreshed token for employee ID: ${employeeId}`);
+          refreshed++;
+        } else {
+          console.log(`Token marked as inactive for employee ID: ${employeeId}`);
+          inactive++;
+        }
+      } catch (error: any) {
+        console.error(`Failed to refresh token for employee ID: ${employeeId}:`, error.message);
+        failed++;
+      }
+
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    console.log(`Proactive refresh completed: ${refreshed} refreshed, ${failed} failed, ${inactive} marked inactive`);
+
+    return { refreshed, failed, inactive };
+  } catch (error: any) {
+    console.error(`Error in proactive token refresh:`, error);
+    return { refreshed: 0, failed: 0, inactive: 0 };
+  }
+};
+
 export const checkAllGoogleCalendarIntegrations = async (
   dbPool: Pool
 ): Promise<{ employeeId: number; calendarId: string }[]> => {
   try {
     const query = `
-      SELECT employee_id, calendar_id
+      SELECT employee_id, calendar_id, google_email
       FROM EmployeeGoogleCalendar
+      WHERE is_active = false OR error_count >= 3
     `;
 
     const [rows] = await dbPool.query<GoogleCalendarCredentialsRow[]>(query);
 
-    console.log(`Found ${rows.length} Google Calendar integrations to check`);
+    console.log(`Found ${rows.length} Google Calendar integrations that need attention`);
 
-    const expiredIntegrations: { employeeId: number; calendarId: string }[] = [];
+    const problematicIntegrations: { employeeId: number; calendarId: string }[] = [];
 
     for (const row of rows) {
-      const employeeId = row.employee_id;
-      const calendarId = row.calendar_id;
-
-      try {
-        const credentials = await getEmployeeGoogleCalendarCredentials(dbPool, employeeId);
-
-        if (!credentials) {
-          console.log(`No credentials found for employee ID: ${employeeId}`);
-          continue;
-        }
-
-        const oauth2Client = getOAuth2Client();
-        oauth2Client.setCredentials({
-          refresh_token: credentials.refreshToken
-        });
-
-        await oauth2Client.getAccessToken();
-        console.log(`Successfully refreshed token for employee ID: ${employeeId}`);
-      } catch (error: any) {
-        if (error.message === 'invalid_grant' ||
-            (error.response?.data?.error === 'invalid_grant')) {
-          console.log(`Token expired for employee ID: ${employeeId}, calendar ID: ${calendarId}`);
-          expiredIntegrations.push({ employeeId, calendarId });
-        } else {
-          console.error(`Error checking calendar integration for employee ID: ${employeeId}:`, error);
-        }
-      }
+      problematicIntegrations.push({
+        employeeId: row.employee_id,
+        calendarId: row.calendar_id
+      });
     }
 
-    return expiredIntegrations;
+    return problematicIntegrations;
   } catch (error: any) {
     console.error(`Error checking Google Calendar integrations:`, error);
     return [];

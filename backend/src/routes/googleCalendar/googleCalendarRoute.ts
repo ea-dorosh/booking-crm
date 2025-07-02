@@ -10,7 +10,9 @@ import {
   getEmployeeGoogleCalendarCredentials,
   getOAuth2Client,
   checkAllGoogleCalendarIntegrations,
-  createGoogleCalendarEvent
+  createGoogleCalendarEvent,
+  markTokenAsInactive,
+  proactivelyRefreshTokens
 } from '@/services/googleCalendar/googleCalendarService.js';
 import { RowDataPacket } from 'mysql2';
 
@@ -116,42 +118,24 @@ router.get(`/:employeeId/google-calendar-status`, async (req: CustomRequestType,
     const credentials = await getEmployeeGoogleCalendarCredentials(req.dbPool, employeeId);
 
     if (credentials) {
-      try {
-        const oauth2Client = getOAuth2Client();
-        oauth2Client.setCredentials({
-          refresh_token: credentials.refreshToken
-        });
-
-        await oauth2Client.getAccessToken();
-
-        res.json({
-          enabled: true,
-          calendarId: credentials.calendarId,
-          tokenExpired: false
-        });
-        return;
-      } catch (tokenError: any) {
-        if (tokenError.message === `invalid_grant` ||
-            (tokenError.response?.data?.error === `invalid_grant`)) {
-
-          console.log(`Token expired for employee ID: ${employeeId}`);
-
-          res.json({
-            enabled: false,
-            calendarId: credentials.calendarId,
-            tokenExpired: true
-          });
-          return;
-        }
-
-        console.error(`Error refreshing Google token:`, tokenError);
-      }
+      res.json({
+        enabled: credentials.isActive,
+        calendarId: credentials.calendarId,
+        tokenExpired: !credentials.isActive,
+        googleEmail: credentials.googleEmail,
+        lastUsed: credentials.lastUsedAt,
+        errorCount: credentials.errorCount,
+        lastError: credentials.lastError,
+        needsReconnection: !credentials.isActive || (credentials.errorCount && credentials.errorCount >= 3)
+      });
+      return;
     }
 
     res.json({
       enabled: false,
-      calendarId: credentials?.calendarId || null,
-      tokenExpired: false
+      calendarId: null,
+      tokenExpired: false,
+      needsReconnection: false
     });
   } catch (error) {
     console.error(`Error checking Google Calendar status:`, error);
@@ -168,12 +152,71 @@ router.delete(`/:employeeId/google-calendar`, async (req: CustomRequestType, res
   const employeeId = Number(req.params.employeeId);
 
   try {
-    const query = `DELETE FROM EmployeeGoogleCalendar WHERE employee_id = ?`;
-    await req.dbPool.query(query, [employeeId]);
+    // Mark as inactive instead of deleting completely
+    await markTokenAsInactive(req.dbPool, employeeId, 'Manually disconnected by user');
     res.json({ success: true });
   } catch (error) {
     console.error(`Error removing Google Calendar integration:`, error);
     res.status(500).json({ error: `Failed to remove Google Calendar integration` });
+  }
+});
+
+router.post(`/proactive-refresh`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    console.log(`Manual proactive token refresh requested`);
+    const result = await proactivelyRefreshTokens(req.dbPool);
+
+    res.json({
+      success: true,
+      message: `Proactive token refresh completed`,
+      result
+    });
+  } catch (error) {
+    console.error(`Error running proactive token refresh:`, error);
+    res.status(500).json({ error: `Failed to refresh tokens` });
+  }
+});
+
+router.get(`/integration-stats`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    const query = `
+      SELECT
+        COUNT(*) as total,
+        COUNT(CASE WHEN is_active = true THEN 1 END) as active,
+        COUNT(CASE WHEN is_active = false THEN 1 END) as inactive,
+        COUNT(CASE WHEN error_count >= 3 THEN 1 END) as problematic,
+        AVG(error_count) as avg_error_count,
+        MAX(last_used_at) as last_activity
+      FROM EmployeeGoogleCalendar
+    `;
+
+    const [rows] = await req.dbPool.query<RowDataPacket[]>(query);
+    const stats = rows[0];
+
+    res.json({
+      success: true,
+      stats: {
+        total: Number(stats.total),
+        active: Number(stats.active),
+        inactive: Number(stats.inactive),
+        problematic: Number(stats.problematic),
+        averageErrorCount: Number(stats.avg_error_count || 0).toFixed(2),
+        lastActivity: stats.last_activity
+      }
+    });
+  } catch (error) {
+    console.error(`Error getting integration stats:`, error);
+    res.status(500).json({ error: `Failed to get integration statistics` });
   }
 });
 
