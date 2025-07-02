@@ -14,6 +14,7 @@ import {
 import { getService } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
 import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
+import { AppointmentStatusEnum } from '@/enums/enums.js';
 
 const router = express.Router();
 
@@ -104,11 +105,13 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       SELECT * FROM SavedAppointments
       WHERE date IN (${datesInRange.map(() => '?').join(',')})
       AND employee_id IN (${employeeIds.map(() => '?').join(',')})
+      AND status = ?
     `;
 
     const [appointmentResults] = await req.dbPool.query<SavedAppointmentRow[]>(savedAppointmentsQuery, [
       ...datesInRange,
-      ...employeeIds
+      ...employeeIds,
+      AppointmentStatusEnum.Active
     ]);
 
     const groupedAppointments: Record<string, SavedAppointmentRow[]> = {};
