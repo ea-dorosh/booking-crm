@@ -4,6 +4,8 @@ import {
   EmployeeDetailDataType,
 } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { AppointmentStatusEnum } from '@/enums/enums.js';
+import { checkGoogleCalendarAvailability } from '@/services/googleCalendar/googleCalendarService.js';
 
 interface CheckEmployeeParams {
   date: string;
@@ -86,6 +88,7 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
     SELECT * FROM SavedAppointments
     WHERE employee_id = ?
       AND date = ?
+      AND status = ?
       AND (
         (time_start >= ? AND time_start < ?)
         OR
@@ -98,6 +101,7 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
   const checkAvailabilityValues = [
     employeeId,
     date,
+    AppointmentStatusEnum.Active,
     mysqlTimeStart,
     mysqlTimeEnd,
     mysqlTimeStart,
@@ -108,11 +112,27 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
 
   const [existingAppointments] = await dbPool.query<SavedAppointmentRow[]>(checkAvailabilityQuery, checkAvailabilityValues);
 
-  if (existingAppointments.length > 0) {
-    return { isEmployeeAvailable: false };
-  } else {
-    return { isEmployeeAvailable: true };
+  const hasDbConflict = existingAppointments.length > 0;
+  let hasGoogleCalendarConflict = false;
+
+  try {
+    const isGoogleCalendarAvailable = await checkGoogleCalendarAvailability(
+      dbPool,
+      employeeId,
+      timeStart,
+      timeEnd
+    );
+    hasGoogleCalendarConflict = !isGoogleCalendarAvailable;
+
+    if (hasGoogleCalendarConflict) {
+      console.log(`Google Calendar conflict detected for employee ${employeeId} at ${timeStart}-${timeEnd}`);
+    }
+  } catch (error) {
+    console.error(`Error checking Google Calendar availability for employee ${employeeId}:`, error);
+    hasGoogleCalendarConflict = false;
   }
+
+  return { isEmployeeAvailable: !(hasDbConflict || hasGoogleCalendarConflict) };
 }
 
 export {
