@@ -10,7 +10,7 @@ export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
     //   year: 'numeric'
     // });
 
-    return dayjs(dateStr).format('DD. MMM YYYY');
+    return dayjs.tz(dateStr, 'Europe/Berlin').format('DD. MMM YYYY');
   };
 
   const formattedDateIssued = formatDate(params.dateIssued);

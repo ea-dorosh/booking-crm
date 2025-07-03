@@ -22,8 +22,8 @@ interface DayData {
 }
 
 function getAppointmentEndTimeHours(startTime: string, serviceDuration: string): string {
-  const parsedStartTime = dayjs(startTime, TIME_FORMAT);
-  const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
+  const parsedStartTime = dayjs.tz(startTime, TIME_FORMAT, 'Europe/Berlin');
+  const parsedServiceDuration = dayjs.tz(serviceDuration, TIME_FORMAT, 'Europe/Berlin');
 
   const endTime = parsedStartTime
     .add(parsedServiceDuration.hour(), 'hour')
@@ -34,9 +34,9 @@ function getAppointmentEndTimeHours(startTime: string, serviceDuration: string):
 }
 
 function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
-  const parsedStartTime = dayjs(startTime);
-
+  const parsedStartTime = dayjs.tz(startTime, 'Europe/Berlin');
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
+
   const endTime = parsedStartTime
     .add(parsedServiceDuration.hour(), 'hour')
     .add(parsedServiceDuration.minute(), 'minute')

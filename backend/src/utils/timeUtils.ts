@@ -17,12 +17,12 @@ function getServiceDuration(durationTime: string, bufferTime?: string): string {
 
 // form 2024-12-31T13:12:57.865Z create ISO string 2024-12-31
 function toMySQLDate(string: string): string {
-  return dayjs(string).format(`YYYY-MM-DD`);
+  return dayjs.tz(string, 'Europe/Berlin').format(`YYYY-MM-DD`);
 }
 
 
 function getDueDate(dateIssued: string, daysToAdd: number): string {
-  const issued = dayjs(dateIssued);
+  const issued = dayjs.tz(dateIssued, 'Europe/Berlin');
   const result = issued.add(daysToAdd, `day`);
 
   return result.format(`YYYY-MM-DD`);
