@@ -660,18 +660,23 @@ export const getGoogleCalendarEvents = async (
 
     const { calendarClient, calendarId } = calendarData;
 
+    const tzStartDate = dayjs.tz(startDate, 'Europe/Berlin').startOf('day');
+    const tzEndDate = dayjs.tz(endDate, 'Europe/Berlin').endOf('day');
+
     console.log(`Fetching Google Calendar events for employee ${employeeId}:`, {
       calendarId,
-      timeMin: new Date(startDate).toISOString(),
-      timeMax: new Date(endDate).toISOString()
+      timeMin: tzStartDate.toISOString(),
+      timeMax: tzEndDate.toISOString(),
+      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     });
 
     const response = await calendarClient.events.list({
       calendarId,
-      timeMin: new Date(startDate).toISOString(),
-      timeMax: new Date(endDate).toISOString(),
+      timeMin: tzStartDate.toISOString(),
+      timeMax: tzEndDate.toISOString(),
       singleEvents: true,
-      orderBy: `startTime`
+      orderBy: `startTime`,
+      timeZone: 'Europe/Berlin'
     });
 
     if (!response.data.items || response.data.items.length === 0) {
@@ -681,11 +686,24 @@ export const getGoogleCalendarEvents = async (
 
     const events = (response.data.items as GoogleCalendarEvent[])
       .filter((event: GoogleCalendarEvent) => event.start?.dateTime && event.end?.dateTime)
-      .map((event: GoogleCalendarEvent) => ({
-        start: new Date(event.start!.dateTime as string),
-        end: new Date(event.end!.dateTime as string),
-        summary: event.summary || `Busy`
-      }));
+      .map((event: GoogleCalendarEvent) => {
+        const startDateTime = event.start!.dateTime as string;
+        const endDateTime = event.end!.dateTime as string;
+
+        console.log(`Processing Google Calendar event:`, {
+          summary: event.summary,
+          originalStart: startDateTime,
+          originalEnd: endDateTime,
+          parsedStart: dayjs(startDateTime).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss'),
+          parsedEnd: dayjs(endDateTime).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss')
+        });
+
+        return {
+          start: dayjs(startDateTime).tz('Europe/Berlin').toDate(),
+          end: dayjs(endDateTime).tz('Europe/Berlin').toDate(),
+          summary: event.summary || `Busy`
+        };
+      });
 
     console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId}`);
     return events;

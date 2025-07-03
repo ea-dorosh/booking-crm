@@ -7,6 +7,7 @@ import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddlewa
 import { initScheduler } from '@/services/scheduler/schedulerService.js';
 import mysql from 'mysql2/promise';
 import path from "path";
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 // routes for CRM
 import appointmentsRouter from '@/routes/appointments/appointmentsRoute.js';
@@ -109,4 +110,11 @@ app.listen(port, `0.0.0.0`, () => {
   } catch (error) {
     console.error(`Failed to initialize scheduler:`, error);
   }
+
+  console.log(`Server timezone info:`, {
+    timezoneName: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    currentTime: new Date().toISOString(),
+    currentLocalTime: new Date().toString(),
+    dayjsTimezone: dayjs.tz.guess()
+  });
 });

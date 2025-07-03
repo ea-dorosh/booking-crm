@@ -157,11 +157,21 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           const employeeGoogleEvents = googleCalendarEvents[availability.employeeId] || [];
 
           employeeGoogleEvents.forEach(event => {
-            const eventDate = dayjs(event.start).format(DATE_FORMAT);
+            const eventDate = dayjs(event.start).tz('Europe/Berlin').format(DATE_FORMAT);
+
+            console.log(`Google Calendar event in calendar route:`, {
+              eventSummary: event.summary,
+              eventStartRaw: event.start,
+              eventEndRaw: event.end,
+              eventDate: eventDate,
+              currentDate: dateFormatted,
+              serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              appTimezone: 'Europe/Berlin'
+            });
 
             if (eventDate === dateFormatted) {
-              const startBlockedTime = dayjs(event.start).format(TIME_FORMAT);
-              const endBlockedTime = dayjs(event.end).format(TIME_FORMAT);
+              const startBlockedTime = dayjs(event.start).tz('Europe/Berlin').format(TIME_FORMAT);
+              const endBlockedTime = dayjs(event.end).tz('Europe/Berlin').format(TIME_FORMAT);
 
               console.log(`Adding Google event to blockedTimes: ${event.summary}, ${startBlockedTime}-${endBlockedTime}`);
 
