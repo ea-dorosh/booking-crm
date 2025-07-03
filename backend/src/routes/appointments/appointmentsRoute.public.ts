@@ -246,7 +246,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       data: {
         id: appointmentResults.insertId,
         date: date,
-        timeStart: timeStart,
+        timeStart: dayjs.tz(timeStart, 'Europe/Berlin').format(),
         serviceName: serviceName,
         salutation: appointmentFormData.salutation,
         lastName: formatName(appointmentFormData.lastName),

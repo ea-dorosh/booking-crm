@@ -59,10 +59,10 @@ router.get('/', async (request: CustomRequestType, response: CustomResponseType)
 
     const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => ({
       id: row.id,
-      date: row.date,
-      createdDate: row.created_date,
+      date: dayjs.tz(row.date, 'Europe/Berlin').format(),
+      createdDate: dayjs.tz(row.created_date, 'Europe/Berlin').format(),
       serviceName: row.service_name,
-      timeStart: row.time_start,
+      timeStart: dayjs.tz(`${row.date} ${row.time_start}`, 'Europe/Berlin').format(),
       serviceDuration: row.service_duration,
       customerLastName: row.customer_last_name,
       customerFirstName: row.customer_first_name,
@@ -109,13 +109,13 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
 
     const appointment: AppointmentDetailType[] = results.map((row) => ({
       id: row.id,
-      date: row.date,
-      timeStart: row.time_start,
-      timeEnd: row.time_end,
+      date: dayjs.tz(row.date, 'Europe/Berlin').format(),
+      timeStart: dayjs.tz(`${row.date} ${row.time_start}`, 'Europe/Berlin').format(),
+      timeEnd: dayjs.tz(`${row.date} ${row.time_end}`, 'Europe/Berlin').format(),
       serviceDuration: row.service_duration,
       serviceId: row.service_id,
       serviceName: row.service_name,
-      createdDate: row.created_date,
+      createdDate: dayjs.tz(row.created_date, 'Europe/Berlin').format(),
       employee: {
         id: row.employee_id,
         firstName: ``,

@@ -19,7 +19,11 @@ export const formattedTime = (parsedTime) => parsedTime.slice(0, 5);
  * @returns {string} - The formatted time '09:30'
  */
 export const formattedDateToTime = (date) => {
-  const time = new Date(date).toLocaleTimeString(`de-DE`, { hour: `2-digit`, minute: `2-digit` });
+  const time = new Date(date).toLocaleTimeString(`de-DE`, {
+    hour: `2-digit`,
+    minute: `2-digit`,
+    timeZone: 'Europe/Berlin'
+  });
   return time;
 };
 
@@ -80,7 +84,7 @@ export const getMonth = (dateString) => {
 
 export const formatCreatedDate = (createdDate) => {
   const date = dayjs(createdDate);
-  const now = dayjs(); 
+  const now = dayjs();
 
   if (!date.isValid()) {
     return "Invalid date";
@@ -106,7 +110,7 @@ export const formatCreatedDate = (createdDate) => {
  */
 export const formatTimeToString = (timeStr) => {
   const [hours, minutes, seconds] = timeStr.split(`:`).map(Number);
-    
+
   let formattedTime = ``;
 
   if (hours > 0) {
