@@ -57,17 +57,23 @@ router.get('/', async (request: CustomRequestType, response: CustomResponseType)
   try {
     const [appointmentsResults] = await request.dbPool.query<AppointmentRowType[]>(appointmentsSql, queryParams);
 
-    const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => ({
-      id: row.id,
-      date: dayjs.tz(row.date, 'Europe/Berlin').format(),
-      createdDate: dayjs.tz(row.created_date, 'Europe/Berlin').format(),
-      serviceName: row.service_name,
-      timeStart: dayjs.tz(row.time_start, 'Europe/Berlin').format(),
-      serviceDuration: row.service_duration,
-      customerLastName: row.customer_last_name,
-      customerFirstName: row.customer_first_name,
-      status: row.status,
-    }));
+    const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
+      const appointmentDate = new Date(row.date);
+      const timeStart = new Date(row.time_start);
+      const createdDate = new Date(row.created_date);
+
+      return {
+        id: row.id,
+        date: appointmentDate.toISOString(),
+        createdDate: createdDate.toISOString(),
+        serviceName: row.service_name,
+        timeStart: timeStart.toISOString(),
+        serviceDuration: row.service_duration,
+        customerLastName: row.customer_last_name,
+        customerFirstName: row.customer_first_name,
+        status: row.status,
+      };
+    });
 
     response.json(appointmentsData);
   } catch (error) {
@@ -107,28 +113,43 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
   try {
     const [results] = await request.dbPool.query<AppointmentDetailsRowType[]>(sql, [appointmentId]);
 
-    const appointment: AppointmentDetailType[] = results.map((row) => ({
-      id: row.id,
-      date: dayjs.tz(row.date, 'Europe/Berlin').format(),
-      timeStart: dayjs.tz(row.time_start, 'Europe/Berlin').format(),
-      timeEnd: dayjs.tz(row.time_end, 'Europe/Berlin').format(),
-      serviceDuration: row.service_duration,
-      serviceId: row.service_id,
-      serviceName: row.service_name,
-      createdDate: dayjs.tz(row.created_date, 'Europe/Berlin').format(),
-      employee: {
-        id: row.employee_id,
-        firstName: ``,
-        lastName: ``,
-      },
-      customer: {
-        id: row.customer_id,
-        firstName: row.customer_first_name,
-        lastName: row.customer_last_name,
-        isCustomerNew: row.is_customer_new === CustomerNewStatusEnum.Existing ? false : true,
-      },
-      status: row.status,
-    }));
+    const appointment: AppointmentDetailType[] = results.map((row) => {
+      console.log("Appointment raw data:", {
+        id: row.id,
+        date: row.date,
+        time_start: row.time_start,
+        time_end: row.time_end,
+        created_date: row.created_date
+      });
+
+      const appointmentDate = new Date(row.date);
+
+      const timeStart = new Date(row.time_start);
+      const timeEnd = new Date(row.time_end);
+
+      return {
+        id: row.id,
+        date: appointmentDate.toISOString(), // ISO формат
+        timeStart: timeStart.toISOString(), // ISO формат
+        timeEnd: timeEnd.toISOString(), // ISO формат
+        serviceDuration: row.service_duration,
+        serviceId: row.service_id,
+        serviceName: row.service_name,
+        createdDate: new Date(row.created_date).toISOString(),
+        employee: {
+          id: row.employee_id,
+          firstName: ``,
+          lastName: ``,
+        },
+        customer: {
+          id: row.customer_id,
+          firstName: row.customer_first_name,
+          lastName: row.customer_last_name,
+          isCustomerNew: row.is_customer_new === CustomerNewStatusEnum.Existing ? false : true,
+        },
+        status: row.status,
+      };
+    });
 
     const employeeSql = `
       SELECT employee_id, first_name, last_name

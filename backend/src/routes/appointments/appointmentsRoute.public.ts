@@ -118,10 +118,23 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   const employeeId = appointmentFormData.employeeId;
   const date = appointmentFormData.date;
 
+  console.log("Appointment creation input:", {
+    date,
+    time: appointmentFormData.time,
+    timezoneName: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    dayjsTimezone: dayjs.tz.guess()
+  });
+
   const timeStart = dayjs.tz(`${date} ${appointmentFormData.time}`, `YYYY-MM-DD HH:mm:ss`, 'Europe/Berlin')
     .format(`YYYY-MM-DD HH:mm:ss`);
 
   const timeEnd = getAppointmentEndTime(timeStart, serviceDurationAndBufferTimeInMinutes);
+
+  console.log("Appointment times calculated:", {
+    timeStart,
+    timeEnd,
+    serviceDuration: serviceDurationAndBufferTimeInMinutes
+  });
 
   try {
     const { isEmployeeAvailable } = await checkEmployeeTimeNotOverlap(request.dbPool, { date, employeeId, timeStart, timeEnd })
@@ -246,7 +259,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       data: {
         id: appointmentResults.insertId,
         date: date,
-        timeStart: dayjs.tz(timeStart, 'Europe/Berlin').format(),
+        timeStart: dayjs(timeStart).format(),
         serviceName: serviceName,
         salutation: appointmentFormData.salutation,
         lastName: formatName(appointmentFormData.lastName),

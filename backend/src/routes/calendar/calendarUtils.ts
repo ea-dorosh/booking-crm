@@ -34,7 +34,9 @@ function getAppointmentEndTimeHours(startTime: string, serviceDuration: string):
 }
 
 function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
-  const parsedStartTime = dayjs.tz(startTime, 'Europe/Berlin');
+  console.log(`getAppointmentEndTime input:`, {startTime, serviceDuration});
+
+  const parsedStartTime = dayjs(startTime);
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
 
   const endTime = parsedStartTime
@@ -42,7 +44,10 @@ function getAppointmentEndTime(startTime: string, serviceDuration: string): stri
     .add(parsedServiceDuration.minute(), 'minute')
     .add(parsedServiceDuration.second(), 'second');
 
-  return endTime.format('YYYY-MM-DD HH:mm:ss');
+  const result = endTime.format('YYYY-MM-DD HH:mm:ss');
+  console.log(`getAppointmentEndTime result:`, {result});
+
+  return result;
 }
 
 function disableTimeSlotsForServiceDuration(
