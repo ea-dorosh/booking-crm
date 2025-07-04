@@ -58,16 +58,24 @@ router.get('/', async (request: CustomRequestType, response: CustomResponseType)
     const [appointmentsResults] = await request.dbPool.query<AppointmentRowType[]>(appointmentsSql, queryParams);
 
     const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
-      const appointmentDate = new Date(row.date);
-      const timeStart = new Date(row.time_start);
-      const createdDate = new Date(row.created_date);
+      const appointmentDate = dayjs(row.date).tz('Europe/Berlin').format();
+      const timeStart = dayjs(row.time_start).tz('Europe/Berlin').format();
+      const createdDate = dayjs(row.created_date).tz('Europe/Berlin').format();
+
+      console.log("Formatting list appointment:", {
+        id: row.id,
+        rawDate: row.date,
+        rawTimeStart: row.time_start,
+        formattedDate: appointmentDate,
+        formattedTimeStart: timeStart
+      });
 
       return {
         id: row.id,
-        date: appointmentDate.toISOString(),
-        createdDate: createdDate.toISOString(),
+        date: appointmentDate,
+        createdDate: createdDate,
         serviceName: row.service_name,
-        timeStart: timeStart.toISOString(),
+        timeStart: timeStart,
         serviceDuration: row.service_duration,
         customerLastName: row.customer_last_name,
         customerFirstName: row.customer_first_name,
@@ -122,20 +130,20 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
         created_date: row.created_date
       });
 
-      const appointmentDate = new Date(row.date);
-
-      const timeStart = new Date(row.time_start);
-      const timeEnd = new Date(row.time_end);
+      const appointmentDate = dayjs(row.date).tz('Europe/Berlin').format();
+      const timeStart = dayjs(row.time_start).tz('Europe/Berlin').format();
+      const timeEnd = dayjs(row.time_end).tz('Europe/Berlin').format();
+      const createdDate = dayjs(row.created_date).tz('Europe/Berlin').format();
 
       return {
         id: row.id,
-        date: appointmentDate.toISOString(), // ISO формат
-        timeStart: timeStart.toISOString(), // ISO формат
-        timeEnd: timeEnd.toISOString(), // ISO формат
+        date: appointmentDate,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
         serviceDuration: row.service_duration,
         serviceId: row.service_id,
         serviceName: row.service_name,
-        createdDate: new Date(row.created_date).toISOString(),
+        createdDate: createdDate,
         employee: {
           id: row.employee_id,
           firstName: ``,

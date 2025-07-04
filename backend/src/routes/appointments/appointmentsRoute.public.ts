@@ -133,7 +133,8 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   console.log("Appointment times calculated:", {
     timeStart,
     timeEnd,
-    serviceDuration: serviceDurationAndBufferTimeInMinutes
+    serviceDuration: serviceDurationAndBufferTimeInMinutes,
+    berlinTime: dayjs(timeStart).tz('Europe/Berlin').format()
   });
 
   try {
@@ -259,7 +260,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       data: {
         id: appointmentResults.insertId,
         date: date,
-        timeStart: dayjs(timeStart).format(),
+        timeStart: dayjs(timeStart).tz('Europe/Berlin').format(),
         serviceName: serviceName,
         salutation: appointmentFormData.salutation,
         lastName: formatName(appointmentFormData.lastName),

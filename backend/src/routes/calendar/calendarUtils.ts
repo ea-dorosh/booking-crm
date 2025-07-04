@@ -36,7 +36,7 @@ function getAppointmentEndTimeHours(startTime: string, serviceDuration: string):
 function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
   console.log(`getAppointmentEndTime input:`, {startTime, serviceDuration});
 
-  const parsedStartTime = dayjs(startTime);
+  const parsedStartTime = dayjs.tz(startTime, 'Europe/Berlin');
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
 
   const endTime = parsedStartTime
@@ -151,17 +151,14 @@ interface ReplaceDayParams {
 function replaceExistingDayWithNewEmployeeData({ existingDay, newDay }: ReplaceDayParams): DayData {
   const mergedTimeslots: Record<string, TimeSlot> = {};
 
-  // Объединяем слоты из существующего и нового дня
   [...existingDay.availableTimeslots, ...newDay.availableTimeslots].forEach(timeslot => {
     const key = `${timeslot.startTime}-${timeslot.endTime}`;
     if (!mergedTimeslots[key]) {
       mergedTimeslots[key] = { ...timeslot };
     } else {
-      // Добавляем employeeId из нового таймслота, если их там еще нет
       mergedTimeslots[key].employeeId.push(
         ...timeslot.employeeId.filter(id => !mergedTimeslots[key].employeeId.includes(id))
       );
-      // Если оба слота были disabled, оставляем disabled, иначе false
       if (timeslot.disabled && mergedTimeslots[key].disabled) {
         mergedTimeslots[key].disabled = true;
       } else {
