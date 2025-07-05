@@ -7,12 +7,13 @@ import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { checkGoogleCalendarAvailability } from '@/services/googleCalendar/googleCalendarService.js';
 import { EmployeeAvailabilityRow, EmployeeAvailabilityDataType } from '@/@types/employeesTypes.js';
+import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
 
 interface CheckEmployeeParams {
   date: string;
   employeeId: number;
-  timeStart: string;
-  timeEnd: string;
+  timeStart: dayjs.Dayjs;
+  timeEnd: dayjs.Dayjs;
 }
 
 interface SavedAppointmentRow extends RowDataPacket {
@@ -25,10 +26,6 @@ interface SavedAppointmentRow extends RowDataPacket {
 
 interface CheckEmployeeAvailabilityResult {
   isEmployeeAvailable: boolean;
-}
-
-function toMySQLDateTime(isoString: string): string {
-  return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss');
 }
 
 async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
@@ -82,8 +79,8 @@ async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDe
 }
 
 async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, timeStart, timeEnd }: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
-  const mysqlTimeStart = toMySQLDateTime(timeStart);
-  const mysqlTimeEnd   = toMySQLDateTime(timeEnd);
+  const mysqlTimeStart = fromDayjsToMySQLDateTime(timeStart);
+  const mysqlTimeEnd = fromDayjsToMySQLDateTime(timeEnd);
 
   const checkAvailabilityQuery = `
     SELECT * FROM SavedAppointments
@@ -120,8 +117,8 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
     const isGoogleCalendarAvailable = await checkGoogleCalendarAvailability(
       dbPool,
       employeeId,
-      timeStart,
-      timeEnd
+      timeStart.format(`YYYY-MM-DD HH:mm:ss`),
+      timeEnd.format(`YYYY-MM-DD HH:mm:ss`)
     );
     hasGoogleCalendarConflict = !isGoogleCalendarAvailable;
 

@@ -3,6 +3,10 @@ import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
 } from '@/enums/enums';
+import {
+  Date_ISO_Type,
+  Time_HH_MM_SS_Type,
+} from '@/@types/utilTypes.js';
 
 export interface AppointmentRowType extends RowDataPacket {
   id: number;
@@ -82,7 +86,7 @@ export interface AppointmentDetailType {
 }
 
 export interface AppointmentFormDataType {
-  date: string;
+  date: Date_ISO_Type;
   email: string;
   employeeId: number;
   firstName: string;
@@ -90,7 +94,7 @@ export interface AppointmentFormDataType {
   phone: string;
   salutation: number;
   serviceId: number;
-  time: string;
+  time: Time_HH_MM_SS_Type;
 }
 
 export interface AppointmentFormDataValidationErrorsType {

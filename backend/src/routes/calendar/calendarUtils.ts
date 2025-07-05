@@ -1,5 +1,5 @@
 import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { Date_ISO_Type } from '@/@types/utilTypes.js';
+import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
@@ -60,28 +60,20 @@ function getAppointmentEndTimeHours(startTime: string, serviceDuration: string):
   const parsedServiceDuration = dayjs.tz(serviceDuration, TIME_FORMAT, 'Europe/Berlin');
 
   const endTime = parsedStartTime
-    .add(parsedServiceDuration.hour(), 'hour')
-    .add(parsedServiceDuration.minute(), 'minute')
-    .add(parsedServiceDuration.second(), 'second');
+    .add(parsedServiceDuration.hour(), `hour`)
+    .add(parsedServiceDuration.minute(), `minute`)
+    .add(parsedServiceDuration.second(), `second`);
 
   return endTime.format(TIME_FORMAT);
 }
 
-function getAppointmentEndTime(startTime: string, serviceDuration: string): string {
-  console.log(`getAppointmentEndTime input:`, {startTime, serviceDuration});
-
-  const parsedStartTime = dayjs.tz(startTime, 'Europe/Berlin');
+function getAppointmentEndTime(startTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs {
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
 
-  const endTime = parsedStartTime
-    .add(parsedServiceDuration.hour(), 'hour')
-    .add(parsedServiceDuration.minute(), 'minute')
-    .add(parsedServiceDuration.second(), 'second');
-
-  const result = endTime.format('YYYY-MM-DD HH:mm:ss');
-  console.log(`getAppointmentEndTime result:`, {result});
-
-  return result;
+  return startTime
+    .add(parsedServiceDuration.hour(), `hour`)
+    .add(parsedServiceDuration.minute(), `minute`)
+    .add(parsedServiceDuration.second(), `second`);
 }
 
 function disableTimeSlotsForServiceDuration(

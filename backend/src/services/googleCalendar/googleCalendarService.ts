@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import { Pool, RowDataPacket } from 'mysql2/promise';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
 
 interface GoogleCalendarCredentials {
   employeeId: number;
@@ -474,9 +475,8 @@ export const createGoogleCalendarEvent = async (
     customerId: number;
     customerName: string;
     serviceName: string;
-    date: string;
-    timeStart: string;
-    timeEnd: string;
+    timeStart: dayjs.Dayjs;
+    timeEnd: dayjs.Dayjs;
   }
 ): Promise<string | null> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
@@ -488,27 +488,24 @@ export const createGoogleCalendarEvent = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const startDateTime = dayjs.tz(appointment.timeStart, 'Europe/Berlin').toISOString();
-  const endDateTime = dayjs.tz(appointment.timeEnd, 'Europe/Berlin').toISOString();
-
   console.log(`Creating Google Calendar event:`, {
     calendarId,
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
     appointmentId: appointment.id,
-    startTime: startDateTime,
-    endTime: endDateTime
+    startTime: fromDayjsToMySQLDateTime(appointment.timeStart),
+    endTime: fromDayjsToMySQLDateTime(appointment.timeEnd),
   });
 
   const event: GoogleEvent = {
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
-    description: `Appointment #${appointment.id} with Customer #${appointment.customerId}`,
+    description: `Appointment #${appointment.id} with ${appointment.customerName} #${appointment.customerId}`,
     start: {
-      dateTime: startDateTime,
-      timeZone: `Europe/Berlin`,
+      dateTime: appointment.timeStart.toISOString(), //2025-07-10T10:00:00.000Z
+      timeZone: `UTC`,
     },
     end: {
-      dateTime: endDateTime,
-      timeZone: `Europe/Berlin`,
+      dateTime: appointment.timeEnd.toISOString(), //2025-07-10T12:00:00.000Z
+      timeZone: `UTC`,
     },
   };
 

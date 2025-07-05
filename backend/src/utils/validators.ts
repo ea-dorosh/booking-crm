@@ -1,5 +1,9 @@
 import validator from 'validator';
 import { phone } from 'phone';
+import {
+  Date_ISO_Type,
+  Time_HH_MM_SS_Type,
+} from '@/@types/utilTypes.js';
 
 /**
  * Validate email format
@@ -30,8 +34,8 @@ const validatePhone = (phoneNumber: string) => {
  * @param date - The date string to validate (ISO 8601 format)
  * @returns true if the date is valid, false otherwise
  */
-const validateIsoDate = (date: string) => {
-  return validator.isISO8601(date);
+const validateIsoDate = (date: Date_ISO_Type) => {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
 };
 
 /**
@@ -39,7 +43,7 @@ const validateIsoDate = (date: string) => {
  * @param time - The time string to validate (HH:MM:SS)
  * @returns true if the time is valid, false otherwise
  */
-const validateTime = (time: string) => {
+const validateTime = (time: Time_HH_MM_SS_Type) => {
   return /^\d{2}:\d{2}:\d{2}$/.test(time);
 };
 

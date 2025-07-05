@@ -1,6 +1,14 @@
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 
+/**
+ * @param dayjs - dayjs object
+ * @returns string in format YYYY-MM-DD HH:mm:ss || '2025-07-10 10:00:00' UTC
+ */
+function fromDayjsToMySQLDateTime(dayjs: dayjs.Dayjs): string {
+  return dayjs.format(`YYYY-MM-DD HH:mm:ss`);
+}
+
 function getServiceDuration(durationTime: Time_HH_MM_SS_Type, bufferTime?: Time_HH_MM_SS_Type): Time_HH_MM_SS_Type {
   // TODO: check logic with correct calculation when with real buffer time
   if (!bufferTime) return durationTime;
@@ -31,6 +39,7 @@ function getDueDate(dateIssued: string, daysToAdd: number): string {
 }
 
 export {
+  fromDayjsToMySQLDateTime,
   getServiceDuration,
   toMySQLDate,
   getDueDate,
