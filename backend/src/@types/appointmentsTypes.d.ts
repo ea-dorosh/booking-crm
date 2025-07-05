@@ -66,6 +66,7 @@ export interface AppointmentDetailType {
     lastName: string;
   };
   status: AppointmentStatusEnum;
+  googleCalendarEventId: string | null;
 }
 
 export interface AppointmentFormDataType {

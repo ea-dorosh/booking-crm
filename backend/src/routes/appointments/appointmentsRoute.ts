@@ -7,86 +7,35 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes';
-import {
-  AppointmentRowType,
-  AppointmentDataType,
-  AppointmentDetailsRowType,
-  AppointmentDetailType,
- } from '@/@types/appointmentsTypes.js';
-import {
-  EmployeeDetailRowType,
-} from '@/@types/employeesTypes.js';
 import { deleteGoogleCalendarEvent } from '@/services/googleCalendar/googleCalendarService.js';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { getAppointments, getAppointment } from '@/services/appointment/appointmentService.js';
+import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
 const router = express.Router();
 
-router.get('/', async (request: CustomRequestType, response: CustomResponseType) => {
+router.get(`/`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
     response.status(500).json({ message: `Database connection not initialized` });
     return;
   }
 
-  const { startDate, status = null } = request.query;
+  const startDate = request.query?.startDate as Date_ISO_Type | null;
+  const status = Number(request.query?.status) as AppointmentStatusEnum | null;
 
   if (!startDate) {
     response.status(400).json({ error: `startDate query parameter is required` });
     return;
   }
 
-  const appointmentsSql = `
-    SELECT
-      id,
-      date,
-      created_date,
-      service_name,
-      time_start,
-      service_duration,
-      customer_last_name,
-      customer_first_name,
-      status
-    FROM SavedAppointments
-    WHERE
-      date >= ?
-      AND (status = COALESCE(?, status))
-  `;
-
-  const queryParams: (string | null)[] = [String(startDate), status !== null ? String(status) : null];
-
   try {
-    const [appointmentsResults] = await request.dbPool.query<AppointmentRowType[]>(appointmentsSql, queryParams);
-
-    const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
-      const appointmentDate = dayjs(row.date).tz('Europe/Berlin').format();
-      const timeStart = dayjs(row.time_start).tz('Europe/Berlin').format();
-      const createdDate = dayjs(row.created_date).tz('Europe/Berlin').format();
-
-      console.log("Formatting list appointment:", {
-        id: row.id,
-        rawDate: row.date,
-        rawTimeStart: row.time_start,
-        formattedDate: appointmentDate,
-        formattedTimeStart: timeStart
-      });
-
-      return {
-        id: row.id,
-        date: appointmentDate,
-        createdDate: createdDate,
-        serviceName: row.service_name,
-        timeStart: timeStart,
-        serviceDuration: row.service_duration,
-        customerLastName: row.customer_last_name,
-        customerFirstName: row.customer_first_name,
-        status: row.status,
-      };
-    });
+    const appointmentsData = await getAppointments(request.dbPool, startDate, status);
 
     response.json(appointmentsData);
   } catch (error) {
     console.error(error);
-    response.status(500).json({ error: `Error fetching employees` });
+    response.status(500).json({ error: `Error fetching appointments` });
   }
 });
 
@@ -96,84 +45,17 @@ router.get(`/:id`, async (request: CustomRequestType, response: CustomResponseTy
     return;
   }
 
-  const appointmentId = request.params.id;
+  const appointmentId = Number(request.params.id);
 
-  const sql = `
-    SELECT
-      id,
-      employee_id,
-      date,
-      time_start,
-      time_end,
-      service_duration,
-      service_id,
-      service_name,
-      customer_id,
-      created_date,
-      customer_last_name,
-      customer_first_name,
-      is_customer_new,
-      status
-    FROM SavedAppointments
-    WHERE id = ?
-  `;
+  if (!appointmentId) {
+    response.status(400).json({ error: `appointmentId is required` });
+    return;
+  }
 
   try {
-    const [results] = await request.dbPool.query<AppointmentDetailsRowType[]>(sql, [appointmentId]);
+    const appointment = await getAppointment(request.dbPool, appointmentId);
 
-    const appointment: AppointmentDetailType[] = results.map((row) => {
-      console.log("Appointment raw data:", {
-        id: row.id,
-        date: row.date,
-        time_start: row.time_start,
-        time_end: row.time_end,
-        created_date: row.created_date
-      });
-
-      const appointmentDate = dayjs(row.date).tz('Europe/Berlin').format();
-      const timeStart = dayjs(row.time_start).tz('Europe/Berlin').format();
-      const timeEnd = dayjs(row.time_end).tz('Europe/Berlin').format();
-      const createdDate = dayjs(row.created_date).tz('Europe/Berlin').format();
-
-      return {
-        id: row.id,
-        date: appointmentDate,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-        serviceDuration: row.service_duration,
-        serviceId: row.service_id,
-        serviceName: row.service_name,
-        createdDate: createdDate,
-        employee: {
-          id: row.employee_id,
-          firstName: ``,
-          lastName: ``,
-        },
-        customer: {
-          id: row.customer_id,
-          firstName: row.customer_first_name,
-          lastName: row.customer_last_name,
-          isCustomerNew: row.is_customer_new === CustomerNewStatusEnum.Existing ? false : true,
-        },
-        status: row.status,
-      };
-    });
-
-    const employeeSql = `
-      SELECT employee_id, first_name, last_name
-      FROM Employees
-      WHERE employee_id = ?
-    `;
-
-    const [employeeResults] = await request.dbPool.query<EmployeeDetailRowType[]>(employeeSql, [appointment[0].employee.id]);
-
-    appointment[0].employee = {
-      ...appointment[0].employee,
-      firstName: employeeResults[0].first_name,
-      lastName: employeeResults[0].last_name
-    };
-
-    response.json(appointment[0]);
+    response.json(appointment);
   } catch (error) {
     console.error(error);
     response.status(500).json({ error: `Error fetching appointment` });
@@ -186,7 +68,7 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
     return;
   }
 
-  const appointmentId = request.params.id;
+  const appointmentId = Number(request.params?.id);
 
   const getAppointmentQuery = `
     SELECT employee_id, google_calendar_event_id
@@ -200,14 +82,12 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
   }
 
   try {
-    const [rows] = await request.dbPool.query<AppointmentRow[]>(getAppointmentQuery, [appointmentId]);
+    const appointment = await getAppointment(request.dbPool, appointmentId);
 
-    if (rows.length === 0) {
+    if (!appointment) {
       response.status(404).json({ error: `Appointment not found` });
       return;
     }
-
-    const { employee_id, google_calendar_event_id } = rows[0];
 
     const updateQuery = `
       UPDATE SavedAppointments
@@ -217,9 +97,9 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
 
     await request.dbPool.query(updateQuery, [AppointmentStatusEnum.Canceled, appointmentId]);
 
-    if (google_calendar_event_id) {
+    if (appointment.googleCalendarEventId) {
       try {
-        await deleteGoogleCalendarEvent(request.dbPool, employee_id, google_calendar_event_id);
+        await deleteGoogleCalendarEvent(request.dbPool, appointment.employee.id, appointment.googleCalendarEventId);
       } catch (error) {
         console.error(`Error deleting Google Calendar event:`, error);
       }
@@ -238,36 +118,16 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
     return;
   }
 
-  const appointmentId = request.params.id;
+  const appointmentId = Number(request.params?.id);
   const appointmentData = request.body;
 
-  const getAppointmentQuery = `
-    SELECT
-      employee_id, service_id, service_name, customer_id,
-      customer_first_name, customer_last_name, google_calendar_event_id
-    FROM SavedAppointments
-    WHERE id = ?
-  `;
-
-  interface AppointmentEditRow extends RowDataPacket {
-    employee_id: number;
-    service_id: number;
-    service_name: string;
-    customer_id: number;
-    customer_first_name: string;
-    customer_last_name: string;
-    google_calendar_event_id: string | null;
-  }
-
   try {
-    const [rows] = await request.dbPool.query<AppointmentEditRow[]>(getAppointmentQuery, [appointmentId]);
+    const appointment = await getAppointment(request.dbPool, appointmentId);
 
-    if (rows.length === 0) {
+    if (!appointment) {
       response.status(404).json({ error: `Appointment not found` });
       return;
     }
-
-    const appointment = rows[0];
 
     const updateQuery = `
       UPDATE SavedAppointments
@@ -287,21 +147,21 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
       appointmentId
     ]);
 
-    if (appointment.google_calendar_event_id) {
+    if (appointment.googleCalendarEventId) {
       try {
-        if (appointment.employee_id !== appointmentData.employeeId) {
+        if (appointment.employee.id !== appointmentData.employeeId) {
           const { deleteGoogleCalendarEvent, createGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
 
-          await deleteGoogleCalendarEvent(request.dbPool, appointment.employee_id, appointment.google_calendar_event_id);
+          await deleteGoogleCalendarEvent(request.dbPool, appointment.employee.id, appointment.googleCalendarEventId);
 
           const newGoogleEventId = await createGoogleCalendarEvent(
             request.dbPool,
             appointmentData.employeeId,
             {
               id: Number(appointmentId),
-              customerId: appointment.customer_id,
-              customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
-              serviceName: appointment.service_name,
+              customerId: appointment.customer.id,
+              customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,
+              serviceName: appointment.serviceName,
               date: appointmentData.date,
               timeStart: appointmentData.timeStart,
               timeEnd: appointmentData.timeEnd
@@ -321,13 +181,13 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
 
           await updateGoogleCalendarEvent(
             request.dbPool,
-            appointment.employee_id,
-            appointment.google_calendar_event_id,
+            appointment.employee.id,
+            appointment.googleCalendarEventId,
             {
               id: Number(appointmentId),
-              customerId: appointment.customer_id,
-              customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
-              serviceName: appointment.service_name,
+              customerId: appointment.customer.id,
+              customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,
+              serviceName: appointment.serviceName,
               date: appointmentData.date,
               timeStart: appointmentData.timeStart,
               timeEnd: appointmentData.timeEnd
