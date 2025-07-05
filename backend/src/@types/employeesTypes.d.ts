@@ -24,3 +24,19 @@ export interface EmployeeFormDataValidationErrors {
   email?: string;
   phone?: string;
 }
+
+export interface EmployeeAvailabilityRow extends RowDataPacket {
+  id: number;
+  employee_id: number;
+  day_id: number;
+  start_time: string;
+  end_time: string;
+}
+
+export interface EmployeeAvailabilityDataType {
+  id: number;
+  employeeId: number;
+  dayId: number;
+  startTime: string;
+  endTime: string;
+}

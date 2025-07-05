@@ -10,6 +10,7 @@ import {
 } from '@/@types/expressTypes.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
+import { getEmployeeAvailability } from '@/services/employees/employeesService.js';
 
 const router = express.Router();
 
@@ -143,28 +144,10 @@ router.get(`/:employeeId/availabilities`, async (req: CustomRequestType, res: Cu
 
   const employeeId = req.params.employeeId;
 
-  const sql = `SELECT * FROM EmployeeAvailability WHERE employee_id = ?`;
-
-  interface EmployeeAvailabilityRow extends RowDataPacket {
-    id: number;
-    employee_id: number;
-    day_id: number;
-    start_time: string;
-    end_time: string;
-  }
-
   try {
-    const [results] = await req.dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeId]);
+    const employeeAvailability = await getEmployeeAvailability(req.dbPool, [Number(employeeId)]);
 
-    const data = results.map((row) => ({
-      id: row.id,
-      employeeId: row.employee_id,
-      dayId: row.day_id,
-      startTime: row.start_time,
-      endTime: row.end_time,
-    }));
-
-    res.json(data);
+    res.json(employeeAvailability);
 
     return;
   } catch (error) {

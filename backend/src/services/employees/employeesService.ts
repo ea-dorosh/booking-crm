@@ -6,6 +6,7 @@ import {
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { checkGoogleCalendarAvailability } from '@/services/googleCalendar/googleCalendarService.js';
+import { EmployeeAvailabilityRow, EmployeeAvailabilityDataType } from '@/@types/employeesTypes.js';
 
 interface CheckEmployeeParams {
   date: string;
@@ -135,8 +136,31 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
   return { isEmployeeAvailable: !(hasDbConflict || hasGoogleCalendarConflict) };
 }
 
+async function getEmployeeAvailability(dbPool: Pool, employeeIds: number[]): Promise<EmployeeAvailabilityDataType[]> {
+  const sql = `
+    SELECT *
+    FROM EmployeeAvailability
+    WHERE employee_id IN (?)
+  `;
+
+  const [results] = await dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeIds]);
+
+
+  const data = results.map((row) => ({
+    id: row.id,
+    employeeId: row.employee_id,
+    dayId: row.day_id,
+    startTime: row.start_time,
+    endTime: row.end_time,
+  }));
+
+  return data;
+}
+
+
 export {
   getEmployees,
   getEmployee,
+  getEmployeeAvailability,
   checkEmployeeTimeNotOverlap,
 };

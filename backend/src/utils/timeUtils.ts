@@ -1,6 +1,8 @@
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 
-function getServiceDuration(durationTime: string, bufferTime?: string): string {
+function getServiceDuration(durationTime: Time_HH_MM_SS_Type, bufferTime?: Time_HH_MM_SS_Type): Time_HH_MM_SS_Type {
+  // TODO: check logic with correct calculation when with real buffer time
   if (!bufferTime) return durationTime;
 
   const format = `HH:mm:ss`;
@@ -12,7 +14,7 @@ function getServiceDuration(durationTime: string, bufferTime?: string): string {
     .add(parsedTime2.minute(), `minute`)
     .add(parsedTime2.second(), `second`);
 
-  return totalTime.format(format);
+  return totalTime.format(format) as Time_HH_MM_SS_Type;
 }
 
 // form 2024-12-31T13:12:57.865Z create ISO string 2024-12-31

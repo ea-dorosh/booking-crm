@@ -1,6 +1,7 @@
 import { Pool } from 'mysql2/promise';
 import { RowDataPacket } from 'mysql2';
 import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
+import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 
 interface CategoryRow extends RowDataPacket {
   id: number;
@@ -12,8 +13,8 @@ interface ServiceRow extends RowDataPacket {
   id: number;
   name: string;
   category_id: number;
-  duration_time: string;
-  buffer_time: string;
+  duration_time: Time_HH_MM_SS_Type;
+  buffer_time: Time_HH_MM_SS_Type;
   booking_note: string | null;
   employee_id: number | null;
   price: number | null;

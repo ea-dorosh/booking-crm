@@ -1,10 +1,12 @@
+import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
+
 export interface ServiceDetailsDataType {
   id: number;
   name: string;
   categoryId: number;
   employeeIds: [];
-  durationTime: string;
-  bufferTime?: string;
+  durationTime: Time_HH_MM_SS_Type;
+  bufferTime?: Time_HH_MM_SS_Type;
   bookingNote: string | null;
 }
 

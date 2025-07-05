@@ -1,6 +1,8 @@
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
-const TIME_FORMAT = 'HH:mm:ss';
+const TIME_FORMAT = `HH:mm:ss`;
+const DATE_FORMAT = `YYYY-MM-DD`;
 
 interface TimeSlot {
   startTime: string;
@@ -19,6 +21,38 @@ interface DayData {
   startTime: string;
   endTime: string;
   availableTimeslots: TimeSlot[];
+}
+
+function getDatesPeriod(date: Date_ISO_Type, today: dayjs.Dayjs): {
+  datesInDesiredPeriod: Date_ISO_Type[];
+  firstDayInPeriod: dayjs.Dayjs;
+  lastDayInPeriod: dayjs.Dayjs;
+} {
+  const dateObj = dayjs(date, { format: DATE_FORMAT });
+
+  const firstDayOfSearch = dateObj.startOf(`week`);
+  const lastDayOfSearch = dateObj.endOf(`week`);
+
+  const datesInRange: Date_ISO_Type[] = [];
+  let tempDay = firstDayOfSearch;
+
+  /**
+   * generate array of dates in week
+   * eg. if date is 2025-07-05, then datesInRange will be
+   * [2025-07-01, 2025-07-02, 2025-07-03, 2025-07-04, 2025-07-05]
+   */
+  while (tempDay.isBefore(lastDayOfSearch) || tempDay.isSame(lastDayOfSearch, `day`)) {
+    if (tempDay.isAfter(today)) {
+      datesInRange.push(tempDay.format(DATE_FORMAT) as Date_ISO_Type);
+    }
+    tempDay = tempDay.add(1, `day`);
+  }
+
+  return {
+    datesInDesiredPeriod: datesInRange,
+    firstDayInPeriod: firstDayOfSearch,
+    lastDayInPeriod: lastDayOfSearch,
+  };
 }
 
 function getAppointmentEndTimeHours(startTime: string, serviceDuration: string): string {
@@ -181,6 +215,7 @@ function replaceExistingDayWithNewEmployeeData({ existingDay, newDay }: ReplaceD
 }
 
 export {
+  getDatesPeriod,
   getAppointmentEndTime,
   disableTimeSlotsForServiceDuration,
   addTimeSlotsAccordingEmployeeAvailability,

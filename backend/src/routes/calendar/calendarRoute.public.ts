@@ -15,6 +15,9 @@ import { getService } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
 import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
+import { getEmployeeAvailability } from '@/services/employees/employeesService.js';
+import { Date_ISO_Type } from '@/@types/utilTypes.js';
+import { getDatesPeriod } from '@/routes/calendar/calendarUtils.js';
 
 const router = express.Router();
 
@@ -31,71 +34,40 @@ interface SavedAppointmentRow extends RowDataPacket {
 router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
     res.status(500).json({ message: `Database connection not initialized` });
-
     return;
   }
 
   try {
-    const parsedUrl = url.parse(req.url, true);
+    const parsedUrlQuery = url.parse(req.url, true)?.query;
 
     // getting request query params
-    const paramDate = parsedUrl.query.date;
-    if (typeof paramDate !== 'string') {
-      res.status(400).json({ error: `Invalid date` });
-      return;
-    }
+    const paramDate = parsedUrlQuery.date as Date_ISO_Type;
+    const serviceId = Number(parsedUrlQuery.serviceId);
+    const employeeIds = (parsedUrlQuery.employeeIds as string).split(`,`).map(Number);
+    const today = dayjs().startOf(`day`);
 
-    const serviceId = Number(parsedUrl.query.serviceId);
-    const employeeIds = (parsedUrl.query.employeeIds as string).split(',').map(Number);
-
-    if (employeeIds.length === 0) {
-      res.status(400).json({ error: `Invalid employeeIds` });
+    if (typeof paramDate !== `string` || !serviceId || employeeIds.length === 0) {
+      res.status(400).json({
+        error: `Invalid parameters: date must be a string, serviceId must be provided, and employeeIds cannot be empty`
+      });
       return;
     }
 
     // get Service from the database
     const service = await getService(req.dbPool, serviceId);
     const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
+    const employeeAvailability = await getEmployeeAvailability(req.dbPool, employeeIds);
 
-    // Construct the SQL query with the WHERE clause to filter by specific employee IDs
-    const employeeAvailabilityQuery = `
-      SELECT DISTINCT employee_id, day_id, start_time, end_time
-      FROM EmployeeAvailability
-      WHERE employee_id IN (${employeeIds})
-    `;
-
-    interface EmployeeAvailabilityRowType extends RowDataPacket {
-      employee_id: number;
-      day_id: number;
-      start_time: string;
-      end_time: string;
-    }
-
-    const [employeeAvailabilityRows] = await req.dbPool.query<EmployeeAvailabilityRowType[]>(employeeAvailabilityQuery);
-    const employeeAvailability = employeeAvailabilityRows.map(row => ({
-      employeeId: row.employee_id,
-      dayId: row.day_id,
-      startTime: row.start_time,
-      endTime: row.end_time,
-    }));
-
-    // Iterate through all employeeAvailability from the database
-    const dateObj = dayjs(paramDate, { format: DATE_FORMAT });
-    const today = dayjs().startOf(`day`);
-
-    const firstDayOfSearch = dateObj.startOf(`week`);
-    const lastDayOfSearch = dateObj.endOf(`week`);
+    // THIS IS THE RESULT THAT WILL BE RETURNED TO THE CLIENT
     const availableDays: any = [];
 
-    const datesInRange: string[] = [];
-    let tempDay = firstDayOfSearch;
+    const {
+      datesInDesiredPeriod,
+      firstDayInPeriod,
+      lastDayInPeriod,
+    } = getDatesPeriod(paramDate, today);
 
-    while (tempDay.isBefore(lastDayOfSearch) || tempDay.isSame(lastDayOfSearch, 'day')) {
-      if (tempDay.isAfter(today)) datesInRange.push(tempDay.format(DATE_FORMAT));
-      tempDay = tempDay.add(1, 'day');
-    }
-
-    if (datesInRange.length === 0) {
+    if (datesInDesiredPeriod.length === 0) {
       res.json([]);
       return;
     }
@@ -103,13 +75,13 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     // Get all appointments for the given dates and employee IDs
     const savedAppointmentsQuery = `
       SELECT * FROM SavedAppointments
-      WHERE date IN (${datesInRange.map(() => '?').join(',')})
+      WHERE date IN (${datesInDesiredPeriod.map(() => '?').join(',')})
       AND employee_id IN (${employeeIds.map(() => '?').join(',')})
       AND status = ?
     `;
 
     const [appointmentResults] = await req.dbPool.query<SavedAppointmentRow[]>(savedAppointmentsQuery, [
-      ...datesInRange,
+      ...datesInDesiredPeriod,
       ...employeeIds,
       AppointmentStatusEnum.Active
     ]);
@@ -126,8 +98,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     const googleCalendarEvents: Record<number, {start: Date; end: Date; summary: string}[]> = {};
 
     for (const employeeId of employeeIds) {
-      const startDateString = firstDayOfSearch.format(DATE_FORMAT);
-      const endDateString = lastDayOfSearch.add(1, 'day').format(DATE_FORMAT);
+      const startDateString = firstDayInPeriod.format(DATE_FORMAT);
+      const endDateString = lastDayInPeriod.add(1, 'day').format(DATE_FORMAT);
 
       const employeeEvents = await getGoogleCalendarEvents(
         req.dbPool,
@@ -142,9 +114,9 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     }
 
     for (const availability of employeeAvailability) {
-      let currentDay = firstDayOfSearch;
+      let currentDay = firstDayInPeriod;
 
-      while (currentDay.isBefore(lastDayOfSearch) || currentDay.isSame(lastDayOfSearch, `day`)) {
+      while (currentDay.isBefore(lastDayInPeriod) || currentDay.isSame(lastDayInPeriod, `day`)) {
         if (currentDay.isAfter(today) && currentDay.day() === availability.dayId) {
           const dateFormatted = currentDay.format(DATE_FORMAT);
           const key = `${dateFormatted}_${availability.employeeId}`;
