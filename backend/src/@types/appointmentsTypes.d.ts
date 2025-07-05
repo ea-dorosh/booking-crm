@@ -22,10 +22,22 @@ export interface AppointmentDataType {
   createdDate: string;
   serviceName: string;
   timeStart: string;
+  timeEnd: string;
   serviceDuration: number;
   customerLastName: string;
   customerFirstName: string;
   status: AppointmentStatusEnum;
+  customer: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    isCustomerNew: boolean;
+  };
+  employee: {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+  };
 }
 
 export interface AppointmentDetailsRowType extends RowDataPacket {

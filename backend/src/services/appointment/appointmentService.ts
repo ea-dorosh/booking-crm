@@ -13,7 +13,6 @@ import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getEmployee } from '@/services/employees/employeesService.js';
 
-
 async function getAppointments(
   dbPool: Pool,
   startDate: Date_ISO_Type,
@@ -34,6 +33,7 @@ async function getAppointments(
   const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
     const appointmentDate = dayjs(row.date).format();
     const timeStart = dayjs(row.time_start).format();
+    const timeEnd = dayjs(row.time_end).format();
     const createdDate = dayjs(row.created_date).format();
 
     return {
@@ -42,10 +42,20 @@ async function getAppointments(
       createdDate: createdDate,
       serviceName: row.service_name,
       timeStart: timeStart,
+      timeEnd: timeEnd,
       serviceDuration: row.service_duration,
       customerLastName: row.customer_last_name,
       customerFirstName: row.customer_first_name,
       status: row.status,
+      customer: {
+        id: row.customer_id,
+        firstName: row.customer_first_name,
+        lastName: row.customer_last_name,
+        isCustomerNew: row.is_customer_new === CustomerNewStatusEnum.Existing ? false : true,
+      },
+      employee: {
+        id: row.employee_id,
+      },
     };
   });
 
@@ -103,7 +113,59 @@ async function getAppointment(dbPool: Pool, appointmentId: number): Promise<Appo
   return appointment[0];
 }
 
+async function getAppointmentsForCalendar(
+  dbPool: Pool,
+  dates: Date_ISO_Type[],
+  employeeIds: number[],
+  status: AppointmentStatusEnum
+): Promise<AppointmentDataType[]> {
+  const savedAppointmentsQuery = `
+    SELECT * FROM SavedAppointments
+    WHERE date IN (${dates.map(() => '?').join(',')})
+    AND employee_id IN (${employeeIds.map(() => '?').join(',')})
+    AND status = ?
+  `;
+
+  const [appointmentResults] = await dbPool.query<AppointmentRowType[]>(savedAppointmentsQuery, [
+    ...dates,
+    ...employeeIds,
+    status
+  ]);
+
+  const appointmentsData: AppointmentDataType[] = appointmentResults.map((row) => {
+    const appointmentDate = dayjs(row.date).format();
+    const timeStart = dayjs(row.time_start).format();
+    const timeEnd = dayjs(row.time_end).format();
+    const createdDate = dayjs(row.created_date).format();
+
+    return {
+      id: row.id,
+      date: appointmentDate,
+      createdDate: createdDate,
+      serviceName: row.service_name,
+      timeStart: timeStart,
+      timeEnd: timeEnd,
+      serviceDuration: row.service_duration,
+      customerLastName: row.customer_last_name,
+      customerFirstName: row.customer_first_name,
+      status: row.status,
+      customer: {
+        id: row.customer_id,
+        firstName: row.customer_first_name,
+        lastName: row.customer_last_name,
+        isCustomerNew: row.is_customer_new === CustomerNewStatusEnum.Existing ? false : true,
+      },
+      employee: {
+        id: row.employee_id,
+      },
+    };
+  });
+
+  return appointmentsData;
+}
+
 export {
   getAppointments,
   getAppointment,
+  getAppointmentsForCalendar,
 };

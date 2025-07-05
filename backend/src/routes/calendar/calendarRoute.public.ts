@@ -12,24 +12,18 @@ import {
   CustomResponseType,
 } from '@/@types/expressTypes.js';
 import { getService } from '@/services/service/serviceService.js';
-import { RowDataPacket } from 'mysql2';
 import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { getEmployeeAvailability } from '@/services/employees/employeesService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getDatesPeriod } from '@/routes/calendar/calendarUtils.js';
+import { getAppointmentsForCalendar } from '@/services/appointment/appointmentService.js';
+import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 
 const router = express.Router();
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
-
-interface SavedAppointmentRow extends RowDataPacket {
-  date: string;
-  employee_id: number;
-  time_start: string;
-  time_end: string;
-}
 
 router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
@@ -72,25 +66,19 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       return;
     }
 
-    // Get all appointments for the given dates and employee IDs
-    const savedAppointmentsQuery = `
-      SELECT * FROM SavedAppointments
-      WHERE date IN (${datesInDesiredPeriod.map(() => '?').join(',')})
-      AND employee_id IN (${employeeIds.map(() => '?').join(',')})
-      AND status = ?
-    `;
-
-    const [appointmentResults] = await req.dbPool.query<SavedAppointmentRow[]>(savedAppointmentsQuery, [
-      ...datesInDesiredPeriod,
-      ...employeeIds,
+    // Get all appointments for the given dates and employee IDs using service
+    const savedAppointments = await getAppointmentsForCalendar(
+      req.dbPool,
+      datesInDesiredPeriod,
+      employeeIds,
       AppointmentStatusEnum.Active
-    ]);
+    );
 
-    const groupedAppointments: Record<string, SavedAppointmentRow[]> = {};
+    const groupedAppointments: Record<string, AppointmentDataType[]> = {};
 
-    appointmentResults.forEach((appointment) => {
+    savedAppointments.forEach((appointment) => {
       const dateFormatted = dayjs(appointment.date).format(DATE_FORMAT);
-      const key = `${dateFormatted}_${appointment.employee_id}`;
+      const key = `${dateFormatted}_${appointment.employee.id}`;
       if (!groupedAppointments[key]) groupedAppointments[key] = [];
       groupedAppointments[key].push(appointment);
     });
@@ -122,8 +110,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           const key = `${dateFormatted}_${availability.employeeId}`;
 
           const blockedTimes = (groupedAppointments[key] || []).map((appointment) => ({
-            startBlockedTime: dayjs(appointment.time_start).format(TIME_FORMAT),
-            endBlockedTime: dayjs(appointment.time_end).format(TIME_FORMAT),
+            startBlockedTime: dayjs(appointment.timeStart).format(TIME_FORMAT),
+            endBlockedTime: dayjs(appointment.timeEnd).format(TIME_FORMAT),
           }));
 
           const employeeGoogleEvents = googleCalendarEvents[availability.employeeId] || [];
