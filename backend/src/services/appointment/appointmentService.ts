@@ -9,9 +9,9 @@ import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
 } from '@/enums/enums.js';
-import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getEmployee } from '@/services/employees/employeesService.js';
+import { fromMySQLToISOString } from '@/utils/timeUtils.js';
 
 async function getAppointments(
   dbPool: Pool,
@@ -31,18 +31,13 @@ async function getAppointments(
   console.log(`appointmentsResults[0]: `, appointmentsResults[0]);
 
   const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
-    const appointmentDate = dayjs(row.date).format();
-    const timeStart = dayjs(row.time_start).format();
-    const timeEnd = dayjs(row.time_end).format();
-    const createdDate = dayjs(row.created_date).format();
-
     return {
       id: row.id,
-      date: appointmentDate,
-      createdDate: createdDate,
+      date: fromMySQLToISOString(row.date),
+      timeStart: fromMySQLToISOString(row.time_start),
+      timeEnd: fromMySQLToISOString(row.time_end),
+      createdDate: fromMySQLToISOString(row.created_date),
       serviceName: row.service_name,
-      timeStart: timeStart,
-      timeEnd: timeEnd,
       serviceDuration: row.service_duration,
       customerLastName: row.customer_last_name,
       customerFirstName: row.customer_first_name,
@@ -72,20 +67,15 @@ async function getAppointment(dbPool: Pool, appointmentId: number): Promise<Appo
   const [results] = await dbPool.query<AppointmentDetailsRowType[]>(sql, [appointmentId]);
 
   const appointment: AppointmentDetailType[] = results.map((row) => {
-    const appointmentDate = dayjs(row.date).format();
-    const timeStart = dayjs(row.time_start).format();
-    const timeEnd = dayjs(row.time_end).format();
-    const createdDate = dayjs(row.created_date).format();
-
     return {
       id: row.id,
-      date: appointmentDate,
-      timeStart: timeStart,
-      timeEnd: timeEnd,
+      date: fromMySQLToISOString(row.date),
+      timeStart: fromMySQLToISOString(row.time_start),
+      timeEnd: fromMySQLToISOString(row.time_end),
       serviceDuration: row.service_duration,
       serviceId: row.service_id,
       serviceName: row.service_name,
-      createdDate: createdDate,
+      createdDate: fromMySQLToISOString(row.created_date),
       employee: {
         id: row.employee_id,
         firstName: ``,
@@ -133,18 +123,13 @@ async function getAppointmentsForCalendar(
   ]);
 
   const appointmentsData: AppointmentDataType[] = appointmentResults.map((row) => {
-    const appointmentDate = dayjs(row.date).format();
-    const timeStart = dayjs(row.time_start).format();
-    const timeEnd = dayjs(row.time_end).format();
-    const createdDate = dayjs(row.created_date).format();
-
     return {
       id: row.id,
-      date: appointmentDate,
-      createdDate: createdDate,
+      date: fromMySQLToISOString(row.date),
+      createdDate: fromMySQLToISOString(row.created_date),
       serviceName: row.service_name,
-      timeStart: timeStart,
-      timeEnd: timeEnd,
+      timeStart: fromMySQLToISOString(row.time_start),
+      timeEnd: fromMySQLToISOString(row.time_end),
       serviceDuration: row.service_duration,
       customerLastName: row.customer_last_name,
       customerFirstName: row.customer_first_name,

@@ -9,6 +9,16 @@ function fromDayjsToMySQLDateTime(dayjs: dayjs.Dayjs): string {
   return dayjs.format(`YYYY-MM-DD HH:mm:ss`);
 }
 
+/**
+ * @param mysqlDateTime - string in format
+ * YYYY-MM-DD HH:mm:ss || '2025-07-10 10:00:00' UTC
+ * @returns string in format 2025-07-10T10:00:00.000Z
+ */
+function fromMySQLToISOString(mysqlDateTime: string): string {
+  // Parse as UTC by adding 'Z' suffix to indicate UTC time
+  return new Date(mysqlDateTime + 'Z').toISOString();
+}
+
 function getServiceDuration(durationTime: Time_HH_MM_SS_Type, bufferTime?: Time_HH_MM_SS_Type): Time_HH_MM_SS_Type {
   // TODO: check logic with correct calculation when with real buffer time
   if (!bufferTime) return durationTime;
@@ -40,6 +50,7 @@ function getDueDate(dateIssued: string, daysToAdd: number): string {
 
 export {
   fromDayjsToMySQLDateTime,
+  fromMySQLToISOString,
   getServiceDuration,
   toMySQLDate,
   getDueDate,

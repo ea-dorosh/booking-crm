@@ -184,7 +184,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
     customerId,
     serviceDurationAndBufferTimeInMinutes,
     appointmentFormData.employeeId,
-    fromDayjsToMySQLDateTime(dayjs()),
+    fromDayjsToMySQLDateTime(dayjs().utc()),
     appointmentFormData.salutation,
     formatName(appointmentFormData.firstName),
     formatName(appointmentFormData.lastName),

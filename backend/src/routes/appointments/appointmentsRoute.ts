@@ -162,7 +162,6 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
               customerId: appointment.customer.id,
               customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,
               serviceName: appointment.serviceName,
-              date: appointmentData.date,
               timeStart: appointmentData.timeStart,
               timeEnd: appointmentData.timeEnd
             }
@@ -271,7 +270,6 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
           customerId: appointmentData.customerId,
           customerName: `${appointmentData.customerFirstName} ${appointmentData.customerLastName}`,
           serviceName: appointmentData.serviceName,
-          date: appointmentData.date,
           timeStart: appointmentData.timeStart,
           timeEnd: appointmentData.timeEnd
         }
