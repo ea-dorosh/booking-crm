@@ -5,6 +5,10 @@ import {
   addTimeSlotsAccordingEmployeeAvailability,
   disableTimeSlotsForServiceDuration,
   replaceExistingDayWithNewEmployeeData,
+  combinePeriodWithSavedAppointments,
+  generateTimeSlotsFromAvailableTimes,
+  generateGroupedTimeSlots,
+  PeriodWithGroupedTimeslotsType,
 } from '@/routes/calendar/calendarUtils.js';
 import { getServiceDuration } from '@/utils/timeUtils.js';
 import {
@@ -14,9 +18,9 @@ import {
 import { getService } from '@/services/service/serviceService.js';
 import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
-import { getEmployeeAvailability } from '@/services/employees/employeesService.js';
+import { getEmployeeAvailability, getGroupEmployeeAvailability } from '@/services/employees/employeesService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
-import { getDatesPeriod } from '@/routes/calendar/calendarUtils.js';
+import { getDatesPeriod, getPeriodWithDaysAndEmployeeAvailability } from '@/routes/calendar/calendarUtils.js';
 import { getAppointmentsForCalendar } from '@/services/appointment/appointmentService.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 
@@ -24,6 +28,45 @@ const router = express.Router();
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
+
+const calendarRouteNewLogic = async (dbPool: any, paramDate: Date_ISO_Type, serviceId: number, employeeIds: number[]): Promise<PeriodWithGroupedTimeslotsType[]> => {
+  const service = await getService(dbPool, serviceId);
+  const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
+  const groupedEmployeeAvailability = await getGroupEmployeeAvailability(dbPool, employeeIds);
+  console.log(`groupedEmployeeAvailability: `, JSON.stringify(groupedEmployeeAvailability, null, 4));
+
+  const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedEmployeeAvailability);
+  console.log(`periodWithDaysAndEmployeeAvailability: `, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 4));
+
+  const savedAppointments = await getAppointmentsForCalendar(
+    dbPool,
+    periodWithDaysAndEmployeeAvailability.map(dayInPeriod => dayInPeriod.day),
+    employeeIds,
+    AppointmentStatusEnum.Active
+  );
+  console.log(`savedAppointments: `, JSON.stringify(savedAppointments, null, 4));
+  const periodWithClearedDays = combinePeriodWithSavedAppointments(
+    periodWithDaysAndEmployeeAvailability,
+    savedAppointments,
+    serviceDurationWithBuffer
+  );
+
+  console.log(`\x1b[31m========================\x1b[0m`);
+  console.log(`periodWithClearedDays: `, JSON.stringify(periodWithClearedDays, null, 4));
+  console.log(`\x1b[31m========================\x1b[0m`);
+
+  const timeSlotsData = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
+  console.log(`\x1b[32m========================\x1b[0m`);
+  console.log(`timeSlotsData: `, JSON.stringify(timeSlotsData, null, 4));
+  console.log(`\x1b[32m========================\x1b[0m`);
+
+  const groupedTimeSlots = generateGroupedTimeSlots(timeSlotsData);
+  console.log(`\x1b[33m========================\x1b[0m`);
+  console.log(`groupedTimeSlots: `, JSON.stringify(groupedTimeSlots, null, 4));
+  console.log(`\x1b[33m========================\x1b[0m`);
+
+  return groupedTimeSlots;
+}
 
 router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
@@ -52,14 +95,18 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
     const employeeAvailability = await getEmployeeAvailability(req.dbPool, employeeIds);
 
-    // THIS IS THE RESULT THAT WILL BE RETURNED TO THE CLIENT
-    const availableDays: any = [];
+    // just call this fucntion to check the logs during development
+    // calendarRouteNewLogic(req.dbPool, paramDate, serviceId, employeeIds);
+    const groupedTimeSlots = await calendarRouteNewLogic(req.dbPool, paramDate, serviceId, employeeIds);
+
+    res.json(groupedTimeSlots);
+    return;
 
     const {
       datesInDesiredPeriod,
       firstDayInPeriod,
       lastDayInPeriod,
-    } = getDatesPeriod(paramDate, today);
+    } = getDatesPeriod(paramDate, today, employeeAvailability);
 
     if (datesInDesiredPeriod.length === 0) {
       res.json([]);
@@ -67,46 +114,54 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     }
 
     // Get all appointments for the given dates and employee IDs using service
-    const savedAppointments = await getAppointmentsForCalendar(
-      req.dbPool,
-      datesInDesiredPeriod,
-      employeeIds,
-      AppointmentStatusEnum.Active
-    );
+    // const savedAppointments = await getAppointmentsForCalendar(
+    //   req.dbPool,
+    //   datesInDesiredPeriod,
+    //   employeeIds,
+    //   AppointmentStatusEnum.Active
+    // );
 
     const groupedAppointments: Record<string, AppointmentDataType[]> = {};
 
-    savedAppointments.forEach((appointment) => {
-      const dateFormatted = dayjs(appointment.date).format(DATE_FORMAT);
-      const key = `${dateFormatted}_${appointment.employee.id}`;
-      if (!groupedAppointments[key]) groupedAppointments[key] = [];
-      groupedAppointments[key].push(appointment);
-    });
+    // savedAppointments.forEach((appointment) => {
+    //   const dateFormatted = dayjs(appointment.date).format(DATE_FORMAT);
+    //   const key = `${dateFormatted}_${appointment.employee.id}`;
+    //   if (!groupedAppointments[key]) groupedAppointments[key] = [];
+    //   groupedAppointments[key].push(appointment);
+    // });
 
     const googleCalendarEvents: Record<number, {start: Date; end: Date; summary: string}[]> = {};
 
-    for (const employeeId of employeeIds) {
-      const startDateString = firstDayInPeriod.format(DATE_FORMAT);
-      const endDateString = lastDayInPeriod.add(1, 'day').format(DATE_FORMAT);
+    // for (const employeeId of employeeIds) {
+    //   const startDateString = firstDayInPeriod.format(DATE_FORMAT);
+    //   const endDateString = lastDayInPeriod.add(1, 'day').format(DATE_FORMAT);
 
-      const employeeEvents = await getGoogleCalendarEvents(
-        req.dbPool,
-        employeeId,
-        startDateString,
-        endDateString
-      );
+    //   const employeeEvents = await getGoogleCalendarEvents(
+    //     req.dbPool,
+    //     employeeId,
+    //     startDateString,
+    //     endDateString
+    //   );
 
-      if (employeeEvents) {
-        googleCalendarEvents[employeeId] = employeeEvents;
-      }
-    }
+    //   if (employeeEvents) {
+    //     googleCalendarEvents[employeeId] = employeeEvents;
+    //   }
+    // }
+
+    // THIS IS THE RESULT THAT WILL BE RETURNED TO THE CLIENT
+    const availableDays: any = [];
 
     for (const availability of employeeAvailability) {
-      let currentDay = firstDayInPeriod;
+      let indexDay = firstDayInPeriod;
 
-      while (currentDay.isBefore(lastDayInPeriod) || currentDay.isSame(lastDayInPeriod, `day`)) {
-        if (currentDay.isAfter(today) && currentDay.day() === availability.dayId) {
-          const dateFormatted = currentDay.format(DATE_FORMAT);
+      // iterate over all days in the period
+      while (indexDay.isBefore(lastDayInPeriod) || indexDay.isSame(lastDayInPeriod, `day`)) {
+
+        // starting from tomorrow and if this days included in the employee availability
+        if (indexDay.isAfter(today) && indexDay.day() === availability.dayId) {
+
+
+          const dateFormatted = indexDay.format(DATE_FORMAT);
           const key = `${dateFormatted}_${availability.employeeId}`;
 
           const blockedTimes = (groupedAppointments[key] || []).map((appointment) => ({
@@ -174,7 +229,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
             );
           }
         }
-        currentDay = currentDay.add(1, `day`);
+
+        indexDay = indexDay.add(1, `day`);
       }
     }
 

@@ -21,8 +21,8 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isBetween);
 dayjs.extend(weekday);
 dayjs.extend(updateLocale);
-dayjs.locale(`de`);
 
+dayjs.locale(`de`);
 dayjs.updateLocale(`de`, {
   weekStart: 1
 });

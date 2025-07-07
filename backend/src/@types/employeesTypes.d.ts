@@ -40,3 +40,12 @@ export interface EmployeeAvailabilityDataType {
   startTime: string;
   endTime: string;
 }
+
+interface GroupedAvailabilityDayType {
+  dayId: number;
+  employees: Array<{
+    id: number;
+    startTime: string;
+    endTime: string;
+  }>;
+}
