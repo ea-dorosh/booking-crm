@@ -72,8 +72,8 @@ export interface PeriodWithDaysAndEmployeeAvailabilityTypeWithBlockedTimes {
 }
 
 interface AvailableTimeSlot {
-  startTime: string;
-  endTime: string;
+  startTime: dayjs.Dayjs;
+  endTime: dayjs.Dayjs;
 }
 
 interface EmployeeWithTimeSlots {
@@ -92,7 +92,7 @@ export interface PeriodWithGroupedTimeslotsType {
 
 interface TimeslotWithGroupedEmployeeId {
   employeeId: number[];
-  startTime: Time_HH_MM_SS_Type;
+  startTime: Time_HH_MM_SS_Type; // in german time zone
 }
 
 // HELPER FUNCTIONS
@@ -285,8 +285,8 @@ function generateTimeSlotsFromAvailableTimes(
           // Add the slot if currentTime is within available time
           if (currentTime.isSameOrBefore(endTime)) {
             availableTimeSlots.push({
-              startTime: currentTime.toISOString(),
-              endTime: slotEndTime.toISOString(),
+              startTime: currentTime,
+              endTime: slotEndTime,
             });
           }
 
@@ -317,8 +317,11 @@ function generateGroupedTimeSlots(
     // Process each employee's time slots
     dayData.employees.forEach(employee => {
       employee.availableTimeSlots.forEach(timeSlot => {
-        // Convert ISO time to HH:mm:ss format for grouping
-        const startTime = dayjs.utc(timeSlot.startTime).format(TIME_FORMAT) as Time_HH_MM_SS_Type;
+
+        /**
+         * Convert UTC time to German time zone here to deliver correct time to the client
+         */
+        const startTime = timeSlot.startTime.tz(`Europe/Berlin`).format(TIME_FORMAT) as Time_HH_MM_SS_Type;
 
         if (timeSlotMap.has(startTime)) {
           // Add employee ID to existing time slot if not already present

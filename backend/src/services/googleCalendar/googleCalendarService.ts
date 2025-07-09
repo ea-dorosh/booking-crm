@@ -384,8 +384,8 @@ export const getEmployeeCalendarClient = async (
 export const checkGoogleCalendarAvailability = async (
   dbPool: Pool,
   employeeId: number,
-  startTime: string,
-  endTime: string
+  startTime: string, // in UTC
+  endTime: string // in UTC
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
 
@@ -395,31 +395,28 @@ export const checkGoogleCalendarAvailability = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const isoStartTime = dayjs.tz(startTime, 'Europe/Berlin').toISOString();
-  const isoEndTime = dayjs.tz(endTime, 'Europe/Berlin').toISOString();
+  const isoStartTime = dayjs.utc(startTime).toISOString();
+  const isoEndTime = dayjs.utc(endTime).toISOString();
 
-  const startOfDay = dayjs.tz(startTime, 'Europe/Berlin').startOf('day');
-  const endOfDay = dayjs.tz(startTime, 'Europe/Berlin').endOf('day');
-
-  const isoDayStart = startOfDay.toISOString();
-  const isoDayEnd = endOfDay.toISOString();
+  const startOfDay = dayjs.utc(startTime).startOf(`day`).toISOString();
+  const endOfDay = dayjs.utc(startTime).endOf(`day`).toISOString();
 
   console.log(`Checking Google Calendar availability for:`, {
     calendarId,
     requestedSlot: { startTime: isoStartTime, endTime: isoEndTime },
-    expandedSearch: { dayStart: isoDayStart, dayEnd: isoDayEnd }
+    expandedSearch: { dayStart: startOfDay, dayEnd: endOfDay }
   });
 
   try {
     const response = await calendarClient.events.list({
       calendarId,
-      timeMin: isoDayStart,
-      timeMax: isoDayEnd,
+      timeMin: startOfDay,
+      timeMax: endOfDay,
       singleEvents: true,
     });
 
-    const requestStart = dayjs.tz(startTime, 'Europe/Berlin');
-    const requestEnd = dayjs.tz(endTime, 'Europe/Berlin');
+    const requestStart = dayjs.utc(startTime);
+    const requestEnd = dayjs.utc(endTime);
 
     let hasConflict = false;
 
@@ -492,8 +489,8 @@ export const createGoogleCalendarEvent = async (
     calendarId,
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
     appointmentId: appointment.id,
-    startTime: fromDayjsToMySQLDateTime(appointment.timeStart),
-    endTime: fromDayjsToMySQLDateTime(appointment.timeEnd),
+    startTime: appointment.timeStart.toISOString(), // in UTC
+    endTime: appointment.timeEnd.toISOString(), // in UTC
   });
 
   const event: GoogleEvent = {

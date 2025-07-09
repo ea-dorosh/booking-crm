@@ -93,7 +93,10 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   let customerId;
 
   try {
-    const checkCustomerResult = await checkCustomerExists(request.dbPool, {email: appointmentFormData.email, customerId: null});
+    const checkCustomerResult = await checkCustomerExists(request.dbPool, {
+      email: appointmentFormData.email,
+      customerId: null,
+    });
 
     if (checkCustomerResult.exists) {
       isCustomerNew = CustomerNewStatusEnum.Existing;
@@ -120,11 +123,15 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   }
 
   const timeStartUTC = dayjs.tz(`${appointmentFormData.date} ${appointmentFormData.time}`, `Europe/Berlin`).utc();
+
+  // TODO: getAppointmentEndTime move to time utils
   const timeEndUTC = getAppointmentEndTime(timeStartUTC, serviceDurationAndBufferTimeInMinutes);
 
-  console.log("Appointment times calculated:", {
-    timeStart: fromDayjsToMySQLDateTime(timeStartUTC),
-    timeEnd: fromDayjsToMySQLDateTime(timeEndUTC),
+  console.log(`Appointment times calculated:`, {
+    timeStartDAYJS: timeStartUTC,
+    timeEndDAYJS: timeEndUTC,
+    timeStart: timeStartUTC.format(`YYYY-MM-DD HH:mm:ss`),
+    timeEnd: timeEndUTC.format(`YYYY-MM-DD HH:mm:ss`),
     serviceDuration: serviceDurationAndBufferTimeInMinutes,
   });
 
@@ -232,7 +239,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       const emailResult = await sendAppointmentConfirmationEmail(
         appointmentFormData.email,
         {
-          date: dayjs.tz(appointmentFormData.date, 'Europe/Berlin').format('DD.MM.YYYY'),
+          date:  dayjs.tz(`${appointmentFormData.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
           time: dayjs.tz(timeStartUTC, 'Europe/Berlin').format('HH:mm'),
           service: serviceName,
           specialist: `${employee.firstName} ${employee.lastName}`,
@@ -251,7 +258,6 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       }
     } catch (error) {
       console.error(`Failed to send confirmation email:`, error);
-      throw error;
     }
 
     response.json({
@@ -259,7 +265,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
       data: {
         id: appointmentResults.insertId,
         date: appointmentFormData.date,
-        timeStart: timeStartUTC.toISOString(),
+        timeStart: dayjs.tz(timeStartUTC, `Europe/Berlin`).format(`HH:mm`),
         serviceName: serviceName,
         salutation: appointmentFormData.salutation,
         lastName: formatName(appointmentFormData.lastName),

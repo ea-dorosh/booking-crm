@@ -81,8 +81,11 @@ async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDe
 }
 
 async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, timeStart, timeEnd }: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
-  const mysqlTimeStart = fromDayjsToMySQLDateTime(timeStart);
-  const mysqlTimeEnd = fromDayjsToMySQLDateTime(timeEnd);
+  const mysqlTimeStart = fromDayjsToMySQLDateTime(timeStart); // in UTC
+  const mysqlTimeEnd = fromDayjsToMySQLDateTime(timeEnd); // in UTC
+
+  console.log(`mysqlTimeStart: `, mysqlTimeStart);
+  console.log(`mysqlTimeEnd: `, mysqlTimeEnd);
 
   const checkAvailabilityQuery = `
     SELECT * FROM SavedAppointments
@@ -119,13 +122,13 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
     const isGoogleCalendarAvailable = await checkGoogleCalendarAvailability(
       dbPool,
       employeeId,
-      timeStart.format(`YYYY-MM-DD HH:mm:ss`),
-      timeEnd.format(`YYYY-MM-DD HH:mm:ss`)
+      mysqlTimeStart,
+      mysqlTimeEnd,
     );
     hasGoogleCalendarConflict = !isGoogleCalendarAvailable;
 
     if (hasGoogleCalendarConflict) {
-      console.log(`Google Calendar conflict detected for employee ${employeeId} at ${timeStart}-${timeEnd}`);
+      console.log(`Google Calendar conflict detected for employee ${employeeId} at ${mysqlTimeStart}-${mysqlTimeEnd}`);
     }
   } catch (error) {
     console.error(`Error checking Google Calendar availability for employee ${employeeId}:`, error);
