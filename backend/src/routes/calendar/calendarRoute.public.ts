@@ -33,24 +33,29 @@ const calendarRouteNewLogic = async (dbPool: any, paramDate: Date_ISO_Type, serv
   const service = await getService(dbPool, serviceId);
   const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
   const groupedEmployeeAvailability = await getGroupEmployeeAvailability(dbPool, employeeIds);
+
   console.log(`groupedEmployeeAvailability: `, JSON.stringify(groupedEmployeeAvailability, null, 4));
 
   const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedEmployeeAvailability);
   console.log(`periodWithDaysAndEmployeeAvailability: `, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 4));
 
-  const savedAppointments = await getAppointmentsForCalendar(
-    dbPool,
-    periodWithDaysAndEmployeeAvailability.map(dayInPeriod => dayInPeriod.day),
-    employeeIds,
-    AppointmentStatusEnum.Active
-  );
+  let savedAppointments: AppointmentDataType[] = [];
+
+  if (periodWithDaysAndEmployeeAvailability.length > 0) {
+    savedAppointments = await getAppointmentsForCalendar(
+      dbPool,
+      periodWithDaysAndEmployeeAvailability.map(dayInPeriod => dayInPeriod.day),
+      employeeIds,
+      AppointmentStatusEnum.Active
+    );
+  }
   console.log(`savedAppointments: `, JSON.stringify(savedAppointments, null, 4));
+
   const periodWithClearedDays = combinePeriodWithSavedAppointments(
     periodWithDaysAndEmployeeAvailability,
     savedAppointments,
     serviceDurationWithBuffer
   );
-
   console.log(`\x1b[31m========================\x1b[0m`);
   console.log(`periodWithClearedDays: `, JSON.stringify(periodWithClearedDays, null, 4));
   console.log(`\x1b[31m========================\x1b[0m`);
@@ -81,7 +86,6 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     const paramDate = parsedUrlQuery.date as Date_ISO_Type;
     const serviceId = Number(parsedUrlQuery.serviceId);
     const employeeIds = (parsedUrlQuery.employeeIds as string).split(`,`).map(Number);
-    const today = dayjs().startOf(`day`);
 
     if (typeof paramDate !== `string` || !serviceId || employeeIds.length === 0) {
       res.status(400).json({
@@ -90,17 +94,18 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       return;
     }
 
-    // get Service from the database
-    const service = await getService(req.dbPool, serviceId);
-    const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
-    const employeeAvailability = await getEmployeeAvailability(req.dbPool, employeeIds);
-
     // just call this fucntion to check the logs during development
     // calendarRouteNewLogic(req.dbPool, paramDate, serviceId, employeeIds);
     const groupedTimeSlots = await calendarRouteNewLogic(req.dbPool, paramDate, serviceId, employeeIds);
 
     res.json(groupedTimeSlots);
     return;
+
+    // get Service from the database
+    const service = await getService(req.dbPool, serviceId);
+    const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
+    const employeeAvailability = await getEmployeeAvailability(req.dbPool, employeeIds);
+    const today = dayjs().startOf(`day`);
 
     const {
       datesInDesiredPeriod,

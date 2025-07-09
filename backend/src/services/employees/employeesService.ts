@@ -157,40 +157,6 @@ async function getEmployeeAvailability(dbPool: Pool, employeeIds: number[]): Pro
 }
 
 async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[]): Promise<GroupedAvailabilityDayType[]> {
-  // const sql = `
-  //   SELECT *
-  //   FROM EmployeeAvailability
-  //   WHERE employee_id IN (?)
-  //   ORDER BY day_id ASC, start_time ASC
-  // `;
-
-  // const [results] = await dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeIds]);
-
-  // if (!results.length) {
-  //   return [];
-  // }
-
-  // const groupedByDay = results.reduce<Record<number, GroupedAvailabilityDayType>>((acc, row) => {
-  //   const { employee_id, day_id, start_time, end_time } = row;
-
-  //   if (!acc[day_id]) {
-  //     acc[day_id] = {
-  //       dayId: day_id,
-  //       employees: []
-  //     };
-  //   }
-
-  //   acc[day_id].employees.push({
-  //     id: employee_id,
-  //     startTime: start_time,
-  //     endTime: end_time
-  //   });
-
-  //   return acc;
-  // }, {});
-
-  // return Object.values(groupedByDay).sort((a, b) => a.dayId - b.dayId);
-
   const sql = `
   SELECT *
   FROM EmployeeAvailability

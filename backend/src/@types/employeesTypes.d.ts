@@ -1,4 +1,5 @@
 import { RowDataPacket } from 'mysql2';
+import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 
 export interface EmployeeDetailRowType extends RowDataPacket {
   employee_id: number;
@@ -29,8 +30,8 @@ export interface EmployeeAvailabilityRow extends RowDataPacket {
   id: number;
   employee_id: number;
   day_id: number;
-  start_time: string;
-  end_time: string;
+  start_time: Time_HH_MM_SS_Type;
+  end_time: Time_HH_MM_SS_Type;
 }
 
 export interface EmployeeAvailabilityDataType {
@@ -45,7 +46,7 @@ interface GroupedAvailabilityDayType {
   dayId: number;
   employees: Array<{
     id: number;
-    startTime: string;
-    endTime: string;
+    startTime: Time_HH_MM_SS_Type;
+    endTime: Time_HH_MM_SS_Type;
   }>;
 }
