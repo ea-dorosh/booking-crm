@@ -102,7 +102,7 @@ interface TimeslotWithGroupedEmployeeId {
  * @param serviceDuration - service duration in HH:mm:ss format
  * @returns adjusted time in HH:mm:ss format
  */
-function calculateAdjustedEndTime(baseTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs {
+const calculateAdjustedEndTime = (baseTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs => {
   const result = dayjs(baseTime, TIME_FORMAT)
     .subtract(dayjs(serviceDuration, TIME_FORMAT).hour(), 'hour')
     .subtract(dayjs(serviceDuration, TIME_FORMAT).minute(), 'minute')
@@ -542,6 +542,7 @@ export {
   disableTimeSlotsForServiceDuration,
   addTimeSlotsAccordingEmployeeAvailability,
   replaceExistingDayWithNewEmployeeData,
+  calculateAdjustedEndTime,
 
   getPeriodWithDaysAndEmployeeAvailability,
   combinePeriodWithSavedAppointments,
