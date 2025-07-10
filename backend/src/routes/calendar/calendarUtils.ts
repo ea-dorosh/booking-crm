@@ -112,12 +112,12 @@ const calculateAdjustedEndTime = (baseTime: dayjs.Dayjs, serviceDuration: Time_H
   return result;
 }
 
-function calculateAvailableTimes(
+const calculateAvailableTimes = (
   startWorkingTime: dayjs.Dayjs,
   endWorkingTime: dayjs.Dayjs,
   blockedTimes: BlockedTime[],
   serviceDuration: Time_HH_MM_SS_Type
-): AvailableTime[] {
+): AvailableTime[] => {
   const availableTimes: AvailableTime[] = [];
 
   if (blockedTimes.length === 0) {
@@ -153,7 +153,6 @@ function calculateAvailableTimes(
 
   if (currentTime.isBefore(endWorkingTime)) {
     const adjustedEndTime = calculateAdjustedEndTime(endWorkingTime, serviceDuration);
-    console.log('Debug - Final adjustedEndTime:', adjustedEndTime.format('YYYY-MM-DD HH:mm:ss'));
 
     if (adjustedEndTime.isAfter(currentTime) || adjustedEndTime.isSame(currentTime)) {
       availableTimes.push({
@@ -542,8 +541,9 @@ export {
   disableTimeSlotsForServiceDuration,
   addTimeSlotsAccordingEmployeeAvailability,
   replaceExistingDayWithNewEmployeeData,
-  calculateAdjustedEndTime,
 
+  calculateAdjustedEndTime, // export for tests
+  calculateAvailableTimes, // export for tests
   getPeriodWithDaysAndEmployeeAvailability,
   combinePeriodWithSavedAppointments,
   generateTimeSlotsFromAvailableTimes,
