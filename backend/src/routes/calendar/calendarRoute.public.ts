@@ -6,6 +6,9 @@ import {
   disableTimeSlotsForServiceDuration,
   replaceExistingDayWithNewEmployeeData,
   combinePeriodWithSavedAppointments,
+  combinePeriodWithNormalizedAppointments,
+  normalizeSavedAppointments,
+  normalizeGoogleCalendarEvents,
   generateTimeSlotsFromAvailableTimes,
   generateGroupedTimeSlots,
   PeriodWithGroupedTimeslotsType,
@@ -16,7 +19,7 @@ import {
   CustomResponseType,
 } from '@/@types/expressTypes.js';
 import { getService } from '@/services/service/serviceService.js';
-import { getGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
+import { getGoogleCalendarEvents, getGoogleCalendarEventsForSpecificDates } from '@/services/googleCalendar/googleCalendarService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { getEmployeeAvailability, getGroupEmployeeAvailability } from '@/services/employees/employeesService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
@@ -49,11 +52,96 @@ const calendarRouteNewLogic = async (dbPool: any, paramDate: Date_ISO_Type, serv
       AppointmentStatusEnum.Active
     );
   }
-  console.log(`savedAppointments: `, JSON.stringify(savedAppointments, null, 4));
 
-  const periodWithClearedDays = combinePeriodWithSavedAppointments(
+  console.log(`\x1b[31m========================\x1b[0m`);
+  console.log(`savedAppointments: `, JSON.stringify(savedAppointments, null, 4));
+  console.log(`\x1b[31m========================\x1b[0m`);
+
+  // Загружаем события Google Calendar только для конкретных сотрудников и дней
+  const googleCalendarEvents: { start: string; end: string; summary: string }[] = [];
+
+  if (periodWithDaysAndEmployeeAvailability.length > 0) {
+    console.log(`Loading Google Calendar events for specific employees and days`);
+
+    // Создаем карту сотрудник -> даты для оптимизации запросов
+    const employeeDatesMap = new Map<number, string[]>();
+
+    // Заполняем карту: для каждого сотрудника собираем даты, когда он работает
+    periodWithDaysAndEmployeeAvailability.forEach(dayData => {
+      dayData.employees.forEach(employee => {
+        if (!employeeDatesMap.has(employee.employeeId)) {
+          employeeDatesMap.set(employee.employeeId, []);
+        }
+        employeeDatesMap.get(employee.employeeId)!.push(dayData.day);
+      });
+    });
+
+    console.log(`Employee dates map:`, Object.fromEntries(employeeDatesMap));
+
+    // Загружаем события для каждого сотрудника только для его рабочих дней
+    for (const [employeeId, dates] of employeeDatesMap) {
+      try {
+        const employeeGoogleEvents = await getGoogleCalendarEventsForSpecificDates(
+          dbPool,
+          employeeId,
+          dates as Date_ISO_Type[]
+        );
+
+        if (employeeGoogleEvents && employeeGoogleEvents.length > 0) {
+          console.log(`Found ${employeeGoogleEvents.length} Google Calendar events for employee ${employeeId} on dates: ${dates.join(', ')}`);
+          googleCalendarEvents.push(...employeeGoogleEvents);
+        }
+      } catch (error) {
+        console.error(`Error loading Google Calendar events for employee ${employeeId}:`, error);
+        // Продолжаем работу даже если не удалось загрузить события для одного сотрудника
+      }
+    }
+  }
+
+  // Нормализуем данные встреч
+  const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
+
+  // Нормализуем данные Google Calendar событий
+  const normalizedGoogleEvents: any[] = [];
+  if (periodWithDaysAndEmployeeAvailability.length > 0) {
+    // Создаем карту сотрудник -> даты для нормализации
+    const employeeDatesMapForNormalization = new Map<number, string[]>();
+
+    periodWithDaysAndEmployeeAvailability.forEach(dayData => {
+      dayData.employees.forEach(employee => {
+        if (!employeeDatesMapForNormalization.has(employee.employeeId)) {
+          employeeDatesMapForNormalization.set(employee.employeeId, []);
+        }
+        employeeDatesMapForNormalization.get(employee.employeeId)!.push(dayData.day);
+      });
+    });
+
+    for (const [employeeId, dates] of employeeDatesMapForNormalization) {
+      const employeeGoogleEvents = googleCalendarEvents.filter(event => {
+        const eventDate = dayjs(event.start).format(DATE_FORMAT);
+        return dates.includes(eventDate);
+      });
+
+      if (employeeGoogleEvents.length > 0) {
+        const normalizedEvents = normalizeGoogleCalendarEvents(employeeGoogleEvents, employeeId);
+        normalizedGoogleEvents.push(...normalizedEvents);
+      }
+    }
+  }
+
+  // теперь надо проверить normalizedSavedAppointments и normalizedGoogleEvents имееют одинаковые даты и время или перескаемые времана на одном сотруднике
+
+
+  // Объединяем нормализованные данные
+  const allNormalizedAppointments = [...normalizedSavedAppointments, ...normalizedGoogleEvents];
+
+  console.log(`Total normalized appointments (saved + Google Calendar): ${allNormalizedAppointments.length}`);
+  console.log(`Normalized saved appointments: ${normalizedSavedAppointments.length}`);
+  console.log(`Normalized Google Calendar events: ${normalizedGoogleEvents.length}`);
+
+  const periodWithClearedDays = combinePeriodWithNormalizedAppointments(
     periodWithDaysAndEmployeeAvailability,
-    savedAppointments,
+    allNormalizedAppointments,
     serviceDurationWithBuffer
   );
   console.log(`\x1b[31m========================\x1b[0m`);

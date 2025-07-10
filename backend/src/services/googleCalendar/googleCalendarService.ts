@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import { Pool, RowDataPacket } from 'mysql2/promise';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
+import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
 interface GoogleCalendarCredentials {
   employeeId: number;
@@ -657,7 +658,7 @@ export const getGoogleCalendarEvents = async (
     const tzStartDate = dayjs.tz(startDate, 'Europe/Berlin').startOf('day');
     const tzEndDate = dayjs.tz(endDate, 'Europe/Berlin').endOf('day');
 
-    console.log(`Fetching Google Calendar events for employee ${employeeId}:`, {
+    console.log(`Fetching Google Calendar events for employee ${employeeId} on ${startDate} - ${endDate}:`, {
       calendarId,
       timeMin: tzStartDate.toISOString(),
       timeMax: tzEndDate.toISOString(),
@@ -700,6 +701,89 @@ export const getGoogleCalendarEvents = async (
       });
 
     console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId}`);
+    return events;
+  } catch (error: any) {
+    console.error(`Error fetching Google Calendar events for employee ${employeeId}:`, error.message);
+    return null;
+  }
+};
+
+export const getGoogleCalendarEventsForSpecificDates = async (
+  dbPool: Pool,
+  employeeId: number,
+  dates: Date_ISO_Type[],
+): Promise<{ start: string; end: string; summary: string }[] | null> => {
+  try {
+    const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
+
+    if (!calendarData) {
+      console.log(`No Google Calendar integration found for employee ID: ${employeeId}`);
+      return null;
+    }
+
+    const { calendarClient, calendarId } = calendarData;
+
+    // Если дат нет, возвращаем пустой массив
+    if (dates.length === 0) {
+      return [];
+    }
+
+    // Сортируем даты для определения минимального и максимального диапазона
+    const sortedDates = dates.sort();
+    const minDate = sortedDates[0];
+    const maxDate = sortedDates[sortedDates.length - 1];
+
+    const startDateUtc = dayjs.utc(minDate).startOf('day');
+    const endDateUtc = dayjs.utc(maxDate).endOf('day');
+
+    console.log(`Fetching Google Calendar events for employee ${employeeId} for specific dates:`, {
+      calendarId,
+      requestedDates: dates,
+      timeMin: startDateUtc.toISOString(),
+      timeMax: endDateUtc.toISOString(),
+    });
+
+    const response = await calendarClient.events.list({
+      calendarId,
+      timeMin: startDateUtc.toISOString(),
+      timeMax: endDateUtc.toISOString(),
+      singleEvents: true,
+      orderBy: `startTime`,
+      timeZone: `UTC`,
+    });
+
+    if (!response.data.items || response.data.items.length === 0) {
+      console.log(`No events found for employee ${employeeId} in the specified period`);
+      return [];
+    }
+
+    // Фильтруем события только для запрошенных дат
+    const events = (response.data.items as GoogleCalendarEvent[])
+      .filter((event: GoogleCalendarEvent) => {
+        if (!event.start?.dateTime || !event.end?.dateTime) return false;
+
+        const eventDate = dayjs.utc(event.start.dateTime).format(`YYYY-MM-DD`);
+        return dates.includes(eventDate as Date_ISO_Type  );
+      })
+      .map((event: GoogleCalendarEvent) => {
+        const startDateTime = event.start!.dateTime as string;
+        const endDateTime = event.end!.dateTime as string;
+
+        console.log(`Processing Google Calendar event for requested date:`, {
+          summary: event.summary,
+          originalStart: startDateTime,
+          originalEnd: endDateTime,
+          eventDate: dayjs.utc(startDateTime).format('YYYY-MM-DD'),
+        });
+
+        return {
+          start: startDateTime,
+          end: endDateTime,
+          summary: event.summary || `Busy`
+        };
+      });
+
+    console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId} on requested dates: ${dates.join(', ')}`);
     return events;
   } catch (error: any) {
     console.error(`Error fetching Google Calendar events for employee ${employeeId}:`, error.message);

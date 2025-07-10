@@ -1,10 +1,18 @@
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
-import { EmployeeAvailabilityDataType, GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
+import { GroupedAvailabilityDayType, EmployeeAvailabilityDataType } from '@/@types/employeesTypes.js';
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
+
+// Интерфейс для нормализованных данных встреч
+interface NormalizedAppointmentData {
+  date: string;
+  timeStart: string;
+  timeEnd: string;
+  employeeId: number;
+}
 
 interface TimeSlot {
   startTime: string;
@@ -219,19 +227,42 @@ function getPeriodWithDaysAndEmployeeAvailability(
   return period;
 }
 
-function combinePeriodWithSavedAppointments(
+// Функции нормализации данных
+function normalizeSavedAppointments(savedAppointments: AppointmentDataType[]): NormalizedAppointmentData[] {
+  return savedAppointments.map(appointment => ({
+    date: appointment.date,
+    timeStart: appointment.timeStart,
+    timeEnd: appointment.timeEnd,
+    employeeId: appointment.employee.id
+  }));
+}
+
+function normalizeGoogleCalendarEvents(
+  googleEvents: { start: string; end: string; summary: string }[],
+  employeeId: number
+): NormalizedAppointmentData[] {
+  return googleEvents.map(event => ({
+    date: dayjs(event.start).format(DATE_FORMAT),
+    timeStart: event.start,
+    timeEnd: event.end,
+    employeeId: employeeId,
+  }));
+}
+
+// Обновленная функция combinePeriodWithSavedAppointments для работы с нормализованными данными
+function combinePeriodWithNormalizedAppointments(
   period: PeriodWithEmployeeWorkingTimeType[],
-  savedAppointments: AppointmentDataType[],
+  normalizedAppointments: NormalizedAppointmentData[],
   serviceDuration: Time_HH_MM_SS_Type,
 ): PeriodWithClearedDaysType[] {
   return period.map(dayData => {
-    const dayAppointments = savedAppointments.filter(appointment =>
+    const dayAppointments = normalizedAppointments.filter(appointment =>
       dayjs(appointment.date).format(DATE_FORMAT) === dayData.day
     );
 
     const employeesWithBlockedTimes = dayData.employees.map(employee => {
       const employeeAppointments = dayAppointments.filter(appointment =>
-        appointment.employee?.id === employee.employeeId
+        appointment.employeeId === employee.employeeId
       );
 
       const blockedTimes: BlockedTime[] = employeeAppointments.map(appointment => {
@@ -384,18 +415,7 @@ function getDatesPeriod(
   };
 }
 
-function getAppointmentEndTimeHours(startTime: string, serviceDuration: string): string {
-  const parsedStartTime = dayjs.tz(startTime, TIME_FORMAT, 'Europe/Berlin');
-  const parsedServiceDuration = dayjs.tz(serviceDuration, TIME_FORMAT, 'Europe/Berlin');
-
-  const endTime = parsedStartTime
-    .add(parsedServiceDuration.hour(), `hour`)
-    .add(parsedServiceDuration.minute(), `minute`)
-    .add(parsedServiceDuration.second(), `second`);
-
-  return endTime.format(TIME_FORMAT);
-}
-
+// Восстанавливаем недостающие методы
 function getAppointmentEndTime(startTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs {
   const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
 
@@ -414,7 +434,7 @@ function disableTimeSlotsForServiceDuration(
       return slot;
     }
 
-    const appointmentEndTime = getAppointmentEndTimeHours(slot.startTime, serviceDuration);
+    const appointmentEndTime = getAppointmentEndTime(dayjs(slot.startTime, TIME_FORMAT), serviceDuration as Time_HH_MM_SS_Type);
 
     for (let i = slotIndex; i <= availableTimeSlots.length - 1; i++) {
       const timeSlot = availableTimeSlots[i];
@@ -427,7 +447,7 @@ function disableTimeSlotsForServiceDuration(
         };
       }
 
-      if (dayjs(timeSlot.endTime, TIME_FORMAT).isBefore(dayjs(appointmentEndTime, TIME_FORMAT))) {
+      if (dayjs(timeSlot.endTime, TIME_FORMAT).isBefore(appointmentEndTime)) {
         if (i + 1 === availableTimeSlots.length) {
           return {
             ...slot,
@@ -435,7 +455,7 @@ function disableTimeSlotsForServiceDuration(
             employeeId: [],
           };
         }
-      } else if (dayjs(timeSlot.endTime, TIME_FORMAT).isSame(dayjs(appointmentEndTime, TIME_FORMAT))) {
+      } else if (dayjs(timeSlot.endTime, TIME_FORMAT).isSame(appointmentEndTime)) {
         break;
       } else {
         break;
@@ -537,15 +557,17 @@ function replaceExistingDayWithNewEmployeeData({ existingDay, newDay }: ReplaceD
 
 export {
   getDatesPeriod,
+  getPeriodWithDaysAndEmployeeAvailability,
+  combinePeriodWithSavedAppointments,
+  combinePeriodWithNormalizedAppointments,
+  normalizeSavedAppointments,
+  normalizeGoogleCalendarEvents,
+  generateTimeSlotsFromAvailableTimes,
+  generateGroupedTimeSlots,
   getAppointmentEndTime,
   disableTimeSlotsForServiceDuration,
   addTimeSlotsAccordingEmployeeAvailability,
   replaceExistingDayWithNewEmployeeData,
-
   calculateAdjustedEndTime, // export for tests
   calculateAvailableTimes, // export for tests
-  getPeriodWithDaysAndEmployeeAvailability,
-  combinePeriodWithSavedAppointments,
-  generateTimeSlotsFromAvailableTimes,
-  generateGroupedTimeSlots,
 };
