@@ -103,10 +103,10 @@ interface TimeslotWithGroupedEmployeeId {
  * @returns adjusted time in HH:mm:ss format
  */
 const calculateAdjustedEndTime = (baseTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs => {
-  const result = dayjs(baseTime, TIME_FORMAT)
-    .subtract(dayjs(serviceDuration, TIME_FORMAT).hour(), 'hour')
-    .subtract(dayjs(serviceDuration, TIME_FORMAT).minute(), 'minute')
-    .subtract(dayjs(serviceDuration, TIME_FORMAT).second(), 'second')
+  const result = baseTime
+    .subtract(dayjs(serviceDuration, TIME_FORMAT).hour(), `hour`)
+    .subtract(dayjs(serviceDuration, TIME_FORMAT).minute(), `minute`)
+    .subtract(dayjs(serviceDuration, TIME_FORMAT).second(), `second`)
     .utc();
 
   return result;
@@ -123,7 +123,7 @@ const calculateAvailableTimes = (
   if (blockedTimes.length === 0) {
     const adjustedEndTime = calculateAdjustedEndTime(endWorkingTime, serviceDuration);
 
-    if (dayjs(adjustedEndTime, TIME_FORMAT).isAfter(dayjs(startWorkingTime, TIME_FORMAT))) {
+    if (adjustedEndTime.isAfter(startWorkingTime)) {
       return [{
         minPossibleStartTime: startWorkingTime,
         maxPossibleStartTime: adjustedEndTime
