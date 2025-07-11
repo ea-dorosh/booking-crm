@@ -477,6 +477,11 @@ export const createGoogleCalendarEvent = async (
     timeEnd: dayjs.Dayjs;
   }
 ): Promise<string | null> => {
+  console.log(`createGoogleCalendarEvent input:`, {
+    employeeId,
+    appointment
+  });
+
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
 
   if (!calendarData) {

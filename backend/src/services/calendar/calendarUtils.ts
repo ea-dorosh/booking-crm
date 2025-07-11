@@ -158,6 +158,18 @@ const calculateAvailableTimes = (
   return availableTimes;
 }
 
+const getAppointmentEndTime = (startTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs => {
+  const endTime = startTime
+    .add(dayjs(serviceDuration, TIME_FORMAT).hour(), `hour`)
+    .add(dayjs(serviceDuration, TIME_FORMAT).minute(), `minute`)
+    .add(dayjs(serviceDuration, TIME_FORMAT).second(), `second`)
+    .utc();
+
+  console.log(`getAppointmentEndTime endTime:`, {endTime});
+
+  return endTime;
+}
+
 // MAIN FUNCTIONS
 function getPeriodWithDaysAndEmployeeAvailability(
   initialParamDate: Date_ISO_Type,
@@ -369,6 +381,7 @@ export {
   combinePeriodWithNormalizedAppointments,
   generateGroupedTimeSlots,
   generateTimeSlotsFromAvailableTimes,
+  getAppointmentEndTime,
   getPeriodWithDaysAndEmployeeAvailability,
   normalizeGoogleCalendarEvents,
   normalizeSavedAppointments,
