@@ -18,7 +18,7 @@ import {
   getEmployee,
 } from '@/services/employees/employeesService.js';
 import { getCompany } from '@/services/company/companyService.js';
-import { getAppointmentEndTime } from '@/routes/calendar/calendarUtils.js';
+import { calculateAdjustedEndTime } from '@/routes/calendar/calendarUtils.js';
 import { CustomerNewStatusEnum } from '@/enums/enums.js';
 import {
   CustomRequestType,
@@ -123,9 +123,7 @@ router.post(`/create`, async (request: CustomRequestType, response: CustomRespon
   }
 
   const timeStartUTC = dayjs.tz(`${appointmentFormData.date} ${appointmentFormData.time}`, `Europe/Berlin`).utc();
-
-  // TODO: getAppointmentEndTime move to time utils
-  const timeEndUTC = getAppointmentEndTime(timeStartUTC, serviceDurationAndBufferTimeInMinutes);
+  const timeEndUTC = calculateAdjustedEndTime(timeStartUTC, serviceDurationAndBufferTimeInMinutes);
 
   console.log(`Appointment times calculated:`, {
     timeStartDAYJS: timeStartUTC,

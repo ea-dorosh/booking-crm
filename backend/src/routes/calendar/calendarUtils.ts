@@ -1,24 +1,16 @@
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
-import { GroupedAvailabilityDayType, EmployeeAvailabilityDataType } from '@/@types/employeesTypes.js';
+import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
 
-// Интерфейс для нормализованных данных встреч
 interface NormalizedAppointmentData {
   date: string;
   timeStart: string;
   timeEnd: string;
   employeeId: number;
-}
-
-interface TimeSlot {
-  startTime: string;
-  endTime: string;
-  disabled: boolean;
-  employeeId: number[];
 }
 
 interface BlockedTime {
@@ -29,13 +21,6 @@ interface BlockedTime {
 interface AvailableTime {
   minPossibleStartTime: dayjs.Dayjs;
   maxPossibleStartTime: dayjs.Dayjs;
-}
-
-interface DayData {
-  day: string;
-  startTime: string;
-  endTime: string;
-  availableTimeslots: TimeSlot[];
 }
 
 export interface GetDatesPeriodResultType {
@@ -227,7 +212,6 @@ function getPeriodWithDaysAndEmployeeAvailability(
   return period;
 }
 
-// Функции нормализации данных
 function normalizeSavedAppointments(savedAppointments: AppointmentDataType[]): NormalizedAppointmentData[] {
   return savedAppointments.map(appointment => ({
     date: appointment.date,
@@ -249,7 +233,6 @@ function normalizeGoogleCalendarEvents(
   }));
 }
 
-// Обновленная функция combinePeriodWithSavedAppointments для работы с нормализованными данными
 function combinePeriodWithNormalizedAppointments(
   period: PeriodWithEmployeeWorkingTimeType[],
   normalizedAppointments: NormalizedAppointmentData[],
@@ -380,194 +363,13 @@ function generateGroupedTimeSlots(
   });
 }
 
-
-// OLD
-function getDatesPeriod(
-  date: Date_ISO_Type,
-  today: dayjs.Dayjs,
-  employeeAvailability: EmployeeAvailabilityDataType[]
-): GetDatesPeriodResultType {
-  const dateObj = dayjs(date, { format: DATE_FORMAT });
-
-  const firstDayInPeriod = dateObj.startOf(`week`);
-  const lastDayInPeriod = dateObj.endOf(`week`);
-
-  const datesInRange: Date_ISO_Type[] = [];
-  let indexDay = firstDayInPeriod;
-
-  while (indexDay.isBefore(lastDayInPeriod) || indexDay.isSame(lastDayInPeriod, `day`)) {
-
-    // starting from tomorrow and if this days included in the employee availability
-    if (
-      indexDay.isAfter(today) &&
-      employeeAvailability.some(availability => availability.dayId === indexDay.day())
-    ) {
-      datesInRange.push(indexDay.format(DATE_FORMAT) as Date_ISO_Type);
-    }
-
-    indexDay = indexDay.add(1, `day`);
-  }
-
-  return {
-    datesInDesiredPeriod: datesInRange,
-    firstDayInPeriod,
-    lastDayInPeriod,
-  };
-}
-
-// Восстанавливаем недостающие методы
-function getAppointmentEndTime(startTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs {
-  const parsedServiceDuration = dayjs(serviceDuration, TIME_FORMAT);
-
-  return startTime
-    .add(parsedServiceDuration.hour(), `hour`)
-    .add(parsedServiceDuration.minute(), `minute`)
-    .add(parsedServiceDuration.second(), `second`);
-}
-
-function disableTimeSlotsForServiceDuration(
-  availableTimeSlots: TimeSlot[],
-  serviceDuration: string
-): TimeSlot[] {
-  const modifiedTimeSlots = availableTimeSlots.map((slot, slotIndex) => {
-    if (slot.disabled) {
-      return slot;
-    }
-
-    const appointmentEndTime = getAppointmentEndTime(dayjs(slot.startTime, TIME_FORMAT), serviceDuration as Time_HH_MM_SS_Type);
-
-    for (let i = slotIndex; i <= availableTimeSlots.length - 1; i++) {
-      const timeSlot = availableTimeSlots[i];
-
-      if (timeSlot.disabled) {
-        return {
-          ...slot,
-          disabled: true,
-          employeeId: [],
-        };
-      }
-
-      if (dayjs(timeSlot.endTime, TIME_FORMAT).isBefore(appointmentEndTime)) {
-        if (i + 1 === availableTimeSlots.length) {
-          return {
-            ...slot,
-            disabled: true,
-            employeeId: [],
-          };
-        }
-      } else if (dayjs(timeSlot.endTime, TIME_FORMAT).isSame(appointmentEndTime)) {
-        break;
-      } else {
-        break;
-      }
-    }
-
-    return slot;
-  });
-
-  return modifiedTimeSlots;
-}
-
-interface AddTimeSlotsParams {
-  startTime: string;
-  endTime: string;
-  blockedTimes: BlockedTime[];
-  employeeId: number;
-}
-
-function addTimeSlotsAccordingEmployeeAvailability({
-  startTime,
-  endTime,
-  blockedTimes,
-  employeeId,
-}: AddTimeSlotsParams): TimeSlot[] {
-  const parsedStartTime = dayjs(startTime, TIME_FORMAT);
-  const parsedEndTime = dayjs(endTime, TIME_FORMAT);
-
-  const slots: TimeSlot[] = [];
-  let currentTime = parsedStartTime;
-
-  while (currentTime.isBefore(parsedEndTime)) {
-    const nextTime = currentTime.add(30, 'minute');
-    let disabled = false;
-
-    for (const block of blockedTimes) {
-      const blockStart = dayjs(block.startBlockedTime, TIME_FORMAT);
-      const blockEnd = dayjs(block.endBlockedTime, TIME_FORMAT);
-
-      if (
-        (currentTime.isBefore(blockEnd) && nextTime.isAfter(blockStart)) ||
-        (currentTime.isSame(blockStart) && nextTime.isSame(blockEnd))
-      ) {
-        disabled = true;
-        break;
-      }
-    }
-
-    const employeeIds = disabled ? [] : [employeeId];
-
-    slots.push({
-      startTime: currentTime.format(TIME_FORMAT),
-      endTime: nextTime.format(TIME_FORMAT),
-      disabled,
-      employeeId: employeeIds,
-    });
-    currentTime = nextTime;
-  }
-
-  return slots;
-}
-
-interface ReplaceDayParams {
-  existingDay: DayData;
-  newDay: DayData;
-}
-
-function replaceExistingDayWithNewEmployeeData({ existingDay, newDay }: ReplaceDayParams): DayData {
-  const mergedTimeslots: Record<string, TimeSlot> = {};
-
-  [...existingDay.availableTimeslots, ...newDay.availableTimeslots].forEach(timeslot => {
-    const key = `${timeslot.startTime}-${timeslot.endTime}`;
-    if (!mergedTimeslots[key]) {
-      mergedTimeslots[key] = { ...timeslot };
-    } else {
-      mergedTimeslots[key].employeeId.push(
-        ...timeslot.employeeId.filter(id => !mergedTimeslots[key].employeeId.includes(id))
-      );
-      if (timeslot.disabled && mergedTimeslots[key].disabled) {
-        mergedTimeslots[key].disabled = true;
-      } else {
-        mergedTimeslots[key].disabled = false;
-      }
-    }
-  });
-
-  const availableTimeslots = Object.values(mergedTimeslots);
-
-  // Сортируем по startTime
-  availableTimeslots.sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-  return {
-    day: existingDay.day,
-    startTime: existingDay.startTime,
-    endTime: existingDay.endTime,
-    availableTimeslots
-  };
-}
-
 export {
-  getDatesPeriod,
-  getPeriodWithDaysAndEmployeeAvailability,
-  combinePeriodWithSavedAppointments,
-  combinePeriodWithNormalizedAppointments,
-  normalizeSavedAppointments,
-  normalizeGoogleCalendarEvents,
-  generateTimeSlotsFromAvailableTimes,
-  generateGroupedTimeSlots,
-  getAppointmentEndTime,
-  disableTimeSlotsForServiceDuration,
-  addTimeSlotsAccordingEmployeeAvailability,
-  replaceExistingDayWithNewEmployeeData,
-  calculateAdjustedEndTime, // export for tests
+  calculateAdjustedEndTime,
   calculateAvailableTimes, // export for tests
+  combinePeriodWithNormalizedAppointments,
+  generateGroupedTimeSlots,
+  generateTimeSlotsFromAvailableTimes,
+  getPeriodWithDaysAndEmployeeAvailability,
+  normalizeGoogleCalendarEvents,
+  normalizeSavedAppointments,
 };
