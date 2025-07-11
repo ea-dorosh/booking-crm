@@ -18,7 +18,7 @@ import {
   getEmployee,
 } from '@/services/employees/employeesService.js';
 import { getCompany } from '@/services/company/companyService.js';
-import { calculateAdjustedEndTime } from '@/routes/calendar/calendarUtils.js';
+import { calculateAdjustedEndTime } from '@/services/calendar/calendarUtils.js';
 import { CustomerNewStatusEnum } from '@/enums/enums.js';
 import {
   CustomRequestType,
