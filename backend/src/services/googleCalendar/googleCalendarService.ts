@@ -385,27 +385,30 @@ export const getEmployeeCalendarClient = async (
 export const checkGoogleCalendarAvailability = async (
   dbPool: Pool,
   employeeId: number,
-  startTime: string, // in UTC
-  endTime: string // in UTC
+  startTime: dayjs.Dayjs,
+  endTime: dayjs.Dayjs,
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
-
+  console.log(`checkGoogleCalendarAvailability`);
   if (!calendarData) {
     return true;
   }
 
   const { calendarClient, calendarId } = calendarData;
 
-  const isoStartTime = dayjs.utc(startTime).toISOString();
-  const isoEndTime = dayjs.utc(endTime).toISOString();
-
-  const startOfDay = dayjs.utc(startTime).startOf(`day`).toISOString();
-  const endOfDay = dayjs.utc(startTime).endOf(`day`).toISOString();
+  const startOfDay = startTime.startOf(`day`).toISOString();
+  const endOfDay = startTime.endOf(`day`).toISOString();
 
   console.log(`Checking Google Calendar availability for:`, {
     calendarId,
-    requestedSlot: { startTime: isoStartTime, endTime: isoEndTime },
-    expandedSearch: { dayStart: startOfDay, dayEnd: endOfDay }
+    requestedSlot: {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    },
+    expandedSearch: {
+      dayStart: startOfDay,
+      dayEnd: endOfDay,
+    }
   });
 
   try {
@@ -418,6 +421,8 @@ export const checkGoogleCalendarAvailability = async (
 
     const requestStart = dayjs.utc(startTime);
     const requestEnd = dayjs.utc(endTime);
+    console.log(`requestStart:`, requestStart.toISOString());
+    console.log(`requestEnd:`, requestEnd.toISOString());
 
     let hasConflict = false;
 
@@ -427,8 +432,8 @@ export const checkGoogleCalendarAvailability = async (
       for (const event of response.data.items as GoogleCalendarEvent[]) {
         if (!event.start?.dateTime || !event.end?.dateTime) continue;
 
-        const eventStart = dayjs(event.start.dateTime);
-        const eventEnd = dayjs(event.end.dateTime);
+        const eventStart = dayjs.utc(event.start.dateTime);
+        const eventEnd = dayjs.utc(event.end.dateTime);
 
         console.log(`Checking event:`, {
           summary: event.summary,
@@ -479,7 +484,7 @@ export const createGoogleCalendarEvent = async (
 ): Promise<string | null> => {
   console.log(`createGoogleCalendarEvent input:`, {
     employeeId,
-    appointment
+    appointment,
   });
 
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
@@ -543,9 +548,8 @@ export const updateGoogleCalendarEvent = async (
     customerId: number;
     customerName: string;
     serviceName: string;
-    date: string;
-    timeStart: string;
-    timeEnd: string;
+    timeStart: dayjs.Dayjs;
+    timeEnd: dayjs.Dayjs;
   }
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
@@ -556,8 +560,8 @@ export const updateGoogleCalendarEvent = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const startDateTime = dayjs.tz(appointment.timeStart, 'Europe/Berlin').toISOString();
-  const endDateTime = dayjs.tz(appointment.timeEnd, 'Europe/Berlin').toISOString();
+  const startDateTime = appointment.timeStart.toISOString();
+  const endDateTime = appointment.timeEnd.toISOString();
 
   console.log(`Updating Google Calendar event:`, {
     calendarId,
@@ -572,11 +576,11 @@ export const updateGoogleCalendarEvent = async (
     description: `Appointment #${appointment.id} with Customer #${appointment.customerId}`,
     start: {
       dateTime: startDateTime,
-      timeZone: `Europe/Berlin`,
+      timeZone: `UTC`,
     },
     end: {
       dateTime: endDateTime,
-      timeZone: `Europe/Berlin`,
+      timeZone: `UTC`,
     },
   };
 
@@ -659,12 +663,10 @@ export const getGoogleCalendarEventsForSpecificDates = async (
 
     const { calendarClient, calendarId } = calendarData;
 
-    // Если дат нет, возвращаем пустой массив
     if (dates.length === 0) {
       return [];
     }
 
-    // Сортируем даты для определения минимального и максимального диапазона
     const sortedDates = dates.sort();
     const minDate = sortedDates[0];
     const maxDate = sortedDates[sortedDates.length - 1];
@@ -693,7 +695,6 @@ export const getGoogleCalendarEventsForSpecificDates = async (
       return [];
     }
 
-    // Фильтруем события только для запрошенных дат
     const events = (response.data.items as GoogleCalendarEvent[])
       .filter((event: GoogleCalendarEvent) => {
         if (!event.start?.dateTime || !event.end?.dateTime) return false;
@@ -709,7 +710,6 @@ export const getGoogleCalendarEventsForSpecificDates = async (
           summary: event.summary,
           originalStart: startDateTime,
           originalEnd: endDateTime,
-          eventDate: dayjs.utc(startDateTime).format('YYYY-MM-DD'),
         });
 
         return {

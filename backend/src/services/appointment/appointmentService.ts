@@ -1,17 +1,53 @@
-import { Pool } from 'mysql2/promise';
+import {
+  Pool,
+  ResultSetHeader,
+} from 'mysql2/promise';
 import {
   AppointmentRowType,
   AppointmentDataType,
   AppointmentDetailsRowType,
   AppointmentDetailType,
+  AppointmentFormDataType,
+  CreateAppointmentServiceResponseErrorType,
+  CreateAppointmentServiceResponseSuccessType,
  } from '@/@types/appointmentsTypes.js';
  import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
 } from '@/enums/enums.js';
-import { Date_ISO_Type } from '@/@types/utilTypes.js';
+import {
+  Date_ISO_Type,
+  Time_HH_MM_SS_Type,
+} from '@/@types/utilTypes.js';
+import { getCompany } from '@/services/company/companyService.js';
 import { getEmployee } from '@/services/employees/employeesService.js';
-import { fromMySQLToISOString } from '@/utils/timeUtils.js';
+import {
+  fromMySQLToISOString,
+  getServiceDuration,
+  fromDayjsToMySQLDateTime,
+ } from '@/utils/timeUtils.js';
+import {
+  createGoogleCalendarEvent,
+  deleteGoogleCalendarEvent,
+} from '@/services/googleCalendar/googleCalendarService.js';
+import {
+  validateAppointmentDetailsData,
+} from '@/validators/appointmentValidators.js';
+import { getService } from '@/services/service/serviceService.js';
+import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
+import {
+  checkCustomerExists,
+  createCustomer,
+ } from '@/services/customer/customerService.js';
+ import { validateCustomerData } from '@/validators/customersValidators.js';
+ import { dayjs } from '@/services/dayjs/dayjsService.js';
+ import { getAppointmentEndTime } from '../calendar/calendarUtils';
+ import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService';
+ import {
+  formatName,
+  formatPhone,
+} from '@/utils/formatters.js';
+import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
 
 async function getAppointments(
   dbPool: Pool,
@@ -26,9 +62,7 @@ async function getAppointments(
       AND (status = COALESCE(?, status))
   `;
 
-  const [appointmentsResults] = await await dbPool.query<AppointmentRowType[]>(sql, [startDate, status]);
-
-  console.log(`appointmentsResults[0]: `, appointmentsResults[0]);
+  const [appointmentsResults] = await dbPool.query<AppointmentRowType[]>(sql, [startDate, status]);
 
   const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
     return {
@@ -149,8 +183,250 @@ async function getAppointmentsForCalendar(
   return appointmentsData;
 }
 
+async function cancelAppointment(dbPool: Pool, appointment: AppointmentDetailType): Promise<void> {
+  const sql = `
+    UPDATE SavedAppointments
+    SET status = ?
+    WHERE id = ?
+  `;
+
+  await dbPool.query(sql, [AppointmentStatusEnum.Canceled, appointment.id]);
+
+  if (appointment.googleCalendarEventId) {
+    try {
+      await deleteGoogleCalendarEvent(dbPool, appointment.employee.id, appointment.googleCalendarEventId);
+    } catch (error) {
+      console.error(`Error deleting Google Calendar event:`, error);
+      throw error;
+    }
+  }
+}
+
+const ERROR_MESSAGE = {
+  VALIDATION_FAILED: `Validation failed`,
+  GENERAL_ERROR_MESSAGE: `Beim Erstellen des Datensatzes ist ein Fehler aufgetreten, bitte versuchen Sie es erneut oder versuchen Sie es später noch einmal.`,
+  EMPLOYEE_IS_ALREADY_BUSY: `Leider hat sich schon jemand die Zeit genommen. Versuchen Sie, eine andere Zeit oder einen anderen Tag zu wählen und versuchen Sie es erneut`,
+};
+
+async function createAppointment(dbPool: Pool, appointment: AppointmentFormDataType): Promise<
+CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSuccessType
+> {
+  const invalidAppointmentDetailsData = validateAppointmentDetailsData(appointment);
+
+  if (Object.keys(invalidAppointmentDetailsData).length > 0) {
+    return {
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
+      errors: invalidAppointmentDetailsData,
+    };
+  }
+
+  const invalidAppointmentCustomerData = validateCustomerData({
+    formData: appointment,
+    publicErrors: true,
+  });
+
+  if (Object.keys(invalidAppointmentCustomerData).length > 0) {
+    return {
+      errorMessage: ERROR_MESSAGE.VALIDATION_FAILED,
+      validationErrors: invalidAppointmentCustomerData,
+    };
+  }
+
+  let serviceDurationAndBufferTimeInMinutes: Time_HH_MM_SS_Type = `00:00:00`;
+  let serviceName: string = ``;
+
+  try {
+    const serviceDetails: ServiceDetailsDataType = await getService(dbPool, appointment.serviceId);
+
+    /** save serviceName for response */
+    serviceName = serviceDetails.name;
+
+    serviceDurationAndBufferTimeInMinutes = getServiceDuration(
+      serviceDetails.durationTime,
+      serviceDetails.bufferTime
+    );
+  } catch (error) {
+    return {
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
+      error: (error as Error).message,
+    };
+  }
+
+  /** check customer already exists and create if not */
+  let isCustomerNew = CustomerNewStatusEnum.New;
+  let customerId;
+
+  try {
+    const checkCustomerResult = await checkCustomerExists(dbPool, {
+      email: appointment.email,
+      customerId: null,
+    });
+
+    if (checkCustomerResult.exists) {
+      isCustomerNew = CustomerNewStatusEnum.Existing;
+      customerId = checkCustomerResult.customerId;
+    } else {
+      const { newCustomerId } = await createCustomer(dbPool, appointment);
+
+      customerId = newCustomerId;
+    }
+  } catch (error) {
+    return {
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
+      error: (error as Error).message,
+    };
+  }
+
+  const timeStartUTC = dayjs.tz(`${appointment.date} ${appointment.time}`, `Europe/Berlin`).utc();
+  const timeEndUTC = getAppointmentEndTime(
+    timeStartUTC,
+    serviceDurationAndBufferTimeInMinutes
+  );
+
+  console.log(`Appointment times calculated:`, {
+    timeStartDAYJS: timeStartUTC,
+    timeEndDAYJS: timeEndUTC,
+    serviceDuration: serviceDurationAndBufferTimeInMinutes,
+  });
+
+  try {
+    const { isEmployeeAvailable } = await checkEmployeeTimeNotOverlap(
+      dbPool,
+      {
+        date: appointment.date,
+        employeeId: appointment.employeeId,
+        timeStart: timeStartUTC,
+        timeEnd: timeEndUTC,
+      },
+    );
+
+    if (!isEmployeeAvailable) {
+      return {
+        errorMessage: ERROR_MESSAGE.EMPLOYEE_IS_ALREADY_BUSY,
+      };
+    }
+  } catch (error) {
+    return {
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
+      error: (error as Error).message,
+    };
+  }
+
+  const appointmentQuery = `
+    INSERT INTO SavedAppointments (
+      date,
+      time_start,
+      time_end,
+      service_id,
+      service_name,
+      customer_id,
+      service_duration,
+      employee_id,
+      created_date,
+      customer_salutation,
+      customer_first_name,
+      customer_last_name,
+      customer_email,
+      customer_phone,
+      is_customer_new,
+      google_calendar_event_id
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const appointmentValues = [
+    appointment.date,
+    fromDayjsToMySQLDateTime(timeStartUTC),
+    fromDayjsToMySQLDateTime(timeEndUTC),
+    appointment.serviceId,
+    serviceName,
+    customerId,
+    serviceDurationAndBufferTimeInMinutes,
+    appointment.employeeId,
+    fromDayjsToMySQLDateTime(dayjs().utc()),
+    appointment.salutation,
+    formatName(appointment.firstName),
+    formatName(appointment.lastName),
+    appointment.email,
+    formatPhone(appointment.phone),
+    isCustomerNew,
+    null, // placeholder for google_calendar_event_id
+  ];
+
+  const [appointmentResults] = await dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);
+
+  const appointmentId = appointmentResults.insertId;
+
+  try {
+    const googleEventId = await createGoogleCalendarEvent(
+      dbPool,
+      appointment.employeeId,
+      {
+        id: appointmentId,
+        customerId: Number(customerId),
+        customerName: `${formatName(appointment.firstName)} ${formatName(appointment.lastName)}`,
+        serviceName: serviceName,
+        timeStart: timeStartUTC,
+        timeEnd: timeEndUTC,
+      }
+    );
+
+    if (googleEventId) {
+      const updateGoogleEventQuery = `
+        UPDATE SavedAppointments
+        SET google_calendar_event_id = ?
+        WHERE id = ?
+      `;
+      await dbPool.query(updateGoogleEventQuery, [googleEventId, appointmentId]);
+    }
+  } catch (error) {
+    console.error(`Failed to create Google Calendar event:`, error);
+  }
+
+  try {
+    const employee = await getEmployee(dbPool, appointment.employeeId);
+    const company = await getCompany(dbPool);
+
+    const emailResult = await sendAppointmentConfirmationEmail(
+      appointment.email,
+      {
+        date:  dayjs.tz(`${appointment.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
+        time: dayjs.tz(timeStartUTC, 'Europe/Berlin').format('HH:mm'),
+        service: serviceName,
+        specialist: `${employee.firstName} ${employee.lastName}`,
+        location: `Harburger Str. 10, 22765 Hamburg`,
+        lastName: formatName(appointment.lastName),
+        firstName: formatName(appointment.firstName),
+        phone: formatPhone(appointment.phone),
+        email: appointment.email,
+      },
+      company,
+    );
+    console.log(`Confirmation email sent to ${appointment.email}`);
+
+    if (emailResult?.previewUrl) {
+      console.log(`Email preview available at: ${emailResult.previewUrl}`);
+    }
+  } catch (error) {
+    console.error(`Failed to send confirmation email for appointment ${appointmentId}: `, error);
+  }
+
+  return {
+    id: appointmentId,
+    date: appointment.date,
+    timeStart: appointment.time,
+    serviceName: serviceName,
+    salutation: appointment.salutation,
+    lastName: formatName(appointment.lastName),
+    firstName: formatName(appointment.firstName)
+  };
+}
+
+
 export {
   getAppointments,
   getAppointment,
   getAppointmentsForCalendar,
+  cancelAppointment,
+  createAppointment,
 };

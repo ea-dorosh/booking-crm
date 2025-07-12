@@ -7,6 +7,7 @@ import {
   Date_ISO_Type,
   Time_HH_MM_SS_Type,
 } from '@/@types/utilTypes.js';
+import { CustomerFormDataValidationErrors } from '@/@types/customersTypes.js';
 
 export interface AppointmentRowType extends RowDataPacket {
   id: number;
@@ -97,13 +98,6 @@ export interface AppointmentFormDataType {
   time: Time_HH_MM_SS_Type;
 }
 
-export interface AppointmentFormDataValidationErrorsType {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  salutation?: string;
-}
 export interface AppointmentFormDataErrorsType {
   date?: string;
   employeeId?: string;
@@ -133,4 +127,21 @@ export interface SavedAppointmentItemDataType {
     lastName: string,
   },
   status: string;
+}
+
+export interface CreateAppointmentServiceResponseErrorType {
+  errorMessage: string;
+  errors?: AppointmentFormDataErrorsType;
+  error?: string;
+  validationErrors?: CustomerFormDataValidationErrors;
+}
+
+export interface CreateAppointmentServiceResponseSuccessType {
+  id: number;
+  date: string;
+  timeStart: string;
+  serviceName: string;
+  salutation: number;
+  lastName: string;
+  firstName: string;
 }

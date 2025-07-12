@@ -2,12 +2,16 @@ import { validateIsoDate } from '@/utils/validators.js';
 import { InvoiceUpdatedData, InvoiceFormDataValidationErrors } from '@/@types/invoicesTypes.js';
 import { validateCustomerData } from '@/validators/customersValidators.js';
 import { parseNumberWithComma } from '@/utils/formatters.js';
+import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
 const validateInvoiceFormData = (formData: InvoiceUpdatedData): InvoiceFormDataValidationErrors => {
   let errors: InvoiceFormDataValidationErrors = {};
 
   if (!formData.customerId && formData.isNewCustomer) {
-    const customerErrors = validateCustomerData(formData);
+    const customerErrors = validateCustomerData({
+      formData,
+      publicErrors: false,
+    });
 
     if (Object.keys(customerErrors).length) {
       if (customerErrors.email) {
@@ -36,7 +40,7 @@ const validateInvoiceFormData = (formData: InvoiceUpdatedData): InvoiceFormDataV
 
   if (!formData.dateIssued.length) {
     errors.dateIssued = `Date issued is required`;
-  } else if (!validateIsoDate(formData.dateIssued)) {
+  } else if (!validateIsoDate(formData.dateIssued as Date_ISO_Type)) {
     errors.dateIssued = `Invalid date format`;
   }
 

@@ -123,7 +123,10 @@ async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<
 }
 
 async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponseData): Promise<CreateCustomerResult> {
-  const errors = validateCustomerData(customerData);
+  const errors = validateCustomerData({
+    formData: customerData,
+    publicErrors: false,
+  });
 
   if (Object.keys(errors).length > 0) {
     return {
@@ -172,7 +175,10 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponse
 }
 
 async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResponseData, customerId: number): Promise<UpdateCustomerResult> {
-  const errors = validateCustomerData(customerData);
+  const errors = validateCustomerData({
+    formData: customerData,
+    publicErrors: false,
+  });
 
   if (Object.keys(errors).length > 0) {
     return {

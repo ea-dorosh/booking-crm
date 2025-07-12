@@ -122,13 +122,13 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, tim
     const isGoogleCalendarAvailable = await checkGoogleCalendarAvailability(
       dbPool,
       employeeId,
-      mysqlTimeStart,
-      mysqlTimeEnd,
+      timeStart,
+      timeEnd,
     );
     hasGoogleCalendarConflict = !isGoogleCalendarAvailable;
 
     if (hasGoogleCalendarConflict) {
-      console.log(`Google Calendar conflict detected for employee ${employeeId} at ${mysqlTimeStart}-${mysqlTimeEnd}`);
+      console.log(`Google Calendar conflict detected for employee ${employeeId} at ${timeEnd.toISOString()}-${timeEnd.toISOString()}`);
     }
   } catch (error) {
     console.error(`Error checking Google Calendar availability for employee ${employeeId}:`, error);

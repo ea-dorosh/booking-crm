@@ -1,17 +1,16 @@
 import express from 'express';
-import {
-  AppointmentStatusEnum,
-  CustomerNewStatusEnum,
-} from '@/enums/enums.js';
+import { AppointmentStatusEnum } from '@/enums/enums.js';
 import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes';
-import { deleteGoogleCalendarEvent } from '@/services/googleCalendar/googleCalendarService.js';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { getAppointments, getAppointment } from '@/services/appointment/appointmentService.js';
+import {
+  getAppointments,
+  getAppointment,
+  cancelAppointment,
+ } from '@/services/appointment/appointmentService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
+
 
 const router = express.Router();
 
@@ -70,17 +69,6 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
 
   const appointmentId = Number(request.params?.id);
 
-  const getAppointmentQuery = `
-    SELECT employee_id, google_calendar_event_id
-    FROM SavedAppointments
-    WHERE id = ?
-  `;
-
-  interface AppointmentRow extends RowDataPacket {
-    employee_id: number;
-    google_calendar_event_id: string | null;
-  }
-
   try {
     const appointment = await getAppointment(request.dbPool, appointmentId);
 
@@ -89,20 +77,12 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
       return;
     }
 
-    const updateQuery = `
-      UPDATE SavedAppointments
-      SET status = ?
-      WHERE id = ?
-    `;
-
-    await request.dbPool.query(updateQuery, [AppointmentStatusEnum.Canceled, appointmentId]);
-
-    if (appointment.googleCalendarEventId) {
-      try {
-        await deleteGoogleCalendarEvent(request.dbPool, appointment.employee.id, appointment.googleCalendarEventId);
-      } catch (error) {
-        console.error(`Error deleting Google Calendar event:`, error);
-      }
+    try {
+      await cancelAppointment(request.dbPool, appointment);
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ error: `Error canceling appointment` });
+      return;
     }
 
     response.json({ message: `Appointment status updated successfully` });
@@ -112,6 +92,8 @@ router.put(`/:id/cancel`, async (request: CustomRequestType, response: CustomRes
   }
 });
 
+
+// TODO: add logic to FE to edit appointment and extract logic to service
 router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
     response.status(500).json({ message: `Database connection not initialized` });
@@ -187,7 +169,6 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
               customerId: appointment.customer.id,
               customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,
               serviceName: appointment.serviceName,
-              date: appointmentData.date,
               timeStart: appointmentData.timeStart,
               timeEnd: appointmentData.timeEnd
             }
@@ -202,98 +183,6 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
   } catch (error) {
     console.error(error);
     response.status(500).json({ error: `Error updating appointment` });
-  }
-});
-
-router.post(`/create`, async (request: CustomRequestType, response: CustomResponseType) => {
-  if (!request.dbPool) {
-    response.status(500).json({ message: `Database connection not initialized` });
-    return;
-  }
-
-  const appointmentData = request.body;
-
-  try {
-    const insertQuery = `
-      INSERT INTO SavedAppointments (
-        date,
-        time_start,
-        time_end,
-        service_id,
-        service_name,
-        customer_id,
-        service_duration,
-        employee_id,
-        created_date,
-        customer_salutation,
-        customer_first_name,
-        customer_last_name,
-        customer_email,
-        customer_phone,
-        is_customer_new,
-        google_calendar_event_id,
-        status
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const [insertResult] = await request.dbPool.query<ResultSetHeader>(insertQuery, [
-      appointmentData.date,
-      appointmentData.timeStart,
-      appointmentData.timeEnd,
-      appointmentData.serviceId,
-      appointmentData.serviceName,
-      appointmentData.customerId,
-      appointmentData.serviceDuration,
-      appointmentData.employeeId,
-      dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      appointmentData.customerSalutation,
-      appointmentData.customerFirstName,
-      appointmentData.customerLastName,
-      appointmentData.customerEmail,
-      appointmentData.customerPhone,
-      appointmentData.isCustomerNew || CustomerNewStatusEnum.Existing,
-      null, // google_calendar_event_id
-      appointmentData.status || AppointmentStatusEnum.Active
-    ]);
-
-    const appointmentId = insertResult.insertId;
-
-    try {
-      const { createGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
-
-      const googleEventId = await createGoogleCalendarEvent(
-        request.dbPool,
-        appointmentData.employeeId,
-        {
-          id: appointmentId,
-          customerId: appointmentData.customerId,
-          customerName: `${appointmentData.customerFirstName} ${appointmentData.customerLastName}`,
-          serviceName: appointmentData.serviceName,
-          timeStart: appointmentData.timeStart,
-          timeEnd: appointmentData.timeEnd
-        }
-      );
-
-      if (googleEventId) {
-        const updateGoogleEventQuery = `
-          UPDATE SavedAppointments
-          SET google_calendar_event_id = ?
-          WHERE id = ?
-        `;
-        await request.dbPool.query(updateGoogleEventQuery, [googleEventId, appointmentId]);
-      }
-    } catch (error) {
-      console.error('Failed to create Google Calendar event:', error);
-    }
-
-    response.json({
-      message: `Appointment created successfully`,
-      id: appointmentId
-    });
-  } catch (error) {
-    console.error(`Error creating appointment:`, error);
-    response.status(500).json({ error: `Error creating appointment` });
   }
 });
 
