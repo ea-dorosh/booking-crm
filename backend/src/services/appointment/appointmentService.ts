@@ -41,8 +41,8 @@ import {
  } from '@/services/customer/customerService.js';
  import { validateCustomerData } from '@/validators/customersValidators.js';
  import { dayjs } from '@/services/dayjs/dayjsService.js';
- import { getAppointmentEndTime } from '../calendar/calendarUtils';
- import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService';
+ import { getAppointmentEndTime } from '../calendar/calendarUtils.js';
+ import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
  import {
   formatName,
   formatPhone,
