@@ -154,7 +154,7 @@ jobs:
             fi
 
             cd backend
-            npm ci --omit=dev
+            npm ci
 
             echo "Checking email templates..."
             ls -la resources/templates/emails/

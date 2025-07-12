@@ -9,7 +9,7 @@ import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';
 import weekday from 'dayjs/plugin/weekday.js';
 import updateLocale from 'dayjs/plugin/updateLocale.js';
-import 'dayjs/locale/de';
+import 'dayjs/locale/de.js';
 
 dayjs.extend(advancedFormat);
 dayjs.extend(customParseFormat);
