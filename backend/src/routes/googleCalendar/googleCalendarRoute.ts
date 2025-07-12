@@ -15,6 +15,7 @@ import {
   proactivelyRefreshTokens
 } from '@/services/googleCalendar/googleCalendarService.js';
 import { RowDataPacket } from 'mysql2';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 const router = express.Router();
 
@@ -326,9 +327,8 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
             customerId: appointment.customer_id,
             customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
             serviceName: appointment.service_name,
-            date: appointment.date,
-            timeStart: appointment.time_start,
-            timeEnd: appointment.time_end
+            timeStart: dayjs.utc(appointment.time_start),
+            timeEnd: dayjs.utc(appointment.time_end)
           }
         );
 

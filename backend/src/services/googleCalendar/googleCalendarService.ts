@@ -1,6 +1,8 @@
 import { google } from 'googleapis';
 import { Pool, RowDataPacket } from 'mysql2/promise';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
+import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
 interface GoogleCalendarCredentials {
   employeeId: number;
@@ -383,42 +385,44 @@ export const getEmployeeCalendarClient = async (
 export const checkGoogleCalendarAvailability = async (
   dbPool: Pool,
   employeeId: number,
-  startTime: string,
-  endTime: string
+  startTime: dayjs.Dayjs,
+  endTime: dayjs.Dayjs,
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
-
+  console.log(`checkGoogleCalendarAvailability`);
   if (!calendarData) {
     return true;
   }
 
   const { calendarClient, calendarId } = calendarData;
 
-  const isoStartTime = dayjs.tz(startTime, 'Europe/Berlin').toISOString();
-  const isoEndTime = dayjs.tz(endTime, 'Europe/Berlin').toISOString();
-
-  const startOfDay = dayjs.tz(startTime, 'Europe/Berlin').startOf('day');
-  const endOfDay = dayjs.tz(startTime, 'Europe/Berlin').endOf('day');
-
-  const isoDayStart = startOfDay.toISOString();
-  const isoDayEnd = endOfDay.toISOString();
+  const startOfDay = startTime.startOf(`day`).toISOString();
+  const endOfDay = startTime.endOf(`day`).toISOString();
 
   console.log(`Checking Google Calendar availability for:`, {
     calendarId,
-    requestedSlot: { startTime: isoStartTime, endTime: isoEndTime },
-    expandedSearch: { dayStart: isoDayStart, dayEnd: isoDayEnd }
+    requestedSlot: {
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+    },
+    expandedSearch: {
+      dayStart: startOfDay,
+      dayEnd: endOfDay,
+    }
   });
 
   try {
     const response = await calendarClient.events.list({
       calendarId,
-      timeMin: isoDayStart,
-      timeMax: isoDayEnd,
+      timeMin: startOfDay,
+      timeMax: endOfDay,
       singleEvents: true,
     });
 
-    const requestStart = dayjs.tz(startTime, 'Europe/Berlin');
-    const requestEnd = dayjs.tz(endTime, 'Europe/Berlin');
+    const requestStart = dayjs.utc(startTime);
+    const requestEnd = dayjs.utc(endTime);
+    console.log(`requestStart:`, requestStart.toISOString());
+    console.log(`requestEnd:`, requestEnd.toISOString());
 
     let hasConflict = false;
 
@@ -428,8 +432,8 @@ export const checkGoogleCalendarAvailability = async (
       for (const event of response.data.items as GoogleCalendarEvent[]) {
         if (!event.start?.dateTime || !event.end?.dateTime) continue;
 
-        const eventStart = dayjs(event.start.dateTime);
-        const eventEnd = dayjs(event.end.dateTime);
+        const eventStart = dayjs.utc(event.start.dateTime);
+        const eventEnd = dayjs.utc(event.end.dateTime);
 
         console.log(`Checking event:`, {
           summary: event.summary,
@@ -474,11 +478,15 @@ export const createGoogleCalendarEvent = async (
     customerId: number;
     customerName: string;
     serviceName: string;
-    date: string;
-    timeStart: string;
-    timeEnd: string;
+    timeStart: dayjs.Dayjs;
+    timeEnd: dayjs.Dayjs;
   }
 ): Promise<string | null> => {
+  console.log(`createGoogleCalendarEvent input:`, {
+    employeeId,
+    appointment,
+  });
+
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
 
   if (!calendarData) {
@@ -488,27 +496,24 @@ export const createGoogleCalendarEvent = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const startDateTime = dayjs.tz(appointment.timeStart, 'Europe/Berlin').toISOString();
-  const endDateTime = dayjs.tz(appointment.timeEnd, 'Europe/Berlin').toISOString();
-
   console.log(`Creating Google Calendar event:`, {
     calendarId,
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
     appointmentId: appointment.id,
-    startTime: startDateTime,
-    endTime: endDateTime
+    startTime: appointment.timeStart.toISOString(), // in UTC
+    endTime: appointment.timeEnd.toISOString(), // in UTC
   });
 
   const event: GoogleEvent = {
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
-    description: `Appointment #${appointment.id} with Customer #${appointment.customerId}`,
+    description: `Appointment #${appointment.id} with ${appointment.customerName} #${appointment.customerId}`,
     start: {
-      dateTime: startDateTime,
-      timeZone: `Europe/Berlin`,
+      dateTime: appointment.timeStart.toISOString(), //2025-07-10T10:00:00.000Z
+      timeZone: `UTC`,
     },
     end: {
-      dateTime: endDateTime,
-      timeZone: `Europe/Berlin`,
+      dateTime: appointment.timeEnd.toISOString(), //2025-07-10T12:00:00.000Z
+      timeZone: `UTC`,
     },
   };
 
@@ -543,9 +548,8 @@ export const updateGoogleCalendarEvent = async (
     customerId: number;
     customerName: string;
     serviceName: string;
-    date: string;
-    timeStart: string;
-    timeEnd: string;
+    timeStart: dayjs.Dayjs;
+    timeEnd: dayjs.Dayjs;
   }
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
@@ -556,8 +560,8 @@ export const updateGoogleCalendarEvent = async (
 
   const { calendarClient, calendarId } = calendarData;
 
-  const startDateTime = dayjs.tz(appointment.timeStart, 'Europe/Berlin').toISOString();
-  const endDateTime = dayjs.tz(appointment.timeEnd, 'Europe/Berlin').toISOString();
+  const startDateTime = appointment.timeStart.toISOString();
+  const endDateTime = appointment.timeEnd.toISOString();
 
   console.log(`Updating Google Calendar event:`, {
     calendarId,
@@ -572,11 +576,11 @@ export const updateGoogleCalendarEvent = async (
     description: `Appointment #${appointment.id} with Customer #${appointment.customerId}`,
     start: {
       dateTime: startDateTime,
-      timeZone: `Europe/Berlin`,
+      timeZone: `UTC`,
     },
     end: {
       dateTime: endDateTime,
-      timeZone: `Europe/Berlin`,
+      timeZone: `UTC`,
     },
   };
 
@@ -644,12 +648,11 @@ export const deleteGoogleCalendarEvent = async (
   }
 };
 
-export const getGoogleCalendarEvents = async (
+export const getGoogleCalendarEventsForSpecificDates = async (
   dbPool: Pool,
   employeeId: number,
-  startDate: string,
-  endDate: string
-): Promise<{ start: Date; end: Date; summary: string }[] | null> => {
+  dates: Date_ISO_Type[],
+): Promise<{ start: string; end: string; summary: string }[] | null> => {
   try {
     const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
 
@@ -660,23 +663,31 @@ export const getGoogleCalendarEvents = async (
 
     const { calendarClient, calendarId } = calendarData;
 
-    const tzStartDate = dayjs.tz(startDate, 'Europe/Berlin').startOf('day');
-    const tzEndDate = dayjs.tz(endDate, 'Europe/Berlin').endOf('day');
+    if (dates.length === 0) {
+      return [];
+    }
 
-    console.log(`Fetching Google Calendar events for employee ${employeeId}:`, {
+    const sortedDates = dates.sort();
+    const minDate = sortedDates[0];
+    const maxDate = sortedDates[sortedDates.length - 1];
+
+    const startDateUtc = dayjs.utc(minDate).startOf('day');
+    const endDateUtc = dayjs.utc(maxDate).endOf('day');
+
+    console.log(`Fetching Google Calendar events for employee ${employeeId} for specific dates:`, {
       calendarId,
-      timeMin: tzStartDate.toISOString(),
-      timeMax: tzEndDate.toISOString(),
-      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      requestedDates: dates,
+      timeMin: startDateUtc.toISOString(),
+      timeMax: endDateUtc.toISOString(),
     });
 
     const response = await calendarClient.events.list({
       calendarId,
-      timeMin: tzStartDate.toISOString(),
-      timeMax: tzEndDate.toISOString(),
+      timeMin: startDateUtc.toISOString(),
+      timeMax: endDateUtc.toISOString(),
       singleEvents: true,
       orderBy: `startTime`,
-      timeZone: 'Europe/Berlin'
+      timeZone: `UTC`,
     });
 
     if (!response.data.items || response.data.items.length === 0) {
@@ -685,27 +696,30 @@ export const getGoogleCalendarEvents = async (
     }
 
     const events = (response.data.items as GoogleCalendarEvent[])
-      .filter((event: GoogleCalendarEvent) => event.start?.dateTime && event.end?.dateTime)
+      .filter((event: GoogleCalendarEvent) => {
+        if (!event.start?.dateTime || !event.end?.dateTime) return false;
+
+        const eventDate = dayjs.utc(event.start.dateTime).format(`YYYY-MM-DD`);
+        return dates.includes(eventDate as Date_ISO_Type  );
+      })
       .map((event: GoogleCalendarEvent) => {
         const startDateTime = event.start!.dateTime as string;
         const endDateTime = event.end!.dateTime as string;
 
-        console.log(`Processing Google Calendar event:`, {
+        console.log(`Processing Google Calendar event for requested date:`, {
           summary: event.summary,
           originalStart: startDateTime,
           originalEnd: endDateTime,
-          parsedStart: dayjs(startDateTime).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss'),
-          parsedEnd: dayjs(endDateTime).tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss')
         });
 
         return {
-          start: dayjs(startDateTime).tz('Europe/Berlin').toDate(),
-          end: dayjs(endDateTime).tz('Europe/Berlin').toDate(),
+          start: startDateTime,
+          end: endDateTime,
           summary: event.summary || `Busy`
         };
       });
 
-    console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId}`);
+    console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId} on requested dates: ${dates.join(', ')}`);
     return events;
   } catch (error: any) {
     console.error(`Error fetching Google Calendar events for employee ${employeeId}:`, error.message);

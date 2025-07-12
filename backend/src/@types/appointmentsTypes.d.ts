@@ -3,6 +3,11 @@ import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
 } from '@/enums/enums';
+import {
+  Date_ISO_Type,
+  Time_HH_MM_SS_Type,
+} from '@/@types/utilTypes.js';
+import { CustomerFormDataValidationErrors } from '@/@types/customersTypes.js';
 
 export interface AppointmentRowType extends RowDataPacket {
   id: number;
@@ -22,10 +27,22 @@ export interface AppointmentDataType {
   createdDate: string;
   serviceName: string;
   timeStart: string;
+  timeEnd: string;
   serviceDuration: number;
   customerLastName: string;
   customerFirstName: string;
   status: AppointmentStatusEnum;
+  customer: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    isCustomerNew: boolean;
+  };
+  employee: {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+  };
 }
 
 export interface AppointmentDetailsRowType extends RowDataPacket {
@@ -66,10 +83,11 @@ export interface AppointmentDetailType {
     lastName: string;
   };
   status: AppointmentStatusEnum;
+  googleCalendarEventId: string | null;
 }
 
 export interface AppointmentFormDataType {
-  date: string;
+  date: Date_ISO_Type;
   email: string;
   employeeId: number;
   firstName: string;
@@ -77,16 +95,9 @@ export interface AppointmentFormDataType {
   phone: string;
   salutation: number;
   serviceId: number;
-  time: string;
+  time: Time_HH_MM_SS_Type;
 }
 
-export interface AppointmentFormDataValidationErrorsType {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  salutation?: string;
-}
 export interface AppointmentFormDataErrorsType {
   date?: string;
   employeeId?: string;
@@ -116,4 +127,21 @@ export interface SavedAppointmentItemDataType {
     lastName: string,
   },
   status: string;
+}
+
+export interface CreateAppointmentServiceResponseErrorType {
+  errorMessage: string;
+  errors?: AppointmentFormDataErrorsType;
+  error?: string;
+  validationErrors?: CustomerFormDataValidationErrors;
+}
+
+export interface CreateAppointmentServiceResponseSuccessType {
+  id: number;
+  date: string;
+  timeStart: string;
+  serviceName: string;
+  salutation: number;
+  lastName: string;
+  firstName: string;
 }

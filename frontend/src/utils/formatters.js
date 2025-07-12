@@ -1,9 +1,13 @@
 /* eslint-disable no-unused-vars */
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import 'dayjs/locale/de';
 
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 dayjs.locale(`de`);
 
 /**
@@ -22,7 +26,6 @@ export const formattedDateToTime = (date) => {
   const time = new Date(date).toLocaleTimeString(`de-DE`, {
     hour: `2-digit`,
     minute: `2-digit`,
-    timeZone: 'Europe/Berlin'
   });
   return time;
 };
@@ -141,4 +144,46 @@ export const formatFromDateTimeToStringDate = (dateString) => {
   const [day, month, year] = formattedDate.split(` `);
 
   return `${day}. ${month} ${year}`;
+};
+
+/**
+ * Transforms appointment data dates from UTC to Berlin timezone
+ * @param {Object|Array} responseData - Appointment data object or array of objects
+ * @param {Array} dateFields - Array of field names to transform
+ * @returns {Object|Array} - Appointment data with transformed dates
+ */
+export const transformIsoDates = (responseData, dateFields = []) => {
+  if (!responseData) return responseData;
+
+  // If responseData is an array, transform each element
+  if (Array.isArray(responseData)) {
+    return responseData.map(item => {
+      if (!item) return item;
+
+      const transformedItem = { ...item };
+
+      dateFields.forEach(field => {
+        if (transformedItem[field]) {
+          transformedItem[field] = dayjs(transformedItem[field])
+            .tz(`Europe/Berlin`)
+            .format(`YYYY-MM-DD HH:mm:ss`);
+        }
+      });
+
+      return transformedItem;
+    });
+  }
+
+  // If responseData is an object, transform it
+  const transformedData = { ...responseData };
+
+  dateFields.forEach(field => {
+    if (transformedData[field]) {
+      transformedData[field] = dayjs(transformedData[field])
+        .tz(`Europe/Berlin`)
+        .format(`YYYY-MM-DD HH:mm:ss`);
+    }
+  });
+
+  return transformedData;
 };
