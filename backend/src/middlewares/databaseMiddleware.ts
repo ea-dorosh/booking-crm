@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import mysql from 'mysql2/promise';
 import { Response, NextFunction } from 'express';
-import { CustomRequestType } from '@/@types/expressTypes';
+import { CustomRequestType } from '@/@types/expressTypes.js';
 
 interface DecodedToken {
   database: string;

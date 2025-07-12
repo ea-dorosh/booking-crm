@@ -48,7 +48,7 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 const corsOptions = {
-  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+  origin: function(origin: string | undefined, callback: (_err: Error | null, allow?: boolean) => void) {
     if (!origin) {
       return callback(null, true);
     }
@@ -72,7 +72,7 @@ app.use(express.json());
 app.use(express.static(`public`));
 
 app.use(`/images`, express.static(`public/images`, {
-  setHeaders: (res, filePath) => {
+  setHeaders: (res) => {
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   }
 }));

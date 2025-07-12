@@ -2,7 +2,7 @@ import { RowDataPacket } from 'mysql2';
 import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
-} from '@/enums/enums';
+} from '@/enums/enums.js';
 import {
   Date_ISO_Type,
   Time_HH_MM_SS_Type,

@@ -1,7 +1,7 @@
 import { RowDataPacket } from 'mysql2';
 import {
   SalutationEnum,
-} from '@/enums/enums';
+} from '@/enums/enums.js';
 
 export interface CustomerRequestRow extends RowDataPacket {
   customer_id: number;

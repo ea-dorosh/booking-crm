@@ -1,6 +1,4 @@
 import {
-  validateEmail,
-  validatePhone,
   validateIsoDate,
   validateTime,
 } from '@/utils/validators.js';
@@ -8,7 +6,6 @@ import {
   AppointmentFormDataErrorsType,
   AppointmentFormDataType,
 } from '@/@types/appointmentsTypes.js';
-import { SalutationEnum } from '@/enums/enums.js';
 
 const validateAppointmentDetailsData = (formData: AppointmentFormDataType): AppointmentFormDataErrorsType => {
   const errors: AppointmentFormDataErrorsType = {};

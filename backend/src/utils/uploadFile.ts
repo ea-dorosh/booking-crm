@@ -1,8 +1,8 @@
 import multer, { StorageEngine } from 'multer';
 import path from 'path';
-import { 
-  CustomRequestType, 
-} from '@/@types/expressTypes';
+import {
+  CustomRequestType,
+} from '@/@types/expressTypes.js';
 
 const storage: StorageEngine = multer.diskStorage({
   destination: (req: CustomRequestType, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {

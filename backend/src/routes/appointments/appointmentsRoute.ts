@@ -3,7 +3,7 @@ import { AppointmentStatusEnum } from '@/enums/enums.js';
 import {
   CustomRequestType,
   CustomResponseType,
-} from '@/@types/expressTypes';
+} from '@/@types/expressTypes.js';
 import {
   getAppointments,
   getAppointment,

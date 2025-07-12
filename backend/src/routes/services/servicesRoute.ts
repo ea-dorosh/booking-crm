@@ -6,7 +6,7 @@ import {
   CustomRequestType,
   CustomResponseType,
   DbPoolType,
-} from '@/@types/expressTypes';
+} from '@/@types/expressTypes.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { EmployeePriceType, ServiceDataType, CategoryDataType } from '@/@types/servicesTypes.js';
 import { CategoryRow } from '@/@types/categoriesTypes.js';

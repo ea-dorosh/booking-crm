@@ -1,7 +1,6 @@
 import { google } from 'googleapis';
 import { Pool, RowDataPacket } from 'mysql2/promise';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
 interface GoogleCalendarCredentials {

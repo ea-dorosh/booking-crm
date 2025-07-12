@@ -2,8 +2,8 @@ import { RowDataPacket } from 'mysql2';
 import {
   InvoiceStatusEnum,
   SalutationEnum,
-} from '@/enums/enums';
-import { CustomerFormDataValidationErrors } from '@/@types/customersTypes';
+} from '@/enums/enums.js';
+import { CustomerFormDataValidationErrors } from '@/@types/customersTypes.js';
 
 export interface InvoicesRequestRow extends RowDataPacket {
   id: number;
