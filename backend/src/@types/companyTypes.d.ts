@@ -1,4 +1,5 @@
 import { RowDataPacket } from 'mysql2';
+import { CompanyBranchResponseData } from '@/@types/companyBranchesTypes.js';
 
 export interface CompanyRequestRow extends RowDataPacket {
   id: number;
@@ -26,6 +27,7 @@ export interface CompanyResponseData {
   website: string | null;
   taxNumber: string | null;
   bankAccount: string | null;
+  branches: CompanyBranchResponseData[];
 }
 
 export interface CompanyFormDataValidationErrors {

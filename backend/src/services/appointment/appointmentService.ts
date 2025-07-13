@@ -123,6 +123,7 @@ async function getAppointment(dbPool: Pool, appointmentId: number): Promise<Appo
       },
       status: row.status,
       googleCalendarEventId: row.google_calendar_event_id,
+      location: row.location,
     };
   });
 
@@ -256,6 +257,8 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
   let isCustomerNew = CustomerNewStatusEnum.New;
   let customerId;
 
+  const company = await getCompany(dbPool);
+
   try {
     const checkCustomerResult = await checkCustomerExists(dbPool, {
       email: appointment.email,
@@ -329,9 +332,11 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
       customer_email,
       customer_phone,
       is_customer_new,
-      google_calendar_event_id
+      google_calendar_event_id,
+      location,
+      location_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const appointmentValues = [
@@ -351,6 +356,8 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     formatPhone(appointment.phone),
     isCustomerNew,
     null, // placeholder for google_calendar_event_id
+    `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+    company.branches[0].id,
   ];
 
   const [appointmentResults] = await dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);
@@ -368,6 +375,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
         serviceName: serviceName,
         timeStart: timeStartUTC,
         timeEnd: timeEndUTC,
+        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
       }
     );
 
@@ -385,7 +393,6 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
 
   try {
     const employee = await getEmployee(dbPool, appointment.employeeId);
-    const company = await getCompany(dbPool);
 
     const emailResult = await sendAppointmentConfirmationEmail(
       appointment.email,
@@ -394,7 +401,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
         time: dayjs.tz(timeStartUTC, 'Europe/Berlin').format('HH:mm'),
         service: serviceName,
         specialist: `${employee.firstName} ${employee.lastName}`,
-        location: `Harburger Str. 10, 22765 Hamburg`,
+        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
         lastName: formatName(appointment.lastName),
         firstName: formatName(appointment.firstName),
         phone: formatPhone(appointment.phone),
@@ -418,7 +425,8 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     serviceName: serviceName,
     salutation: appointment.salutation,
     lastName: formatName(appointment.lastName),
-    firstName: formatName(appointment.firstName)
+    firstName: formatName(appointment.firstName),
+    location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
   };
 }
 

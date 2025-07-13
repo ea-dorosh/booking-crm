@@ -145,7 +145,8 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
               customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,
               serviceName: appointment.serviceName,
               timeStart: appointmentData.timeStart,
-              timeEnd: appointmentData.timeEnd
+              timeEnd: appointmentData.timeEnd,
+              location: appointment.location,
             }
           );
 

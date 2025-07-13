@@ -84,6 +84,7 @@ export interface AppointmentDetailType {
   };
   status: AppointmentStatusEnum;
   googleCalendarEventId: string | null;
+  location: string;
 }
 
 export interface AppointmentFormDataType {
@@ -127,6 +128,7 @@ export interface SavedAppointmentItemDataType {
     lastName: string,
   },
   status: string;
+  location: string;
 }
 
 export interface CreateAppointmentServiceResponseErrorType {
@@ -144,4 +146,5 @@ export interface CreateAppointmentServiceResponseSuccessType {
   salutation: number;
   lastName: string;
   firstName: string;
+  location: string;
 }

@@ -5,7 +5,6 @@ import {
   updateCompanyData,
  } from '@/services/company/companyService.js';
 import {
-  getAllCompanyBranches,
   createCompanyBranch,
   updateCompanyBranch,
 } from '@/services/companyBranches/companyBranchesService.js';
@@ -28,14 +27,8 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
 
   try {
     const company = await getCompany(request.dbPool);
-    const branches = await getAllCompanyBranches(request.dbPool);
 
-    const companyWithBranches = {
-      ...company,
-      branches,
-    };
-
-    response.json(companyWithBranches);
+    response.json(company);
 
     return;
   } catch (error) {

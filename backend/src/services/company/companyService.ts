@@ -8,6 +8,7 @@ import {
   UpdateCompanyResult,
 } from '@/@types/companyTypes.js';
 import { DbPoolType } from '@/@types/expressTypes.js';
+import { getAllCompanyBranches } from '@/services/companyBranches/companyBranchesService.js';
 
 async function getCompany(dbPool: DbPoolType): Promise<CompanyResponseData> {
   const sql = `
@@ -47,7 +48,12 @@ async function getCompany(dbPool: DbPoolType): Promise<CompanyResponseData> {
     throw new Error(`No company found`);
   }
 
-  return companyResponse[0];
+  const branches = await getAllCompanyBranches(dbPool);
+
+  return {
+    ...companyResponse[0],
+    branches,
+  };
 }
 
 async function createCompany(dbPool: DbPoolType, companyData: CompanyResponseData): Promise<CreateCompanyResult> {

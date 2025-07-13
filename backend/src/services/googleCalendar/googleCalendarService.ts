@@ -30,6 +30,7 @@ interface GoogleCalendarCredentialsRow extends RowDataPacket {
 interface GoogleEvent {
   summary: string;
   description: string;
+  location?: string;
   start: {
     dateTime: string;
     timeZone: string;
@@ -479,6 +480,7 @@ export const createGoogleCalendarEvent = async (
     serviceName: string;
     timeStart: dayjs.Dayjs;
     timeEnd: dayjs.Dayjs;
+    location?: string;
   }
 ): Promise<string | null> => {
   console.log(`createGoogleCalendarEvent input:`, {
@@ -506,6 +508,7 @@ export const createGoogleCalendarEvent = async (
   const event: GoogleEvent = {
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
     description: `Appointment #${appointment.id} with ${appointment.customerName} #${appointment.customerId}`,
+    ...(appointment.location && { location: appointment.location }),
     start: {
       dateTime: appointment.timeStart.toISOString(), //2025-07-10T10:00:00.000Z
       timeZone: `UTC`,
@@ -549,6 +552,7 @@ export const updateGoogleCalendarEvent = async (
     serviceName: string;
     timeStart: dayjs.Dayjs;
     timeEnd: dayjs.Dayjs;
+    location?: string;
   }
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
@@ -573,6 +577,7 @@ export const updateGoogleCalendarEvent = async (
   const event: GoogleEvent = {
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
     description: `Appointment #${appointment.id} with Customer #${appointment.customerId}`,
+    ...(appointment.location && { location: appointment.location }),
     start: {
       dateTime: startDateTime,
       timeZone: `UTC`,
