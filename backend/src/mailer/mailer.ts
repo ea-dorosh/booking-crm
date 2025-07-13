@@ -188,7 +188,7 @@ export async function sendAppointmentConfirmationEmail(
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Appointment confirmation email sent: %s`, info.messageId);
+    console.log(`Appointment confirmation email sent: %s`, info.messageId, info.envelope);
 
     // If using Ethereal test account, get preview URL
     const previewUrl = nodemailer.getTestMessageUrl(info);
