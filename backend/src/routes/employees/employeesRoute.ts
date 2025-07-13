@@ -248,7 +248,8 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
       created_date,
       service_duration,
       customer_id,
-      status
+      status,
+      location
     FROM SavedAppointments
     WHERE employee_id = ?
   `;
@@ -264,6 +265,7 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
     service_duration: number;
     customer_id: number;
     status: string;
+    location: string;
   }
 
   try {
@@ -291,6 +293,7 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
         lastName: customers.find(customer => customer.id === row.customer_id)?.lastName || ``,
       },
       status: row.status,
+      location: row.location,
     }));
 
     response.json(savedAppointments);
