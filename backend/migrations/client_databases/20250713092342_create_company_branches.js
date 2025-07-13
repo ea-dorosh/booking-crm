@@ -6,10 +6,10 @@ export const up = async function(knex) {
   // Create CompanyBranches table if not exists
   const hasCompanyBranchesTable = await knex.schema.hasTable('CompanyBranches');
 
-        if (!hasCompanyBranchesTable) {
+          if (!hasCompanyBranchesTable) {
     await knex.schema.createTable('CompanyBranches', (table) => {
-      table.integer('id').primary().unsigned();
-      table.integer('company_id').unsigned().notNullable();
+      table.increments('id').primary();
+      table.integer('company_id').notNullable();
       table.string('name', 255).notNullable();
       table.string('address_street', 255).nullable();
       table.string('address_zip', 20).nullable();
@@ -30,7 +30,7 @@ export const up = async function(knex) {
   const hasBranchIdColumn = await knex.schema.hasColumn('Company', 'branch_id');
   if (!hasBranchIdColumn) {
     await knex.schema.alterTable('Company', (table) => {
-      table.integer('branch_id').unsigned().nullable();
+      table.integer('branch_id').nullable();
       table.foreign('branch_id').references('id').inTable('CompanyBranches').onDelete('SET NULL');
     });
   }

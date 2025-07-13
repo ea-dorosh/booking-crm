@@ -7,26 +7,27 @@ export const up = async function(knex) {
   const hasCompanyBranchesTable = await knex.schema.hasTable('CompanyBranches');
 
   if (hasCompanyBranchesTable) {
-    // Drop the existing table to recreate without company_id
-    await knex.schema.dropTable('CompanyBranches');
+    // First drop the foreign key constraint from Company table
+    const hasBranchIdColumn = await knex.schema.hasColumn('Company', 'branch_id');
+    if (hasBranchIdColumn) {
+      await knex.schema.alterTable('Company', (table) => {
+        table.dropForeign(['branch_id']);
+        table.dropColumn('branch_id');
+      });
+    }
+
+    // Drop the foreign key constraint from CompanyBranches table
+    await knex.schema.alterTable('CompanyBranches', (table) => {
+      table.dropForeign(['company_id']);
+    });
+
+    // Drop the company_id column
+    await knex.schema.alterTable('CompanyBranches', (table) => {
+      table.dropColumn('company_id');
+    });
   }
 
-  // Recreate CompanyBranches table without company_id column
-  await knex.schema.createTable('CompanyBranches', (table) => {
-    table.increments('id').primary();
-    table.string('name', 255).notNullable();
-    table.string('address_street', 255).nullable();
-    table.string('address_zip', 20).nullable();
-    table.string('address_city', 255).nullable();
-    table.string('address_country', 255).nullable();
-    table.string('phone', 50).nullable();
-    table.string('email', 255).nullable();
-    table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
-  });
-
-  // Check if branch_id column exists in Company table
+  // Check if branch_id column exists in Company table and add it back
   const hasBranchIdColumn = await knex.schema.hasColumn('Company', 'branch_id');
   if (!hasBranchIdColumn) {
     await knex.schema.alterTable('Company', (table) => {
