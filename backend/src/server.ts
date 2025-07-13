@@ -23,6 +23,7 @@ import userRouter from '@/routes/user/userRoute.js';
 // routes for client site
 import appointmentsPublicRouter from '@/routes/appointments/appointmentsRoute.public.js';
 import calendarPublicRouter from '@/routes/calendar/calendarRoute.public.js';
+import companyPublicRouter from '@/routes/company/companyRoute.public.js';
 import employeesPublicRouter from '@/routes/employees/employeesRoute.public.js';
 import servicesPublicRouter from '@/routes/services/servicesRoute.public.js';
 
@@ -93,6 +94,7 @@ app.use(`/api/protected/user`, databaseMiddleware, userRouter);
 // Use client site routes
 app.use(`/api/public/appointments`, databaseSelectionMiddleware, appointmentsPublicRouter);
 app.use(`/api/public/calendar`, databaseSelectionMiddleware, calendarPublicRouter);
+app.use(`/api/public/company`, databaseSelectionMiddleware, companyPublicRouter);
 app.use(`/api/public/employees`, databaseSelectionMiddleware, employeesPublicRouter);
 app.use(`/api/public/services`, databaseSelectionMiddleware, servicesPublicRouter);
 
