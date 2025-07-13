@@ -2,80 +2,45 @@ import EditIcon from "@mui/icons-material/Edit";
 import {
   Button,
   List,
-  ListItemText,
 } from "@mui/material";
+import ListItemText from "@/components/ListItemText/ListItemText";
 
 export default function CompanyDetails({ company, onChangeCompanyClick }) {
   return (
     <List>
       <ListItemText
-        primary={company.name || `-`}
-        secondary="Name"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={company.name}
+        label="Name"
       />
 
       <ListItemText
-        primary={company.email}
-        secondary="Email"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={company.email}
+        label="Email"
       />
 
       <ListItemText
-        primary={company.phone || `-`}
-        secondary="Phone"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={company.phone}
+        label="Phone"
       />
 
       <ListItemText
-        primary={company.website || `-`}
-        secondary="Website"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={company.website}
+        label="Website"
       />
 
       <ListItemText
-        primary={`${company.addressStreet}, ${company.addressZip} ${company.addressCity}, ${company.addressCountry}`}
-        secondary="Address"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={`${company.addressStreet}, ${company.addressZip} ${company.addressCity}, ${company.addressCountry}`}
+        label="Address"
       />
 
       <ListItemText
-        primary={company.taxNumber || `-`}
-        secondary="Tax Number"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={company.taxNumber}
+        label="Tax Number"
       />
 
       <ListItemText
-        primary={company.bankAccount || `-`}
-        secondary="Bank Account"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={company.bankAccount}
+        label="Bank Account"
       />
 
       <Button

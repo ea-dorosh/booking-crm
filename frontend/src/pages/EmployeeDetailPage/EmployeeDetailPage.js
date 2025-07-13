@@ -4,7 +4,6 @@ import {
   Typography,
   Box,
   List,
-  ListItemText,
   LinearProgress,
   Divider
 } from "@mui/material";
@@ -16,6 +15,7 @@ import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvai
 import EmployeeForm from "@/components/EmployeeForm/EmployeeForm";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import GoogleCalendarIntegration from '@/components/GoogleCalendarIntegration/GoogleCalendarIntegration';
+import ListItemText from "@/components/ListItemText/ListItemText";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import {
   fetchEmployees,
@@ -120,30 +120,18 @@ export default function EmployeeDetailPage() {
           width: `60%`
         }}>
           <ListItemText
-            primary={`${employee.firstName} ${employee.lastName}`}
-            secondary="Name"
-            sx={{
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={`${employee.firstName} ${employee.lastName}`}
+            label="Name"
           />
 
           <ListItemText
-            primary={employee.email}
-            secondary="Email"
-            sx={{
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={employee.email}
+            label="Email"
           />
 
           <ListItemText
-            primary={employee.phone}
-            secondary="Phone"
-            sx={{
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={employee.phone}
+            label="Phone"
           />
         </List>
 

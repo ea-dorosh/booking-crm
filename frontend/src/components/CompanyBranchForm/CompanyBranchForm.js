@@ -24,7 +24,7 @@ export default function CompanyBranchForm({
     addressStreet: isEditMode ? branch.addressStreet : ``,
     addressZip: isEditMode ? branch.addressZip : ``,
     addressCity: isEditMode ? branch.addressCity : ``,
-    addressCountry: isEditMode ? branch.addressCountry : ``,
+    addressCountry: isEditMode ? branch.addressCountry : `Deutschland`,
     phone: isEditMode ? branch.phone : ``,
     email: isEditMode ? branch.email : ``,
   });

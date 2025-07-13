@@ -33,7 +33,7 @@ export default function CustomerForm({
     addressStreet: isEditMode ? customer.addressStreet : ``,
     addressZip: isEditMode ? customer.addressZip : ``,
     addressCity: isEditMode ? customer.addressCity : ``,
-    addressCountry: isEditMode ? customer.addressCountry : ``,
+    addressCountry: isEditMode ? customer.addressCountry : `Deutschland`,
   });
 
   useEffect(() => {

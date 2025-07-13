@@ -3,51 +3,31 @@ import {
   Typography,
   Button,
   List,
-  ListItemText,
 } from "@mui/material";
+import ListItemText from "@/components/ListItemText/ListItemText";
 
 
 export default function CustomerDetails({ customer, onChangeCustomerClick }) {
   return (
     <List>
       <ListItemText
-        primary={`${customer.lastName || `-`} ${customer.firstName || `-`}`}
-        secondary="Name"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={`${customer.lastName || `-`} ${customer.firstName || `-`}`}
+        label="Name"
       />
 
       <ListItemText
-        primary={customer.email}
-        secondary="Email"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.email}
+        label="Email"
       />
 
       <ListItemText
-        primary={customer.phone || `-`}
-        secondary="Phone"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.phone}
+        label="Phone"
       />
 
       <ListItemText
-        primary={customer.addedDate || `-`}
-        secondary="Added"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.addedDate}
+        label="Added"
       />
 
       <Typography variant="h6" color="text.secondary">
@@ -55,43 +35,23 @@ export default function CustomerDetails({ customer, onChangeCustomerClick }) {
       </Typography>
 
       <ListItemText
-        primary={customer.addressStreet || `-`}
-        secondary="Street"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.addressStreet}
+        label="Street"
       />
 
       <ListItemText
-        primary={customer.addressZip || `-`}
-        secondary="Zip"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.addressZip}
+        label="Zip"
       />
 
       <ListItemText
-        primary={customer.addressCity || `-`}
-        secondary="City"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.addressCity}
+        label="City"
       />
 
       <ListItemText
-        primary={customer.addressCountry || `-`}
-        secondary="Country"
-        sx={{
-          flex: `0 0 200px`,
-          display: `flex`,
-          flexDirection: `column-reverse`,
-        }}
+        value={customer.addressCountry}
+        label="Country"
       />
 
       <Button

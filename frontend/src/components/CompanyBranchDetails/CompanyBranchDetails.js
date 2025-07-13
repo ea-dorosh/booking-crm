@@ -3,10 +3,10 @@ import {
   Box,
   Button,
   List,
-  ListItemText,
 } from "@mui/material";
 import { useState } from "react";
 import CompanyBranchForm from "@/components/CompanyBranchForm/CompanyBranchForm";
+import ListItemText from "@/components/ListItemText/ListItemText";
 
 export default function CompanyBranchDetails({
   branch,
@@ -24,43 +24,23 @@ export default function CompanyBranchDetails({
     <Box>
       {!isEditMode && <List>
         <ListItemText
-          primary={branch.name || `-`}
-          secondary="Name"
-          sx={{
-            flex: `0 0 200px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
+          value={branch.name}
+          label="Name"
         />
 
         <ListItemText
-          primary={`${branch.addressStreet}, ${branch.addressZip} ${branch.addressCity}, ${branch.addressCountry}`}
-          secondary="Address"
-          sx={{
-            flex: `0 0 200px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
+          value={`${branch.addressStreet}, ${branch.addressZip} ${branch.addressCity}, ${branch.addressCountry}`}
+          label="Address"
         />
 
         <ListItemText
-          primary={branch.phone || `-`}
-          secondary="Phone"
-          sx={{
-            flex: `0 0 200px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
+          value={branch.phone}
+          label="Phone"
         />
 
         <ListItemText
-          primary={branch.email || `-`}
-          secondary="Email"
-          sx={{
-            flex: `0 0 200px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
+          value={branch.email}
+          label="Email"
         />
       </List>}
 

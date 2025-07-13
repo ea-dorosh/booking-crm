@@ -4,13 +4,13 @@ import {
   Button,
   Typography,
   List,
-  ListItemText,
   LinearProgress,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
+import ListItemText from "@/components/ListItemText/ListItemText";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceForm from "@/components/ServiceForm/ServiceForm";
 import { fetchEmployees } from '@/features/employees/employeesSlice';
@@ -144,53 +144,28 @@ export default function ServicesDetailPage() {
       {!isEditMode && service && serviceCategories && <Box mt={3}>
         <List>
           <ListItemText
-            primary={service.name}
-            secondary="Service Name"
-            sx={{
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={service.name}
+            label="Service Name"
           />
 
           <ListItemText
-            primary={serviceCategories.find(category => category.id === service.categoryId).name || `-`}
-            secondary="Service Category"
-            sx={{
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={serviceCategories.find(category => category.id === service.categoryId).name || `-`}
+            label="Service Category"
           />
 
           <ListItemText
-            primary={service.durationTime}
-            secondary="Duration Time"
-            sx={{
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={service.durationTime}
+            label="Duration Time"
           />
 
           <ListItemText
-            primary={service.bufferTime || `-`}
-            secondary="Buffer Time"
-            sx={{
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={service.bufferTime || `-`}
+            label="Buffer Time"
           />
 
           <ListItemText
-            primary={service.bookingNote || `-`}
-            secondary="Note"
-            sx={{
-              flex: `0 0 200px`,
-              display: `flex`,
-              flexDirection: `column-reverse`,
-            }}
+            value={service.bookingNote || `-`}
+            label="Note"
           />
 
           <Box sx={{marginTop: `20px`}}>
@@ -202,9 +177,8 @@ export default function ServicesDetailPage() {
               {service.employeePrices.map((employeePrice) => (
                 <ListItemText
                   key={employeePrice.employeeId}
-                  primary={getEmployeeName(employeePrice.employeeId)}
-                  secondary={employeePrice.price}
-                  sx={{ flex: `0 0 200px` }}
+                  value={getEmployeeName(employeePrice.employeeId)}
+                  label={employeePrice.price}
                 />
               ))}
             </List>

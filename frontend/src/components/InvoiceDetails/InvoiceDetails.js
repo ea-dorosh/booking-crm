@@ -7,12 +7,12 @@ import {
   IconButton,
   Button,
   Chip,
-  ListItemText,
   Box,
   Typography,
   Tooltip,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
+import ListItemText from "@/components/ListItemText/ListItemText";
 import { formatIsoDate } from "@/utils/formatters";
 
 export default function InvoiceDetails({ invoice, onChangeInvoiceClick, onDownloadInvoiceClick, onViewInvoiceClick }) {
@@ -80,23 +80,13 @@ export default function InvoiceDetails({ invoice, onChangeInvoiceClick, onDownlo
         flexWrap: `wrap`,
       }}>
         <ListItemText
-          primary={formatIsoDate(invoice.dateIssued)}
-          secondary="Date Issued"
-          sx={{
-            flex: `0 0 120px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
+          value={formatIsoDate(invoice.dateIssued)}
+          label="Date Issued"
         />
 
         <ListItemText
-          primary={formatIsoDate(invoice.dueDate)}
-          secondary="Due Date"
-          sx={{
-            flex: `0 0 120px`,
-            display: `flex`,
-            flexDirection: `column-reverse`,
-          }}
+          value={formatIsoDate(invoice.dueDate)}
+          label="Due Date"
         />
       </Box>
 

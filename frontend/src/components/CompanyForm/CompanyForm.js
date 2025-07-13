@@ -23,7 +23,7 @@ export default function CompanyForm({
     addressStreet: isEditMode ? company.addressStreet : ``,
     addressZip: isEditMode ? company.addressZip : ``,
     addressCity: isEditMode ? company.addressCity : ``,
-    addressCountry: isEditMode ? company.addressCountry : ``,
+    addressCountry: isEditMode ? company.addressCountry : `Deutschland`,
     phone: isEditMode ? company.phone : ``,
     email: isEditMode ? company.email : ``,
     website: isEditMode ? company.website : ``,
