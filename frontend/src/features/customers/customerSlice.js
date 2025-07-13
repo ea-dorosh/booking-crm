@@ -47,7 +47,7 @@ export const updateCustomer = createAsyncThunk(
   }
 );
 
-const servicesSlice = createSlice({
+const customerSlice = createSlice({
   name: `customer`,
   initialState: {
     data: null,
@@ -122,5 +122,5 @@ export const {
   cleanError,
   cleanErrors,
   resetCustomerData
-} = servicesSlice.actions;
-export default servicesSlice.reducer;
+} = customerSlice.actions;
+export default customerSlice.reducer;

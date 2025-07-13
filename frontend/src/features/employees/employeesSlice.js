@@ -43,8 +43,19 @@ export const updateEmployee = createAsyncThunk(
         return data;
       }
     } catch (error) {
-      const parsedErrors = await JSON.parse(error.message);
-      return thunkAPI.rejectWithValue(parsedErrors);
+      // Handle validation errors that are already objects
+      if (error.errors) {
+        return thunkAPI.rejectWithValue(error.errors);
+      }
+
+      // Handle string errors that need parsing
+      try {
+        const parsedErrors = JSON.parse(error.message);
+        return thunkAPI.rejectWithValue(parsedErrors);
+      } catch {
+        // If parsing fails, return the error as is
+        return thunkAPI.rejectWithValue({ general: error.message });
+      }
     }
   }
 );

@@ -24,6 +24,7 @@ import {
   cleanError,
   cleanErrors,
 } from "@/features/customers/customerSlice";
+import { fetchCustomers } from "@/features/customers/customersSlice";
 
 export default function CustomerDetailPage() {
   const { customerId } = useParams();
@@ -55,6 +56,9 @@ export default function CustomerDetailPage() {
       const response = await dispatch(updateCustomer(customer)).unwrap();
 
       setIsEditMode(false);
+
+      // Update customers list to reflect changes
+      dispatch(fetchCustomers());
 
       if (isNewCustomer) {
         navigate(`/customers/${response.data}`, { replace: true });
@@ -102,6 +106,7 @@ export default function CustomerDetailPage() {
           {<Button
             variant="outlined"
             onClick={() => {
+              dispatch(cleanErrors());
               if (isNewCustomer) {
                 navigate(`/customers`, { replace: true });
               } else {

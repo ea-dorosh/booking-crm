@@ -9,14 +9,14 @@ export default function EmployeesPage() {
   const employees = useSelector(state => state.employees.data);
 
   useEffect(() => {
-    if (!employees.length) {
+    if (!employees || employees.length === 0) {
       dispatch(fetchEmployees());
     }
   }, []);
 
   return (
     <PageContainer pageTitle="Employees">
-      {employees.length > 0 && <EmployeesContainer 
+      {employees.length > 0 && <EmployeesContainer
         employees={employees}
       />}
     </PageContainer>

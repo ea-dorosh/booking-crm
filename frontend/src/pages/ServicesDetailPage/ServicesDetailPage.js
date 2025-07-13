@@ -55,6 +55,7 @@ export default function ServicesDetailPage() {
     if (!service && !shouldShowServiceForm) {
       promises.push(dispatch(fetchServices()));
     } else if (shouldShowServiceForm) {
+      dispatch(cleanErrors());
       setIsEditMode(true)
     }
 
@@ -67,15 +68,22 @@ export default function ServicesDetailPage() {
   };
 
   const updateServiceHandler = async (service) => {
-    const serviceId = await dispatch(updateService(service)).unwrap();
+    try {
+      const serviceId = await dispatch(updateService(service)).unwrap();
 
-    if (!service.id) {
-      navigate(`/services/${serviceId}`);
+      // Clear errors on successful update
+      dispatch(cleanErrors());
+
+      if (!service.id) {
+        navigate(`/services/${serviceId}`);
+      }
+
+      dispatch(fetchServices());
+
+      setIsEditMode(false);
+    } catch (error) {
+      console.error(error);
     }
-
-    dispatch(fetchServices());
-
-    setIsEditMode(false);
   };
 
   const handleCleanError = (fieldName) => {
@@ -122,7 +130,10 @@ export default function ServicesDetailPage() {
         <Box mt={2} sx={{width:`100%`}}>
           {!shouldShowServiceForm && <Button
             variant="outlined"
-            onClick={() => setIsEditMode(false)}
+            onClick={() => {
+              dispatch(cleanErrors());
+              setIsEditMode(false);
+            }}
             sx={{width:`100%`}}
           >
             Cancel
@@ -186,7 +197,10 @@ export default function ServicesDetailPage() {
 
           <Button
             startIcon={<EditIcon />}
-            onClick={() => setIsEditMode(true)}
+            onClick={() => {
+              dispatch(cleanErrors());
+              setIsEditMode(true);
+            }}
             variant="outlined"
           >
             Update

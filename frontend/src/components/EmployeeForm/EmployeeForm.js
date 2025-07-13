@@ -1,9 +1,10 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import TextField from "@mui/material/TextField";
-import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
+import FormActions from "@/components/common/FormActions";
+import FormField from "@/components/common/FormField";
+import ImageUpload from "@/components/common/ImageUpload";
+import { EMPLOYEE_FIELDS } from "@/constants/formFields";
+import useForm from "@/hooks/useForm";
+import { createEmployeeSubmitData } from "@/utils/formUtils";
 
 export default function EmployeeForm({
   employee,
@@ -14,174 +15,65 @@ export default function EmployeeForm({
 }) {
   const isEditMode = Boolean(employee);
 
-  const [formData, setFormData] = useState({
-    firstName: isEditMode ? employee.firstName : ``,
-    lastName: isEditMode ? employee.lastName : ``,
-    email: isEditMode ? employee.email : ``,
-    phone: isEditMode ? employee.phone : ``,
+  // Initialize form data
+  const initialData = {
+    ...EMPLOYEE_FIELDS.reduce((acc, field) => {
+      acc[field.name] = isEditMode
+        ? employee[field.name] || field.defaultValue || ``
+        : field.defaultValue || ``;
+      return acc;
+    }, {}),
     image: null,
+  };
+
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+    updateFormData,
+  } = useForm(initialData, {
+    onSubmit: (data) => createEmployee(createEmployeeSubmitData(employee, data)),
+    formErrors: formErrors || {},
+    cleanError,
+    cleanErrors,
   });
 
-  const [temporaryImage, setTemporaryImage] = useState(null);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if(formErrors && formErrors[name]) {
-      cleanError(name);
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    updateFormData({ image: file });
   };
-
-  const handleImgChange = (event) => {
-    const [file] = event.target.files
-    if (file) {
-      setTemporaryImage(URL.createObjectURL(file))
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      image: event.target.files[0],
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    await createEmployee({
-      ...employee,
-      ...formData,
-    });
-  };
-
-  useEffect(() => {
-    return () => cleanErrors()
-  }, []);
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
+        display: `flex`,
+        flexDirection: `column`,
+        gap: 2.2,
       }}
     >
-      <FormControl 
-        sx={{ mt: `20px` }}
-        error={Boolean(formErrors?.firstName)}
-      >
-        <TextField
-          value={formData.firstName}
-          label="First Name"
-          variant="outlined"
-          name="firstName"
+      {EMPLOYEE_FIELDS.map((field) => (
+        <FormField
+          key={field.name}
+          type={field.type}
+          name={field.name}
+          label={field.label}
+          value={formData[field.name]}
           onChange={handleChange}
+          error={formErrors?.[field.name]}
+          required={field.required}
         />
-        {formErrors?.firstName && 
-          <FormHelperText>
-            {formErrors.firstName}
-          </FormHelperText>
-        }
-      </FormControl>
+      ))}
 
-      <FormControl 
-        sx={{ mt: `20px` }}
-        error={Boolean(formErrors?.lastName)}
-      >
-        <TextField
-          value={formData.lastName}
-          label="Last Name"
-          variant="outlined"
-          name="lastName"
-          onChange={handleChange}
-        />
-        {formErrors?.lastName && 
-          <FormHelperText>
-            {formErrors.lastName}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl 
-        sx={{ mt: `20px` }}
-        error={Boolean(formErrors?.email)}
-      >
-        <TextField
-          value={formData.email}
-          label="Email"
-          variant="outlined"
-          name="email"
-          onChange={handleChange}
-        />
-        {formErrors?.email && 
-          <FormHelperText>
-            {formErrors.email}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl 
-        sx={{ mt: `20px` }}
-        error={Boolean(formErrors?.phone)}
-      >
-        <TextField
-          value={formData.phone}
-          label="Phone"
-          variant="outlined"
-          name="phone"
-          onChange={handleChange}
-        />
-        {formErrors?.phone && 
-          <FormHelperText>
-            {formErrors.phone}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      {(temporaryImage || employee?.image) && 
-        <Box 
-          sx={{
-            padding: `20px`, 
-            margin: `20px 0`, 
-            width: `50%`,
-            backgroundColor: `#f5f5f5`,
-          }}
-        >
-          {temporaryImage && 
-            <img 
-              src={temporaryImage}
-              style={{ width: `100%` }}
-            />
-          }
-
-          {!temporaryImage && employee?.image && 
-            <img 
-              src={employee.image} 
-              style={{ width: `100%` }}
-            />
-          }
-        </Box>}
-
-      <input
-        accept="image/*"
-        type='file'
-        onChange={handleImgChange}
-        style={{ margin: `20px 0`}}
+      <ImageUpload
+        currentImage={employee?.image}
+        onChange={handleImageChange}
+        name="image"
       />
 
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ mt: `20px` }}
-        disabled={formErrors && Object.values(formErrors).length > 0}
-      >
-        Submit
-      </Button>
+      <FormActions
+        onSubmit={handleSubmit}
+        disabled={formErrors && Object.keys(formErrors).length > 0}
+      />
     </Box>
   );
 }

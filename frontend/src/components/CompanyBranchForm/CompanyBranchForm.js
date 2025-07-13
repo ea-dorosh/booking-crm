@@ -1,12 +1,9 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  TextField,
-  CircularProgress,
-} from "@mui/material";
-import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
+import FormActions from "@/components/common/FormActions";
+import FormField from "@/components/common/FormField";
+import { ADDRESS_FIELDS, CONTACT_FIELDS } from "@/constants/formFields";
+import useForm from "@/hooks/useForm";
+import { createSubmitData } from "@/utils/formUtils";
 
 export default function CompanyBranchForm({
   branch,
@@ -19,41 +16,37 @@ export default function CompanyBranchForm({
 }) {
   const isEditMode = Boolean(branch);
 
-  const [formData, setFormData] = useState({
-    name: isEditMode ? branch.name : ``,
-    addressStreet: isEditMode ? branch.addressStreet : ``,
-    addressZip: isEditMode ? branch.addressZip : ``,
-    addressCity: isEditMode ? branch.addressCity : ``,
-    addressCountry: isEditMode ? branch.addressCountry : `Deutschland`,
-    phone: isEditMode ? branch.phone : ``,
-    email: isEditMode ? branch.email : ``,
+  // Define form fields configuration
+  const formFields = [
+    {
+      name: "name",
+      label: "Name",
+      type: "text",
+      required: true,
+    },
+    ...ADDRESS_FIELDS,
+    ...CONTACT_FIELDS,
+  ];
+
+  // Initialize form data
+  const initialData = formFields.reduce((acc, field) => {
+    acc[field.name] = isEditMode
+      ? branch[field.name] || field.defaultValue || ``
+      : field.defaultValue || ``;
+    return acc;
+  }, {});
+
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+  } = useForm(initialData, {
+    onSubmit: (data) => submitForm(createSubmitData(branch, data)),
+    formErrors: formErrors || {},
+    cleanError,
+    cleanErrors,
+    isPending,
   });
-
-  useEffect(() => {
-    return () => cleanErrors()
-  }, []);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if(formErrors && formErrors[name]) {
-      cleanError(name);
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    await submitForm({
-      ...branch,
-      ...formData,
-    });
-  };
 
   return (
     <Box
@@ -63,137 +56,26 @@ export default function CompanyBranchForm({
         gap: 2.2,
       }}
     >
-      <FormControl error={Boolean(formErrors?.name)}>
-        <TextField
-          value={formData.name}
-          label="Name"
-          variant="outlined"
-          name="name"
+      {formFields.map((field) => (
+        <FormField
+          key={field.name}
+          type={field.type}
+          name={field.name}
+          label={field.label}
+          value={formData[field.name]}
           onChange={handleChange}
+          error={formErrors?.[field.name]}
           disabled={isPending}
+          required={field.required}
         />
-        {formErrors?.name &&
-          <FormHelperText>
-            {formErrors.name}
-          </FormHelperText>
-        }
-      </FormControl>
+      ))}
 
-      <FormControl error={Boolean(formErrors?.addressStreet)}>
-        <TextField
-          value={formData.addressStreet}
-          label="Street, House Number"
-          variant="outlined"
-          name="addressStreet"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.addressStreet &&
-          <FormHelperText>
-            {formErrors.addressStreet}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.addressZip)}>
-        <TextField
-          value={formData.addressZip}
-          label="Zip"
-          variant="outlined"
-          name="addressZip"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.addressZip &&
-          <FormHelperText>
-            {formErrors.addressZip}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.addressCity)}>
-        <TextField
-          value={formData.addressCity}
-          label="City"
-          variant="outlined"
-          name="addressCity"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.addressCity &&
-          <FormHelperText>
-            {formErrors.addressCity}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.addressCountry)}>
-        <TextField
-          value={formData.addressCountry}
-          label="Country"
-          variant="outlined"
-          name="addressCountry"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.addressCountry &&
-          <FormHelperText>
-            {formErrors.addressCountry}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.phone)}>
-        <TextField
-          value={formData.phone}
-          label="Phone"
-          variant="outlined"
-          name="phone"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.phone &&
-          <FormHelperText>
-            {formErrors.phone}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.email)}>
-        <TextField
-          value={formData.email}
-          label="Email"
-          variant="outlined"
-          name="email"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.email &&
-          <FormHelperText>
-            {formErrors.email}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ mt: `20px` }}
-        disabled={isPending}
-        endIcon={isPending && <CircularProgress size={16} />}
-      >
-        Save
-      </Button>
-
-      <Button
-        variant="outlined"
-        color="secondary"
-        onClick={onCancelClick}
-      >
-        Cancel
-      </Button>
+      <FormActions
+        onSubmit={handleSubmit}
+        onCancel={onCancelClick}
+        isPending={isPending}
+        disabled={formErrors && Object.keys(formErrors).length > 0}
+      />
     </Box>
   );
 }

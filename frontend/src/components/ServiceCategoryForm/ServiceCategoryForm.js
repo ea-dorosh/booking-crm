@@ -1,9 +1,9 @@
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import TextField from "@mui/material/TextField";
-import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
+import FormActions from "@/components/common/FormActions";
+import FormField from "@/components/common/FormField";
+import ImageUpload from "@/components/common/ImageUpload";
+import useForm from "@/hooks/useForm";
+import { createSubmitData } from "@/utils/formUtils";
 
 export default function ServiceCategoryForm({
   category,
@@ -14,50 +14,39 @@ export default function ServiceCategoryForm({
 }) {
   const isEditMode = Boolean(category);
 
-  const [formData, setFormData] = useState({
-    name: isEditMode ? category.name : ``,
-    id: isEditMode ? category.id : ``,
-    image: null,
+  // Define form fields configuration
+  const formFields = [
+    {
+      name: "name",
+      label: "Service Category Name",
+      type: "text",
+      required: true,
+    },
+  ];
+
+  // Initialize form data
+  const initialData = formFields.reduce((acc, field) => {
+    acc[field.name] = isEditMode
+      ? category[field.name] || field.defaultValue || ``
+      : field.defaultValue || ``;
+    return acc;
+  }, {});
+
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+    updateFormData,
+  } = useForm(initialData, {
+    onSubmit: (data) => submitForm(createSubmitData(category, data)),
+    formErrors: formErrors || {},
+    cleanError,
+    cleanErrors,
   });
 
-  const [temporaryImage, setTemporaryImage] = useState(null);
-
-  useEffect(() => {
-    return () => cleanErrors()
-  }, []);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if(formErrors && formErrors[name]) {
-      cleanError(name);
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleImgChange = (event) => {
-    const [file] = event.target.files
-    if (file) {
-      setTemporaryImage(URL.createObjectURL(file))
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      image: event.target.files[0],
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    await submitForm({
-      ...category,
-      ...formData,
-    });
+  const handleImageChange = (event) => {
+    const [file] = event.target.files;
+    updateFormData({ image: file });
   };
 
   return (
@@ -65,68 +54,32 @@ export default function ServiceCategoryForm({
       sx={{
         display: `flex`,
         flexDirection: `column`,
+        gap: 2.2,
       }}
     >
-      <FormControl error={Boolean(formErrors?.name)}>
-        <TextField
-          value={formData.name}
-          label="Service Category Name"
-          variant="outlined"
-          name="name"
+      {formFields.map((field) => (
+        <FormField
+          key={field.name}
+          type={field.type}
+          name={field.name}
+          label={field.label}
+          value={formData[field.name]}
           onChange={handleChange}
+          error={formErrors?.[field.name]}
+          required={field.required}
         />
+      ))}
 
-        {formErrors?.name &&
-          <FormHelperText>
-            {formErrors.name}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      {(temporaryImage || category?.image) &&
-        <Box
-          sx={{
-            padding: `20px`,
-            margin: `20px 0`,
-            width: `100%`,
-            backgroundColor: `#f5f5f5`,
-            display: `flex`,
-            justifyContent: `center`,
-            alignItems: `center`,
-          }}
-        >
-          {temporaryImage &&
-            <img
-              src={temporaryImage}
-              style={{ width: `60%`, margin: `0 auto` }}
-            />
-          }
-
-          {!temporaryImage && category?.image &&
-            <img
-              src={category.image}
-              style={{ width: `60%`, margin: `0 auto` }}
-            />
-          }
-        </Box>}
-
-      <input
-        accept="image/*"
-        type='file'
-        onChange={handleImgChange}
-        style={{ margin: `20px 0`}}
+      <ImageUpload
+        name="image"
+        onChange={handleImageChange}
+        currentImage={category?.image}
       />
 
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ mt: `20px` }}
+      <FormActions
+        onSubmit={handleSubmit}
         disabled={formErrors && Object.keys(formErrors).length > 0}
-      >
-        Save
-      </Button>
+      />
     </Box>
   );
 }

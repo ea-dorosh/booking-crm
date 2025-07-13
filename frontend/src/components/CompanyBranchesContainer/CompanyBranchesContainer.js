@@ -24,6 +24,8 @@ export default function CompanyBranchesContainer({ branches }) {
   const submitForm = async (branch) => {
     try {
       await dispatch(updateCompanyBranch(branch)).unwrap();
+
+      dispatch(cleanErrors());
       setIsAddMode(false);
       setHasAddButton(true);
 
@@ -45,7 +47,10 @@ export default function CompanyBranchesContainer({ branches }) {
     <Box mt={3}>
       {hasAddButton && <Box>
         <Button
-          onClick={() => setIsAddMode(true)}
+          onClick={() => {
+            dispatch(cleanErrors());
+            setIsAddMode(true);
+          }}
           disabled={isAddMode}
         >
           <AddIcon />
@@ -60,7 +65,10 @@ export default function CompanyBranchesContainer({ branches }) {
         cleanError={handleCleanError}
         cleanErrors={handleCleanErrors}
         isPending={updateFormPending}
-        onCancelClick={() => setIsAddMode(false)}
+        onCancelClick={() => {
+          dispatch(cleanErrors());
+          setIsAddMode(false);
+        }}
       />}
 
       {branches.map((branch) => (

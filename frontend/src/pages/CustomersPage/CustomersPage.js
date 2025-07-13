@@ -13,10 +13,10 @@ export default function CustomersPage() {
   const dispatch = useDispatch();
 
   const customers = useSelector(selectSortedCustomers);
-  const { isPending, data: customersData } = useSelector(state => state.customers);
+  const { isPending } = useSelector(state => state.customers);
 
   useEffect(() => {
-    if (!customersData) {
+    if (!customers || customers.length === 0) {
       dispatch(fetchCustomers());
     }
   }, []);

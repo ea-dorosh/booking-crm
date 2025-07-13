@@ -51,12 +51,16 @@ export default function CompanyBranchDetails({
         cleanError={cleanError}
         cleanErrors={cleanErrors}
         isPending={isPending}
-        onCancelClick={() => setIsEditMode(false)}
+        onCancelClick={() => {
+          cleanErrors();
+          setIsEditMode(false);
+        }}
       />}
 
       {!isEditMode && !disabledEditMode && <Button
         startIcon={<EditIcon />}
         onClick={() => {
+          cleanErrors();
           setIsEditMode(true);
           onEditModeClick();
         }}

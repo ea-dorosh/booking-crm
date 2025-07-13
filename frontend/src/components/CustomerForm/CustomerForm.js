@@ -1,17 +1,11 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  FormControlLabel,
-  FormHelperText,
-  TextField,
-  Radio,
-  RadioGroup,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
-import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
+import FormActions from "@/components/common/FormActions";
+import FormField from "@/components/common/FormField";
+import RadioField from "@/components/common/RadioField";
+import SectionHeader from "@/components/common/SectionHeader";
+import { CUSTOMER_FIELDS } from "@/constants/formFields";
+import useForm from "@/hooks/useForm";
+import { createCustomerSubmitData } from "@/utils/formUtils";
 
 export default function CustomerForm({
   customer,
@@ -24,42 +18,78 @@ export default function CustomerForm({
 }) {
   const isEditMode = Boolean(customer);
 
-  const [formData, setFormData] = useState({
-    salutation: isEditMode ? customer.salutation : null,
-    firstName: isEditMode ? customer.firstName : ``,
-    lastName: isEditMode ? customer.lastName : ``,
-    email: isEditMode ? customer.email : ``,
-    phone: isEditMode ? customer.phone : ``,
-    addressStreet: isEditMode ? customer.addressStreet : ``,
-    addressZip: isEditMode ? customer.addressZip : ``,
-    addressCity: isEditMode ? customer.addressCity : ``,
-    addressCountry: isEditMode ? customer.addressCountry : `Deutschland`,
-  });
-
-  useEffect(() => {
-    return () => cleanErrors()
-  }, []);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if(formErrors && formErrors[name]) {
-      cleanError(name);
-    }
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+  // Initialize form data
+  const initialData = {
+    ...CUSTOMER_FIELDS.reduce((acc, field) => {
+      acc[field.name] = isEditMode
+        ? customer[field.name] || field.defaultValue || ``
+        : field.defaultValue || ``;
+      return acc;
+    }, {}),
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const {
+    formData,
+    handleChange,
+    handleSubmit,
+  } = useForm(initialData, {
+    onSubmit: (data) => submitForm(createCustomerSubmitData(customer, data)),
+    formErrors: formErrors || {},
+    cleanError,
+    cleanErrors,
+  });
 
-    await submitForm({
-      ...customer,
-      ...formData,
+  // Render different field types
+  const renderField = (field) => {
+    if (field.type === 'radio') {
+      return (
+        <RadioField
+          key={field.name}
+          name={field.name}
+          label={field.label}
+          value={formData[field.name]}
+          onChange={handleChange}
+          options={field.options}
+          error={formErrors?.[field.name]}
+          disabled={isPending}
+          required={field.required}
+        />
+      );
+    }
+
+    return (
+      <FormField
+        key={field.name}
+        type={field.type}
+        name={field.name}
+        label={field.label}
+        value={formData[field.name]}
+        onChange={handleChange}
+        error={formErrors?.[field.name]}
+        required={field.required}
+        disabled={isPending}
+      />
+    );
+  };
+
+  // Group fields by sections
+  const renderFields = () => {
+    const fields = [];
+    let currentSection = null;
+
+    CUSTOMER_FIELDS.forEach((field) => {
+      // Add section header for address fields
+      if (field.name === 'addressStreet' && currentSection !== 'address') {
+        fields.push(
+          <SectionHeader key="address-header" title="Address" />
+        );
+        currentSection = 'address';
+      }
+
+      fields.push(renderField(field));
     });
+
+    return fields;
   };
 
   return (
@@ -70,196 +100,20 @@ export default function CustomerForm({
         gap: 2.2,
       }}
     >
-      <FormControl error={Boolean(formErrors?.salutation)}>
-        <Box sx={{
-          display: `flex`,
-          flexDirection: `row`,
-          alignItems: `center`,
-          gap: 3,
-        }}>
-          <FormLabel
-            id="salutation-group-label"
-            sx={{ mr: 4 }}
-          >
-            Anrede
-          </FormLabel>
+      {renderFields()}
 
-          <RadioGroup
-            row
-            name="salutation"
-            value={formData.salutation}
-            onChange={handleChange}
-          >
-            <FormControlLabel value={1} control={
-              <Radio color="info" disabled={isPending} />
-            } label="Frau"  />
-
-            <FormControlLabel value={0} control={
-              <Radio color="info" disabled={isPending} />
-            } label="Herr" />
-          </RadioGroup>
-        </Box>
-
-        {formErrors?.salutation &&
-          <FormHelperText>
-            {formErrors.salutation}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.lastName)}>
-        <TextField
-          value={formData.lastName}
-          label="Last Name"
-          variant="outlined"
-          name="lastName"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.lastName &&
-          <FormHelperText>
-            {formErrors.lastName}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.firstName)}>
-        <TextField
-          value={formData.firstName}
-          label="First Name"
-          variant="outlined"
-          name="firstName"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.firstName &&
-          <FormHelperText>
-            {formErrors.firstName}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.email)}>
-        <TextField
-          value={formData.email}
-          label="Email"
-          variant="outlined"
-          name="email"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.email &&
-          <FormHelperText>
-            {formErrors.email}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.phone)}>
-        <TextField
-          value={formData.phone}
-          label="Phone"
-          variant="outlined"
-          name="phone"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-        {formErrors?.phone &&
-          <FormHelperText>
-            {formErrors.phone}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <Typography variant="h6" color="text.secondary">
-        Address
-      </Typography>
-
-      <FormControl error={Boolean(formErrors?.addressStreet)}>
-        <TextField
-          value={formData.addressStreet}
-          label="Street"
-          variant="outlined"
-          name="addressStreet"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-
-        {formErrors?.addressStreet &&
-          <FormHelperText>
-            {formErrors.addressStreet}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.addressZip)}>
-        <TextField
-          value={formData.addressZip}
-          label="Zip"
-          variant="outlined"
-          name="addressZip"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-
-        {formErrors?.addressZip &&
-          <FormHelperText>
-            {formErrors.addressZip}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.addressCity)}>
-        <TextField
-          value={formData.addressCity}
-          label="City"
-          variant="outlined"
-          name="addressCity"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-
-        {formErrors?.addressCity &&
-          <FormHelperText>
-            {formErrors.addressCity}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      <FormControl error={Boolean(formErrors?.addressCountry)}>
-        <TextField
-          value={formData.addressCountry}
-          label="Country"
-          variant="outlined"
-          name="addressCountry"
-          onChange={handleChange}
-          disabled={isPending}
-        />
-
-        {formErrors?.addressCountry &&
-          <FormHelperText>
-            {formErrors.addressCountry}
-          </FormHelperText>
-        }
-      </FormControl>
-
-      {errorMessage &&
-        <FormHelperText sx={{ color: `red`, fontSize: `16px` }}>
+      {errorMessage && (
+        <Box sx={{ color: 'error.main', fontSize: '16px', mt: 1 }}>
           {errorMessage}
-        </FormHelperText>
-      }
+        </Box>
+      )}
 
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        onClick={handleSubmit}
-        sx={{ mt: `20px` }}
-        disabled={formErrors && Object.keys(formErrors).length > 0 || isPending}
-        endIcon={isPending && <CircularProgress size={16} />}
-      >
-        Save
-      </Button>
+      <FormActions
+        onSubmit={handleSubmit}
+        disabled={formErrors && Object.keys(formErrors).length > 0}
+        isPending={isPending}
+        submitText="Save"
+      />
     </Box>
   );
 }

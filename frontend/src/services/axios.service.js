@@ -28,11 +28,14 @@ axiosInstance.interceptors.request.use(
 );
 
 export const handleAxiosError = (error) => {
-  if (error?.status === ERRORS.VALIDATION_ERROR) {
-    error.response.data.status = ERRORS.VALIDATION_ERROR;
-    throw error.response.data;
+  // Handle validation errors (428 Precondition Required)
+  if (error?.response?.status === 428 || error?.status === ERRORS.VALIDATION_ERROR) {
+    const errorData = error.response?.data || error;
+    errorData.status = ERRORS.VALIDATION_ERROR;
+    throw errorData;
   }
 
+  // Handle other API errors
   if (error?.response?.data?.errorMessage) {
     throw error.response.data.errorMessage;
   } else if (error?.response?.data?.message) {

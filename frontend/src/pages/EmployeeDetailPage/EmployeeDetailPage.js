@@ -104,7 +104,10 @@ export default function EmployeeDetailPage() {
         <Box mt={2}>
           {!shouldShowCreateEmployeeForm && <Button
             variant="outlined"
-            onClick={() => setIsEditMode(false)}
+            onClick={() => {
+              dispatch(cleanErrors());
+              setIsEditMode(false);
+            }}
           >
             Cancel
           </Button>}
@@ -147,6 +150,7 @@ export default function EmployeeDetailPage() {
       {!isEditMode && <Button
         sx={{ width: `100%`, mt: `20px` }}
         onClick={() => {
+          dispatch(cleanErrors());
           setIsEditMode(true);
         }}
         startIcon={<Edit />}

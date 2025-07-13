@@ -56,6 +56,7 @@ export default function CompanyDetailPage() {
     try {
       const response = await dispatch(updateCompany(company)).unwrap();
 
+      dispatch(cleanErrors());
       setIsEditMode(false);
 
       dispatch(fetchCompany(response.data));
@@ -85,7 +86,10 @@ export default function CompanyDetailPage() {
       </Box>}
 
       {hasCreateButton && !isEditMode &&<Box
-        onClick={() => setIsEditMode(true)}
+        onClick={() => {
+          dispatch(cleanErrors());
+          setIsEditMode(true);
+        }}
         sx={{
           display: `flex`,
           alignItems: `center`,
@@ -124,6 +128,8 @@ export default function CompanyDetailPage() {
           {<Button
             variant="outlined"
             onClick={() => {
+              dispatch(cleanErrors());
+
               if (hasCreateButton) {
                 navigate(`/company`, { replace: true });
               } else {
@@ -142,7 +148,10 @@ export default function CompanyDetailPage() {
       {!isEditMode && company && <Box mt={3}>
         <CompanyDetails
           company={company}
-          onChangeCompanyClick={() => setIsEditMode(true)}
+          onChangeCompanyClick={() => {
+            dispatch(cleanErrors());
+            setIsEditMode(true);
+          }}
         />
       </Box>}
 

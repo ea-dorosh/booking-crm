@@ -28,14 +28,26 @@ export default function ServicesDetailPage() {
     if (!serviceCategory) {
       dispatch(fetchServiceCategories());
     }
+
+    // Clean errors when component unmounts
+    return () => {
+      dispatch(cleanErrors());
+    };
   }, []);
 
   const categoryHandler = async (category) => {
-    const categoryId = await dispatch(updateCategory(category)).unwrap();
+    try {
+      const categoryId = await dispatch(updateCategory(category)).unwrap();
 
-    navigate(`/categories/${categoryId}`, { replace: true });
+      // Clear errors on successful update
+      dispatch(cleanErrors());
 
-    dispatch(fetchServiceCategories());
+      navigate(`/categories/${categoryId}`, { replace: true });
+
+      dispatch(fetchServiceCategories());
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCleanError = (fieldName) => {

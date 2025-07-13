@@ -12,7 +12,9 @@ export interface ServiceDetailsDataType {
 
 export interface ServiceFormDataValidationErrors {
   name?: string;
+  categoryId?: string;
   durationTime?: string;
+  employeePrices?: string;
 }
 
 export interface EmployeePriceType {

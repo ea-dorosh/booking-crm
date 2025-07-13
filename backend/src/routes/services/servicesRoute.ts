@@ -436,6 +436,12 @@ const deleteEmployeesPriceForService = async (db: DbPoolType, serviceId: number)
 
 const saveEmployeePriceForService = async (db: DbPoolType, employeePrice: EmployeePriceType, serviceId: number) => {
   try {
+    // Skip saving if price is null, undefined, or negative
+    if (employeePrice.price === null || employeePrice.price === undefined || employeePrice.price < 0) {
+      console.log(`Skipping employee ${employeePrice.employeeId} - invalid price: ${employeePrice.price}`);
+      return;
+    }
+
     // Check if there's an existing record for the employee and service
     const checkQuery = `SELECT price FROM ServiceEmployeePrice WHERE employee_id = ? AND service_id = ?`;
 

@@ -19,7 +19,7 @@ export default function ServicesPage() {
     if (!services) {
       promises.push(dispatch(fetchServices()));
     }
-    if (!employees.length) {
+    if (!employees || employees.length === 0) {
       promises.push(dispatch(fetchEmployees()));
     }
     if (!serviceCategories) {

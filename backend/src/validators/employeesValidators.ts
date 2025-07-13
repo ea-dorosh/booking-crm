@@ -5,18 +5,22 @@ const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDat
   const errors: EmployeeFormDataValidationErrors = {};
 
   if (!employee.firstName || employee.firstName.length < 2 ) {
-    errors.firstName = `Service name must be at least 2 characters long`;
+    errors.firstName = `First name must be at least 2 characters long`;
   }
 
   if (!employee.lastName || employee.lastName.length < 2 ) {
-    errors.lastName = `Service name must be at least 2 characters long`;
+    errors.lastName = `Last name must be at least 2 characters long`;
   }
 
-  if (employee.email && !validateEmail(employee.email)) {
+  if (!employee.email || employee.email.trim() === '') {
+    errors.email = `Email is required`;
+  } else if (!validateEmail(employee.email)) {
     errors.email = `Invalid email address`;
   }
 
-  if (employee.phone && !validatePhone(employee.phone)) {
+  if (!employee.phone || employee.phone.trim() === '') {
+    errors.phone = `Phone is required`;
+  } else if (!validatePhone(employee.phone)) {
     errors.phone = `Invalid phone number`;
   }
 
