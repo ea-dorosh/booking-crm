@@ -7,7 +7,15 @@ export const up = async function(knex) {
   const hasCompanyBranchesTable = await knex.schema.hasTable('CompanyBranches');
 
   if (hasCompanyBranchesTable) {
-    // Drop the existing table to recreate with correct types
+    // First drop the foreign key constraint
+    const hasBranchIdColumn = await knex.schema.hasColumn('Company', 'branch_id');
+    if (hasBranchIdColumn) {
+      await knex.schema.alterTable('Company', (table) => {
+        table.dropForeign(['branch_id']);
+        table.dropColumn('branch_id');
+      });
+    }
+    // Now we can drop the table
     await knex.schema.dropTable('CompanyBranches');
   }
 
