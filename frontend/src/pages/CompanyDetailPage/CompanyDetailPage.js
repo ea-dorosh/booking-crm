@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
+import CompanyBranchesContainer from "@/components/CompanyBranchesContainer/CompanyBranchesContainer";
 import CompanyDetails from "@/components/CompanyDetails/CompanyDetails";
 import CompanyForm from "@/components/CompanyForm/CompanyForm";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
@@ -144,6 +145,10 @@ export default function CompanyDetailPage() {
           onChangeCompanyClick={() => setIsEditMode(true)}
         />
       </Box>}
+
+      <CompanyBranchesContainer
+        branches={company?.branches || []}
+      />
     </PageContainer>
   );
 }

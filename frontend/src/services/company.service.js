@@ -20,6 +20,26 @@ const createCompany = async (company) => {
   }
 };
 
+const createCompanyBranch = async (companyBranch) => {
+  try {
+    const response = await axios.post(`/company/create-company-branch`, companyBranch);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const updateCompanyBranch = async (companyBranch) => {
+  try {
+    const response = await axios.put(`/company/edit-company-branch/${companyBranch.id}`, companyBranch);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const updateCompany = async (company) => {
   try {
     const response = await axios.put(`/company/edit/${company.id}`, company);
@@ -32,6 +52,8 @@ const updateCompany = async (company) => {
 
 const companyService = {
   createCompany,
+  createCompanyBranch,
+  updateCompanyBranch,
   getCompany,
   updateCompany,
 };

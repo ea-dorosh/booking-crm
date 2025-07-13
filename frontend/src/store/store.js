@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import appointmentSlice from '@/features/appointments/appointmentSlice';
 import appointmentsSlice from '@/features/appointments/appointmentsSlice';
+import companyBranchSlice from '@/features/company/companyBranchSlice';
 import companySlice from '@/features/company/companySlice';
 import counterReducer from '@/features/counter/counterSlice';
 import customerReducer from '@/features/customers/customerSlice';
@@ -17,6 +18,7 @@ export default configureStore({
     appointment: appointmentSlice,
     appointments: appointmentsSlice,
     counter: counterReducer,
+    companyBranch: companyBranchSlice,
     company: companySlice,
     customer: customerReducer,
     customers: customersReducer,

@@ -5,6 +5,12 @@ import {
   updateCompanyData,
  } from '@/services/company/companyService.js';
 import {
+  getAllCompanyBranches,
+  getCompanyBranchById,
+  createCompanyBranch,
+  updateCompanyBranch,
+} from '@/services/companyBranches/companyBranchesService.js';
+import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
@@ -23,8 +29,14 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
 
   try {
     const company = await getCompany(request.dbPool);
+    const branches = await getAllCompanyBranches(request.dbPool);
 
-    response.json(company);
+    const companyWithBranches = {
+      ...company,
+      branches,
+    };
+
+    response.json(companyWithBranches);
 
     return;
   } catch (error) {
@@ -61,6 +73,68 @@ router.post(`/create-company`, async (request: CustomRequestType, response: Cust
       response.json({
         message: `Company data inserted successfully`,
         data: newCompanyId,
+      });
+    }
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const mysqlError = error as { code?: string; message?: string };
+      if (mysqlError.code === 'ER_DUP_ENTRY') {
+        response.status(409).json({
+          errorMessage: `Company with this name already exists`,
+        });
+
+        return;
+      }
+
+      response.status(500).json({
+        errorMessage: `Error while creating company`,
+        message: mysqlError.message,
+      });
+
+      return;
+    }
+
+    if (error instanceof Error) {
+      response.status(500).json({
+        errorMessage: `Error while creating company`,
+        message: error.message,
+      });
+
+      return;
+    }
+
+    response.status(500).json({
+      errorMessage: `Unknown error occurred`,
+    });
+
+    return;
+  }
+});
+
+router.post(`/create-company-branch`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({
+      errorMessages: `Database connection not initialized`,
+      error: new Error(`Database connection not initialized`).message,
+    });
+
+    return;
+  }
+
+  const companyBranch = request.body;
+
+  try {
+    const { newBranchId, validationErrors } = await createCompanyBranch(request.dbPool, companyBranch);
+
+    if (validationErrors) {
+      response.status(428).json({
+          errorMessage: `Validation failed`,
+          validationErrors,
+        });
+    } else if (newBranchId) {
+      response.json({
+        message: `Company branch data inserted successfully`,
+        data: newBranchId,
       });
     }
   } catch (error: unknown) {
@@ -154,6 +228,44 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
 
       return;
     }
+
+    response.status(500).json({
+      errorMessage: `Unknown error occurred`,
+    });
+
+    return;
+  }
+});
+
+router.put(`/edit-company-branch/:id`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({
+      errorMessages: `Database connection not initialized`,
+      error: new Error(`Database connection not initialized`).message,
+    });
+
+    return;
+  }
+
+  const companyBranchId = Number(request.params.id);
+  const companyBranch = request.body;
+
+  try {
+    const { updatedBranchId, validationErrors } = await updateCompanyBranch(request.dbPool, companyBranchId, companyBranch);
+
+    if (validationErrors) {
+      response.status(428).json({
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
+    } else if (updatedBranchId) {
+      response.json({
+        message: `Company branch with id: ${updatedBranchId} has been updated successfully`,
+        data: updatedBranchId,
+      });
+    }
+  } catch (error) {
+    console.error(error);
 
     response.status(500).json({
       errorMessage: `Unknown error occurred`,

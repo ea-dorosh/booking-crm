@@ -6,9 +6,9 @@ import companyService from "@/services/company.service";
 
 export const fetchCompany = createAsyncThunk(
   `company/fetchCompany`,
-  async (id, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      const data = await companyService.getCompany(id);
+      const data = await companyService.getCompany();
 
       return data;
     } catch (error) {
