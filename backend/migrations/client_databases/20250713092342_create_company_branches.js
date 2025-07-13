@@ -6,7 +6,7 @@ export const up = async function(knex) {
   // Create CompanyBranches table if not exists
   const hasCompanyBranchesTable = await knex.schema.hasTable('CompanyBranches');
 
-    if (!hasCompanyBranchesTable) {
+        if (!hasCompanyBranchesTable) {
     await knex.schema.createTable('CompanyBranches', (table) => {
       table.integer('id').primary().unsigned();
       table.integer('company_id').unsigned().notNullable();
