@@ -7,24 +7,24 @@ export const up = async function(knex) {
   const hasCompanyBranchesTable = await knex.schema.hasTable('CompanyBranches');
 
   if (hasCompanyBranchesTable) {
-    // First drop the foreign key constraint from Company table
-    const hasBranchIdColumn = await knex.schema.hasColumn('Company', 'branch_id');
-    if (hasBranchIdColumn) {
-      await knex.schema.alterTable('Company', (table) => {
-        table.dropForeign(['branch_id']);
-        table.dropColumn('branch_id');
+    // Check if company_id column exists in CompanyBranches table
+    const hasCompanyIdColumn = await knex.schema.hasColumn('CompanyBranches', 'company_id');
+    if (hasCompanyIdColumn) {
+      // Drop the foreign key constraint from CompanyBranches table
+      try {
+        await knex.schema.alterTable('CompanyBranches', (table) => {
+          table.dropForeign(['company_id']);
+        });
+      } catch (error) {
+        // Foreign key might not exist, continue
+        console.log('Foreign key company_id might not exist, continuing...');
+      }
+
+      // Drop the company_id column
+      await knex.schema.alterTable('CompanyBranches', (table) => {
+        table.dropColumn('company_id');
       });
     }
-
-    // Drop the foreign key constraint from CompanyBranches table
-    await knex.schema.alterTable('CompanyBranches', (table) => {
-      table.dropForeign(['company_id']);
-    });
-
-    // Drop the company_id column
-    await knex.schema.alterTable('CompanyBranches', (table) => {
-      table.dropColumn('company_id');
-    });
   }
 
   // Check if branch_id column exists in Company table and add it back
