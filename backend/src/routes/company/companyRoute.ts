@@ -6,7 +6,6 @@ import {
  } from '@/services/company/companyService.js';
 import {
   getAllCompanyBranches,
-  getCompanyBranchById,
   createCompanyBranch,
   updateCompanyBranch,
 } from '@/services/companyBranches/companyBranchesService.js';
