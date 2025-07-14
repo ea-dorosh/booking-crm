@@ -4,29 +4,29 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
-import ServiceCategoryForm from "@/components/ServiceCategoryForm/ServiceCategoryForm";
+import ServiceSubCategoryForm from "@/components/ServiceSubCategoryForm/ServiceSubCategoryForm";
 import {
-  fetchServiceCategories,
-  updateCategory,
+  fetchServiceSubCategories,
+  updateSubCategory,
   cleanError,
   cleanErrors,
-} from '@/features/serviceCategories/serviceCategoriesSlice';
+} from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
-export default function ServicesDetailPage() {
+export default function ServiceSubCategoryDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { categoryId } = useParams();
+  const { subCategoryId } = useParams();
 
-  const serviceCategory = useSelector(state => state.serviceCategories.data?.find(category => category.id === Number(categoryId)));
+  const serviceSubCategory = useSelector(state => state.serviceSubCategories.data?.find(subCategory => subCategory.id === Number(subCategoryId)));
   const {
-    areCategoriesFetching,
-    isUpdateCategoryRequestPending,
+    areSubCategoriesFetching,
+    isUpdateSubCategoryRequestPending,
     formErrors,
-  } = useSelector(state => state.serviceCategories);
+  } = useSelector(state => state.serviceSubCategories);
 
   useEffect(() => {
-    if (!serviceCategory) {
-      dispatch(fetchServiceCategories());
+    if (!serviceSubCategory) {
+      dispatch(fetchServiceSubCategories());
     }
 
     // Clean errors when component unmounts
@@ -35,16 +35,16 @@ export default function ServicesDetailPage() {
     };
   }, []);
 
-  const categoryHandler = async (category) => {
+  const subCategoryHandler = async (subCategory) => {
     try {
-      const categoryId = await dispatch(updateCategory(category)).unwrap();
+      const subCategoryId = await dispatch(updateSubCategory(subCategory)).unwrap();
 
       // Clear errors on successful update
       dispatch(cleanErrors());
 
-      navigate(`/categories/${categoryId}`, { replace: true });
+      navigate(`/sub-categories/${subCategoryId}`, { replace: true });
 
-      dispatch(fetchServiceCategories());
+      dispatch(fetchServiceSubCategories());
     } catch (error) {
       console.error(error);
     }
@@ -60,23 +60,23 @@ export default function ServicesDetailPage() {
 
   return (
     <PageContainer
-      pageTitle={serviceCategory ?
-        `${serviceCategory.name}`
+      pageTitle={serviceSubCategory ?
+        `${serviceSubCategory.name}`
         :
-        `New Category`
+        `New Sub Category`
       }
       hideSideNav
     >
       <GoBackNavigation />
 
-      {(areCategoriesFetching || isUpdateCategoryRequestPending) && <Box mt={2}>
+      {(areSubCategoriesFetching || isUpdateSubCategoryRequestPending) && <Box mt={2}>
         <LinearProgress />
       </Box>}
 
       <Box mt={3}>
-        {!areCategoriesFetching && <ServiceCategoryForm
-          category={serviceCategory}
-          submitForm={categoryHandler}
+        {!areSubCategoriesFetching && <ServiceSubCategoryForm
+          subCategory={serviceSubCategory}
+          submitForm={subCategoryHandler}
           formErrors={formErrors}
           cleanError={handleCleanError}
           cleanErrors={handleCleanErrors}

@@ -16,9 +16,9 @@ import OAuthCallbackPage from '@/pages/OAuthCallbackPage/OAuthCallbackPage';
 import ForgotPasswordPage from '@/pages/PasswordResetPage/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/PasswordResetPage/ResetPasswordPage';
 import RootPageWithOAuthHandler from '@/pages/RootPageWithOAuthHandler/RootPageWithOAuthHandler';
-import ServiceCategoryDetailPage from '@/pages/ServiceCategoryDetailPage/ServiceCategoryDetailPage';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
+import ServiceSubCategoryDetailPage from '@/pages/ServiceSubCategoryDetailPage/ServiceSubCategoryDetailPage.js';
 import { ProtectedRoute } from '@/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -122,9 +122,9 @@ export const router = createBrowserRouter([
     </ProtectedRoute>,
   },
   {
-    path: `/categories/:categoryId`,
+    path: `/sub-categories/:subCategoryId`,
     element: <ProtectedRoute>
-      <ServiceCategoryDetailPage />
+      <ServiceSubCategoryDetailPage />
     </ProtectedRoute>,
   },
   {

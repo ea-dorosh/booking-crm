@@ -9,14 +9,14 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
-const CategorySelectField = ({
+const SubCategorySelectField = ({
   name,
   value,
   onChange,
   error,
   cleanError,
   disabled = false,
-  serviceCategories = [],
+  serviceSubCategories = [],
   sx = {},
 }) => {
   return (
@@ -32,25 +32,25 @@ const CategorySelectField = ({
         sx={{ flexGrow: 1 }}
         error={Boolean(error)}
       >
-        <InputLabel id={`${name}-select-label`}>Service Category</InputLabel>
+        <InputLabel id={`${name}-select-label`}>Service Sub Category</InputLabel>
 
         <Select
           name={name}
           value={value}
           labelId={`${name}-select-label`}
-          label="Service Category"
+          label="Service Sub Category"
           onChange={(event) => {
             onChange(event);
-            // Clear category error when user makes a selection
+            // Clear sub category error when user makes a selection
             if (cleanError && error) {
               cleanError(name);
             }
           }}
           disabled={disabled}
         >
-          {serviceCategories.map((category) => (
-            <MenuItem key={category.id} value={category.id}>
-              {category.name}
+          {serviceSubCategories.map((subCategory) => (
+            <MenuItem key={subCategory.id} value={subCategory.id}>
+              {subCategory.name}
             </MenuItem>
           ))}
         </Select>
@@ -70,7 +70,7 @@ const CategorySelectField = ({
             size="small"
             disabled={disabled}
           >
-            Edit Category
+            Edit Sub Category
           </Button>
         </RouterLink>
       )}
@@ -78,4 +78,4 @@ const CategorySelectField = ({
   );
 };
 
-export default CategorySelectField;
+export default SubCategorySelectField;

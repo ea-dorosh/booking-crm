@@ -3,15 +3,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServicesContainer from "@/components/ServicesContainer/ServicesContainer";
 import { fetchEmployees } from '@/features/employees/employeesSlice';
-import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { fetchServices } from '@/features/services/servicesSlice';
+import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
 
 export default function ServicesPage() {
   const dispatch = useDispatch();
   const services = useSelector(state => state.services.data);
   const employees = useSelector(state => state.employees.data);
-  const serviceCategories = useSelector(state => state.serviceCategories.data);
+  const serviceSubCategories = useSelector(state => state.serviceSubCategories.data);
 
   useEffect(() => {
     const promises = [];
@@ -22,8 +22,8 @@ export default function ServicesPage() {
     if (!employees || employees.length === 0) {
       promises.push(dispatch(fetchEmployees()));
     }
-    if (!serviceCategories) {
-      promises.push(dispatch(fetchServiceCategories()));
+    if (!serviceSubCategories) {
+      promises.push(dispatch(fetchServiceSubCategories()));
     }
 
     Promise.all(promises);
@@ -34,7 +34,7 @@ export default function ServicesPage() {
       <ServicesContainer
         services={services}
         employees={employees}
-        categories={serviceCategories}
+        subCategories={serviceSubCategories}
       />
     </PageContainer>
   );

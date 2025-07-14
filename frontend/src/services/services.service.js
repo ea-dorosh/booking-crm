@@ -11,9 +11,9 @@ const getServices = async () => {
   }
 };
 
-const getServiceCategories = async () => {
+const getServiceSubCategories = async () => {
   try {
-    const response = await axios.get(`/services/categories`);
+    const response = await axios.get(`/services/sub-categories`);
 
     return response.data;
   } catch (error) {
@@ -49,11 +49,11 @@ const updateService = async (service) => {
   }
 };
 
-const updateServiceCategory = async (serviceCategory) => {
-  const formData = appendFormData(serviceCategory);
+const updateServiceSubCategory = async (serviceSubCategory) => {
+  const formData = appendFormData(serviceSubCategory);
 
   try {
-    const response = await axios.put(`/services/category/edit/${serviceCategory.id}`, formData);
+    const response = await axios.put(`/services/sub-category/edit/${serviceSubCategory.id}`, formData);
 
     return response.data;
   } catch (error) {
@@ -61,11 +61,11 @@ const updateServiceCategory = async (serviceCategory) => {
   }
 };
 
-const createServiceCategory = async (serviceCategory) => {
-  const formData = appendFormData(serviceCategory);
+const createServiceSubCategory = async (serviceSubCategory) => {
+  const formData = appendFormData(serviceSubCategory);
 
   try {
-    const response = await axios.post(`/services/category/create`, formData);
+    const response = await axios.post(`/services/sub-category/create`, formData);
 
     return response.data;
   } catch (error) {
@@ -85,11 +85,11 @@ const deleteService = async (id) => {
 
 const serviceService = {
   getServices,
-  getServiceCategories,
+  getServiceSubCategories,
   createService,
   updateService,
-  updateServiceCategory,
-  createServiceCategory,
+  updateServiceSubCategory,
+  createServiceSubCategory,
   deleteService,
 };
 

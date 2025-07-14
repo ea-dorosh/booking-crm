@@ -4,11 +4,11 @@ import {
 } from '@reduxjs/toolkit';
 import servicesService from "@/services/services.service";
 
-export const fetchServiceCategories = createAsyncThunk(
-  `serviceCategories/fetchServiceCategories`,
+export const fetchServiceSubCategories = createAsyncThunk(
+  `serviceSubCategories/fetchServiceSubCategories`,
   async (_arg, thunkAPI) => {
     try {
-      const data = await servicesService.getServiceCategories();
+      const data = await servicesService.getServiceSubCategories();
 
       return data;
     } catch (error) {
@@ -17,16 +17,16 @@ export const fetchServiceCategories = createAsyncThunk(
   }
 );
 
-export const updateCategory = createAsyncThunk(
-  `serviceCategories/updateCategory`,
+export const updateSubCategory = createAsyncThunk(
+  `serviceSubCategories/updateSubCategory`,
   async (formData, thunkAPI) => {
     try {
       if (formData.id) {
-        const { data } = await servicesService.updateServiceCategory(formData);
+        const { data } = await servicesService.updateServiceSubCategory(formData);
 
         return data;
       } else {
-        const { data } = await servicesService.createServiceCategory(formData);
+        const { data } = await servicesService.createServiceSubCategory(formData);
 
         return data;
       }
@@ -38,7 +38,7 @@ export const updateCategory = createAsyncThunk(
 );
 
 export const deleteService = createAsyncThunk(
-  `serviceCategories/deleteCategory`,
+  `serviceSubCategories/deleteSubCategory`,
   async (serviceId, thunkAPI) => {
     try {
       const { data } = await servicesService.deleteService(serviceId);
@@ -51,13 +51,13 @@ export const deleteService = createAsyncThunk(
   }
 );
 
-const serviceCategoriesSlice = createSlice({
-  name: `serviceCategories`,
+const serviceSubCategoriesSlice = createSlice({
+  name: `serviceSubCategories`,
   initialState: {
     data: null,
-    areCategoriesFetching: false,
+    areSubCategoriesFetching: false,
     error: null,
-    isUpdateCategoryRequestPending: false,
+    isUpdateSubCategoryRequestPending: false,
     updateFormData: null,
     updateFormErrors: null,
   },
@@ -75,26 +75,26 @@ const serviceCategoriesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchServiceCategories.pending, (state) => {
-        state.areCategoriesFetching = true;
+      .addCase(fetchServiceSubCategories.pending, (state) => {
+        state.areSubCategoriesFetching = true;
       })
-      .addCase(fetchServiceCategories.fulfilled, (state, action) => {
-        state.areCategoriesFetching = false;
+      .addCase(fetchServiceSubCategories.fulfilled, (state, action) => {
+        state.areSubCategoriesFetching = false;
         state.data = action.payload;
       })
-      .addCase(fetchServiceCategories.rejected, (state, action) => {
-        state.areCategoriesFetching = false;
+      .addCase(fetchServiceSubCategories.rejected, (state, action) => {
+        state.areSubCategoriesFetching = false;
         state.error = action.payload;
       })
-      .addCase(updateCategory.pending, (state) => {
-        state.isUpdateCategoryRequestPending = true;
+      .addCase(updateSubCategory.pending, (state) => {
+        state.isUpdateSubCategoryRequestPending = true;
       })
-      .addCase(updateCategory.fulfilled, (state, action) => {
-        state.isUpdateCategoryRequestPending = false;
+      .addCase(updateSubCategory.fulfilled, (state, action) => {
+        state.isUpdateSubCategoryRequestPending = false;
         state.updateFormData = action.payload;
       })
-      .addCase(updateCategory.rejected, (state, action) => {
-        state.isUpdateCategoryRequestPending = true;
+      .addCase(updateSubCategory.rejected, (state, action) => {
+        state.isUpdateSubCategoryRequestPending = true;
         state.updateFormErrors = action.payload;
       })
   }
@@ -103,6 +103,6 @@ const serviceCategoriesSlice = createSlice({
 export const {
   cleanError,
   cleanErrors,
-} = serviceCategoriesSlice.actions;
+} = serviceSubCategoriesSlice.actions;
 
-export default serviceCategoriesSlice.reducer;
+export default serviceSubCategoriesSlice.reducer;

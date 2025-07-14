@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { Box } from "@mui/material";
-import CategorySelectField from "@/components/common/CategorySelectField";
 import EmployeePriceFields from "@/components/common/EmployeePriceFields";
 import FormActions from "@/components/common/FormActions";
 import FormField from "@/components/common/FormField";
+import SubCategorySelectField from "@/components/common/SubCategorySelectField";
 import { TIME_DURATIONS, BUFFER_TIME_OPTIONS } from "@/constants/formFields";
 import useForm from "@/hooks/useForm";
 import { createServiceSubmitData } from "@/utils/formUtils";
@@ -11,7 +11,7 @@ import { createServiceSubmitData } from "@/utils/formUtils";
 export default function ServiceForm({
   service,
   employees,
-  serviceCategories,
+  serviceSubCategories,
   createNewService,
   formErrors,
   cleanError,
@@ -37,7 +37,7 @@ export default function ServiceForm({
         : field.defaultValue || ``;
       return acc;
     }, {}),
-    categoryId: isEditMode ? service.categoryId : ``,
+    subCategoryId: isEditMode ? service.subCategoryId : ``,
     durationTime: isEditMode ? service.durationTime : ``,
     bufferTime: isEditMode && service.bufferTime ? service.bufferTime : ``,
     bookingNote: isEditMode ? service.bookingNote : ``,
@@ -61,8 +61,8 @@ export default function ServiceForm({
     emp.price !== null && emp.price !== undefined && emp.price !== '' && Number(emp.price) >= 0
   );
 
-  // Check if category is selected
-  const hasValidCategory = formData.categoryId && formData.categoryId !== '';
+  // Check if sub category is selected
+  const hasValidSubCategory = formData.subCategoryId && formData.subCategoryId !== '';
 
   const handleCheckboxChange = (event, employeeId) => {
     const { checked } = event.target;
@@ -105,13 +105,13 @@ export default function ServiceForm({
         />
       ))}
 
-      <CategorySelectField
-        name="categoryId"
-        value={formData.categoryId}
+      <SubCategorySelectField
+        name="subCategoryId"
+        value={formData.subCategoryId}
         onChange={handleChange}
-        error={formErrors?.categoryId}
+        error={formErrors?.subCategoryId}
         cleanError={cleanError}
-        serviceCategories={serviceCategories}
+        serviceSubCategories={serviceSubCategories}
       />
 
       <FormField
@@ -156,7 +156,7 @@ export default function ServiceForm({
 
       <FormActions
         onSubmit={handleSubmit}
-        disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidCategory}
+        disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidSubCategory}
         isPending={false}
       />
     </Box>

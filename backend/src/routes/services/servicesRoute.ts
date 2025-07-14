@@ -38,7 +38,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 });
 
-router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType) => {
+router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
     res.status(500).json({ message: `Database connection not initialized` });
 
@@ -261,7 +261,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
   }
 });
 
-router.post(`/category/create`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
+router.post(`/sub-category/create`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
     res.status(500).json({ message: `Database connection not initialized` });
 
@@ -329,7 +329,7 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
   }
 });
 
-router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
+router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
     res.status(500).json({ message: `Database connection not initialized` });
 

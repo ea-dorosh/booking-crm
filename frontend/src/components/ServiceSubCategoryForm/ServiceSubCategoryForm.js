@@ -5,20 +5,20 @@ import ImageUpload from "@/components/common/ImageUpload";
 import useForm from "@/hooks/useForm";
 import { createSubmitData } from "@/utils/formUtils";
 
-export default function ServiceCategoryForm({
-  category,
+export default function ServiceSubCategoryForm({
+  subCategory,
   submitForm,
   formErrors,
   cleanError,
   cleanErrors,
 }) {
-  const isEditMode = Boolean(category);
+  const isEditMode = Boolean(subCategory);
 
   // Define form fields configuration
   const formFields = [
     {
       name: "name",
-      label: "Service Category Name",
+      label: "Service Sub Category Name",
       type: "text",
       required: true,
     },
@@ -27,7 +27,7 @@ export default function ServiceCategoryForm({
   // Initialize form data
   const initialData = formFields.reduce((acc, field) => {
     acc[field.name] = isEditMode
-      ? category[field.name] || field.defaultValue || ``
+      ? subCategory[field.name] || field.defaultValue || ``
       : field.defaultValue || ``;
     return acc;
   }, {});
@@ -38,7 +38,7 @@ export default function ServiceCategoryForm({
     handleSubmit,
     updateFormData,
   } = useForm(initialData, {
-    onSubmit: (data) => submitForm(createSubmitData(category, data)),
+    onSubmit: (data) => submitForm(createSubmitData(subCategory, data)),
     formErrors: formErrors || {},
     cleanError,
     cleanErrors,
@@ -73,7 +73,7 @@ export default function ServiceCategoryForm({
       <ImageUpload
         name="image"
         onChange={handleImageChange}
-        currentImage={category?.image}
+        currentImage={subCategory?.image}
       />
 
       <FormActions

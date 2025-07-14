@@ -14,7 +14,6 @@ import ListItemText from "@/components/ListItemText/ListItemText";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceForm from "@/components/ServiceForm/ServiceForm";
 import { fetchEmployees } from '@/features/employees/employeesSlice';
-import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
   fetchServices,
   updateService,
@@ -22,6 +21,7 @@ import {
   cleanErrors,
   deleteService,
 } from '@/features/services/servicesSlice';
+import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
 export default function ServicesDetailPage() {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -39,13 +39,13 @@ export default function ServicesDetailPage() {
     isUpdateServiceRequestPending,
   } = useSelector(state => state.services);
 
-  const serviceCategories = useSelector(state => state.serviceCategories.data);
+  const serviceSubCategories = useSelector(state => state.serviceSubCategories.data);
 
   useEffect(() => {
     const promises = [];
 
-    if (!serviceCategories) {
-      promises.push(dispatch(fetchServiceCategories()));
+    if (!serviceSubCategories) {
+      promises.push(dispatch(fetchServiceSubCategories()));
     }
 
     if (!employees.length) {
@@ -116,11 +116,11 @@ export default function ServicesDetailPage() {
         <LinearProgress />
       </Box>}
 
-      {isEditMode && serviceCategories && <Box mt={3}>
+      {isEditMode && serviceSubCategories && <Box mt={3}>
         <ServiceForm
           employees={employees || []}
           service={service}
-          serviceCategories={serviceCategories}
+          serviceSubCategories={serviceSubCategories}
           createNewService={updateServiceHandler}
           formErrors={updateFormErrors}
           cleanError={handleCleanError}
@@ -152,7 +152,7 @@ export default function ServicesDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && service && serviceCategories && <Box mt={3}>
+      {!isEditMode && service && serviceSubCategories && <Box mt={3}>
         <List>
           <ListItemText
             value={service.name}
@@ -160,8 +160,8 @@ export default function ServicesDetailPage() {
           />
 
           <ListItemText
-            value={serviceCategories.find(category => category.id === service.categoryId).name || `-`}
-            label="Service Category"
+            value={serviceSubCategories.find(subCategory => subCategory.id === service.subCategoryId).name || `-`}
+            label="Service Sub Category"
           />
 
           <ListItemText

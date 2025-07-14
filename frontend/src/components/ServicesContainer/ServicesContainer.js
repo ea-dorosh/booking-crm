@@ -13,7 +13,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
 
 const SERVICES = `services`;
-const CATEGORIES = `categories`;
+const SUB_CATEGORIES = `sub-categories`;
 
 const TABS = {
   [SERVICES]: {
@@ -22,17 +22,17 @@ const TABS = {
     url: `/services/create-service`,
     buttonText: `add service`,
   },
-  [CATEGORIES]: {
-    label: `Categories`,
-    value: CATEGORIES,
-    url: `/categories/create-category`,
-    buttonText: `add category`,
+  [SUB_CATEGORIES]: {
+    label: `Sub Categories`,
+    value: SUB_CATEGORIES,
+    url: `/sub-categories/create-sub-category`,
+    buttonText: `add sub category`,
   },
 };
 
 export default function ServicesContainer({
   services,
-  categories,
+  subCategories,
 }) {
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
 
@@ -43,7 +43,7 @@ export default function ServicesContainer({
   return (
     <Box>
       <Tabs
-        tabs={[TABS[SERVICES], TABS[CATEGORIES]]}
+        tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES]]}
         onChange={handleTabChange}
       />
 
@@ -114,18 +114,18 @@ export default function ServicesContainer({
               <Typography sx={{
                 fontSize: `1rem`,
               }}>
-                {service.categoryName}
+                {service.subCategoryName}
               </Typography>
             </Box>
 
           </Box>
         ))}
 
-        {activeTab === TABS[CATEGORIES].value && categories && categories.map((category) => (
+        {activeTab === TABS[SUB_CATEGORIES].value && subCategories && subCategories.map((subCategory) => (
           <Box
-            key={category.id}
+            key={subCategory.id}
             component={RouterLink}
-            to={`/categories/${category.id}`}
+            to={`/sub-categories/${subCategory.id}`}
             sx={{
               display: `flex`,
               alignItems: `flex-start`,
@@ -141,7 +141,7 @@ export default function ServicesContainer({
             <Typography sx={{
               fontSize: `1.1rem`,
             }}>
-              {category.name}
+              {subCategory.name}
             </Typography>
 
             <Box
@@ -152,7 +152,7 @@ export default function ServicesContainer({
               }}
             >
               <img
-                src={category.image}
+                src={subCategory.image}
                 style={{ width: `100%` }}
               />
             </Box>
