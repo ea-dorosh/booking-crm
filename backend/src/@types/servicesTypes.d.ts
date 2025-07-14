@@ -3,7 +3,7 @@ import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 export interface ServiceDetailsDataType {
   id: number;
   name: string;
-  categoryId: number;
+  subCategoryId: number;
   employeeIds: [];
   durationTime: Time_HH_MM_SS_Type;
   bufferTime?: Time_HH_MM_SS_Type;
@@ -12,7 +12,7 @@ export interface ServiceDetailsDataType {
 
 export interface ServiceFormDataValidationErrors {
   name?: string;
-  categoryId?: string;
+  subCategoryId?: string;
   durationTime?: string;
   employeePrices?: string;
 }
@@ -24,14 +24,14 @@ export interface EmployeePriceType {
 
 export interface ServiceDataType {
   name: string;
-  categoryId: number;
+  subCategoryId: number;
   durationTime: string;
   bufferTime: string;
   bookingNote: string;
   employeePrices: EmployeePriceType[];
 }
 
-export interface CategoryDataType {
+export interface SubCategoryDataType {
   name: string;
   image: string;
 }

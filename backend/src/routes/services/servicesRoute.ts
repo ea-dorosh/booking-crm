@@ -8,8 +8,12 @@ import {
   DbPoolType,
 } from '@/@types/expressTypes.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
-import { EmployeePriceType, ServiceDataType, CategoryDataType } from '@/@types/servicesTypes.js';
-import { CategoryRow } from '@/@types/categoriesTypes.js';
+import {
+  EmployeePriceType,
+  ServiceDataType,
+  SubCategoryDataType,
+} from '@/@types/servicesTypes.js';
+import { SubCategoryRow } from '@/@types/categoriesTypes.js';
 
 const router = express.Router();
 
@@ -41,13 +45,14 @@ router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType
     return;
   }
 
+  // get service sub categories
   const sql = `
     SELECT c.id, c.name, c.img
-    FROM ServiceCategories c
+    FROM ServiceSubCategories c
   `;
 
   try {
-    const [results] = await req.dbPool.query<CategoryRow[]>(sql);
+    const [results] = await req.dbPool.query<SubCategoryRow[]>(sql);
 
     const data = results.map((row) => ({
       id: row.id,
@@ -88,7 +93,7 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
     INSERT INTO Services (
       employee_id,
       name,
-      category_id,
+      sub_category_id,
       duration_time,
       buffer_time,
       booking_note
@@ -105,7 +110,7 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
   const serviceValues = [
       employeeIds,
       service.name,
-      service.categoryId,
+      service.subCategoryId,
       service.durationTime,
       service.bufferTime,
       service.bookingNote,
@@ -186,7 +191,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
 
   const updateServiceQuery = `
     UPDATE Services
-    SET employee_id = ?, name = ?, category_id = ?, duration_time = ?, buffer_time = ?, booking_note = ?
+    SET employee_id = ?, name = ?, sub_category_id = ?, duration_time = ?, buffer_time = ?, booking_note = ?
     WHERE id = ?;
   `;
 
@@ -195,7 +200,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
   const serviceValues = [
     employeeIds,
     service.name,
-    service.categoryId,
+    service.subCategoryId,
     service.durationTime,
     service.bufferTime,
     service.bookingNote,
@@ -263,30 +268,30 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
     return;
   }
 
-  const category: CategoryDataType = req.body;
+  const subCategory: SubCategoryDataType = req.body;
 
   const imgPath = req.file?.filename || null;
 
-  const categoryQuery = `
-    INSERT INTO ServiceCategories (
+  const subCategoryQuery = `
+    INSERT INTO ServiceSubCategories (
       name,
       img
     )
     VALUES (?, ?)
   `;
 
-  const categoryValues = [
-    category.name,
+  const subCategoryValues = [
+    subCategory.name,
     imgPath,
   ];
 
   try {
-    const [results] = await req.dbPool.query<ResultSetHeader>(categoryQuery, categoryValues);
-    const categoryId = results.insertId;
+    const [results] = await req.dbPool.query<ResultSetHeader>(subCategoryQuery, subCategoryValues);
+    const subCategoryId = results.insertId;
 
     res.json({
-      message: `Category data inserted successfully`,
-      data: categoryId,
+      message: `Sub Category data inserted successfully`,
+      data: subCategoryId,
     });
 
     return;
@@ -295,13 +300,13 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
-        res.status(428).json({ errors: { name: `Category with this name already exists` } });
+        res.status(428).json({ errors: { name: `Sub Category with this name already exists` } });
 
         return;
       }
 
       res.status(500).json({
-        errorMessage: `Error while editing Category`,
+        errorMessage: `Error while editing Sub Category`,
         message: mysqlError.message,
       });
 
@@ -309,7 +314,7 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
     }
     if (error instanceof Error) {
       res.status(500).json({
-        errorMessage: `Error while editing Category`,
+        errorMessage: `Error while editing Sub Category`,
         message: error.message,
       });
 
@@ -317,7 +322,7 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
     }
 
     res.status(500).json({
-      errorMessage: `Unknown error occurred while editing Category`,
+      errorMessage: `Unknown error occurred while editing Sub Category`,
     });
 
     return;
@@ -331,29 +336,29 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
     return;
   }
 
-  const categoryId = req.params.id;
+  const subCategoryId = req.params.id;
   const { name } = req.body;
 
   const imgPath = req.file?.filename || null;
 
-  const updateServiceCategoryQuery = `
-    UPDATE ServiceCategories
+  const updateServiceSubCategoryQuery = `
+    UPDATE ServiceSubCategories
     SET name = ?, img = COALESCE(?, img)
     WHERE id = ?;
   `;
 
-  const categoryValues = [
+  const subCategoryValues = [
     name,
     imgPath,
-    categoryId,
+    subCategoryId,
   ];
 
   try {
-    await req.dbPool.query(updateServiceCategoryQuery, categoryValues);
+    await req.dbPool.query(updateServiceSubCategoryQuery, subCategoryValues);
 
     res.json({
-        message: `Category data updated successfully`,
-        data: categoryId,
+        message: `SubCategory data updated successfully`,
+        data: subCategoryId,
     });
 
     return;
@@ -362,13 +367,13 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
-        res.status(428).json({ errors: { name: `Category with this name already exists` } });
+        res.status(428).json({ errors: { name: `Sub Category with this name already exists` } });
 
         return;
       }
 
       res.status(500).json({
-        errorMessage: `Error while editing Category`,
+        errorMessage: `Error while editing Sub Category`,
         message: mysqlError.message,
       });
 
@@ -376,7 +381,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
     }
     if (error instanceof Error) {
       res.status(500).json({
-        errorMessage: `Error while editing Category`,
+        errorMessage: `Error while editing Sub Category`,
         message: error.message,
       });
 
@@ -384,7 +389,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
     }
 
     res.status(500).json({
-      errorMessage: `Unknown error occurred while editing Category`,
+      errorMessage: `Unknown error occurred while editing Sub Category`,
     });
 
     return;

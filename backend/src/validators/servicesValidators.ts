@@ -7,8 +7,8 @@ const validateServiceData = (service: ServiceDataType): ServiceFormDataValidatio
     errors.name = `Service name must be at least 3 characters long`;
   }
 
-  if (!service.categoryId || service.categoryId <= 0) {
-    errors.categoryId = `Service category is required`;
+  if (!service.subCategoryId || service.subCategoryId <= 0) {
+    errors.subCategoryId = `Service category is required`;
   }
 
   if (!service.durationTime || service.durationTime === `00:00:00`) {

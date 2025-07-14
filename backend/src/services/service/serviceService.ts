@@ -3,7 +3,7 @@ import { RowDataPacket } from 'mysql2';
 import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
 import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 
-interface CategoryRow extends RowDataPacket {
+interface SubCategoryRow extends RowDataPacket {
   id: number;
   name: string;
   img: string | null;
@@ -12,7 +12,7 @@ interface CategoryRow extends RowDataPacket {
 interface ServiceRow extends RowDataPacket {
   id: number;
   name: string;
-  category_id: number;
+  sub_category_id: number;
   duration_time: Time_HH_MM_SS_Type;
   buffer_time: Time_HH_MM_SS_Type;
   booking_note: string | null;
@@ -20,7 +20,7 @@ interface ServiceRow extends RowDataPacket {
   price: number | null;
 }
 
-interface CategoryData {
+interface SubCategoryData {
   id: number;
   name: string;
   image: string | null;
@@ -34,8 +34,8 @@ interface EmployeePrice {
 interface ServiceData {
   id: number;
   name: string;
-  categoryId: number;
-  categoryName: string;
+  subCategoryId: number;
+  subCategoryName: string;
   durationTime: string;
   bufferTime: string;
   bookingNote: string | null;
@@ -43,14 +43,14 @@ interface ServiceData {
 }
 
 async function getServices(dbPool: Pool): Promise<ServiceData[]> {
-  const categoriesSql = `
+  const subCategoriesSql = `
     SELECT c.id, c.name, c.img
-    FROM ServiceCategories c
+    FROM ServiceSubCategories c
   `;
 
-  const [categoriesResult] = await dbPool.query<CategoryRow[]>(categoriesSql);
+  const [subCategoriesResult] = await dbPool.query<SubCategoryRow[]>(subCategoriesSql);
 
-  const categoriesData: CategoryData[] = categoriesResult.map((row) => ({
+  const subCategoriesData: SubCategoryData[] = subCategoriesResult.map((row) => ({
     id: row.id,
     name: row.name,
     image: row.img ? `${process.env.SERVER_API_URL}images/${row.img}` : null,
@@ -60,7 +60,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
     SELECT
       s.id,
       s.name,
-      s.category_id,
+      s.sub_category_id,
       s.duration_time,
       s.buffer_time,
       s.booking_note,
@@ -78,7 +78,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
     const {
       id,
       name,
-      category_id,
+      sub_category_id,
       duration_time,
       buffer_time,
       booking_note,
@@ -87,13 +87,13 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
     } = row;
 
     if (!servicesMap.has(id)) {
-      const category = categoriesData.find(category => category.id === category_id);
+      const subCategory = subCategoriesData.find(subCategory => subCategory.id === sub_category_id);
 
       servicesMap.set(id, {
         id,
         name,
-        categoryId: category_id,
-        categoryName: category ? category.name : '',
+        subCategoryId: sub_category_id,
+        subCategoryName: subCategory ? subCategory.name : '',
         durationTime: duration_time,
         bufferTime: buffer_time,
         bookingNote: booking_note,
@@ -128,7 +128,7 @@ async function getService(dbPool: Pool, serviceId: number): Promise<ServiceDetai
   const serviceData: ServiceDetailsDataType[] = serviceRows.map((row) => ({
     id: row.id,
     name: row.name,
-    categoryId: row.category_id,
+    subCategoryId: row.sub_category_id,
     employeeIds: [],
     durationTime: row.duration_time,
     bufferTime: row.buffer_time,

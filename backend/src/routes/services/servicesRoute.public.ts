@@ -4,7 +4,7 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { CategoryRow } from '@/@types/categoriesTypes.js';
+import { SubCategoryRow } from '@/@types/categoriesTypes.js';
 import { getEmployees } from '@/services/employees/employeesService.js';
 import { RowDataPacket } from 'mysql2';
 
@@ -18,15 +18,15 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
-    // get service categories
-    const categoriesSql = `
+    // get service sub categories
+    const subCategoriesSql = `
       SELECT c.id, c.name, c.img
-      FROM ServiceCategories c
+      FROM ServiceSubCategories c
     `;
 
-    const [categoriesResult] = await req.dbPool.query<CategoryRow[]>(categoriesSql);
+    const [subCategoriesResult] = await req.dbPool.query<SubCategoryRow[]>(subCategoriesSql);
 
-    const categoriesData = categoriesResult.map((row) => ({
+    const subCategoriesData = subCategoriesResult.map((row) => ({
       id: row.id,
       name: row.name,
       image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
@@ -34,12 +34,12 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
     const employeesData = await getEmployees(req.dbPool);
 
-    // get all services and map with categories and employee prices
+    // get all services and map with sub categories and employee prices
     const sql = `
       SELECT
         s.id,
         s.name,
-        s.category_id,
+        s.sub_category_id,
         s.duration_time,
         s.buffer_time,
         s.booking_note,
@@ -57,7 +57,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       const {
         id,
         name,
-        category_id,
+        sub_category_id,
         duration_time,
         buffer_time,
         booking_note,
@@ -69,14 +69,14 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         servicesMap.set(id, {
           id,
           name,
-          categoryId: category_id,
+          subCategoryId: sub_category_id,
           durationTime: duration_time,
           bufferTime: buffer_time,
           bookingNote: booking_note,
           employees: [],
-          categoryName: categoriesData.find(category => category.id === category_id)?.name || '',
-          categoryImage: categoriesData.find(category => category.id === category_id)?.image || null,
-          categoryUrl: toKebabCase(categoriesData.find(category => category.id === category_id)?.name || ''),
+          subCategoryName: subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.name || '',
+          subCategoryImage: subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.image || null,
+          subCategoryUrl: toKebabCase(subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.name || ''),
         });
       }
       // Push employee ID and price into the array
