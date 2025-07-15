@@ -1,19 +1,20 @@
 import express from 'express';
-import { getServices } from '@/services/service/serviceService.js';
-import { validateServiceData } from '@/validators/servicesValidators.js';
+import {
+  getServices,
+  getServiceSubCategories,
+  createService,
+  updateService,
+} from '@/services/service/serviceService.js';
 import { upload } from '@/utils/uploadFile.js';
 import {
   CustomRequestType,
   CustomResponseType,
-  DbPoolType,
 } from '@/@types/expressTypes.js';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import { ResultSetHeader } from 'mysql2';
 import {
-  EmployeePriceType,
   ServiceDataType,
   SubCategoryDataType,
 } from '@/@types/servicesTypes.js';
-import { SubCategoryRow } from '@/@types/categoriesTypes.js';
 
 const router = express.Router();
 
@@ -45,22 +46,10 @@ router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponse
     return;
   }
 
-  // get service sub categories
-  const sql = `
-    SELECT c.id, c.name, c.img
-    FROM ServiceSubCategories c
-  `;
-
   try {
-    const [results] = await req.dbPool.query<SubCategoryRow[]>(sql);
+    const subCategories = await getServiceSubCategories(req.dbPool);
 
-    const data = results.map((row) => ({
-      id: row.id,
-      name: row.name,
-      image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
-    }));
-
-    res.json(data);
+    res.json(subCategories);
 
     return;
   } catch (error) {
@@ -80,79 +69,24 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
 
   const service: ServiceDataType = req.body;
 
-  // Validation
-  const errors = validateServiceData(service);
-
-  if (Object.keys(errors).length > 0) {
-    res.status(428).json({ errors });
-
-    return;
-  }
-
-  const serviceQuery = `
-    INSERT INTO Services (
-      employee_id,
-      name,
-      sub_category_id,
-      duration_time,
-      buffer_time,
-      booking_note
-    )
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-
-  const employeeIds = service.employeePrices.map(employeePrice => {
-    if (employeePrice.price) {
-      return employeePrice.employeeId
-    }
-  }).join(`,`);
-
-  const serviceValues = [
-      employeeIds,
-      service.name,
-      service.subCategoryId,
-      service.durationTime,
-      service.bufferTime,
-      service.bookingNote,
-  ];
-
-  let serviceId;
-
   try {
-    const [serviceResults] = await req.dbPool.query<ResultSetHeader>(serviceQuery, serviceValues);
-    serviceId = serviceResults.insertId;
+    const { serviceId, validationErrors } = await createService(req.dbPool, service);
 
-    // set price to ServiceEmployeePrice table
-    if (service.employeePrices.length) {
-      for (const employeePrice of service.employeePrices) {
-        console.log(employeePrice);
-        await saveEmployeePriceForService(req.dbPool, employeePrice, serviceId);
-      }
+    if (validationErrors) {
+      res.status(428).json({ errors: validationErrors });
+
+      return;
     }
 
-    res.json({
-      message: `Service data inserted successfully`,
-      data: serviceId,
-    });
-
-    return;
-  } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
-      const mysqlError = error as { code?: string; message?: string };
-
-      if (mysqlError.code === `ER_DUP_ENTRY`) {
-        res.status(428).json({ errors: { name: `Service with this name already exists` } });
-
-        return;
-      }
-
-      res.status(500).json({
-        errorMessage: `Error while creating service`,
-        message: mysqlError.message,
+    if (serviceId) {
+      res.json({
+        message: `Service data inserted successfully`,
+        data: serviceId,
       });
 
       return;
     }
+  } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({
         errorMessage: `Error while creating service`,
@@ -180,73 +114,27 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
   const serviceId = Number(req.params.id);
   const service: ServiceDataType = req.body;
 
-  // Validation
-  const errors = validateServiceData(service);
-
-  if (Object.keys(errors).length > 0) {
-    res.status(428).json({ errors });
-
-    return;
-  }
-
-  const updateServiceQuery = `
-    UPDATE Services
-    SET employee_id = ?, name = ?, sub_category_id = ?, duration_time = ?, buffer_time = ?, booking_note = ?
-    WHERE id = ?;
-  `;
-
-  const employeeIds = service.employeePrices.map(employeePrice => employeePrice.employeeId).join(`,`);
-
-  const serviceValues = [
-    employeeIds,
-    service.name,
-    service.subCategoryId,
-    service.durationTime,
-    service.bufferTime,
-    service.bookingNote,
-    serviceId,
-  ];
-
   try {
-    await req.dbPool.query(updateServiceQuery, serviceValues);
+    const { serviceId: updatedServiceId, validationErrors } = await updateService(req.dbPool, serviceId, service);
 
-    // Delete existing prices for the service
-    await deleteEmployeesPriceForService(req.dbPool, serviceId);
+    if (validationErrors) {
+      res.status(428).json({ errors: validationErrors });
 
-    // set price to ServiceEmployeePrice table
-    if (service.employeePrices.length) {
-      for (const employeePrice of service.employeePrices) {
-        console.log(employeePrice);
-        await saveEmployeePriceForService(req.dbPool, employeePrice, serviceId);
-      }
+      return;
     }
 
-    res.json({
-      message: `Service data updated successfully`,
-      data: serviceId,
-    });
-
-    return;
-  } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
-      const mysqlError = error as { code?: string; message?: string };
-
-      if (mysqlError.code === `ER_DUP_ENTRY`) {
-        res.status(428).json({ errors: { name: `Service with this name already exists` } });
-
-        return;
-      }
-
-      res.status(500).json({
-        errorMessage: `Error while creating service`,
-        message: mysqlError.message,
+    if (updatedServiceId) {
+      res.json({
+        message: `Service data updated successfully`,
+        data: updatedServiceId,
       });
 
       return;
     }
+  } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({
-        errorMessage: `Error while creating service`,
+        errorMessage: `Error while updating service`,
         message: error.message,
       });
 
@@ -254,7 +142,7 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
     }
 
     res.status(500).json({
-      errorMessage: `Unknown error occurred while creating service`,
+      errorMessage: `Unknown error occurred while updating service`,
     });
 
     return;
@@ -427,54 +315,5 @@ router.delete(`/:id`, async (req: CustomRequestType, res: CustomResponseType) =>
     return;
   }
 });
-
-const deleteEmployeesPriceForService = async (db: DbPoolType, serviceId: number) => {
-  try {
-    const deleteQuery = `DELETE FROM ServiceEmployeePrice WHERE service_id = ?`;
-
-    await db.query(deleteQuery, [serviceId]);
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
-
-const saveEmployeePriceForService = async (db: DbPoolType, employeePrice: EmployeePriceType, serviceId: number) => {
-  try {
-    // Skip saving if price is null, undefined, or negative
-    if (employeePrice.price === null || employeePrice.price === undefined || employeePrice.price < 0) {
-      console.log(`Skipping employee ${employeePrice.employeeId} - invalid price: ${employeePrice.price}`);
-      return;
-    }
-
-    // Check if there's an existing record for the employee and service
-    const checkQuery = `SELECT price FROM ServiceEmployeePrice WHERE employee_id = ? AND service_id = ?`;
-
-    interface ServiceEmployeePriceRow extends RowDataPacket {
-      price: number;
-    }
-
-    const [existingRows] = await db.query<ServiceEmployeePriceRow[]>(checkQuery, [employeePrice.employeeId, serviceId]);
-
-    if (existingRows.length === 0 || existingRows[0].price !== employeePrice.price) {
-      // If no existing record or price is different, insert a new one or update the price
-      const query = existingRows.length === 0 ?
-          `INSERT INTO ServiceEmployeePrice (employee_id, service_id, price) VALUES (?, ?, ?)` :
-          `UPDATE ServiceEmployeePrice SET price = ? WHERE employee_id = ? AND service_id = ?`;
-
-      const queryParams = existingRows.length === 0 ?
-          [employeePrice.employeeId, serviceId, employeePrice.price] :
-          [employeePrice.price, employeePrice.employeeId, serviceId];
-
-      await db.execute(query, queryParams);
-      console.log(existingRows.length === 0 ? `New record inserted successfully` : `Existing record updated successfully`);
-    } else {
-      console.log(`Price in database is already the same as the new service data. No need to update.`);
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
 
 export default router;
