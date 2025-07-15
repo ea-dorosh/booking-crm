@@ -1,15 +1,11 @@
-/* eslint-disable no-unused-vars */
-import {
-  AddCircle,
-} from "@mui/icons-material";
-import {
-  IconButton,
-  Typography,
-  Box,
-} from "@mui/material";
-import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Box } from "@mui/material";
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
+import AddButton from './AddButton';
+import CategoriesList from './CategoriesList';
+import ServicesList from './ServicesList';
+import SubCategoriesList from './SubCategoriesList';
 
 const SERVICES = `services`;
 const SUB_CATEGORIES = `sub-categories`;
@@ -41,10 +37,40 @@ export default function ServicesContainer({
   subCategories,
   categories,
 }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
+
+  // Get active tab from URL query parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabFromUrl = urlParams.get('tab');
+
+    if (tabFromUrl && TABS[tabFromUrl]) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [location.search]);
 
   const handleTabChange = (newValue) => {
     setActiveTab(newValue);
+
+    // Update URL with new tab
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set('tab', newValue);
+    navigate(`${location.pathname}?${urlParams.toString()}`, { replace: true });
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+    case TABS[SERVICES].value:
+      return <ServicesList services={services} />;
+    case TABS[SUB_CATEGORIES].value:
+      return <SubCategoriesList subCategories={subCategories} categories={categories} />;
+    case TABS[CATEGORIES].value:
+      return <CategoriesList categories={categories} />;
+    default:
+      return <ServicesList services={services} />;
+    }
   };
 
   return (
@@ -52,170 +78,12 @@ export default function ServicesContainer({
       <Tabs
         tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
         onChange={handleTabChange}
+        activeTab={activeTab}
       />
 
-      <Box
-        sx={{
-          display: `flex`,
-          alignItems: `center`,
-          marginTop: `20px`,
-          marginLeft: `auto`,
-          backgroundColor: `#1976d2`,
-          width: `fit-content`,
-          padding: `10px 20px 10px 30px`,
-          borderRadius: `50px`,
-        }}
-      >
-        <Typography
-          variant="button"
-          sx={{ color: `#fff` }}
-        >
-          {TABS[activeTab].buttonText}
+      <AddButton activeTab={activeTab} tabs={TABS} />
 
-        </Typography>
-
-        <RouterLink to={`${TABS[activeTab].url}`}>
-          <IconButton
-            sx={{color: `#fff`}}
-          >
-            <AddCircle />
-          </IconButton>
-        </RouterLink>
-      </Box>
-
-      <Box
-        sx={{
-          display: `flex`,
-          flexDirection: `column`,
-          gap: `.5rem`,
-          marginTop: `2rem`,
-          maxWidth: `768px`,
-        }}
-      >
-        {activeTab === TABS[SERVICES].value && services && services.map((service) => (
-          <Box
-            key={service.id}
-            component={RouterLink}
-            to={`/services/${service.id}`}
-            sx={{
-              display: `flex`,
-              alignItems: `flex-start`,
-              justifyContent: `space-between`,
-              width: `100%`,
-              gap: `1rem`,
-              padding: `.4rem 0 .4rem 0`,
-              borderBottom: `1px solid #ddd`,
-              textDecoration: `none`,
-              color: `#333`,
-              position: `relative`,
-            }}
-          >
-            <Box>
-              <Typography sx={{
-                fontSize: `1.1rem`,
-                fontWeight: `bold`,
-              }}>
-                {service.name}
-              </Typography>
-
-              <Typography sx={{
-                fontSize: `1rem`,
-              }}>
-                {service.subCategoryName}
-              </Typography>
-            </Box>
-
-          </Box>
-        ))}
-
-        {activeTab === TABS[SUB_CATEGORIES].value && subCategories && subCategories.map((subCategory) => {
-          const category = categories?.find(cat => cat.id === subCategory.categoryId);
-          return (
-            <Box
-              key={subCategory.id}
-              component={RouterLink}
-              to={`/sub-categories/${subCategory.id}`}
-              sx={{
-                display: `flex`,
-                alignItems: `flex-start`,
-                justifyContent: `space-between`,
-                width: `100%`,
-                minHeight: `60px`,
-                textDecoration: `none`,
-                color: `#333`,
-                padding: `.4rem 0 .6rem 0`,
-                borderBottom: `1px solid #ddd`,
-              }}
-            >
-              <Box>
-                <Typography sx={{
-                  fontSize: `1.1rem`,
-                  fontWeight: `bold`,
-                }}>
-                  {subCategory.name}
-                </Typography>
-
-                <Typography sx={{
-                  fontSize: `1rem`,
-                }}>
-                  {category?.name || `No category`}
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  width: `60px`,
-                  height: `60px`,
-                  overflow: `hidden`,
-                }}
-              >
-                <img
-                  src={subCategory.image}
-                  style={{ width: `100%` }}
-                />
-              </Box>
-            </Box>
-          );
-        })}
-
-        {activeTab === TABS[CATEGORIES].value && categories && categories.map((category) => (
-          <Box
-            key={category.id}
-            component={RouterLink}
-            to={`/categories/${category.id}`}
-            sx={{
-              display: `flex`,
-              alignItems: `flex-start`,
-              justifyContent: `space-between`,
-              width: `100%`,
-              minHeight: `60px`,
-              textDecoration: `none`,
-              color: `#333`,
-              padding: `.4rem 0 .6rem 0`,
-              borderBottom: `1px solid #ddd`,
-            }}
-          >
-            <Typography sx={{
-              fontSize: `1.1rem`,
-            }}>
-              {category.name}
-            </Typography>
-
-            <Box
-              sx={{
-                width: `60px`,
-                height: `60px`,
-                overflow: `hidden`,
-              }}
-            >
-              <img
-                src={category.image}
-                style={{ width: `100%` }}
-              />
-            </Box>
-          </Box>
-        ))}
-      </Box>
+      {renderContent()}
     </Box>
   );
 }

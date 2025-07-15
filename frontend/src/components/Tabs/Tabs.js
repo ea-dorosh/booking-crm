@@ -8,11 +8,17 @@ import { useState } from 'react';
 export default function Tabs({
   tabs,
   onChange,
+  activeTab,
 }) {
-  const [value, setValue] = useState(tabs[0].value);
+  const [internalValue, setInternalValue] = useState(tabs[0].value);
+
+  // Use external activeTab if provided, otherwise use internal state
+  const value = activeTab !== undefined ? activeTab : internalValue;
 
   const handleChange = (_event, newValue) => {
-    setValue(newValue);
+    if (activeTab === undefined) {
+      setInternalValue(newValue);
+    }
 
     if (onChange) {
       onChange(newValue);
