@@ -4,7 +4,6 @@ import {
 } from "@mui/icons-material";
 import {
   IconButton,
-  List,
   Typography,
   Box,
 } from "@mui/material";
@@ -14,6 +13,7 @@ import Tabs from '../Tabs/Tabs';
 
 const SERVICES = `services`;
 const SUB_CATEGORIES = `sub-categories`;
+const CATEGORIES = `categories`;
 
 const TABS = {
   [SERVICES]: {
@@ -28,11 +28,18 @@ const TABS = {
     url: `/sub-categories/create-sub-category`,
     buttonText: `add sub category`,
   },
+  [CATEGORIES]: {
+    label: `Categories`,
+    value: CATEGORIES,
+    url: `/categories/create-category`,
+    buttonText: `add category`,
+  },
 };
 
 export default function ServicesContainer({
   services,
   subCategories,
+  categories,
 }) {
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
 
@@ -43,7 +50,7 @@ export default function ServicesContainer({
   return (
     <Box>
       <Tabs
-        tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES]]}
+        tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
         onChange={handleTabChange}
       />
 
@@ -121,11 +128,61 @@ export default function ServicesContainer({
           </Box>
         ))}
 
-        {activeTab === TABS[SUB_CATEGORIES].value && subCategories && subCategories.map((subCategory) => (
+        {activeTab === TABS[SUB_CATEGORIES].value && subCategories && subCategories.map((subCategory) => {
+          const category = categories?.find(cat => cat.id === subCategory.categoryId);
+          return (
+            <Box
+              key={subCategory.id}
+              component={RouterLink}
+              to={`/sub-categories/${subCategory.id}`}
+              sx={{
+                display: `flex`,
+                alignItems: `flex-start`,
+                justifyContent: `space-between`,
+                width: `100%`,
+                minHeight: `60px`,
+                textDecoration: `none`,
+                color: `#333`,
+                padding: `.4rem 0 .6rem 0`,
+                borderBottom: `1px solid #ddd`,
+              }}
+            >
+              <Box>
+                <Typography sx={{
+                  fontSize: `1.1rem`,
+                  fontWeight: `bold`,
+                }}>
+                  {subCategory.name}
+                </Typography>
+
+                <Typography sx={{
+                  fontSize: `1rem`,
+                }}>
+                  {category?.name || `No category`}
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  width: `60px`,
+                  height: `60px`,
+                  overflow: `hidden`,
+                }}
+              >
+                <img
+                  src={subCategory.image}
+                  style={{ width: `100%` }}
+                />
+              </Box>
+            </Box>
+          );
+        })}
+
+        {activeTab === TABS[CATEGORIES].value && categories && categories.map((category) => (
           <Box
-            key={subCategory.id}
+            key={category.id}
             component={RouterLink}
-            to={`/sub-categories/${subCategory.id}`}
+            to={`/categories/${category.id}`}
             sx={{
               display: `flex`,
               alignItems: `flex-start`,
@@ -141,7 +198,7 @@ export default function ServicesContainer({
             <Typography sx={{
               fontSize: `1.1rem`,
             }}>
-              {subCategory.name}
+              {category.name}
             </Typography>
 
             <Box
@@ -152,7 +209,7 @@ export default function ServicesContainer({
               }}
             >
               <img
-                src={subCategory.image}
+                src={category.image}
                 style={{ width: `100%` }}
               />
             </Box>

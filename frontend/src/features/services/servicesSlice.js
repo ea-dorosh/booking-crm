@@ -83,7 +83,7 @@ const servicesSlice = createSlice({
     cleanError: (state, action) => {
       const fieldName = action.payload;
 
-      if (state.updateFormErrors[fieldName]) {
+      if (state.updateFormErrors && state.updateFormErrors[fieldName]) {
         delete state.updateFormErrors[fieldName];
       }
     },

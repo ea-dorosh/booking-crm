@@ -11,18 +11,26 @@ import {
   SubCategoryDataType,
 } from '@/@types/servicesTypes.js';
 import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
-import { validateServiceData } from '@/validators/servicesValidators.js';
+import {
+  validateServiceData,
+  validateSubCategoryData,
+  validateCategoryData,
+  SubCategoryValidationErrors,
+  CategoryValidationErrors
+} from '@/validators/servicesValidators.js';
 
 interface SubCategoryRow extends RowDataPacket {
   id: number;
   name: string;
   img: string | null;
+  category_id: number | null;
 }
 
 interface ServiceRow extends RowDataPacket {
   id: number;
   name: string;
   sub_category_id: number;
+  category_id: number | null;
   duration_time: Time_HH_MM_SS_Type;
   buffer_time: Time_HH_MM_SS_Type;
   booking_note: string | null;
@@ -34,6 +42,7 @@ interface SubCategoryData {
   id: number;
   name: string;
   image: string | null;
+  categoryId: number | null;
 }
 
 interface EmployeePrice {
@@ -44,6 +53,7 @@ interface EmployeePrice {
 interface ServiceData {
   id: number;
   name: string;
+  categoryId: number | null;
   subCategoryId: number;
   subCategoryName: string;
   durationTime: string;
@@ -64,12 +74,40 @@ interface UpdateServiceResult {
 
 interface CreateSubCategoryResult {
   subCategoryId: number | null;
-  validationErrors: Record<string, string> | null;
+  validationErrors: SubCategoryValidationErrors | null;
 }
 
 interface UpdateSubCategoryResult {
   subCategoryId: number | null;
-  validationErrors: Record<string, string> | null;
+  validationErrors: SubCategoryValidationErrors | null;
+}
+
+interface CategoryRow extends RowDataPacket {
+  id: number;
+  name: string;
+  img: string | null;
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface CategoryData {
+  id: number;
+  name: string;
+  image: string | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface CreateCategoryResult {
+  categoryId: number | null;
+  validationErrors: CategoryValidationErrors | null;
+}
+
+interface UpdateCategoryResult {
+  categoryId: number | null;
+  validationErrors: CategoryValidationErrors | null;
 }
 
 async function getServices(dbPool: Pool): Promise<ServiceData[]> {
@@ -80,6 +118,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
       s.id,
       s.name,
       s.sub_category_id,
+      s.category_id,
       s.duration_time,
       s.buffer_time,
       s.booking_note,
@@ -98,6 +137,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
       id,
       name,
       sub_category_id,
+      category_id,
       duration_time,
       buffer_time,
       booking_note,
@@ -111,6 +151,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
       servicesMap.set(id, {
         id,
         name,
+        categoryId: category_id,
         subCategoryId: sub_category_id,
         subCategoryName: subCategory ? subCategory.name : '',
         durationTime: duration_time,
@@ -159,7 +200,7 @@ async function getService(dbPool: Pool, serviceId: number): Promise<ServiceDetai
 
 async function getServiceSubCategories(dbPool: Pool): Promise<SubCategoryData[]> {
   const subCategoriesSql = `
-    SELECT c.id, c.name, c.img
+    SELECT c.id, c.name, c.img, c.category_id
     FROM ServiceSubCategories c
   `;
 
@@ -169,9 +210,32 @@ async function getServiceSubCategories(dbPool: Pool): Promise<SubCategoryData[]>
     id: row.id,
     name: row.name,
     image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+    categoryId: row.category_id,
   }));
 
   return subCategoriesData;
+}
+
+async function getServiceCategories(dbPool: Pool): Promise<CategoryData[]> {
+  const categoriesSql = `
+    SELECT c.id, c.name, c.img, c.status, c.created_at, c.updated_at
+    FROM ServiceCategories c
+    WHERE c.status = 'active'
+    ORDER BY c.name
+  `;
+
+  const [categoriesResult] = await dbPool.query<CategoryRow[]>(categoriesSql);
+
+  const categoriesData: CategoryData[] = categoriesResult.map((row) => ({
+    id: row.id,
+    name: row.name,
+    image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+
+  return categoriesData;
 }
 
 const deleteEmployeesPriceForService = async (dbPool: Pool, serviceId: number) => {
@@ -238,11 +302,12 @@ async function createService(dbPool: Pool, service: ServiceDataType): Promise<Cr
       employee_id,
       name,
       sub_category_id,
+      category_id,
       duration_time,
       buffer_time,
       booking_note
     )
-    VALUES (?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
   const employeeIds = service.employeePrices.map(employeePrice => {
@@ -255,6 +320,7 @@ async function createService(dbPool: Pool, service: ServiceDataType): Promise<Cr
       employeeIds,
       service.name,
       service.subCategoryId,
+      service.categoryId || null,
       service.durationTime,
       service.bufferTime,
       service.bookingNote,
@@ -307,7 +373,7 @@ async function updateService(dbPool: Pool, serviceId: number, service: ServiceDa
 
   const updateServiceQuery = `
     UPDATE Services
-    SET employee_id = ?, name = ?, sub_category_id = ?, duration_time = ?, buffer_time = ?, booking_note = ?
+    SET employee_id = ?, name = ?, sub_category_id = ?, category_id = ?, duration_time = ?, buffer_time = ?, booking_note = ?
     WHERE id = ?;
   `;
 
@@ -317,6 +383,7 @@ async function updateService(dbPool: Pool, serviceId: number, service: ServiceDa
     employeeIds,
     service.name,
     service.subCategoryId,
+    service.categoryId || null,
     service.durationTime,
     service.bufferTime,
     service.bookingNote,
@@ -360,17 +427,29 @@ async function updateService(dbPool: Pool, serviceId: number, service: ServiceDa
 }
 
 async function createServiceSubCategory(dbPool: Pool, subCategory: SubCategoryDataType, imgPath: string | null): Promise<CreateSubCategoryResult> {
+  // Validation
+  const errors = validateSubCategoryData(subCategory);
+
+  if (Object.keys(errors).length > 0) {
+    return {
+      subCategoryId: null,
+      validationErrors: errors,
+    };
+  }
+
   const subCategoryQuery = `
     INSERT INTO ServiceSubCategories (
       name,
-      img
+      img,
+      category_id
     )
-    VALUES (?, ?)
+    VALUES (?, ?, ?)
   `;
 
   const subCategoryValues = [
     subCategory.name,
     imgPath,
+    subCategory.categoryId || null,
   ];
 
   try {
@@ -399,16 +478,27 @@ async function createServiceSubCategory(dbPool: Pool, subCategory: SubCategoryDa
   }
 }
 
-async function updateServiceSubCategory(dbPool: Pool, subCategoryId: number, name: string, imgPath: string | null): Promise<UpdateSubCategoryResult> {
+async function updateServiceSubCategory(dbPool: Pool, subCategoryId: number, subCategory: SubCategoryDataType, imgPath: string | null): Promise<UpdateSubCategoryResult> {
+  // Validation
+  const errors = validateSubCategoryData(subCategory);
+
+  if (Object.keys(errors).length > 0) {
+    return {
+      subCategoryId: null,
+      validationErrors: errors,
+    };
+  }
+
   const updateServiceSubCategoryQuery = `
     UPDATE ServiceSubCategories
-    SET name = ?, img = COALESCE(?, img)
+    SET name = ?, img = COALESCE(?, img), category_id = ?
     WHERE id = ?;
   `;
 
   const subCategoryValues = [
-    name,
+    subCategory.name,
     imgPath,
+    subCategory.categoryId || null,
     subCategoryId,
   ];
 
@@ -437,12 +527,107 @@ async function updateServiceSubCategory(dbPool: Pool, subCategoryId: number, nam
   }
 }
 
+async function createServiceCategory(dbPool: Pool, name: string, imgPath: string | null): Promise<CreateCategoryResult> {
+  // Validation
+  const errors = validateCategoryData(name);
+
+  if (Object.keys(errors).length > 0) {
+    return {
+      categoryId: null,
+      validationErrors: errors,
+    };
+  }
+
+  const categoryQuery = `
+    INSERT INTO ServiceCategories (
+      name,
+      img,
+      status
+    )
+    VALUES (?, ?, 'active')
+  `;
+
+  const categoryValues = [name, imgPath];
+
+  try {
+    const [results] = await dbPool.query<ResultSetHeader>(categoryQuery, categoryValues);
+    const categoryId = results.insertId;
+
+    return {
+      categoryId,
+      validationErrors: null,
+    };
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const mysqlError = error as { code?: string; message?: string };
+
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
+        return {
+          categoryId: null,
+          validationErrors: { name: `Category with this name already exists` },
+        };
+      }
+
+      throw new Error(`Error while creating category: ${mysqlError.message}`);
+    }
+
+    throw error;
+  }
+}
+
+async function updateServiceCategory(dbPool: Pool, categoryId: number, name: string, imgPath: string | null): Promise<UpdateCategoryResult> {
+  // Validation
+  const errors = validateCategoryData(name);
+
+  if (Object.keys(errors).length > 0) {
+    return {
+      categoryId: null,
+      validationErrors: errors,
+    };
+  }
+
+  const updateCategoryQuery = `
+    UPDATE ServiceCategories
+    SET name = ?, img = COALESCE(?, img)
+    WHERE id = ?;
+  `;
+
+  const categoryValues = [name, imgPath, categoryId];
+
+  try {
+    await dbPool.query(updateCategoryQuery, categoryValues);
+
+    return {
+      categoryId,
+      validationErrors: null,
+    };
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const mysqlError = error as { code?: string; message?: string };
+
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
+        return {
+          categoryId: null,
+          validationErrors: { name: `Category with this name already exists` },
+        };
+      }
+
+      throw new Error(`Error while updating category: ${mysqlError.message}`);
+    }
+
+    throw error;
+  }
+}
+
 export {
   createService,
+  createServiceCategory,
   createServiceSubCategory,
   getService,
+  getServiceCategories,
   getServices,
   getServiceSubCategories,
   updateService,
+  updateServiceCategory,
   updateServiceSubCategory,
 };

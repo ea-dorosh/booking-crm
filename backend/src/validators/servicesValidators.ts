@@ -1,4 +1,13 @@
-import { ServiceDataType, ServiceFormDataValidationErrors } from "@/@types/servicesTypes.js";
+import { ServiceDataType, ServiceFormDataValidationErrors, SubCategoryDataType } from "@/@types/servicesTypes.js";
+
+export interface SubCategoryValidationErrors {
+  name?: string;
+  categoryId?: string;
+}
+
+export interface CategoryValidationErrors {
+  name?: string;
+}
 
 const validateServiceData = (service: ServiceDataType): ServiceFormDataValidationErrors => {
   const errors: ServiceFormDataValidationErrors = {};
@@ -7,8 +16,12 @@ const validateServiceData = (service: ServiceDataType): ServiceFormDataValidatio
     errors.name = `Service name must be at least 3 characters long`;
   }
 
+  if (!service.categoryId || service.categoryId <= 0) {
+    errors.categoryId = `Category is required`;
+  }
+
   if (!service.subCategoryId || service.subCategoryId <= 0) {
-    errors.subCategoryId = `Service category is required`;
+    errors.subCategoryId = `Sub category is required`;
   }
 
   if (!service.durationTime || service.durationTime === `00:00:00`) {
@@ -29,6 +42,32 @@ const validateServiceData = (service: ServiceDataType): ServiceFormDataValidatio
   return errors;
 };
 
+const validateSubCategoryData = (subCategory: SubCategoryDataType): SubCategoryValidationErrors => {
+  const errors: SubCategoryValidationErrors = {};
+
+  if (!subCategory.name || subCategory.name.length <= 3) {
+    errors.name = `Sub Category name must be at least 3 characters long`;
+  }
+
+  if (!subCategory.categoryId || subCategory.categoryId <= 0) {
+    errors.categoryId = `Category is required`;
+  }
+
+  return errors;
+};
+
+const validateCategoryData = (name: string): CategoryValidationErrors => {
+  const errors: CategoryValidationErrors = {};
+
+  if (!name || name.length <= 3) {
+    errors.name = `Category name must be at least 3 characters long`;
+  }
+
+  return errors;
+};
+
 export {
   validateServiceData,
+  validateSubCategoryData,
+  validateCategoryData,
 }

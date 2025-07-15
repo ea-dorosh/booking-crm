@@ -4,6 +4,9 @@ import {
   createServiceSubCategory,
   getServices,
   getServiceSubCategories,
+  getServiceCategories,
+  createServiceCategory,
+  updateServiceCategory,
   updateService,
   updateServiceSubCategory,
 } from '@/services/service/serviceService.js';
@@ -52,6 +55,27 @@ router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponse
     const subCategories = await getServiceSubCategories(req.dbPool);
 
     res.json(subCategories);
+
+    return;
+  } catch (error) {
+    console.error(`Database query error:`, error);
+    res.status(500).json({ message: `Failed to query database` });
+
+    return;
+  }
+});
+
+router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+
+    return;
+  }
+
+  try {
+    const categories = await getServiceCategories(req.dbPool);
+
+    res.json(categories);
 
     return;
   } catch (error) {
@@ -204,11 +228,11 @@ router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomR
   }
 
   const subCategoryId = Number(req.params.id);
-  const { name } = req.body;
+  const subCategory: SubCategoryDataType = req.body;
   const imgPath = req.file?.filename || null;
 
   try {
-    const { subCategoryId: updatedSubCategoryId, validationErrors } = await updateServiceSubCategory(req.dbPool, subCategoryId, name, imgPath);
+    const { subCategoryId: updatedSubCategoryId, validationErrors } = await updateServiceSubCategory(req.dbPool, subCategoryId, subCategory, imgPath);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });
@@ -236,6 +260,97 @@ router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomR
 
     res.status(500).json({
       errorMessage: `Unknown error occurred while updating sub category`,
+    });
+
+    return;
+  }
+});
+
+router.post(`/category/create`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+
+    return;
+  }
+
+  const { name } = req.body;
+  const imgPath = req.file?.filename || null;
+
+  try {
+    const { categoryId, validationErrors } = await createServiceCategory(req.dbPool, name, imgPath);
+
+    if (validationErrors) {
+      res.status(428).json({ errors: validationErrors });
+
+      return;
+    }
+
+    if (categoryId) {
+      res.json({
+        message: `Category data inserted successfully`,
+        data: categoryId,
+      });
+
+      return;
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({
+        errorMessage: `Error while creating category`,
+        message: error.message,
+      });
+
+      return;
+    }
+
+    res.status(500).json({
+      errorMessage: `Unknown error occurred while creating category`,
+    });
+
+    return;
+  }
+});
+
+router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+
+    return;
+  }
+
+  const categoryId = Number(req.params.id);
+  const { name } = req.body;
+  const imgPath = req.file?.filename || null;
+
+  try {
+    const { categoryId: updatedCategoryId, validationErrors } = await updateServiceCategory(req.dbPool, categoryId, name, imgPath);
+
+    if (validationErrors) {
+      res.status(428).json({ errors: validationErrors });
+
+      return;
+    }
+
+    if (updatedCategoryId) {
+      res.json({
+        message: `Category data updated successfully`,
+        data: updatedCategoryId,
+      });
+
+      return;
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({
+        errorMessage: `Error while updating category`,
+        message: error.message,
+      });
+
+      return;
+    }
+
+    res.status(500).json({
+      errorMessage: `Unknown error occurred while updating category`,
     });
 
     return;

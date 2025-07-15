@@ -12,6 +12,7 @@ export default function ServiceForm({
   service,
   employees,
   serviceSubCategories,
+  serviceCategories,
   createNewService,
   formErrors,
   cleanError,
@@ -37,6 +38,7 @@ export default function ServiceForm({
         : field.defaultValue || ``;
       return acc;
     }, {}),
+    categoryId: isEditMode ? service.categoryId : ``,
     subCategoryId: isEditMode ? service.subCategoryId : ``,
     durationTime: isEditMode ? service.durationTime : ``,
     bufferTime: isEditMode && service.bufferTime ? service.bufferTime : ``,
@@ -61,8 +63,16 @@ export default function ServiceForm({
     emp.price !== null && emp.price !== undefined && emp.price !== '' && Number(emp.price) >= 0
   );
 
+  // Check if category is selected
+  const hasValidCategory = formData.categoryId && formData.categoryId !== '';
+
   // Check if sub category is selected
   const hasValidSubCategory = formData.subCategoryId && formData.subCategoryId !== '';
+
+  // Filter sub categories based on selected category
+  const filteredSubCategories = hasValidCategory
+    ? serviceSubCategories.filter(subCategory => subCategory.categoryId === Number(formData.categoryId))
+    : [];
 
   const handleCheckboxChange = (event, employeeId) => {
     const { checked } = event.target;
@@ -82,6 +92,21 @@ export default function ServiceForm({
         employeePrice.employeeId === employeeId ? { ...employeePrice, price: value } : employeePrice
       ),
     });
+  };
+
+  const handleCategoryChange = (event) => {
+    const { name, value } = event.target;
+
+    // Clear sub category when category changes
+    updateFormData({
+      [name]: value,
+      subCategoryId: '',
+    });
+
+    // Clear sub category error when category changes
+    if (cleanError && formErrors?.subCategoryId) {
+      cleanError('subCategoryId');
+    }
   };
 
   return (
@@ -105,13 +130,33 @@ export default function ServiceForm({
         />
       ))}
 
-      <SubCategorySelectField
+      <FormField
+        type="select"
+        name="categoryId"
+        label="Service Category"
+        value={formData.categoryId}
+        onChange={handleCategoryChange}
+        error={formErrors?.categoryId}
+        required={true}
+        options={(serviceCategories || []).map(category => ({
+          value: category.id,
+          label: category.name
+        }))}
+      />
+
+      <FormField
+        type="select"
         name="subCategoryId"
+        label="Service Sub Category"
         value={formData.subCategoryId}
         onChange={handleChange}
         error={formErrors?.subCategoryId}
-        cleanError={cleanError}
-        serviceSubCategories={serviceSubCategories}
+        required={true}
+        disabled={!hasValidCategory}
+        options={filteredSubCategories.map(subCategory => ({
+          value: subCategory.id,
+          label: subCategory.name
+        }))}
       />
 
       <FormField
@@ -156,7 +201,7 @@ export default function ServiceForm({
 
       <FormActions
         onSubmit={handleSubmit}
-        disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidSubCategory}
+        disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidCategory || !hasValidSubCategory}
         isPending={false}
       />
     </Box>

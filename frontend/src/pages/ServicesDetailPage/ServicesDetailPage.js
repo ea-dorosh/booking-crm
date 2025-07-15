@@ -14,6 +14,7 @@ import ListItemText from "@/components/ListItemText/ListItemText";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceForm from "@/components/ServiceForm/ServiceForm";
 import { fetchEmployees } from '@/features/employees/employeesSlice';
+import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
   fetchServices,
   updateService,
@@ -40,9 +41,14 @@ export default function ServicesDetailPage() {
   } = useSelector(state => state.services);
 
   const serviceSubCategories = useSelector(state => state.serviceSubCategories.data);
+  const serviceCategories = useSelector(state => state.serviceCategories.data);
 
   useEffect(() => {
     const promises = [];
+
+    if (!serviceCategories) {
+      promises.push(dispatch(fetchServiceCategories()));
+    }
 
     if (!serviceSubCategories) {
       promises.push(dispatch(fetchServiceSubCategories()));
@@ -116,11 +122,12 @@ export default function ServicesDetailPage() {
         <LinearProgress />
       </Box>}
 
-      {isEditMode && serviceSubCategories && <Box mt={3}>
+      {isEditMode && serviceSubCategories && serviceCategories && <Box mt={3}>
         <ServiceForm
           employees={employees || []}
           service={service}
           serviceSubCategories={serviceSubCategories}
+          serviceCategories={serviceCategories}
           createNewService={updateServiceHandler}
           formErrors={updateFormErrors}
           cleanError={handleCleanError}
@@ -152,11 +159,16 @@ export default function ServicesDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && service && serviceSubCategories && <Box mt={3}>
+      {!isEditMode && service && serviceSubCategories && serviceCategories && <Box mt={3}>
         <List>
           <ListItemText
             value={service.name}
             label="Service Name"
+          />
+
+          <ListItemText
+            value={serviceCategories?.find(category => category.id === service.categoryId)?.name || `-`}
+            label="Service Category"
           />
 
           <ListItemText

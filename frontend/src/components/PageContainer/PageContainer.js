@@ -204,6 +204,10 @@ export default function PageContainer({
           padding: `0 16px 20px 16px`,
           width: `100%`,
           maxWidth: `768px`,
+
+          '@media (max-width: 768px)': {
+            maxWidth: `calc(100% - ${!hideSideNav ? `56px` : `0px`})`,
+          },
         }}>
           {children}
         </Box>

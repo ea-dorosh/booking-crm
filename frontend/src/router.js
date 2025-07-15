@@ -16,6 +16,7 @@ import OAuthCallbackPage from '@/pages/OAuthCallbackPage/OAuthCallbackPage';
 import ForgotPasswordPage from '@/pages/PasswordResetPage/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/PasswordResetPage/ResetPasswordPage';
 import RootPageWithOAuthHandler from '@/pages/RootPageWithOAuthHandler/RootPageWithOAuthHandler';
+import ServiceCategoryDetailPage from '@/pages/ServiceCategoryDetailPage/ServiceCategoryDetailPage.js';
 import ServicesDetailPage from '@/pages/ServicesDetailPage/ServicesDetailPage';
 import ServicesPage from '@/pages/ServicesPage/ServicesPage';
 import ServiceSubCategoryDetailPage from '@/pages/ServiceSubCategoryDetailPage/ServiceSubCategoryDetailPage.js';
@@ -125,6 +126,12 @@ export const router = createBrowserRouter([
     path: `/sub-categories/:subCategoryId`,
     element: <ProtectedRoute>
       <ServiceSubCategoryDetailPage />
+    </ProtectedRoute>,
+  },
+  {
+    path: `/categories/:categoryId`,
+    element: <ProtectedRoute>
+      <ServiceCategoryDetailPage />
     </ProtectedRoute>,
   },
   {

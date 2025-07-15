@@ -21,6 +21,16 @@ const getServiceSubCategories = async () => {
   }
 };
 
+const getServiceCategories = async () => {
+  try {
+    const response = await axios.get(`/services/categories`);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const createService = async (service) => {
   if (service.bufferTime === ``) {
     service.bufferTime = null;
@@ -73,6 +83,30 @@ const createServiceSubCategory = async (serviceSubCategory) => {
   }
 };
 
+const updateServiceCategory = async (serviceCategory) => {
+  const formData = appendFormData(serviceCategory);
+
+  try {
+    const response = await axios.put(`/services/category/edit/${serviceCategory.id}`, formData);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const createServiceCategory = async (serviceCategory) => {
+  const formData = appendFormData(serviceCategory);
+
+  try {
+    const response = await axios.post(`/services/category/create`, formData);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const deleteService = async (id) => {
   try {
     const response = await axios.delete(`/services/${id}`);
@@ -86,10 +120,13 @@ const deleteService = async (id) => {
 const serviceService = {
   getServices,
   getServiceSubCategories,
+  getServiceCategories,
   createService,
   updateService,
   updateServiceSubCategory,
   createServiceSubCategory,
+  updateServiceCategory,
+  createServiceCategory,
   deleteService,
 };
 

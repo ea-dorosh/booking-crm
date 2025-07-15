@@ -10,6 +10,7 @@ import employeeAvailabilitySlice from '@/features/employees/employeeAvailability
 import employeesSlice from '@/features/employees/employeesSlice';
 import invoiceSlice from '@/features/invoices/invoiceSlice';
 import invoicesSlice from '@/features/invoices/invoicesSlice';
+import serviceCategoriesSlice from '@/features/serviceCategories/serviceCategoriesSlice';
 import servicesSlice from '@/features/services/servicesSlice';
 import serviceSubCategoriesSlice from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
@@ -27,6 +28,7 @@ export default configureStore({
     invoice: invoiceSlice,
     invoices: invoicesSlice,
     serviceSubCategories: serviceSubCategoriesSlice,
+    serviceCategories: serviceCategoriesSlice,
     services: servicesSlice,
   },
 });

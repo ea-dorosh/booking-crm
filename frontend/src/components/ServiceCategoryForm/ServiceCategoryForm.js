@@ -5,49 +5,30 @@ import ImageUpload from "@/components/common/ImageUpload";
 import useForm from "@/hooks/useForm";
 import { createSubmitData } from "@/utils/formUtils";
 
-export default function ServiceSubCategoryForm({
-  subCategory,
+export default function ServiceCategoryForm({
+  category,
   submitForm,
   formErrors,
   cleanError,
   cleanErrors,
-  serviceCategories = [],
 }) {
-  const isEditMode = Boolean(subCategory);
+  const isEditMode = Boolean(category);
 
   // Define form fields configuration
   const formFields = [
     {
       name: `name`,
-      label: `Service Sub Category Name`,
+      label: `Service Category Name`,
       type: `text`,
       required: true,
     },
-    {
-      name: `categoryId`,
-      label: `Service Category`,
-      type: `select`,
-      required: true,
-      options: serviceCategories.map(category => ({
-        value: category.id,
-        label: category.name
-      }))
-    },
   ];
-
-
 
   // Initialize form data
   const initialData = formFields.reduce((acc, field) => {
-    if (field.name === `categoryId`) {
-      acc[field.name] = isEditMode
-        ? subCategory[field.name] || ``
-        : field.defaultValue || ``;
-    } else {
-      acc[field.name] = isEditMode
-        ? subCategory[field.name] || field.defaultValue || ``
-        : field.defaultValue || ``;
-    }
+    acc[field.name] = isEditMode
+      ? category[field.name] || field.defaultValue || ``
+      : field.defaultValue || ``;
     return acc;
   }, {});
 
@@ -57,7 +38,7 @@ export default function ServiceSubCategoryForm({
     handleSubmit,
     updateFormData,
   } = useForm(initialData, {
-    onSubmit: (data) => submitForm(createSubmitData(subCategory, data)),
+    onSubmit: (data) => submitForm(createSubmitData(category, data)),
     formErrors: formErrors || {},
     cleanError,
     cleanErrors,
@@ -86,14 +67,13 @@ export default function ServiceSubCategoryForm({
           onChange={handleChange}
           error={formErrors?.[field.name]}
           required={field.required}
-          options={field.options}
         />
       ))}
 
       <ImageUpload
         name="image"
         onChange={handleImageChange}
-        currentImage={subCategory?.image}
+        currentImage={category?.image}
       />
 
       <FormActions

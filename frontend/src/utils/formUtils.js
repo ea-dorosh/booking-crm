@@ -122,6 +122,11 @@ export const createServiceSubmitData = (entity, formData) => {
     ...formData,
   };
 
+  // Process categoryId - convert empty string to null
+  if (submitData.categoryId === ``) {
+    submitData.categoryId = null;
+  }
+
   // Process subCategoryId - convert empty string to null
   if (submitData.subCategoryId === ``) {
     submitData.subCategoryId = null;

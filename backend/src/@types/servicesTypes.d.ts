@@ -12,6 +12,7 @@ export interface ServiceDetailsDataType {
 
 export interface ServiceFormDataValidationErrors {
   name?: string;
+  categoryId?: string;
   subCategoryId?: string;
   durationTime?: string;
   employeePrices?: string;
@@ -24,6 +25,7 @@ export interface EmployeePriceType {
 
 export interface ServiceDataType {
   name: string;
+  categoryId?: number;
   subCategoryId: number;
   durationTime: string;
   bufferTime: string;
@@ -34,4 +36,5 @@ export interface ServiceDataType {
 export interface SubCategoryDataType {
   name: string;
   image: string;
+  categoryId?: number;
 }
