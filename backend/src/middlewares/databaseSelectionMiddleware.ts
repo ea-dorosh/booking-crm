@@ -7,6 +7,9 @@ interface CustomRequest extends Request {
   dbPool?: Pool;
 }
 
+// Global pool cache to reuse connections
+const poolCache = new Map<string, Pool>();
+
 async function databaseSelectionMiddleware(req: CustomRequest, res: Response, next: NextFunction): Promise<void> {
   const hostname: string = req.hostname;
 
@@ -24,13 +27,20 @@ async function databaseSelectionMiddleware(req: CustomRequest, res: Response, ne
       databaseName = 'dorosh_studio_database';
   }
 
-  req.dbPool = mysql.createPool({
-    host: process.env.DB_HOST as string,
-    user: process.env.DB_USER as string,
-    password: process.env.DB_PASSWORD as string,
-    database: databaseName,
-  });
-  
+  // Check if pool already exists for this database
+  if (!poolCache.has(databaseName)) {
+    poolCache.set(databaseName, mysql.createPool({
+      host: process.env.DB_HOST as string,
+      user: process.env.DB_USER as string,
+      password: process.env.DB_PASSWORD as string,
+      database: databaseName,
+      // Pool configuration to prevent "Too many connections" error
+      connectionLimit: 10,
+    }));
+  }
+
+  req.dbPool = poolCache.get(databaseName);
+
   next();
 }
 

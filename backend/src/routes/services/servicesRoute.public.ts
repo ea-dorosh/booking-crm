@@ -6,6 +6,7 @@ import {
 } from '@/@types/expressTypes.js';
 import { SubCategoryRow } from '@/@types/categoriesTypes.js';
 import { getEmployees } from '@/services/employees/employeesService.js';
+import { getServiceCategories } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
 
 const router = express.Router();
@@ -18,6 +19,9 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
+    // get service categories
+    const categoriesData = await getServiceCategories(req.dbPool);
+
     // get service sub categories
     const subCategoriesSql = `
       SELECT c.id, c.name, c.img
@@ -39,6 +43,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       SELECT
         s.id,
         s.name,
+        s.category_id,
         s.sub_category_id,
         s.duration_time,
         s.buffer_time,
@@ -57,6 +62,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
       const {
         id,
         name,
+        category_id,
         sub_category_id,
         duration_time,
         buffer_time,
@@ -69,6 +75,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         servicesMap.set(id, {
           id,
           name,
+          categoryId: category_id,
           subCategoryId: sub_category_id,
           durationTime: duration_time,
           bufferTime: buffer_time,
@@ -94,8 +101,43 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     });
 
     // Convert Map values to an array of services
-    const data = Array.from(servicesMap.values());
-    res.json(data);
+    const services = Array.from(servicesMap.values());
+
+    // Group services by category and subcategory
+    const groupedData = categoriesData.map(category => {
+      const categoryServices = services.filter(service => service.categoryId === category.id);
+
+      // Group services by subcategory within this category
+      const subCategoriesMap = new Map();
+
+      categoryServices.forEach(service => {
+        const subCategoryId = service.subCategoryId;
+
+        if (!subCategoriesMap.has(subCategoryId)) {
+          subCategoriesMap.set(subCategoryId, {
+            subCategoryId,
+            subCategoryName: service.subCategoryName,
+            subCategoryImage: service.subCategoryImage,
+            subCategoryUrl: service.subCategoryUrl,
+            services: []
+          });
+        }
+
+        subCategoriesMap.get(subCategoryId).services.push(service);
+      });
+
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        categoryImage: category.image,
+        subCategories: Array.from(subCategoriesMap.values())
+      };
+    });
+
+    // Filter out categories that have no services
+    const filteredData = groupedData.filter(category => category.subCategories.length > 0);
+    console.log(`filteredData: `, JSON.stringify(filteredData, null, 4));
+    res.json(filteredData);
   } catch (error) {
     console.error(`Database query error:`, error);
     res.status(500).json({ message: `Failed to query database` });
