@@ -8,6 +8,7 @@ import {
   ServiceDataType,
   ServiceFormDataValidationErrors,
   EmployeePriceType,
+  SubCategoryDataType,
 } from '@/@types/servicesTypes.js';
 import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { validateServiceData } from '@/validators/servicesValidators.js';
@@ -59,6 +60,16 @@ interface CreateServiceResult {
 interface UpdateServiceResult {
   serviceId: number | null;
   validationErrors: ServiceFormDataValidationErrors | null;
+}
+
+interface CreateSubCategoryResult {
+  subCategoryId: number | null;
+  validationErrors: Record<string, string> | null;
+}
+
+interface UpdateSubCategoryResult {
+  subCategoryId: number | null;
+  validationErrors: Record<string, string> | null;
 }
 
 async function getServices(dbPool: Pool): Promise<ServiceData[]> {
@@ -348,10 +359,90 @@ async function updateService(dbPool: Pool, serviceId: number, service: ServiceDa
   }
 }
 
+async function createServiceSubCategory(dbPool: Pool, subCategory: SubCategoryDataType, imgPath: string | null): Promise<CreateSubCategoryResult> {
+  const subCategoryQuery = `
+    INSERT INTO ServiceSubCategories (
+      name,
+      img
+    )
+    VALUES (?, ?)
+  `;
+
+  const subCategoryValues = [
+    subCategory.name,
+    imgPath,
+  ];
+
+  try {
+    const [results] = await dbPool.query<ResultSetHeader>(subCategoryQuery, subCategoryValues);
+    const subCategoryId = results.insertId;
+
+    return {
+      subCategoryId,
+      validationErrors: null,
+    };
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const mysqlError = error as { code?: string; message?: string };
+
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
+        return {
+          subCategoryId: null,
+          validationErrors: { name: `Sub Category with this name already exists` },
+        };
+      }
+
+      throw new Error(`Error while creating sub category: ${mysqlError.message}`);
+    }
+
+    throw error;
+  }
+}
+
+async function updateServiceSubCategory(dbPool: Pool, subCategoryId: number, name: string, imgPath: string | null): Promise<UpdateSubCategoryResult> {
+  const updateServiceSubCategoryQuery = `
+    UPDATE ServiceSubCategories
+    SET name = ?, img = COALESCE(?, img)
+    WHERE id = ?;
+  `;
+
+  const subCategoryValues = [
+    name,
+    imgPath,
+    subCategoryId,
+  ];
+
+  try {
+    await dbPool.query(updateServiceSubCategoryQuery, subCategoryValues);
+
+    return {
+      subCategoryId,
+      validationErrors: null,
+    };
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const mysqlError = error as { code?: string; message?: string };
+
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
+        return {
+          subCategoryId: null,
+          validationErrors: { name: `Sub Category with this name already exists` },
+        };
+      }
+
+      throw new Error(`Error while updating sub category: ${mysqlError.message}`);
+    }
+
+    throw error;
+  }
+}
+
 export {
-  getServices,
-  getService,
-  getServiceSubCategories,
   createService,
+  createServiceSubCategory,
+  getService,
+  getServices,
+  getServiceSubCategories,
   updateService,
+  updateServiceSubCategory,
 };
