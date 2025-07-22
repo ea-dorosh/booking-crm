@@ -9,6 +9,9 @@ import {
   calculateAdjustedEndTime,
   calculateAvailableTimes,
   getPeriodWithDaysAndEmployeeAvailability,
+  combineAndFilterTimeSlotsDataFromTwoServices,
+  generateGroupedTimeSlotsForTwoServices,
+  DayWithTimeSlots
 } from './calendarUtils';
 
 jest.mock(`dayjs`, () => {
@@ -38,6 +41,11 @@ jest.mock(`dayjs`, () => {
       date.setUTCHours(hours, minutes, seconds, 0);
 
       return originalDayjs(date);
+    }
+
+    // If the argument is an ISO date string, use it directly
+    if (args.length > 0 && typeof args[0] === 'string' && args[0].match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+      return originalDayjs(args[0]);
     }
 
     // For all other cases, return the current mock date
@@ -464,5 +472,747 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
     expect(result[3].employees[1].employeeId).toBe(2);
     expect(result[3].employees[1].startWorkingTime.format('HH:mm:ss')).toBe('07:30:00');
     expect(result[3].employees[1].endWorkingTime.format('HH:mm:ss')).toBe('15:30:00');
+  });
+});
+
+describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
+  it(`should find valid combinations where second service can start right after first service ends`, () => {
+    // Подготавливаем тестовые данные
+    const timeSlotsDataForFirstService: DayWithTimeSlots[] = [
+      {
+        day: "2025-07-28",
+        serviceDuration: "02:00:00",
+        serviceId: 1,
+        employees: [
+          {
+            employeeId: 14,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T06:00:00.000Z"),
+                endTime: dayjs("2025-07-28T06:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T06:30:00.000Z"),
+                endTime: dayjs("2025-07-28T07:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:00:00.000Z"),
+                endTime: dayjs("2025-07-28T07:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T14:00:00.000Z"),
+                endTime: dayjs("2025-07-28T14:30:00.000Z")
+              },
+            ]
+          },
+          {
+            employeeId: 1,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:30:00.000Z"),
+                endTime: dayjs("2025-07-28T09:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:00:00.000Z"),
+                endTime: dayjs("2025-07-28T09:30:00.000Z")
+              },
+            ]
+          }
+        ]
+      }
+    ];
+
+    const timeSlotsDataForSecondService: DayWithTimeSlots[] = [
+      {
+        day: "2025-07-28",
+        serviceDuration: "01:00:00",
+        serviceId: 43,
+        employees: [
+          {
+            employeeId: 14,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T06:00:00.000Z"),
+                endTime: dayjs("2025-07-28T06:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T06:30:00.000Z"),
+                endTime: dayjs("2025-07-28T07:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:00:00.000Z"),
+                endTime: dayjs("2025-07-28T07:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:30:00.000Z"),
+                endTime: dayjs("2025-07-28T08:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+            ]
+          },
+          {
+            employeeId: 1,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:30:00.000Z"),
+                endTime: dayjs("2025-07-28T09:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:00:00.000Z"),
+                endTime: dayjs("2025-07-28T09:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:30:00.000Z"),
+                endTime: dayjs("2025-07-28T10:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T10:00:00.000Z"),
+                endTime: dayjs("2025-07-28T10:30:00.000Z")
+              },
+            ]
+          },
+          {
+            employeeId: 3,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T10:00:00.000Z"),
+                endTime: dayjs("2025-07-28T10:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T16:00:00.000Z"),
+                endTime: dayjs("2025-07-28T16:30:00.000Z")
+              },
+            ]
+          },
+        ]
+      }
+    ];
+
+    const result = combineAndFilterTimeSlotsDataFromTwoServices(
+      timeSlotsDataForFirstService,
+      timeSlotsDataForSecondService
+    );
+
+    // Ожидаем результат в новом формате
+    expect(result).toHaveLength(1); // один день
+    expect(result[0].day).toBe("2025-07-28");
+    expect(result[0].availableTimeSlots).toHaveLength(5); // три валидных слота
+
+    expect(result[0].availableTimeSlots[0]).toEqual({
+      startTime: "2025-07-28T06:00:00.000Z",
+      endTime: "2025-07-28T06:30:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T08:00:00.000Z",
+        endTime: "2025-07-28T08:30:00.000Z",
+        employeeIds: [14, 1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[1]).toEqual({
+      startTime: "2025-07-28T06:30:00.000Z",
+      endTime: "2025-07-28T07:00:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T08:30:00.000Z",
+        endTime: "2025-07-28T09:00:00.000Z",
+        employeeIds: [1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[2]).toEqual({
+      startTime: "2025-07-28T07:00:00.000Z",
+      endTime: "2025-07-28T07:30:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T09:00:00.000Z",
+        endTime: "2025-07-28T09:30:00.000Z",
+        employeeIds: [1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[3]).toEqual({
+      startTime: "2025-07-28T08:00:00.000Z",
+      endTime: "2025-07-28T08:30:00.000Z",
+      employeeIds: [1],
+      secondService: {
+        startTime: "2025-07-28T10:00:00.000Z",
+        endTime: "2025-07-28T10:30:00.000Z",
+        employeeIds: [1, 3]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[4]).toEqual({
+      startTime: "2025-07-28T14:00:00.000Z",
+      endTime: "2025-07-28T14:30:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T16:00:00.000Z",
+        endTime: "2025-07-28T16:30:00.000Z",
+        employeeIds: [3]
+      }
+    });
+  });
+
+  it(`should return empty array when no time slots match between services`, () => {
+    // Подготавливаем тестовые данные где таймслоты не совпадают
+    const timeSlotsDataForFirstService: DayWithTimeSlots[] = [
+      {
+        day: "2025-07-28",
+        serviceDuration: "01:00:00",
+        serviceId: 1,
+        employees: [
+          {
+            employeeId: 14,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T06:00:00.000Z"),
+                endTime: dayjs("2025-07-28T06:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:00:00.000Z"),
+                endTime: dayjs("2025-07-28T07:30:00.000Z")
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const timeSlotsDataForSecondService: DayWithTimeSlots[] = [
+      {
+        day: "2025-07-28",
+        serviceDuration: "01:00:00",
+        serviceId: 43,
+        employees: [
+          {
+            employeeId: 14,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T09:00:00.000Z"), // Не совпадает с окончанием первого сервиса
+                endTime: dayjs("2025-07-28T09:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T10:00:00.000Z"), // Не совпадает с окончанием первого сервиса
+                endTime: dayjs("2025-07-28T10:30:00.000Z")
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const result = combineAndFilterTimeSlotsDataFromTwoServices(
+      timeSlotsDataForFirstService,
+      timeSlotsDataForSecondService
+    );
+
+    // Ожидаем пустой массив таймслотов, так как нет совпадений
+    expect(result).toHaveLength(1); // один день
+    expect(result[0].day).toBe("2025-07-28");
+    expect(result[0].availableTimeSlots).toHaveLength(0); // пустой массив таймслотов
+  });
+
+  it(`should handle real world scenario with multiple employees and complex time slots`, () => {
+    // Реальные данные из логов системы
+    const timeSlotsDataForFirstService: DayWithTimeSlots[] = [
+      {
+        day: "2025-07-28",
+        serviceDuration: "02:00:00",
+        serviceId: 1,
+        employees: [
+          {
+            employeeId: 14,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T06:00:00.000Z"),
+                endTime: dayjs("2025-07-28T06:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T06:30:00.000Z"),
+                endTime: dayjs("2025-07-28T07:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:00:00.000Z"),
+                endTime: dayjs("2025-07-28T07:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:30:00.000Z"),
+                endTime: dayjs("2025-07-28T08:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:00:00.000Z"),
+                endTime: dayjs("2025-07-28T12:30:00.000Z")
+              }
+            ]
+          },
+          {
+            employeeId: 1,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:30:00.000Z"),
+                endTime: dayjs("2025-07-28T09:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:00:00.000Z"),
+                endTime: dayjs("2025-07-28T09:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:30:00.000Z"),
+                endTime: dayjs("2025-07-28T10:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T10:00:00.000Z"),
+                endTime: dayjs("2025-07-28T10:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T10:30:00.000Z"),
+                endTime: dayjs("2025-07-28T11:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T11:00:00.000Z"),
+                endTime: dayjs("2025-07-28T11:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T11:30:00.000Z"),
+                endTime: dayjs("2025-07-28T12:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:00:00.000Z"),
+                endTime: dayjs("2025-07-28T12:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:30:00.000Z"),
+                endTime: dayjs("2025-07-28T13:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T13:00:00.000Z"),
+                endTime: dayjs("2025-07-28T13:30:00.000Z")
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const timeSlotsDataForSecondService: DayWithTimeSlots[] = [
+      {
+        day: "2025-07-28",
+        serviceDuration: "01:00:00",
+        serviceId: 43,
+        employees: [
+          {
+            employeeId: 14,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T06:00:00.000Z"),
+                endTime: dayjs("2025-07-28T06:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T06:30:00.000Z"),
+                endTime: dayjs("2025-07-28T07:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:00:00.000Z"),
+                endTime: dayjs("2025-07-28T07:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T07:30:00.000Z"),
+                endTime: dayjs("2025-07-28T08:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:30:00.000Z"),
+                endTime: dayjs("2025-07-28T09:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:00:00.000Z"),
+                endTime: dayjs("2025-07-28T09:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:00:00.000Z"),
+                endTime: dayjs("2025-07-28T12:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:30:00.000Z"),
+                endTime: dayjs("2025-07-28T13:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T13:00:00.000Z"),
+                endTime: dayjs("2025-07-28T13:30:00.000Z")
+              }
+            ]
+          },
+          {
+            employeeId: 1,
+            availableTimeSlots: [
+              {
+                startTime: dayjs("2025-07-28T08:00:00.000Z"),
+                endTime: dayjs("2025-07-28T08:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T08:30:00.000Z"),
+                endTime: dayjs("2025-07-28T09:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:00:00.000Z"),
+                endTime: dayjs("2025-07-28T09:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T09:30:00.000Z"),
+                endTime: dayjs("2025-07-28T10:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T10:00:00.000Z"),
+                endTime: dayjs("2025-07-28T10:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T10:30:00.000Z"),
+                endTime: dayjs("2025-07-28T11:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T11:00:00.000Z"),
+                endTime: dayjs("2025-07-28T11:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T11:30:00.000Z"),
+                endTime: dayjs("2025-07-28T12:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:00:00.000Z"),
+                endTime: dayjs("2025-07-28T12:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T12:30:00.000Z"),
+                endTime: dayjs("2025-07-28T13:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T13:00:00.000Z"),
+                endTime: dayjs("2025-07-28T13:30:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T13:30:00.000Z"),
+                endTime: dayjs("2025-07-28T14:00:00.000Z")
+              },
+              {
+                startTime: dayjs("2025-07-28T14:00:00.000Z"),
+                endTime: dayjs("2025-07-28T14:30:00.000Z")
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const result = combineAndFilterTimeSlotsDataFromTwoServices(
+      timeSlotsDataForFirstService,
+      timeSlotsDataForSecondService
+    );
+
+    // Проверяем результат согласно реальным логам
+    expect(result).toHaveLength(1);
+    expect(result[0].day).toBe("2025-07-28");
+    expect(result[0].availableTimeSlots).toHaveLength(13);
+
+    // Проверяем первые несколько слотов детально
+    expect(result[0].availableTimeSlots[0]).toEqual({
+      startTime: "2025-07-28T06:00:00.000Z",
+      endTime: "2025-07-28T06:30:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T08:00:00.000Z",
+        endTime: "2025-07-28T08:30:00.000Z",
+        employeeIds: [14, 1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[1]).toEqual({
+      startTime: "2025-07-28T06:30:00.000Z",
+      endTime: "2025-07-28T07:00:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T08:30:00.000Z",
+        endTime: "2025-07-28T09:00:00.000Z",
+        employeeIds: [14, 1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[2]).toEqual({
+      startTime: "2025-07-28T07:00:00.000Z",
+      endTime: "2025-07-28T07:30:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T09:00:00.000Z",
+        endTime: "2025-07-28T09:30:00.000Z",
+        employeeIds: [14, 1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[3]).toEqual({
+      startTime: "2025-07-28T07:30:00.000Z",
+      endTime: "2025-07-28T08:00:00.000Z",
+      employeeIds: [14],
+      secondService: {
+        startTime: "2025-07-28T09:30:00.000Z",
+        endTime: "2025-07-28T10:00:00.000Z",
+        employeeIds: [1]
+      }
+    });
+
+    expect(result[0].availableTimeSlots[4]).toEqual({
+      startTime: "2025-07-28T08:00:00.000Z",
+      endTime: "2025-07-28T08:30:00.000Z",
+      employeeIds: [14, 1],
+      secondService: {
+        startTime: "2025-07-28T10:00:00.000Z",
+        endTime: "2025-07-28T10:30:00.000Z",
+        employeeIds: [1]
+      }
+    });
+
+    // Проверяем последний слот
+    expect(result[0].availableTimeSlots[12]).toEqual({
+      startTime: "2025-07-28T12:00:00.000Z",
+      endTime: "2025-07-28T12:30:00.000Z",
+      employeeIds: [14, 1],
+      secondService: {
+        startTime: "2025-07-28T14:00:00.000Z",
+        endTime: "2025-07-28T14:30:00.000Z",
+        employeeIds: [1]
+      }
+    });
+
+    // Проверяем что результаты отсортированы по времени
+    for (let i = 1; i < result[0].availableTimeSlots.length; i++) {
+      expect(result[0].availableTimeSlots[i-1].startTime < result[0].availableTimeSlots[i].startTime)
+        .toBe(true);
+    }
+  });
+});
+
+describe(`generateGroupedTimeSlotsForTwoServices`, () => {
+  it(`should group time slots by first service start time and combine employee IDs`, () => {
+    // Тестовые данные - результат combineAndFilterTimeSlotsDataFromTwoServices
+    const filteredTimeSlotsData = [
+      {
+        day: "2025-07-28" as Date_ISO_Type,
+        availableTimeSlots: [
+          {
+            startTime: "2025-07-28T06:00:00.000Z", // 08:00 German time (UTC+2 летом)
+            endTime: "2025-07-28T06:30:00.000Z",
+            employeeIds: [14],
+            secondService: {
+              startTime: "2025-07-28T08:00:00.000Z", // 10:00 German time
+              endTime: "2025-07-28T08:30:00.000Z",
+              employeeIds: [14, 1]
+            }
+          },
+          {
+            startTime: "2025-07-28T06:00:00.000Z", // 08:00 German time - тот же тайм слот
+            endTime: "2025-07-28T06:30:00.000Z",
+            employeeIds: [1], // другой сотрудник
+            secondService: {
+              startTime: "2025-07-28T08:00:00.000Z", // 10:00 German time
+              endTime: "2025-07-28T08:30:00.000Z",
+              employeeIds: [14, 1]
+            }
+          },
+          {
+            startTime: "2025-07-28T06:30:00.000Z", // 08:30 German time
+            endTime: "2025-07-28T07:00:00.000Z",
+            employeeIds: [14],
+            secondService: {
+              startTime: "2025-07-28T08:30:00.000Z", // 10:30 German time
+              endTime: "2025-07-28T09:00:00.000Z",
+              employeeIds: [1]
+            }
+          }
+        ]
+      }
+    ];
+
+        // Вызываем функцию
+    const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
+
+    // Проверяем результат
+    expect(result).toHaveLength(1);
+    expect(result[0].day).toBe("2025-07-28");
+    expect(result[0].availableTimeslots).toHaveLength(2);
+
+    // Проверяем группировку первого слота (08:00)
+    expect(result[0].availableTimeslots[0].startTime).toBe("08:00:00");
+    expect(result[0].availableTimeslots[0].employeeId).toEqual([14, 1]); // объединенные employee IDs
+    expect(result[0].availableTimeslots[0].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[0].secondService!.startTime).toBe("10:00:00");
+    expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([14, 1]); // объединенные для второго сервиса
+
+    // Проверяем второй слот (08:30)
+    expect(result[0].availableTimeslots[1].startTime).toBe("08:30:00");
+    expect(result[0].availableTimeslots[1].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[1].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[1].secondService!.startTime).toBe("10:30:00");
+    expect(result[0].availableTimeslots[1].secondService!.employeeIds).toEqual([1]);
+  });
+
+    it(`should handle empty input`, () => {
+    const filteredTimeSlotsData: any[] = [];
+
+    // Вызываем функцию
+    const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
+
+    expect(result).toHaveLength(0);
+  });
+
+  it(`should handle single time slot without grouping`, () => {
+    const filteredTimeSlotsData = [
+      {
+        day: "2025-07-28" as Date_ISO_Type,
+        availableTimeSlots: [
+          {
+            startTime: "2025-07-28T06:00:00.000Z", // 08:00 German time
+            endTime: "2025-07-28T06:30:00.000Z",
+            employeeIds: [14],
+            secondService: {
+              startTime: "2025-07-28T08:00:00.000Z", // 10:00 German time
+              endTime: "2025-07-28T08:30:00.000Z",
+              employeeIds: [1]
+            }
+          }
+        ]
+      }
+    ];
+
+    // Вызываем функцию
+    const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].availableTimeslots).toHaveLength(1);
+    expect(result[0].availableTimeslots[0].startTime).toBe("08:00:00");
+    expect(result[0].availableTimeslots[0].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[0].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[0].secondService!.startTime).toBe("10:00:00");
+    expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([1]);
+  });
+
+  it(`should sort grouped time slots by start time`, () => {
+    const filteredTimeSlotsData = [
+      {
+        day: "2025-07-28" as Date_ISO_Type,
+        availableTimeSlots: [
+          {
+            startTime: "2025-07-28T07:00:00.000Z", // 09:00 German time
+            endTime: "2025-07-28T07:30:00.000Z",
+            employeeIds: [1],
+            secondService: {
+              startTime: "2025-07-28T09:00:00.000Z",
+              endTime: "2025-07-28T09:30:00.000Z",
+              employeeIds: [1]
+            }
+          },
+          {
+            startTime: "2025-07-28T06:00:00.000Z", // 08:00 German time - должен быть первым
+            endTime: "2025-07-28T06:30:00.000Z",
+            employeeIds: [14],
+            secondService: {
+              startTime: "2025-07-28T08:00:00.000Z",
+              endTime: "2025-07-28T08:30:00.000Z",
+              employeeIds: [14]
+            }
+          }
+        ]
+      }
+    ];
+
+    // Вызываем функцию
+    const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
+
+    // Проверяем что есть 2 слота
+    expect(result).toHaveLength(1);
+    expect(result[0].availableTimeslots).toHaveLength(2);
+
+    // Проверяем сортировку - первый должен быть 08:00, второй 09:00
+    expect(result[0].availableTimeslots[0].startTime).toBe("08:00:00");
+    expect(result[0].availableTimeslots[0].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[0].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[0].secondService!.startTime).toBe("10:00:00");
+    expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([14]);
+
+    expect(result[0].availableTimeslots[1].startTime).toBe("09:00:00");
+    expect(result[0].availableTimeslots[1].employeeId).toEqual([1]);
+    expect(result[0].availableTimeslots[1].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[1].secondService!.startTime).toBe("11:00:00");
+    expect(result[0].availableTimeslots[1].secondService!.employeeIds).toEqual([1]);
+
+    // Проверяем что действительно отсортировано
+    expect(result[0].availableTimeslots[0].startTime < result[0].availableTimeslots[1].startTime).toBe(true);
+  });
+
+  it(`should handle single service data without secondService`, () => {
+    // Данные для одного сервиса (без secondService)
+    const filteredTimeSlotsData = [
+      {
+        day: "2025-07-28" as Date_ISO_Type,
+        availableTimeSlots: [
+          {
+            startTime: "2025-07-28T06:00:00.000Z", // 08:00 German time
+            endTime: "2025-07-28T06:30:00.000Z",
+            employeeIds: [14]
+            // secondService отсутствует
+          },
+          {
+            startTime: "2025-07-28T06:00:00.000Z", // 08:00 German time - тот же слот
+            endTime: "2025-07-28T06:30:00.000Z",
+            employeeIds: [1] // другой сотрудник
+            // secondService отсутствует
+          },
+          {
+            startTime: "2025-07-28T06:30:00.000Z", // 08:30 German time
+            endTime: "2025-07-28T07:00:00.000Z",
+            employeeIds: [14]
+            // secondService отсутствует
+          }
+        ]
+      }
+    ];
+
+    // Вызываем функцию
+    const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
+
+    // Проверяем результат
+    expect(result).toHaveLength(1);
+    expect(result[0].day).toBe("2025-07-28");
+    expect(result[0].availableTimeslots).toHaveLength(2);
+
+    // Проверяем первый слот (08:00) - сотрудники должны быть объединены
+    expect(result[0].availableTimeslots[0].startTime).toBe("08:00:00");
+    expect(result[0].availableTimeslots[0].employeeId).toEqual([14, 1]); // объединенные employee IDs
+    expect(result[0].availableTimeslots[0].secondService).toBeUndefined(); // secondService отсутствует
+
+    // Проверяем второй слот (08:30)
+    expect(result[0].availableTimeslots[1].startTime).toBe("08:30:00");
+    expect(result[0].availableTimeslots[1].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[1].secondService).toBeUndefined(); // secondService отсутствует
   });
 });

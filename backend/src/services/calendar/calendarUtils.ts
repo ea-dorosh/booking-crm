@@ -34,9 +34,11 @@ export interface PeriodWithEmployeeWorkingTimeType {
   employees: EmployeeWithWorkingTimesType[];
 }
 
-interface PeriodWithClearedDaysType {
+export interface PeriodWithClearedDaysType {
   day: Date_ISO_Type;
   employees: EmployeeWithBlockedAndAvailableTimesType[];
+  serviceDuration: Time_HH_MM_SS_Type;
+  serviceId: number;
 }
 
 interface EmployeeWithWorkingTimesType {
@@ -73,9 +75,29 @@ interface EmployeeWithTimeSlots {
   employeeId: number;
   availableTimeSlots: AvailableTimeSlot[];
 }
-interface DayWithTimeSlots {
+
+export interface DayWithTimeSlots {
   day: Date_ISO_Type;
+  serviceDuration: Time_HH_MM_SS_Type;
+  serviceId: number;
   employees: EmployeeWithTimeSlots[];
+}
+
+// New types for combined time slots result
+export interface CombinedTimeSlot {
+  startTime: string;
+  endTime: string;
+  employeeIds: number[];
+  secondService?: {
+    startTime: string;
+    endTime: string;
+    employeeIds: number[];
+  };
+}
+
+export interface FilteredTimeSlotsDataForTwoServicesType {
+  day: Date_ISO_Type;
+  availableTimeSlots: CombinedTimeSlot[];
 }
 
 export interface PeriodWithGroupedTimeslotsType {
@@ -86,6 +108,20 @@ export interface PeriodWithGroupedTimeslotsType {
 interface TimeslotWithGroupedEmployeeId {
   employeeId: number[];
   startTime: Time_HH_MM_SS_Type; // in german time zone
+}
+
+interface TimeslotWithGroupedEmployeeIdForTwoServices {
+  employeeId: number[];
+  startTime: Time_HH_MM_SS_Type; // in german time zone
+  secondService?: {
+    startTime: Time_HH_MM_SS_Type; // in german time zone
+    employeeIds: number[];
+  };
+}
+
+export interface PeriodWithGroupedTimeslotsForTwoServicesType {
+  day: Date_ISO_Type;
+  availableTimeslots: TimeslotWithGroupedEmployeeIdForTwoServices[];
 }
 
 // HELPER FUNCTIONS
@@ -164,8 +200,6 @@ const getAppointmentEndTime = (startTime: dayjs.Dayjs, serviceDuration: Time_HH_
     .add(dayjs(serviceDuration, TIME_FORMAT).minute(), `minute`)
     .add(dayjs(serviceDuration, TIME_FORMAT).second(), `second`)
     .utc();
-
-  console.log(`getAppointmentEndTime endTime:`, {endTime});
 
   return endTime;
 }
@@ -248,7 +282,9 @@ function normalizeGoogleCalendarEvents(
 function combinePeriodWithNormalizedAppointments(
   period: PeriodWithEmployeeWorkingTimeType[],
   normalizedAppointments: NormalizedAppointmentData[],
+  serviceDurationWithBuffer: Time_HH_MM_SS_Type,
   serviceDuration: Time_HH_MM_SS_Type,
+  serviceId: number,
 ): PeriodWithClearedDaysType[] {
   return period.map(dayData => {
     const dayAppointments = normalizedAppointments.filter(appointment =>
@@ -274,7 +310,7 @@ function combinePeriodWithNormalizedAppointments(
         employee.startWorkingTime,
         employee.endWorkingTime,
         blockedTimes,
-        serviceDuration
+        serviceDurationWithBuffer,
       );
 
       return {
@@ -286,9 +322,122 @@ function combinePeriodWithNormalizedAppointments(
 
     return {
       ...dayData,
-      employees: employeesWithBlockedTimes
+      employees: employeesWithBlockedTimes,
+      serviceDuration,
+      serviceId,
     };
   });
+}
+
+function combineAndFilterTimeSlotsDataFromTwoServices(
+  timeSlotsDataForFirstService: DayWithTimeSlots[],
+  timeSlotsDataForSecondService: DayWithTimeSlots[]
+): FilteredTimeSlotsDataForTwoServicesType[] {
+  const result: FilteredTimeSlotsDataForTwoServicesType[] = [];
+
+  // Process each day
+  timeSlotsDataForFirstService.forEach(firstServiceDay => {
+    // Find corresponding day in second service
+    const secondServiceDay = timeSlotsDataForSecondService.find(
+      day => day.day === firstServiceDay.day
+    );
+
+    if (!secondServiceDay) {
+      // If no corresponding day in second service, add empty result
+      result.push({
+        day: firstServiceDay.day,
+        availableTimeSlots: []
+      });
+      return;
+    }
+
+    const combinedTimeSlots: CombinedTimeSlot[] = [];
+
+    // For each employee in first service
+    firstServiceDay.employees.forEach(firstEmployee => {
+      // For each time slot of first employee
+      firstEmployee.availableTimeSlots.forEach(firstTimeSlot => {
+        // Calculate when first service will end
+        const durationParts = firstServiceDay.serviceDuration.split(':');
+        const hours = parseInt(durationParts[0]);
+        const minutes = parseInt(durationParts[1]);
+        const seconds = parseInt(durationParts[2]);
+
+        const firstServiceEndTime = firstTimeSlot.startTime
+          .add(hours, 'hour')
+          .add(minutes, 'minute')
+          .add(seconds, 'second');
+
+        // Find all employees in second service who can start at this end time
+        const availableSecondEmployees: number[] = [];
+        const matchingSlots: AvailableTimeSlot[] = [];
+
+        secondServiceDay.employees.forEach(secondEmployee => {
+          const matchingSlot = secondEmployee.availableTimeSlots.find(
+            slot => slot.startTime.isSame(firstServiceEndTime)
+          );
+
+          if (matchingSlot) {
+            availableSecondEmployees.push(secondEmployee.employeeId);
+            matchingSlots.push(matchingSlot);
+          }
+        });
+
+        // If we found employees who can do second service
+        if (availableSecondEmployees.length > 0 && matchingSlots.length > 0) {
+          const secondServiceSlot = matchingSlots[0]; // Use first matching slot
+
+          // Calculate when second service will end
+          const secondDurationParts = secondServiceDay.serviceDuration.split(':');
+          const secondHours = parseInt(secondDurationParts[0]);
+          const secondMinutes = parseInt(secondDurationParts[1]);
+          const secondSeconds = parseInt(secondDurationParts[2]);
+
+          const secondServiceEndTime = secondServiceSlot.startTime
+            .add(secondHours, 'hour')
+            .add(secondMinutes, 'minute')
+            .add(secondSeconds, 'second');
+
+          // Check if this combination already exists
+          const existingSlot = combinedTimeSlots.find(
+            slot => slot.startTime === firstTimeSlot.startTime.toISOString()
+          );
+
+          if (existingSlot) {
+            // Add this employee to existing slot
+            if (!existingSlot.employeeIds.includes(firstEmployee.employeeId)) {
+              existingSlot.employeeIds.push(firstEmployee.employeeId);
+            }
+          } else {
+            // Create new combined slot
+            const newSlot = {
+              startTime: firstTimeSlot.startTime.toISOString(),
+              endTime: firstTimeSlot.endTime.toISOString(),
+              employeeIds: [firstEmployee.employeeId],
+              secondService: {
+                startTime: secondServiceSlot.startTime.toISOString(),
+                endTime: secondServiceSlot.endTime.toISOString(),
+                employeeIds: [...availableSecondEmployees]
+              }
+            };
+            combinedTimeSlots.push(newSlot);
+          }
+        }
+      });
+    });
+
+    // Сортируем слоты по времени начала первого сервиса
+    const sortedCombinedTimeSlots = combinedTimeSlots.sort((a, b) =>
+      a.startTime.localeCompare(b.startTime)
+    );
+
+    result.push({
+      day: firstServiceDay.day,
+      availableTimeSlots: sortedCombinedTimeSlots
+    });
+  });
+
+  return result;
 }
 
 function generateTimeSlotsFromAvailableTimes(
@@ -328,6 +477,8 @@ function generateTimeSlotsFromAvailableTimes(
     return {
       day: dayData.day,
       employees: employeesWithTimeSlots,
+      serviceDuration: dayData.serviceDuration,
+      serviceId: dayData.serviceId,
     };
   });
 }
@@ -375,11 +526,79 @@ function generateGroupedTimeSlots(
   });
 }
 
+function generateGroupedTimeSlotsForTwoServices(
+  filteredTimeSlotsData: FilteredTimeSlotsDataForTwoServicesType[]
+): PeriodWithGroupedTimeslotsForTwoServicesType[] {
+  return filteredTimeSlotsData.map(dayData => {
+    // Create a map to group time slots by their first service start time
+    const timeSlotMap = new Map<string, TimeslotWithGroupedEmployeeIdForTwoServices>();
+
+    // Process each time slot
+    dayData.availableTimeSlots.forEach(timeSlot => {
+      /**
+       * Convert UTC time to German time zone here to deliver correct time to the client
+       */
+      const firstServiceStartTime = dayjs(timeSlot.startTime).tz(`Europe/Berlin`).format(TIME_FORMAT) as Time_HH_MM_SS_Type;
+      const secondServiceStartTime = timeSlot.secondService
+        ? dayjs(timeSlot.secondService.startTime).tz(`Europe/Berlin`).format(TIME_FORMAT) as Time_HH_MM_SS_Type
+        : undefined;
+
+      if (timeSlotMap.has(firstServiceStartTime)) {
+        // Add employee IDs to existing time slot if not already present
+        const existingSlot = timeSlotMap.get(firstServiceStartTime)!;
+
+        // Merge first service employee IDs
+        timeSlot.employeeIds.forEach(employeeId => {
+          if (!existingSlot.employeeId.includes(employeeId)) {
+            existingSlot.employeeId.push(employeeId);
+          }
+        });
+
+        // Merge second service employee IDs if second service exists
+        if (timeSlot.secondService && existingSlot.secondService) {
+          timeSlot.secondService.employeeIds.forEach(employeeId => {
+            if (!existingSlot.secondService!.employeeIds.includes(employeeId)) {
+              existingSlot.secondService!.employeeIds.push(employeeId);
+            }
+          });
+        }
+      } else {
+        // Create new time slot
+        const newSlot: TimeslotWithGroupedEmployeeIdForTwoServices = {
+          startTime: firstServiceStartTime,
+          employeeId: [...timeSlot.employeeIds]
+        };
+
+        // Add second service if it exists
+        if (timeSlot.secondService && secondServiceStartTime) {
+          newSlot.secondService = {
+            startTime: secondServiceStartTime,
+            employeeIds: [...timeSlot.secondService.employeeIds]
+          };
+        }
+
+        timeSlotMap.set(firstServiceStartTime, newSlot);
+      }
+    });
+
+    // Convert map to array and sort by start time
+    const availableTimeslots = Array.from(timeSlotMap.values())
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    return {
+      day: dayData.day as Date_ISO_Type,
+      availableTimeslots
+    };
+  });
+}
+
 export {
   calculateAdjustedEndTime,
   calculateAvailableTimes, // export for tests
   combinePeriodWithNormalizedAppointments,
+  combineAndFilterTimeSlotsDataFromTwoServices,
   generateGroupedTimeSlots,
+  generateGroupedTimeSlotsForTwoServices,
   generateTimeSlotsFromAvailableTimes,
   getAppointmentEndTime,
   getPeriodWithDaysAndEmployeeAvailability,

@@ -6,10 +6,11 @@ import {
 } from '@/@types/expressTypes.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getGroupedTimeSlots } from '@/services/calendar/calendarService.js';
+import { log } from 'console';
 
 const router = express.Router();
 
-router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
+router.post(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   if (!req.dbPool) {
     res.status(500).json({ message: `Database connection not initialized` });
     return;
@@ -18,19 +19,34 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   try {
     const parsedUrlQuery = url.parse(req.url, true)?.query;
 
-    // getting request query params
+    // getting date from query params
     const paramDate = parsedUrlQuery.date as Date_ISO_Type;
-    const serviceId = Number(parsedUrlQuery.serviceId);
-    const employeeIds = (parsedUrlQuery.employeeIds as string).split(`,`).map(Number);
 
-    if (typeof paramDate !== `string` || !serviceId || employeeIds.length === 0) {
+    // getting services data from request body
+    const servicesData = req.body as Array<{ serviceId: number; employeeIds: number[] }>;
+
+    if (typeof paramDate !== `string` || !Array.isArray(servicesData) || servicesData.length === 0) {
       res.status(400).json({
-        error: `Invalid parameters: date must be a string, serviceId must be provided, and employeeIds cannot be empty`
+        error: `Invalid parameters: date must be a string and servicesData must be a non-empty array`
       });
       return;
     }
 
-    const groupedTimeSlots = await getGroupedTimeSlots(req.dbPool, paramDate, serviceId, employeeIds);
+    // validate services data structure
+    const isValidServicesData = servicesData.every(item =>
+      item.serviceId &&
+      Array.isArray(item.employeeIds) &&
+      item.employeeIds.length > 0
+    );
+
+    if (!isValidServicesData) {
+      res.status(400).json({
+        error: `Invalid servicesData format: each item must have serviceId and non-empty employeeIds array`
+      });
+      return;
+    }
+
+    const groupedTimeSlots = await getGroupedTimeSlots(req.dbPool, paramDate, servicesData);
 
     res.json(groupedTimeSlots);
     return;
