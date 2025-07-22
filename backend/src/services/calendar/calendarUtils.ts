@@ -41,7 +41,7 @@ export interface PeriodWithClearedDaysType {
   serviceId: number;
 }
 
-interface EmployeeWithWorkingTimesType {
+export interface EmployeeWithWorkingTimesType {
   employeeId: number;
   startWorkingTime: dayjs.Dayjs;
   endWorkingTime: dayjs.Dayjs;
@@ -426,17 +426,6 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
         // If we found employees who can do second service
         if (availableSecondEmployees.length > 0 && matchingSlots.length > 0) {
           const secondServiceSlot = matchingSlots[0]; // Use first matching slot
-
-          // Calculate when second service will end
-          const secondDurationParts = secondServiceDay.serviceDuration.split(':');
-          const secondHours = parseInt(secondDurationParts[0]);
-          const secondMinutes = parseInt(secondDurationParts[1]);
-          const secondSeconds = parseInt(secondDurationParts[2]);
-
-          const secondServiceEndTime = secondServiceSlot.startTime
-            .add(secondHours, 'hour')
-            .add(secondMinutes, 'minute')
-            .add(secondSeconds, 'second');
 
           // Check if this combination already exists
           const existingSlot = combinedTimeSlots.find(

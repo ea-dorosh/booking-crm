@@ -8,6 +8,8 @@ import {
   PeriodWithClearedDaysType,
   combineAndFilterTimeSlotsDataFromTwoServices,
   generateGroupedTimeSlotsForTwoServices,
+  PeriodWithEmployeeWorkingTimeType,
+  EmployeeWithWorkingTimesType,
 } from '@/services/calendar/calendarUtils.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
@@ -133,7 +135,7 @@ const getGroupedTimeSlots = async (
  */
 async function getGoogleCalendarEventsForEmployees(
   dbPool: Pool,
-  periodWithDaysAndEmployeeAvailability: any[]
+  periodWithDaysAndEmployeeAvailability: PeriodWithEmployeeWorkingTimeType[]
 ): Promise<{ start: string; end: string; summary: string }[]> {
   const googleCalendarEvents: { start: string; end: string; summary: string }[] = [];
 
@@ -144,7 +146,7 @@ async function getGoogleCalendarEventsForEmployees(
   // Create employee dates map
   const employeeDatesMap = new Map<number, string[]>();
   periodWithDaysAndEmployeeAvailability.forEach(dayData => {
-    dayData.employees.forEach((employee: any) => {
+    dayData.employees.forEach((employee: EmployeeWithWorkingTimesType) => {
       if (!employeeDatesMap.has(employee.employeeId)) {
         employeeDatesMap.set(employee.employeeId, []);
       }
