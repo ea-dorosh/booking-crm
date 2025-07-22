@@ -279,6 +279,46 @@ function normalizeGoogleCalendarEvents(
   }));
 }
 
+/**
+ * Normalize Google Calendar events for specific employees
+ */
+function normalizeGoogleEventsForEmployees(
+  googleCalendarEvents: { start: string; end: string; summary: string }[],
+  periodWithDaysAndEmployeeAvailability: any[]
+): any[] {
+  const normalizedGoogleEvents: any[] = [];
+
+  if (periodWithDaysAndEmployeeAvailability.length === 0) {
+    return normalizedGoogleEvents;
+  }
+
+  // Create employee dates map for normalization
+  const employeeDatesMapForNormalization = new Map<number, string[]>();
+  periodWithDaysAndEmployeeAvailability.forEach(dayData => {
+    dayData.employees.forEach((employee: any) => {
+      if (!employeeDatesMapForNormalization.has(employee.employeeId)) {
+        employeeDatesMapForNormalization.set(employee.employeeId, []);
+      }
+      employeeDatesMapForNormalization.get(employee.employeeId)!.push(dayData.day);
+    });
+  });
+
+  // Normalize events for each employee
+  for (const [employeeId, dates] of employeeDatesMapForNormalization) {
+    const employeeGoogleEvents = googleCalendarEvents.filter(event => {
+      const eventDate = dayjs(event.start).format(DATE_FORMAT);
+      return dates.includes(eventDate);
+    });
+
+    if (employeeGoogleEvents.length > 0) {
+      const normalizedEvents = normalizeGoogleCalendarEvents(employeeGoogleEvents, employeeId);
+      normalizedGoogleEvents.push(...normalizedEvents);
+    }
+  }
+
+  return normalizedGoogleEvents;
+}
+
 function combinePeriodWithNormalizedAppointments(
   period: PeriodWithEmployeeWorkingTimeType[],
   normalizedAppointments: NormalizedAppointmentData[],
@@ -483,49 +523,6 @@ function generateTimeSlotsFromAvailableTimes(
   });
 }
 
-function generateGroupedTimeSlots(
-  dayWithTimeSlots: DayWithTimeSlots[]
-): PeriodWithGroupedTimeslotsType[] {
-  return dayWithTimeSlots.map(dayData => {
-    // Create a map to group time slots by their time
-    const timeSlotMap = new Map<string, TimeslotWithGroupedEmployeeId>();
-
-    // Process each employee's time slots
-    dayData.employees.forEach(employee => {
-      employee.availableTimeSlots.forEach(timeSlot => {
-
-        /**
-         * Convert UTC time to German time zone here to deliver correct time to the client
-         */
-        const startTime = timeSlot.startTime.tz(`Europe/Berlin`).format(TIME_FORMAT) as Time_HH_MM_SS_Type;
-
-        if (timeSlotMap.has(startTime)) {
-          // Add employee ID to existing time slot if not already present
-          const existingSlot = timeSlotMap.get(startTime)!;
-          if (!existingSlot.employeeId.includes(employee.employeeId)) {
-            existingSlot.employeeId.push(employee.employeeId);
-          }
-        } else {
-          // Create new time slot
-          timeSlotMap.set(startTime, {
-            startTime,
-            employeeId: [employee.employeeId]
-          });
-        }
-      });
-    });
-
-    // Convert map to array and sort by start time
-    const availableTimeslots = Array.from(timeSlotMap.values())
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-    return {
-      day: dayData.day as Date_ISO_Type,
-      availableTimeslots
-    };
-  });
-}
-
 function generateGroupedTimeSlotsForTwoServices(
   filteredTimeSlotsData: FilteredTimeSlotsDataForTwoServicesType[]
 ): PeriodWithGroupedTimeslotsForTwoServicesType[] {
@@ -597,11 +594,10 @@ export {
   calculateAvailableTimes, // export for tests
   combinePeriodWithNormalizedAppointments,
   combineAndFilterTimeSlotsDataFromTwoServices,
-  generateGroupedTimeSlots,
   generateGroupedTimeSlotsForTwoServices,
   generateTimeSlotsFromAvailableTimes,
   getAppointmentEndTime,
   getPeriodWithDaysAndEmployeeAvailability,
-  normalizeGoogleCalendarEvents,
   normalizeSavedAppointments,
+  normalizeGoogleEventsForEmployees,
 };
