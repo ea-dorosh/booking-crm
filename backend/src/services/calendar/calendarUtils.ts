@@ -108,12 +108,12 @@ export interface PeriodWithGroupedTimeslotsType {
 }
 
 interface TimeslotWithGroupedEmployeeId {
-  employeeId: number[];
+  employeeIds: number[];
   startTime: Time_HH_MM_SS_Type; // in german time zone
 }
 
 interface TimeslotWithGroupedEmployeeIdForTwoServices {
-  employeeId: number[];
+  employeeIds: number[];
   startTime: Time_HH_MM_SS_Type; // in german time zone
   serviceId: number;
   secondService?: {
@@ -279,7 +279,7 @@ function normalizeGoogleCalendarEvents(
     date: dayjs(event.start).format(DATE_FORMAT),
     timeStart: event.start,
     timeEnd: event.end,
-    employeeId: employeeId,
+    employeeId,
   }));
 }
 
@@ -541,8 +541,8 @@ function generateGroupedTimeSlotsForTwoServices(
 
         // Merge first service employee IDs
         timeSlot.employeeIds.forEach(employeeId => {
-          if (!existingSlot.employeeId.includes(employeeId)) {
-            existingSlot.employeeId.push(employeeId);
+          if (!existingSlot.employeeIds.includes(employeeId)) {
+            existingSlot.employeeIds.push(employeeId);
           }
         });
 
@@ -558,7 +558,7 @@ function generateGroupedTimeSlotsForTwoServices(
         // Create new time slot
         const newSlot: TimeslotWithGroupedEmployeeIdForTwoServices = {
           startTime: firstServiceStartTime,
-          employeeId: [...timeSlot.employeeIds],
+          employeeIds: [...timeSlot.employeeIds],
           serviceId: timeSlot.serviceId,
         };
 

@@ -10,6 +10,7 @@ import {
   AppointmentFormDataType,
   CreateAppointmentServiceResponseErrorType,
   CreateAppointmentServiceResponseSuccessType,
+  ServiceBookingBaseType,
  } from '@/@types/appointmentsTypes.js';
  import {
   AppointmentStatusEnum,
@@ -237,7 +238,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
   let serviceName: string = ``;
 
   try {
-    const serviceDetails: ServiceDetailsDataType = await getService(dbPool, appointment.serviceId);
+    const serviceDetails: ServiceDetailsDataType = await getService(dbPool, appointment.service.serviceId);
 
     /** save serviceName for response */
     serviceName = serviceDetails.name;
@@ -280,7 +281,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     };
   }
 
-  const timeStartUTC = dayjs.tz(`${appointment.date} ${appointment.time}`, `Europe/Berlin`).utc();
+  const timeStartUTC = dayjs.tz(`${appointment.date} ${appointment.service.startTime}`, `Europe/Berlin`).utc();
   const timeEndUTC = getAppointmentEndTime(
     timeStartUTC,
     serviceDurationAndBufferTimeInMinutes
@@ -297,7 +298,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
       dbPool,
       {
         date: appointment.date,
-        employeeId: appointment.employeeId,
+        employeeId: appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
         timeStart: timeStartUTC,
         timeEnd: timeEndUTC,
       },
@@ -305,7 +306,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
 
     if (!isEmployeeAvailable) {
       return {
-        errorMessage: ERROR_MESSAGE.EMPLOYEE_IS_ALREADY_BUSY,
+        errorMessage: `Erste Service: ${ERROR_MESSAGE.EMPLOYEE_IS_ALREADY_BUSY}`,
       };
     }
   } catch (error) {
@@ -343,11 +344,11 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     appointment.date,
     fromDayjsToMySQLDateTime(timeStartUTC),
     fromDayjsToMySQLDateTime(timeEndUTC),
-    appointment.serviceId,
+    appointment.service.serviceId,
     serviceName,
     customerId,
     serviceDurationAndBufferTimeInMinutes,
-    appointment.employeeId,
+    appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
     fromDayjsToMySQLDateTime(dayjs().utc()),
     appointment.salutation,
     formatName(appointment.firstName),
@@ -367,7 +368,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
   try {
     const googleEventId = await createGoogleCalendarEvent(
       dbPool,
-      appointment.employeeId,
+      appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
       {
         id: appointmentId,
         customerId: Number(customerId),
@@ -392,7 +393,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
   }
 
   try {
-    const employee = await getEmployee(dbPool, appointment.employeeId);
+    const employee = await getEmployee(dbPool, appointment.service.employeeIds[0]); // TODO: create logic for selecting from employeeIds array
 
     const emailResult = await sendAppointmentConfirmationEmail(
       appointment.email,
@@ -421,7 +422,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
   return {
     id: appointmentId,
     date: appointment.date,
-    timeStart: appointment.time,
+    timeStart: appointment.service.startTime,
     serviceName: serviceName,
     salutation: appointment.salutation,
     lastName: formatName(appointment.lastName),
@@ -429,7 +430,6 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
   };
 }
-
 
 export {
   getAppointments,

@@ -90,20 +90,36 @@ export interface AppointmentDetailType {
 export interface AppointmentFormDataType {
   date: Date_ISO_Type;
   email: string;
-  employeeId: number;
   firstName: string;
   lastName: string;
   phone: string;
   salutation: number;
+  service: AppointmentFormDataServiceType;
+}
+
+export interface ServiceBookingBaseType {
+  employeeIds: number[];
   serviceId: number;
-  time: Time_HH_MM_SS_Type;
+  startTime: Time_HH_MM_SS_Type;
+}
+export interface AppointmentFormDataServiceType extends ServiceBookingBaseType {
+  secondService?: ServiceBookingBaseType;
+}
+
+export interface AppointmentFormDataServiceType {
+  employeeIds: number[];
+  serviceId: number;
+  startTime: Time_HH_MM_SS_Type;
+  secondService?: {
+    employeeIds: number[];
+    serviceId: number;
+    startTime: Time_HH_MM_SS_Type;
+  };
 }
 
 export interface AppointmentFormDataErrorsType {
   date?: string;
-  employeeId?: string;
-  serviceId?: string;
-  time?: string;
+  service?: string;
 }
 
 export interface SavedAppointmentItemDataType {

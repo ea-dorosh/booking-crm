@@ -1078,7 +1078,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots).toHaveLength(2);
 
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
-    expect(result[0].availableTimeslots[0].employeeId).toEqual([14, 1]);
+    expect(result[0].availableTimeslots[0].employeeIds).toEqual([14, 1]);
     expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[0].secondService).toBeDefined();
     expect(result[0].availableTimeslots[0].secondService!.serviceId).toEqual(43);
@@ -1086,7 +1086,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([14, 1]);
 
     expect(result[0].availableTimeslots[1].startTime).toBe(`08:30:00`);
-    expect(result[0].availableTimeslots[1].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[1].employeeIds).toEqual([14]);
     expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[1].secondService).toBeDefined();
     expect(result[0].availableTimeslots[1].secondService!.serviceId).toEqual(43);
@@ -1129,7 +1129,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots).toHaveLength(1);
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
     expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
-    expect(result[0].availableTimeslots[0].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[0].employeeIds).toEqual([14]);
     expect(result[0].availableTimeslots[0].secondService).toBeDefined();
     expect(result[0].availableTimeslots[0].secondService!.startTime).toBe(`10:00:00`);
     expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([1]);
@@ -1175,7 +1175,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots).toHaveLength(2);
 
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
-    expect(result[0].availableTimeslots[0].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[0].employeeIds).toEqual([14]);
     expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[0].secondService).toBeDefined();
     expect(result[0].availableTimeslots[0].secondService!.serviceId).toEqual(43);
@@ -1183,7 +1183,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([14]);
 
     expect(result[0].availableTimeslots[1].startTime).toBe(`09:00:00`);
-    expect(result[0].availableTimeslots[1].employeeId).toEqual([1]);
+    expect(result[0].availableTimeslots[1].employeeIds).toEqual([1]);
     expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[1].secondService).toBeDefined();
     expect(result[0].availableTimeslots[1].secondService!.serviceId).toEqual(43);
@@ -1228,12 +1228,12 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
 
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
     expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
-    expect(result[0].availableTimeslots[0].employeeId).toEqual([14, 1]);
+    expect(result[0].availableTimeslots[0].employeeIds).toEqual([14, 1]);
     expect(result[0].availableTimeslots[0].secondService).toBeUndefined();
 
     expect(result[0].availableTimeslots[1].startTime).toBe(`08:30:00`);
     expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
-    expect(result[0].availableTimeslots[1].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[1].employeeIds).toEqual([14]);
     expect(result[0].availableTimeslots[1].secondService).toBeUndefined();
   });
 });
