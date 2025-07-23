@@ -611,10 +611,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T06:00:00.000Z`,
       endTime: `2025-07-28T06:30:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T08:00:00.000Z`,
         endTime: `2025-07-28T08:30:00.000Z`,
-        employeeIds: [14, 1]
+        employeeIds: [14, 1],
+        serviceId: 43,
       }
     });
 
@@ -622,10 +624,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T06:30:00.000Z`,
       endTime: `2025-07-28T07:00:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T08:30:00.000Z`,
         endTime: `2025-07-28T09:00:00.000Z`,
-        employeeIds: [1]
+        employeeIds: [1],
+        serviceId: 43,
       }
     });
 
@@ -633,10 +637,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T07:00:00.000Z`,
       endTime: `2025-07-28T07:30:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T09:00:00.000Z`,
         endTime: `2025-07-28T09:30:00.000Z`,
-        employeeIds: [1]
+        employeeIds: [1],
+        serviceId: 43,
       }
     });
 
@@ -644,10 +650,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T08:00:00.000Z`,
       endTime: `2025-07-28T08:30:00.000Z`,
       employeeIds: [1],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T10:00:00.000Z`,
         endTime: `2025-07-28T10:30:00.000Z`,
-        employeeIds: [1, 3]
+        employeeIds: [1, 3],
+        serviceId: 43,
       }
     });
 
@@ -655,10 +663,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T14:00:00.000Z`,
       endTime: `2025-07-28T14:30:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T16:00:00.000Z`,
         endTime: `2025-07-28T16:30:00.000Z`,
-        employeeIds: [3]
+        employeeIds: [3],
+        serviceId: 43,
       }
     });
   });
@@ -934,10 +944,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T06:00:00.000Z`,
       endTime: `2025-07-28T06:30:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T08:00:00.000Z`,
         endTime: `2025-07-28T08:30:00.000Z`,
-        employeeIds: [14, 1]
+        employeeIds: [14, 1],
+        serviceId: 43,
       }
     });
 
@@ -945,10 +957,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T06:30:00.000Z`,
       endTime: `2025-07-28T07:00:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T08:30:00.000Z`,
         endTime: `2025-07-28T09:00:00.000Z`,
-        employeeIds: [14, 1]
+        employeeIds: [14, 1],
+        serviceId: 43,
       }
     });
 
@@ -956,10 +970,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T07:00:00.000Z`,
       endTime: `2025-07-28T07:30:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T09:00:00.000Z`,
         endTime: `2025-07-28T09:30:00.000Z`,
-        employeeIds: [14, 1]
+        employeeIds: [14, 1],
+        serviceId: 43,
       }
     });
 
@@ -967,10 +983,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T07:30:00.000Z`,
       endTime: `2025-07-28T08:00:00.000Z`,
       employeeIds: [14],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T09:30:00.000Z`,
         endTime: `2025-07-28T10:00:00.000Z`,
-        employeeIds: [1]
+        employeeIds: [1],
+        serviceId: 43,
       }
     });
 
@@ -978,10 +996,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T08:00:00.000Z`,
       endTime: `2025-07-28T08:30:00.000Z`,
       employeeIds: [14, 1],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T10:00:00.000Z`,
         endTime: `2025-07-28T10:30:00.000Z`,
-        employeeIds: [1]
+        employeeIds: [1],
+        serviceId: 43,
       }
     });
 
@@ -989,10 +1009,12 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
       startTime: `2025-07-28T12:00:00.000Z`,
       endTime: `2025-07-28T12:30:00.000Z`,
       employeeIds: [14, 1],
+      serviceId: 1,
       secondService: {
         startTime: `2025-07-28T14:00:00.000Z`,
         endTime: `2025-07-28T14:30:00.000Z`,
-        employeeIds: [1]
+        employeeIds: [1],
+        serviceId: 43,
       }
     });
 
@@ -1013,30 +1035,36 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time (UTC+2)
             endTime: `2025-07-28T06:30:00.000Z`,
             employeeIds: [14],
+            serviceId: 1,
             secondService: {
               startTime: `2025-07-28T08:00:00.000Z`, // 10:00 German time
               endTime: `2025-07-28T08:30:00.000Z`,
-              employeeIds: [14, 1]
+              employeeIds: [14, 1],
+              serviceId: 43,
             }
           },
           {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time
             endTime: `2025-07-28T06:30:00.000Z`,
             employeeIds: [1],
+            serviceId: 1,
             secondService: {
               startTime: `2025-07-28T08:00:00.000Z`, // 10:00 German time
               endTime: `2025-07-28T08:30:00.000Z`,
-              employeeIds: [14, 1]
+              employeeIds: [14, 1],
+              serviceId: 43,
             }
           },
           {
             startTime: `2025-07-28T06:30:00.000Z`, // 08:30 German time
             endTime: `2025-07-28T07:00:00.000Z`,
             employeeIds: [14],
+            serviceId: 1,
             secondService: {
               startTime: `2025-07-28T08:30:00.000Z`, // 10:30 German time
               endTime: `2025-07-28T09:00:00.000Z`,
-              employeeIds: [1]
+              employeeIds: [1],
+              serviceId: 43,
             }
           }
         ]
@@ -1051,13 +1079,17 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
 
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
     expect(result[0].availableTimeslots[0].employeeId).toEqual([14, 1]);
+    expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[0].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[0].secondService!.serviceId).toEqual(43);
     expect(result[0].availableTimeslots[0].secondService!.startTime).toBe(`10:00:00`);
     expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([14, 1]);
 
     expect(result[0].availableTimeslots[1].startTime).toBe(`08:30:00`);
     expect(result[0].availableTimeslots[1].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[1].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[1].secondService!.serviceId).toEqual(43);
     expect(result[0].availableTimeslots[1].secondService!.startTime).toBe(`10:30:00`);
     expect(result[0].availableTimeslots[1].secondService!.employeeIds).toEqual([1]);
   });
@@ -1079,10 +1111,12 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time
             endTime: `2025-07-28T06:30:00.000Z`,
             employeeIds: [14],
+            serviceId: 1,
             secondService: {
               startTime: `2025-07-28T08:00:00.000Z`, // 10:00 German time
               endTime: `2025-07-28T08:30:00.000Z`,
-              employeeIds: [1]
+              employeeIds: [1],
+              serviceId: 43,
             }
           }
         ]
@@ -1094,10 +1128,12 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result).toHaveLength(1);
     expect(result[0].availableTimeslots).toHaveLength(1);
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
+    expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[0].employeeId).toEqual([14]);
     expect(result[0].availableTimeslots[0].secondService).toBeDefined();
     expect(result[0].availableTimeslots[0].secondService!.startTime).toBe(`10:00:00`);
     expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([1]);
+    expect(result[0].availableTimeslots[0].secondService!.serviceId).toEqual(43);
   });
 
   it(`should sort grouped time slots by start time`, () => {
@@ -1109,20 +1145,24 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
             startTime: `2025-07-28T07:00:00.000Z`, // 09:00 German time
             endTime: `2025-07-28T07:30:00.000Z`,
             employeeIds: [1],
+            serviceId: 1,
             secondService: {
               startTime: `2025-07-28T09:00:00.000Z`,
               endTime: `2025-07-28T09:30:00.000Z`,
-              employeeIds: [1]
+              employeeIds: [1],
+              serviceId: 43,
             }
           },
           {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time
             endTime: `2025-07-28T06:30:00.000Z`,
             employeeIds: [14],
+            serviceId: 1,
             secondService: {
               startTime: `2025-07-28T08:00:00.000Z`,
               endTime: `2025-07-28T08:30:00.000Z`,
-              employeeIds: [14]
+              employeeIds: [14],
+              serviceId: 43,
             }
           }
         ]
@@ -1136,13 +1176,17 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
 
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
     expect(result[0].availableTimeslots[0].employeeId).toEqual([14]);
+    expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[0].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[0].secondService!.serviceId).toEqual(43);
     expect(result[0].availableTimeslots[0].secondService!.startTime).toBe(`10:00:00`);
     expect(result[0].availableTimeslots[0].secondService!.employeeIds).toEqual([14]);
 
     expect(result[0].availableTimeslots[1].startTime).toBe(`09:00:00`);
     expect(result[0].availableTimeslots[1].employeeId).toEqual([1]);
+    expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[1].secondService).toBeDefined();
+    expect(result[0].availableTimeslots[1].secondService!.serviceId).toEqual(43);
     expect(result[0].availableTimeslots[1].secondService!.startTime).toBe(`11:00:00`);
     expect(result[0].availableTimeslots[1].secondService!.employeeIds).toEqual([1]);
 
@@ -1158,16 +1202,19 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time
             endTime: `2025-07-28T06:30:00.000Z`,
             employeeIds: [14],
+            serviceId: 1,
           },
           {
             startTime: `2025-07-28T06:00:00.000Z`,
             endTime: `2025-07-28T06:30:00.000Z`,
             employeeIds: [1],
+            serviceId: 1,
           },
           {
             startTime: `2025-07-28T06:30:00.000Z`, // 08:30 German time
             endTime: `2025-07-28T07:00:00.000Z`,
             employeeIds: [14],
+            serviceId: 1,
           }
         ]
       }
@@ -1180,10 +1227,12 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots).toHaveLength(2);
 
     expect(result[0].availableTimeslots[0].startTime).toBe(`08:00:00`);
+    expect(result[0].availableTimeslots[0].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[0].employeeId).toEqual([14, 1]);
     expect(result[0].availableTimeslots[0].secondService).toBeUndefined();
 
     expect(result[0].availableTimeslots[1].startTime).toBe(`08:30:00`);
+    expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[1].employeeId).toEqual([14]);
     expect(result[0].availableTimeslots[1].secondService).toBeUndefined();
   });

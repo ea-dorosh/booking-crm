@@ -88,10 +88,12 @@ export interface CombinedTimeSlot {
   startTime: string;
   endTime: string;
   employeeIds: number[];
+  serviceId: number;
   secondService?: {
     startTime: string;
     endTime: string;
     employeeIds: number[];
+    serviceId: number;
   };
 }
 
@@ -113,9 +115,11 @@ interface TimeslotWithGroupedEmployeeId {
 interface TimeslotWithGroupedEmployeeIdForTwoServices {
   employeeId: number[];
   startTime: Time_HH_MM_SS_Type; // in german time zone
+  serviceId: number;
   secondService?: {
     startTime: Time_HH_MM_SS_Type; // in german time zone
     employeeIds: number[];
+    serviceId: number;
   };
 }
 
@@ -443,10 +447,12 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
               startTime: firstTimeSlot.startTime.toISOString(),
               endTime: firstTimeSlot.endTime.toISOString(),
               employeeIds: [firstEmployee.employeeId],
+              serviceId: firstServiceDay.serviceId,
               secondService: {
                 startTime: secondServiceSlot.startTime.toISOString(),
                 endTime: secondServiceSlot.endTime.toISOString(),
-                employeeIds: [...availableSecondEmployees]
+                employeeIds: [...availableSecondEmployees],
+                serviceId: secondServiceDay.serviceId,
               }
             };
             combinedTimeSlots.push(newSlot);
@@ -552,14 +558,16 @@ function generateGroupedTimeSlotsForTwoServices(
         // Create new time slot
         const newSlot: TimeslotWithGroupedEmployeeIdForTwoServices = {
           startTime: firstServiceStartTime,
-          employeeId: [...timeSlot.employeeIds]
+          employeeId: [...timeSlot.employeeIds],
+          serviceId: timeSlot.serviceId,
         };
 
         // Add second service if it exists
         if (timeSlot.secondService && secondServiceStartTime) {
           newSlot.secondService = {
             startTime: secondServiceStartTime,
-            employeeIds: [...timeSlot.secondService.employeeIds]
+            employeeIds: [...timeSlot.secondService.employeeIds],
+            serviceId: timeSlot.secondService.serviceId,
           };
         }
 

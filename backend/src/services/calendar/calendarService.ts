@@ -114,7 +114,8 @@ const getGroupedTimeSlots = async (
         employee.availableTimeSlots.map(slot => ({
           startTime: slot.startTime.toISOString(),
           endTime: slot.endTime.toISOString(),
-          employeeIds: [employee.employeeId]
+          employeeIds: [employee.employeeId],
+          serviceId: dayData.serviceId,
         }))
       )
     }));
