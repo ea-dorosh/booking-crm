@@ -166,12 +166,14 @@ export async function sendAppointmentConfirmationEmail({
 
   const htmlContent = renderTemplate(`appointment-confirmation`, templateContext);
 
+  console.log(`templateContext: `, JSON.stringify(templateContext, null, 4));
+
   const mailOptions = {
     from: sender.formatted,
     to: recipientEmail,
-    subject: `Terminbestätigung - Dorosh Studio`,
+    subject: `Terminbestätigung - MOOD BEAUTY`,
     text:
-      `DOROSH STUDIO\n\n` +
+      `MOOD BEAUTY\n\n` +
       `Vielen Dank für die Buchung\n\n` +
       `Hallo ${firstName} ${lastName},\n` +
       `die Buchung für "${firstServiceData.service}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.\n\n` +
@@ -186,14 +188,14 @@ export async function sendAppointmentConfirmationEmail({
       `Name: ${firstName} ${lastName}\n` +
       `Telefonnummer: ${phone || 'Keine Angabe'}\n` +
       `Email: ${email}\n\n` +
-      `DOROSH STUDIO\n` +
+      `MOOD BEAUTY\n` +
       `${location}\n\n` +
       `${companyData.name}\n` +
       `Telefonnummer: ${companyData.phone}\n` +
       `E-Mail: ${companyData.email}\n` +
       `Website: ${companyData.website}\n` +
       `${companyData.addressStreet}, ${companyData.addressZip} ${companyData.addressCity}, ${companyData.addressCountry}\n\n` +
-      `© ${new Date().getFullYear()} Dorosh Studio. Alle Rechte vorbehalten.`,
+      `© ${new Date().getFullYear()} Natalia Dorosh. Alle Rechte vorbehalten.`,
     html: htmlContent,
   };
 

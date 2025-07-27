@@ -45,12 +45,20 @@
         font-weight: 600;
       }
       h2 {
-        font-family: 'Cinzel', serif;
+        font-family: 'Cormorant Garamond', serif;
         font-size: 24px;
         font-weight: 700;
         color: #333333;
         margin-top: 30px;
         margin-bottom: 20px;
+      }
+      .appointment-subtitle {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: #333333;
+        margin-top: 25px;
+        margin-bottom: 15px;
       }
       .appointment-details {
         background-color: #f8f8f8;
@@ -81,7 +89,7 @@
         font-size: 12px;
       }
       .footer-logo {
-        font-family: 'Cinzel', serif;
+        font-family: 'Cormorant Garamond', serif;
         font-size: 22px;
         font-weight: 700;
       }
@@ -94,7 +102,7 @@
         color: #ffffff !important;
       }
 
-      .footer-link {
+      .footer-link a {
         color: #ffffff !important;
         text-decoration: none !important;
       }
@@ -137,12 +145,73 @@
               Vielen Dank für die Buchung
             </p>
 
+            {{#secondServiceData}}
+            <p class="message">
+              Hallo {{../firstName}} {{../lastName}},
+              <br>
+              die Buchungen für "{{../firstServiceData.service}}" und "{{service}}" sind bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.
+            </p>
+            {{/secondServiceData}}
+
+            {{^secondServiceData}}
             <p class="message">
               Hallo {{firstName}} {{lastName}},
               <br>
               die Buchung für "{{firstServiceData.service}}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.
             </p>
+            {{/secondServiceData}}
 
+            {{#secondServiceData}}
+            <h2>Ihre Terminbestätigungen</h2>
+
+            <h3 class="appointment-subtitle">Erster Termin</h3>
+            <div class="appointment-details">
+                <div class="detail-row">
+                  <div class="detail-label">Datum:</div>
+                  <div class="detail-value">{{../firstServiceData.date}} um {{../firstServiceData.time}} Uhr</div>
+                </div>
+
+                <div class="detail-row">
+                  <div class="detail-label">Service:</div>
+                  <div class="detail-value">{{../firstServiceData.service}}</div>
+                </div>
+
+                <div class="detail-row">
+                  <div class="detail-label">Standort:</div>
+                  <div class="detail-value">{{../location}}</div>
+                </div>
+
+                <div class="detail-row">
+                  <div class="detail-label">Spezialist:</div>
+                  <div class="detail-value">{{../firstServiceData.specialist}}</div>
+                </div>
+            </div>
+
+            <h3 class="appointment-subtitle">Zweiter Termin</h3>
+            <div class="appointment-details">
+                <div class="detail-row">
+                  <div class="detail-label">Datum:</div>
+                  <div class="detail-value">{{date}} um {{time}} Uhr</div>
+                </div>
+
+                <div class="detail-row">
+                  <div class="detail-label">Service:</div>
+                  <div class="detail-value">{{service}}</div>
+                </div>
+
+                <div class="detail-row">
+                  <div class="detail-label">Standort:</div>
+                  <div class="detail-value">{{../location}}</div>
+                </div>
+
+                <div class="detail-row">
+                  <div class="detail-label">Spezialist:</div>
+                  <div class="detail-value">{{specialist}}</div>
+                </div>
+            </div>
+            {{/secondServiceData}}
+
+            {{^secondServiceData}}
             <h2>Ihre Terminbestätigung</h2>
 
             <div class="appointment-details">
@@ -166,6 +235,7 @@
                   <div class="detail-value">{{firstServiceData.specialist}}</div>
                 </div>
             </div>
+            {{/secondServiceData}}
 
             <h2>Kundenangaben</h2>
 
