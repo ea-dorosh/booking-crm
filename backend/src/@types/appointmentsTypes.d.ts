@@ -93,7 +93,6 @@ export interface AppointmentFormDataType {
   firstName: string;
   lastName: string;
   phone: string;
-  salutation: number;
   service: AppointmentFormDataServiceType;
 }
 
@@ -159,7 +158,6 @@ export interface CreateAppointmentServiceResponseSuccessType {
   date: string;
   timeStart: string;
   serviceName: string;
-  salutation: number;
   lastName: string;
   firstName: string;
   location: string;

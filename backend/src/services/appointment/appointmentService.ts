@@ -327,7 +327,6 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
       service_duration,
       employee_id,
       created_date,
-      customer_salutation,
       customer_first_name,
       customer_last_name,
       customer_email,
@@ -337,7 +336,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
       location,
       location_id
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const appointmentValues = [
@@ -350,7 +349,6 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     serviceDurationAndBufferTimeInMinutes,
     appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
     fromDayjsToMySQLDateTime(dayjs().utc()),
-    appointment.salutation,
     formatName(appointment.firstName),
     formatName(appointment.lastName),
     appointment.email,
@@ -424,7 +422,6 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     date: appointment.date,
     timeStart: appointment.service.startTime,
     serviceName: serviceName,
-    salutation: appointment.salutation,
     lastName: formatName(appointment.lastName),
     firstName: formatName(appointment.firstName),
     location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,

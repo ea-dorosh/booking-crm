@@ -1,5 +1,4 @@
 import { validateEmail, validatePhone } from '@/utils/validators.js';
-import { SalutationEnum } from '@/enums/enums.js';
 import { CustomerResponseData, CustomerFormDataValidationErrors } from '@/@types/customersTypes.js';
 import { AppointmentFormDataType } from '@/@types/appointmentsTypes.js';
 
@@ -11,12 +10,6 @@ const validateCustomerData = ({
   publicErrors: boolean;
 }): CustomerFormDataValidationErrors => {
   const errors: CustomerFormDataValidationErrors = {};
-
-  if (!formData.salutation || !(formData.salutation in SalutationEnum)) {
-    errors.salutation = publicErrors ?
-      `Bitte wählen Sie eine Anrede aus` :
-      `Salutation is required`;
-  }
 
   if (!formData.email || !formData.email?.length) {
     errors.email = publicErrors ?
