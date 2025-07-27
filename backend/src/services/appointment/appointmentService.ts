@@ -11,7 +11,9 @@ import {
   CreateAppointmentServiceResponseErrorType,
   CreateAppointmentServiceResponseSuccessType,
   ServiceBookingBaseType,
+  AppointmentFormDataServiceType,
  } from '@/@types/appointmentsTypes.js';
+ import { CompanyResponseData } from '@/@types/companyTypes.js';
  import {
   AppointmentStatusEnum,
   CustomerNewStatusEnum,
@@ -30,6 +32,7 @@ import {
 import {
   createGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
+  CreateGoogleCalendarEventInputType,
 } from '@/services/googleCalendar/googleCalendarService.js';
 import {
   validateAppointmentDetailsData,
@@ -234,29 +237,9 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     };
   }
 
-  let serviceDurationAndBufferTimeInMinutes: Time_HH_MM_SS_Type = `00:00:00`;
-  let serviceName: string = ``;
-
-  try {
-    const serviceDetails: ServiceDetailsDataType = await getService(dbPool, appointment.service.serviceId);
-
-    /** save serviceName for response */
-    serviceName = serviceDetails.name;
-
-    serviceDurationAndBufferTimeInMinutes = getServiceDuration(
-      serviceDetails.durationTime,
-      serviceDetails.bufferTime
-    );
-  } catch (error) {
-    return {
-      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
-      error: (error as Error).message,
-    };
-  }
-
   /** check customer already exists and create if not */
   let isCustomerNew = CustomerNewStatusEnum.New;
-  let customerId;
+  let customerId: number | null = null;
 
   const company = await getCompany(dbPool);
 
@@ -281,7 +264,202 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     };
   }
 
-  const timeStartUTC = dayjs.tz(`${appointment.date} ${appointment.service.startTime}`, `Europe/Berlin`).utc();
+  let firstSavedAppointment: SaveAppointmentResult | CreateAppointmentServiceResponseErrorType | null = null;
+
+  firstSavedAppointment = await saveAppointment(dbPool, {
+    service: appointment.service,
+    date: appointment.date,
+    customer: {
+      id: customerId!,
+      firstName: appointment.firstName,
+      lastName: appointment.lastName,
+      email: appointment.email,
+      phone: appointment.phone,
+      isCustomerNew,
+    },
+    company,
+  });
+
+  if ('errorMessage' in firstSavedAppointment || !firstSavedAppointment) {
+    return firstSavedAppointment;
+  }
+
+  let secondSavedAppointment: SaveAppointmentResult | CreateAppointmentServiceResponseErrorType | null = null;
+
+  if (appointment.service.secondService) {
+    secondSavedAppointment = await saveAppointment(dbPool, {
+      service: appointment.service.secondService,
+      date: appointment.date,
+      customer: {
+        id: customerId!,
+        firstName: appointment.firstName,
+        lastName: appointment.lastName,
+        email: appointment.email,
+        phone: appointment.phone,
+        isCustomerNew,
+      },
+      company,
+    });
+  }
+
+  if (secondSavedAppointment !== null && 'errorMessage' in secondSavedAppointment) {
+    return secondSavedAppointment;
+  }
+
+  try {
+    const googleEventId = await createGoogleCalendarEvent(
+      dbPool,
+      {
+        employeeId: appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
+        id: firstSavedAppointment.appointmentId,
+        customerId: Number(customerId),
+        customerName: `${formatName(appointment.firstName)} ${formatName(appointment.lastName)}`,
+        serviceName: firstSavedAppointment.serviceName,
+        timeStart: firstSavedAppointment.timeStartUTC,
+        timeEnd: firstSavedAppointment.timeEndUTC,
+        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+      }
+    );
+
+    if (googleEventId) {
+      const updateGoogleEventQuery = `
+        UPDATE SavedAppointments
+        SET google_calendar_event_id = ?
+        WHERE id = ?
+      `;
+      await dbPool.query(updateGoogleEventQuery, [googleEventId, firstSavedAppointment.appointmentId]);
+    }
+  } catch (error) {
+    console.error(`Failed to create Google Calendar event for first appointment:`, error);
+  }
+
+  if (secondSavedAppointment !== null) {
+    try {
+      const googleEventId = await createGoogleCalendarEvent(
+        dbPool,
+        {
+          employeeId: appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
+          id: secondSavedAppointment.appointmentId,
+          customerId: Number(customerId),
+          customerName: `${formatName(appointment.firstName)} ${formatName(appointment.lastName)}`,
+          serviceName: secondSavedAppointment.serviceName,
+          timeStart: secondSavedAppointment.timeStartUTC,
+          timeEnd: secondSavedAppointment.timeEndUTC,
+          location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+        }
+      );
+
+      if (googleEventId) {
+        const updateGoogleEventQuery = `
+          UPDATE SavedAppointments
+          SET google_calendar_event_id = ?
+          WHERE id = ?
+        `;
+        await dbPool.query(updateGoogleEventQuery, [googleEventId, secondSavedAppointment.appointmentId]);
+      }
+    } catch (error) {
+      console.error(`Failed to create Google Calendar event for second appointment:`, error);
+    }
+  }
+
+  try {
+    const employee = await getEmployee(dbPool, appointment.service.employeeIds[0]); // TODO: create logic for selecting from employeeIds array
+
+    const confirmationEmailPayload: any = {
+      recipientEmail: appointment.email,
+      appointmentData: {
+        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+        lastName: formatName(appointment.lastName),
+        firstName: formatName(appointment.firstName),
+        phone: formatPhone(appointment.phone),
+        email: appointment.email,
+      },
+      firstServiceData:{
+        date:  dayjs.tz(`${appointment.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
+        time: dayjs.tz(firstSavedAppointment.timeStartUTC, 'Europe/Berlin').format('HH:mm'),
+        service: firstSavedAppointment.serviceName,
+        specialist: `${employee.firstName} ${employee.lastName}`,
+      },
+      companyData: company,
+    }
+
+    if (secondSavedAppointment) {
+      confirmationEmailPayload.secondServiceData = {
+        date: dayjs.tz(`${appointment.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
+        time: dayjs.tz(secondSavedAppointment.timeStartUTC, 'Europe/Berlin').format('HH:mm'),
+        service: secondSavedAppointment.serviceName,
+        specialist: `${employee.firstName} ${employee.lastName}`,
+      }
+    }
+
+    const emailResult = await sendAppointmentConfirmationEmail(confirmationEmailPayload);
+    console.log(`Confirmation email sent to ${appointment.email}`);
+
+    if (emailResult?.previewUrl) {
+      console.log(`Email preview available at: ${emailResult.previewUrl}`);
+    }
+  } catch (error) {
+    console.error(`Failed to send confirmation email for appointment ${firstSavedAppointment.appointmentId}: `, error);
+  }
+
+  return {
+    id: firstSavedAppointment.appointmentId,
+    date: appointment.date,
+    timeStart: appointment.service.startTime,
+    serviceName: firstSavedAppointment.serviceName,
+    lastName: formatName(appointment.lastName),
+    firstName: formatName(appointment.firstName),
+    location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+  };
+}
+
+export interface SaveAppointmentResult {
+  appointmentId: number;
+  serviceName: string;
+  timeStartUTC: dayjs.Dayjs;
+  timeEndUTC: dayjs.Dayjs;
+  serviceDurationAndBufferTimeInMinutes: Time_HH_MM_SS_Type;
+}
+
+const saveAppointment = async (dbPool: Pool, {
+  service,
+  date,
+  customer,
+  company,
+}: {
+  service: AppointmentFormDataServiceType;
+  date: Date_ISO_Type;
+  customer: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    isCustomerNew: CustomerNewStatusEnum;
+  };
+  company: CompanyResponseData;
+}): Promise<SaveAppointmentResult | CreateAppointmentServiceResponseErrorType> => {
+  let serviceName: string = ``;
+  let serviceDurationAndBufferTimeInMinutes: Time_HH_MM_SS_Type = `00:00:00`;
+
+  try {
+    const serviceDetails: ServiceDetailsDataType = await getService(dbPool, service.serviceId);
+
+    /** save serviceName for response */
+    serviceName = serviceDetails.name;
+
+    serviceDurationAndBufferTimeInMinutes = getServiceDuration(
+      serviceDetails.durationTime,
+      serviceDetails.bufferTime
+    );
+  } catch (error) {
+    return {
+      errorMessage: ERROR_MESSAGE.GENERAL_ERROR_MESSAGE,
+      error: (error as Error).message,
+    };
+  }
+
+  const timeStartUTC = dayjs.tz(`${date} ${service.startTime}`, `Europe/Berlin`).utc();
   const timeEndUTC = getAppointmentEndTime(
     timeStartUTC,
     serviceDurationAndBufferTimeInMinutes
@@ -297,8 +475,8 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     const { isEmployeeAvailable } = await checkEmployeeTimeNotOverlap(
       dbPool,
       {
-        date: appointment.date,
-        employeeId: appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
+        date: date,
+        employeeId: service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
         timeStart: timeStartUTC,
         timeEnd: timeEndUTC,
       },
@@ -340,20 +518,20 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
   `;
 
   const appointmentValues = [
-    appointment.date,
+    date,
     fromDayjsToMySQLDateTime(timeStartUTC),
     fromDayjsToMySQLDateTime(timeEndUTC),
-    appointment.service.serviceId,
+    service.serviceId,
     serviceName,
-    customerId,
+    customer.id,
     serviceDurationAndBufferTimeInMinutes,
-    appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
+    service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
     fromDayjsToMySQLDateTime(dayjs().utc()),
-    formatName(appointment.firstName),
-    formatName(appointment.lastName),
-    appointment.email,
-    formatPhone(appointment.phone),
-    isCustomerNew,
+    formatName(customer.firstName),
+    formatName(customer.lastName),
+    customer.email,
+    formatPhone(customer.phone),
+    customer.isCustomerNew,
     null, // placeholder for google_calendar_event_id
     `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
     company.branches[0].id,
@@ -363,69 +541,13 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
 
   const appointmentId = appointmentResults.insertId;
 
-  try {
-    const googleEventId = await createGoogleCalendarEvent(
-      dbPool,
-      appointment.service.employeeIds[0], // TODO: create logic for selecting from employeeIds array
-      {
-        id: appointmentId,
-        customerId: Number(customerId),
-        customerName: `${formatName(appointment.firstName)} ${formatName(appointment.lastName)}`,
-        serviceName: serviceName,
-        timeStart: timeStartUTC,
-        timeEnd: timeEndUTC,
-        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
-      }
-    );
-
-    if (googleEventId) {
-      const updateGoogleEventQuery = `
-        UPDATE SavedAppointments
-        SET google_calendar_event_id = ?
-        WHERE id = ?
-      `;
-      await dbPool.query(updateGoogleEventQuery, [googleEventId, appointmentId]);
-    }
-  } catch (error) {
-    console.error(`Failed to create Google Calendar event:`, error);
-  }
-
-  try {
-    const employee = await getEmployee(dbPool, appointment.service.employeeIds[0]); // TODO: create logic for selecting from employeeIds array
-
-    const emailResult = await sendAppointmentConfirmationEmail(
-      appointment.email,
-      {
-        date:  dayjs.tz(`${appointment.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
-        time: dayjs.tz(timeStartUTC, 'Europe/Berlin').format('HH:mm'),
-        service: serviceName,
-        specialist: `${employee.firstName} ${employee.lastName}`,
-        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
-        lastName: formatName(appointment.lastName),
-        firstName: formatName(appointment.firstName),
-        phone: formatPhone(appointment.phone),
-        email: appointment.email,
-      },
-      company,
-    );
-    console.log(`Confirmation email sent to ${appointment.email}`);
-
-    if (emailResult?.previewUrl) {
-      console.log(`Email preview available at: ${emailResult.previewUrl}`);
-    }
-  } catch (error) {
-    console.error(`Failed to send confirmation email for appointment ${appointmentId}: `, error);
-  }
-
   return {
-    id: appointmentId,
-    date: appointment.date,
-    timeStart: appointment.service.startTime,
-    serviceName: serviceName,
-    lastName: formatName(appointment.lastName),
-    firstName: formatName(appointment.firstName),
-    location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
-  };
+    appointmentId,
+    serviceName,
+    serviceDurationAndBufferTimeInMinutes,
+    timeStartUTC,
+    timeEndUTC
+  }
 }
 
 export {

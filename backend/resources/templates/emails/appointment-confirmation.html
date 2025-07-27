@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terminbestätigung - Dorosh Studio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
       body {
         margin: 0;
         padding: 0;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Montserrat', sans-serif;
         background-color: #f8f8f8;
         color: #333333;
         -webkit-font-smoothing: antialiased;
@@ -30,7 +30,7 @@
       }
       .header h1 {
         margin: 0;
-        font-family: 'Cinzel', serif;
+        font-family: 'Cormorant Garamond', serif;
         font-size: 28px;
         font-weight: 700;
         color: #ffffff;
@@ -78,7 +78,7 @@
         color: #ffffff;
         padding: 30px 20px;
         text-align: center;
-        font-size: 14px;
+        font-size: 12px;
       }
       .footer-logo {
         font-family: 'Cinzel', serif;
@@ -93,14 +93,21 @@
         margin-bottom: 15px;
         color: #ffffff !important;
       }
+
+      .footer-link {
+        color: #ffffff !important;
+        text-decoration: none !important;
+      }
+
       .social-links {
-          margin: 20px 0;
+        margin: 20px 0;
       }
       .social-links a {
-          display: inline-block;
-          margin: 0 10px;
-          color: #ffffff;
-          text-decoration: none;
+        font-size: 14px;
+        display: inline-block;
+        margin: 0 10px;
+        color: #ffffff;
+        text-decoration: none;
       }
       @media only screen and (max-width: 480px) {
           .header h1 {
@@ -122,7 +129,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>DOROSH STUDIO</h1>
+            <h1>MOOD BEAUTY</h1>
         </div>
 
         <div class="content">
@@ -133,7 +140,7 @@
             <p class="message">
               Hallo {{firstName}} {{lastName}},
               <br>
-              die Buchung für "{{service}}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.
+              die Buchung für "{{firstServiceData.service}}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.
             </p>
 
             <h2>Ihre Terminbestätigung</h2>
@@ -141,12 +148,12 @@
             <div class="appointment-details">
                 <div class="detail-row">
                   <div class="detail-label">Datum:</div>
-                  <div class="detail-value">{{date}} um {{time}} Uhr</div>
+                  <div class="detail-value">{{firstServiceData.date}} um {{firstServiceData.time}} Uhr</div>
                 </div>
 
                 <div class="detail-row">
                   <div class="detail-label">Service:</div>
-                  <div class="detail-value">{{service}}</div>
+                  <div class="detail-value">{{firstServiceData.service}}</div>
                 </div>
 
                 <div class="detail-row">
@@ -156,7 +163,7 @@
 
                 <div class="detail-row">
                   <div class="detail-label">Spezialist:</div>
-                  <div class="detail-value">{{specialist}}</div>
+                  <div class="detail-value">{{firstServiceData.specialist}}</div>
                 </div>
             </div>
 
@@ -181,16 +188,16 @@
         </div>
 
         <div class="footer">
-            <div class="footer-logo">DOROSH STUDIO</div>
+            <div class="footer-logo">MOOD BEAUTY</div>
             <div class="footer-location">
               {{location}}
             </div>
 
             <div class="footer-info">
               {{ companyData.name }}<br>
-              Telefonnummer: <a href="tel:{{companyData.phone}}">{{companyData.phone}}</a><br>
-              E-Mail: {{companyData.email}}<br>
-              Website: {{companyData.website}}<br>
+              Telefonnummer: <span class="footer-link">{{companyData.phone}}</span><br>
+              E-Mail: <span class="footer-link">{{companyData.email}}</span><br>
+              Website: <span class="footer-link">{{companyData.website}}</span><br>
               {{companyData.addressStreet}}, {{companyData.addressZip}} {{companyData.addressCity}}, {{companyData.addressCountry}}
             </div>
 
@@ -199,7 +206,7 @@
               <a href="https://facebook.com/doroshstudio">Facebook</a>
             </div>
 
-            <div>© {{currentYear}} Dorosh Studio. Alle Rechte vorbehalten.</div>
+            <div>© {{currentYear}} Natalia Dorosh. Alle Rechte vorbehalten.</div>
         </div>
     </div>
 </body>

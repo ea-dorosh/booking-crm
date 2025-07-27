@@ -470,32 +470,38 @@ export const checkGoogleCalendarAvailability = async (
   }
 };
 
+export interface CreateGoogleCalendarEventAppointmentType {
+  id: number;
+  employeeId: number,
+  customerId: number;
+  customerName: string;
+  serviceName: string;
+  timeStart: dayjs.Dayjs;
+  timeEnd: dayjs.Dayjs;
+  location?: string;
+}
+
+export interface CreateGoogleCalendarEventInputType {
+  firstAppointment: CreateGoogleCalendarEventAppointmentType;
+  secondAppointment?: CreateGoogleCalendarEventAppointmentType;
+}
+
 export const createGoogleCalendarEvent = async (
   dbPool: Pool,
-  employeeId: number,
-  appointment: {
-    id: number;
-    customerId: number;
-    customerName: string;
-    serviceName: string;
-    timeStart: dayjs.Dayjs;
-    timeEnd: dayjs.Dayjs;
-    location?: string;
-  }
+  appointment: CreateGoogleCalendarEventAppointmentType,
 ): Promise<string | null> => {
   console.log(`createGoogleCalendarEvent input:`, {
-    employeeId,
     appointment,
   });
 
-  const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
+  const calendarDataFirstAppointment = await getEmployeeCalendarClient(dbPool, appointment.employeeId);
 
-  if (!calendarData) {
-    console.log(`No Google Calendar integration found for employee ID:`, employeeId);
+  if (!calendarDataFirstAppointment) {
+    console.log(`No Google Calendar integration found for employee ID:`, appointment.employeeId);
     return null;
   }
 
-  const { calendarClient, calendarId } = calendarData;
+  const { calendarClient, calendarId } = calendarDataFirstAppointment;
 
   console.log(`Creating Google Calendar event:`, {
     calendarId,

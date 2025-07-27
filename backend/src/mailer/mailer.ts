@@ -57,7 +57,6 @@ function getSenderInfo() {
 
 function renderTemplate(templateName: string, context: Record<string, any>): string {
   try {
-    // Использование единого пути для ресурсов с возможностью переопределения через ENV
     const RESOURCES_PATH = process.env.RESOURCES_PATH || path.join(process.cwd(), 'resources');
     const templatePath = path.join(RESOURCES_PATH, 'templates', 'emails', `${templateName}.html`);
 
@@ -106,30 +105,41 @@ export async function sendPasswordResetEmail(recipientEmail: string, token: stri
   }
 }
 
-export async function sendAppointmentConfirmationEmail(
-  recipientEmail: string,
-  appointmentData: {
-    date: string;
-    time: string;
-    service: string;
-    specialist: string;
-    location: string;
-    lastName: string;
-    firstName: string;
-    phone: string | null;
-    email: string;
-  },
-  companyData: CompanyResponseData,
+export async function sendAppointmentConfirmationEmail({
+  recipientEmail,
+  appointmentData,
+  firstServiceData,
+  secondServiceData,
+  companyData,
+}: {
+    recipientEmail: string,
+    appointmentData: {
+      location: string,
+      lastName: string,
+      firstName: string,
+      phone: string | null,
+      email: string,
+    },
+    firstServiceData: {
+      date: string;
+      time: string;
+      service: string;
+      specialist: string;
+    },
+    secondServiceData?: {
+      date: string;
+      time: string;
+      service: string;
+      specialist: string;
+    },
+    companyData: CompanyResponseData,
+  }
 ) {
   if (!transporter) {
     await createTransporter();
   }
 
   const {
-    date,
-    time,
-    service,
-    specialist,
     location,
     lastName,
     firstName,
@@ -139,19 +149,20 @@ export async function sendAppointmentConfirmationEmail(
 
   const sender = getSenderInfo();
 
-  const templateContext = {
+  const templateContext: any = {
     lastName,
     firstName,
-    date,
-    time,
-    service,
-    specialist,
     location,
     phone,
     email,
-    companyData,
+    companyData: companyData,
     currentYear: new Date().getFullYear(),
+    firstServiceData: firstServiceData,
   };
+
+  if (secondServiceData) {
+    templateContext.secondServiceData = secondServiceData;
+  }
 
   const htmlContent = renderTemplate(`appointment-confirmation`, templateContext);
 
@@ -163,13 +174,13 @@ export async function sendAppointmentConfirmationEmail(
       `DOROSH STUDIO\n\n` +
       `Vielen Dank für die Buchung\n\n` +
       `Hallo ${firstName} ${lastName},\n` +
-      `die Buchung für "${service}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.\n\n` +
+      `die Buchung für "${firstServiceData.service}" ist bestätigt. Für Fragen stehen wir jederzeit zur Verfügung.\n\n` +
       `Ihre Terminbestätigung\n` +
       `---------------------\n` +
-      `Datum: ${date} um ${time} Uhr\n` +
-      `Service: ${service}\n` +
+      `Datum: ${firstServiceData.date} um ${firstServiceData.time} Uhr\n` +
+      `Service: ${firstServiceData.service}\n` +
       `Standort: ${location}\n` +
-      `Spezialist: ${specialist}\n\n` +
+      `Spezialist: ${firstServiceData.specialist}\n\n` +
       `Kundenangaben\n` +
       `-------------\n` +
       `Name: ${firstName} ${lastName}\n` +
