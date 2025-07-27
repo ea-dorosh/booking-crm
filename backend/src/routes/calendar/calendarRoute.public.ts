@@ -6,7 +6,6 @@ import {
 } from '@/@types/expressTypes.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getGroupedTimeSlots } from '@/services/calendar/calendarService.js';
-import { log } from 'console';
 
 const router = express.Router();
 

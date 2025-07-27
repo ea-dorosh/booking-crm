@@ -76,6 +76,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           id,
           name,
           categoryId: category_id,
+          categoryName: categoriesData.find(category => category.id === category_id)?.name || '',
           subCategoryId: sub_category_id,
           durationTime: duration_time,
           bufferTime: buffer_time,
@@ -93,8 +94,6 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           price,
           firstName: employeesData.find(employee => employee.employeeId === employee_id)?.firstName || '',
           lastName: employeesData.find(employee => employee.employeeId === employee_id)?.lastName || '',
-          email: employeesData.find(employee => employee.employeeId === employee_id)?.email || '',
-          phone: employeesData.find(employee => employee.employeeId === employee_id)?.phone || '',
           image: employeesData.find(employee => employee.employeeId === employee_id)?.image || '',
          });
       }
