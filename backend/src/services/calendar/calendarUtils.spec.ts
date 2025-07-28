@@ -411,7 +411,7 @@ describe(`calculateAvailableTimes`, () => {
     const serviceDuration = `00:45:00`;
 
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
-    console.log(`result: `, JSON.stringify(result, null, 2));
+
     expect(result).toHaveLength(3);
     expect(result[0].minPossibleStartTime.isSame(dayjs.utc(`2025-07-28T08:00:00.000Z`))).toBe(true);
     expect(result[0].maxPossibleStartTime.format(`HH:mm:ss`)).toBe(`09:15:00`);
