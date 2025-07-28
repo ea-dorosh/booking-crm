@@ -56,8 +56,10 @@ import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
 async function getAppointments(
   dbPool: Pool,
   startDate: Date_ISO_Type,
-  status: AppointmentStatusEnum | null
+  status: AppointmentStatusEnum | null = null
 ): Promise<AppointmentDataType[]> {
+
+  console.log(`status: `, status);
   const sql = `
     SELECT *
     FROM SavedAppointments

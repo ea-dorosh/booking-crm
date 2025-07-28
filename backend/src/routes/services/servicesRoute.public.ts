@@ -135,7 +135,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
     // Filter out categories that have no services
     const filteredData = groupedData.filter(category => category.subCategories.length > 0);
-    console.log(`filteredData: `, JSON.stringify(filteredData, null, 4));
+
     res.json(filteredData);
   } catch (error) {
     console.error(`Database query error:`, error);

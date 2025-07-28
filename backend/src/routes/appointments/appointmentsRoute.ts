@@ -21,7 +21,7 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
   }
 
   const startDate = request.query?.startDate as Date_ISO_Type | null;
-  const status = Number(request.query?.status) as AppointmentStatusEnum | null;
+  const status = Number(request.query?.status) as AppointmentStatusEnum | null || null;
 
   if (!startDate) {
     response.status(400).json({ error: `startDate query parameter is required` });
@@ -138,8 +138,8 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
 
           const newGoogleEventId = await createGoogleCalendarEvent(
             request.dbPool,
-            appointmentData.employeeId,
             {
+              employeeId: appointmentData.employeeId,
               id: Number(appointmentId),
               customerId: appointment.customer.id,
               customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,

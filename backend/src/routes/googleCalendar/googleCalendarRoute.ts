@@ -321,8 +321,8 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
       try {
         const googleEventId = await createGoogleCalendarEvent(
           req.dbPool,
-          employeeId,
           {
+            employeeId: employeeId,
             id: appointment.id,
             customerId: appointment.customer_id,
             customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,

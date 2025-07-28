@@ -131,15 +131,17 @@ export interface PeriodWithGroupedTimeslotsForTwoServicesType {
 // HELPER FUNCTIONS
 /**
  * Calculate adjusted end time by subtracting service duration from a given time
- * @param baseTime - time in HH:mm:ss format
+ * @param baseTime - time in Dayjs UTC format
  * @param serviceDuration - service duration in HH:mm:ss format
  * @returns adjusted time in HH:mm:ss format
  */
 const calculateAdjustedEndTime = (baseTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs => {
+  const serviceTime = dayjs.utc(serviceDuration, TIME_FORMAT);
+
   const result = baseTime
-    .subtract(dayjs(serviceDuration, TIME_FORMAT).hour(), `hour`)
-    .subtract(dayjs(serviceDuration, TIME_FORMAT).minute(), `minute`)
-    .subtract(dayjs(serviceDuration, TIME_FORMAT).second(), `second`)
+    .subtract(serviceTime.hour(), `hour`)
+    .subtract(serviceTime.minute(), `minute`)
+    .subtract(serviceTime.second(), `second`)
     .utc();
 
   return result;
@@ -181,7 +183,8 @@ const calculateAvailableTimes = (
       }
     }
 
-    currentTime = blockedTime.endBlockedTime;
+    // Only move currentTime forward, never backward - this handles overlapping blocked periods
+    currentTime = dayjs.max(currentTime, blockedTime.endBlockedTime);
   }
 
   if (currentTime.isBefore(endWorkingTime)) {
@@ -350,12 +353,35 @@ function combinePeriodWithNormalizedAppointments(
         };
       });
 
+      // Add blocked period for current time + 30 minutes if this is today
+      const today = dayjs().utc().format(DATE_FORMAT);
+      if (dayData.day === today) {
+        const now = dayjs().utc();
+        const nowPlus30Minutes = now.add(30, 'minute');
+
+        blockedTimes.push({
+          startBlockedTime: employee.startWorkingTime,
+          endBlockedTime: nowPlus30Minutes,
+        });
+      }
+
+      console.log(`calculateAvailableTimes: `, JSON.stringify({
+        startWorkingTime: employee.startWorkingTime,
+        endWorkingTime: employee.endWorkingTime,
+        blockedTimes: blockedTimes.map(blockedTime => ({
+          startBlockedTime: blockedTime.startBlockedTime,
+          endBlockedTime: blockedTime.endBlockedTime,
+        })),
+        serviceDurationWithBuffer,
+      }, null, 2));
       const availableTimes = calculateAvailableTimes(
         employee.startWorkingTime,
         employee.endWorkingTime,
         blockedTimes,
         serviceDurationWithBuffer,
       );
+
+      console.log(`availableTimes: `, JSON.stringify(availableTimes, null, 2));
 
       return {
         ...employee,
