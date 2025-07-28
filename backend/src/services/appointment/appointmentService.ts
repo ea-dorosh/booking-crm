@@ -410,6 +410,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     lastName: formatName(appointment.lastName),
     firstName: formatName(appointment.firstName),
     location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+    company: company,
   };
 }
 

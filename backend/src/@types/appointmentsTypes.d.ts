@@ -8,6 +8,7 @@ import {
   Time_HH_MM_SS_Type,
 } from '@/@types/utilTypes.js';
 import { CustomerFormDataValidationErrors } from '@/@types/customersTypes.js';
+import { CompanyResponseData } from '@/@types/companyTypes.js';
 
 export interface AppointmentRowType extends RowDataPacket {
   id: number;
@@ -161,4 +162,5 @@ export interface CreateAppointmentServiceResponseSuccessType {
   lastName: string;
   firstName: string;
   location: string;
+  company: CompanyResponseData;
 }
