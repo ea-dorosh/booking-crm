@@ -20,6 +20,7 @@ import { getGroupEmployeeAvailability } from '@/services/employees/employeesServ
 import { getService } from '@/services/service/serviceService.js';
 import { getServiceDuration } from '@/utils/timeUtils.js';
 import { Pool } from 'mysql2/promise';
+import { log } from 'console';
 
 /**
  * Get grouped time slots for one or two services
@@ -98,9 +99,11 @@ const getGroupedTimeSlots = async (
       periodWithClearedDaysForSecondService = periodWithClearedDays;
     }
   }
-
+  console.log(`periodWithClearedDaysForFirstService: `, JSON.stringify(periodWithClearedDaysForFirstService, null, 2));
   // Generate time slots
   const timeSlotsDataForFirstService = generateTimeSlotsFromAvailableTimes(periodWithClearedDaysForFirstService);
+
+  console.log(`timeSlotsDataForFirstService: `, JSON.stringify(timeSlotsDataForFirstService, null, 2));
   const timeSlotsDataForSecondService = generateTimeSlotsFromAvailableTimes(periodWithClearedDaysForSecondService);
 
   // Process based on number of services

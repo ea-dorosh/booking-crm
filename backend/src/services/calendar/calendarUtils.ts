@@ -365,15 +365,6 @@ function combinePeriodWithNormalizedAppointments(
         });
       }
 
-      console.log(`calculateAvailableTimes: `, JSON.stringify({
-        startWorkingTime: employee.startWorkingTime,
-        endWorkingTime: employee.endWorkingTime,
-        blockedTimes: blockedTimes.map(blockedTime => ({
-          startBlockedTime: blockedTime.startBlockedTime,
-          endBlockedTime: blockedTime.endBlockedTime,
-        })),
-        serviceDurationWithBuffer,
-      }, null, 2));
       const availableTimes = calculateAvailableTimes(
         employee.startWorkingTime,
         employee.endWorkingTime,
@@ -395,6 +386,81 @@ function combinePeriodWithNormalizedAppointments(
       employees: employeesWithBlockedTimes,
       serviceDuration,
       serviceId,
+    };
+  });
+}
+
+function generateTimeSlotsFromAvailableTimes(
+  periodWithClearedDays: PeriodWithClearedDaysType[]
+): DayWithTimeSlots[] {
+  return periodWithClearedDays.map(dayData => {
+    const employeesWithTimeSlots: EmployeeWithTimeSlots[] = dayData.employees.map(employee => {
+      const availableTimeSlots: AvailableTimeSlot[] = [];
+
+      // Process each available time range for this employee
+      employee.availableTimes.forEach(availableTime => {
+        // Round start time to next 15-minute interval (00, 15, 30, 45)
+        const startMinutes = availableTime.minPossibleStartTime.minute();
+        const roundedMinutes = Math.ceil(startMinutes / 15) * 15;
+        let currentTime = availableTime.minPossibleStartTime
+          .minute(roundedMinutes % 60)
+          .second(0)
+          .millisecond(0);
+
+        // Handle hour overflow if minutes rounded to 60
+        if (roundedMinutes >= 60) {
+          currentTime = currentTime.add(1, 'hour').minute(0);
+        }
+
+        const endTime = availableTime.maxPossibleStartTime;
+
+        // Generate time slots
+        let isFirstSlot = true;
+        while (currentTime.isBefore(endTime) || currentTime.isSame(endTime)) {
+          let slotEndTime: dayjs.Dayjs;
+
+          if (isFirstSlot) {
+            const currentMinutes = currentTime.minute();
+
+            if (currentMinutes === 15 || currentMinutes === 45) {
+              // First slot is 15 minutes (until next :00 or :30)
+              slotEndTime = currentMinutes === 15
+                ? currentTime.minute(30).second(0).millisecond(0)  // 15 -> 30
+                : currentTime.add(1, 'hour').minute(0).second(0).millisecond(0);  // 45 -> :00 next hour
+            } else {
+              // First slot is 30 minutes (starts at :00 or :30)
+              slotEndTime = currentTime.add(30, 'minute');
+            }
+            isFirstSlot = false;
+          } else {
+            // All subsequent slots are 30 minutes and start at :00 or :30
+            slotEndTime = currentTime.add(30, 'minute');
+          }
+
+          // Add the slot if currentTime is within available time
+          if (currentTime.isSameOrBefore(endTime)) {
+            availableTimeSlots.push({
+              startTime: currentTime,
+              endTime: slotEndTime,
+            });
+          }
+
+                    // Move to next slot - use the end time of current slot as start of next slot
+          currentTime = slotEndTime;
+        }
+      });
+
+      return {
+        employeeId: employee.employeeId,
+        availableTimeSlots,
+      };
+    });
+
+    return {
+      day: dayData.day,
+      employees: employeesWithTimeSlots,
+      serviceDuration: dayData.serviceDuration,
+      serviceId: dayData.serviceId,
     };
   });
 }
@@ -499,49 +565,6 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
   });
 
   return result;
-}
-
-function generateTimeSlotsFromAvailableTimes(
-  periodWithClearedDays: PeriodWithClearedDaysType[]
-): DayWithTimeSlots[] {
-  return periodWithClearedDays.map(dayData => {
-    const employeesWithTimeSlots: EmployeeWithTimeSlots[] = dayData.employees.map(employee => {
-      const availableTimeSlots: AvailableTimeSlot[] = [];
-
-      // Process each available time range for this employee
-      employee.availableTimes.forEach(availableTime => {
-        let currentTime = availableTime.minPossibleStartTime;
-        const endTime = availableTime.maxPossibleStartTime;
-
-        // Generate 30-minute slots within this available time range
-        while (currentTime.isBefore(endTime) || currentTime.isSame(endTime)) {
-          const slotEndTime = currentTime.add(30, 'minute');
-
-          // Add the slot if currentTime is within available time
-          if (currentTime.isSameOrBefore(endTime)) {
-            availableTimeSlots.push({
-              startTime: currentTime,
-              endTime: slotEndTime,
-            });
-          }
-
-          currentTime = slotEndTime;
-        }
-      });
-
-      return {
-        employeeId: employee.employeeId,
-        availableTimeSlots,
-      };
-    });
-
-    return {
-      day: dayData.day,
-      employees: employeesWithTimeSlots,
-      serviceDuration: dayData.serviceDuration,
-      serviceId: dayData.serviceId,
-    };
-  });
 }
 
 function generateGroupedTimeSlotsForTwoServices(

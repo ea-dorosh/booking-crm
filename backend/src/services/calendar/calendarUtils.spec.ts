@@ -2,7 +2,7 @@
 const MOCK_BASE_DATE = `2024-01-15T10:00:00.000Z`; // Winter time (UTC+1)
 const MOCK_SUMMER_DATE = `2024-07-15T10:00:00.000Z`; // Summer time (UTC+2)
 
-import { Date_ISO_Type } from '@/@types/utilTypes.js';
+import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import {
@@ -11,7 +11,8 @@ import {
   getPeriodWithDaysAndEmployeeAvailability,
   combineAndFilterTimeSlotsDataFromTwoServices,
   generateGroupedTimeSlotsForTwoServices,
-  DayWithTimeSlots
+  DayWithTimeSlots,
+  generateTimeSlotsFromAvailableTimes
 } from './calendarUtils';
 
 jest.mock(`dayjs`, () => {
@@ -1416,5 +1417,170 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots[1].serviceId).toEqual(1);
     expect(result[0].availableTimeslots[1].employeeIds).toEqual([14]);
     expect(result[0].availableTimeslots[1].secondService).toBeUndefined();
+  });
+});
+
+describe(`generateTimeSlotsFromAvailableTimes`, () => {
+  it(`should round start time to next 15-minute interval, first slot may be shorter if on :15 or :45`, () => {
+    // Test data: 19:09:18 should round to 19:15:00
+    const periodWithClearedDays = [
+      {
+        day: `2025-07-29` as Date_ISO_Type,
+        employees: [
+          {
+            employeeId: 1,
+            startWorkingTime: dayjs.utc(`2025-07-29T08:00:00.000Z`),
+            endWorkingTime: dayjs.utc(`2025-07-29T21:30:00.000Z`),
+            blockedTimes: [],
+            availableTimes: [
+              {
+                // Start time 19:09:18 should be rounded up to 19:15:00
+                minPossibleStartTime: dayjs.utc(`2025-07-29T19:09:18.673Z`),
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`)
+              }
+            ]
+          }
+        ],
+        serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
+        serviceId: 1
+      }
+    ];
+
+    const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
+    const slots = result[0].employees[0].availableTimeSlots;
+
+    // Should have: 19:15-19:30 (15min), 19:30-20:00 (30min), 20:00-20:30 (30min)
+    expect(slots).toHaveLength(4);
+
+    // First slot: 19:15-19:30 (only 15 minutes because it starts at :15)
+    expect(slots[0].startTime.format(`HH:mm:ss`)).toBe(`19:15:00`);
+    expect(slots[0].endTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
+
+    // Second slot: 19:30-20:00 (standard 30 minutes)
+    expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
+    expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+
+    // Third slot: 20:00-20:30 (standard 30 minutes)
+    expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+
+    // Fourth slot: 20:30-21:00 (standard 30 minutes)
+    expect(slots[3].startTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+    expect(slots[3].endTime.format(`HH:mm:ss`)).toBe(`21:00:00`);
+  });
+
+  it(`should handle time that rounds to :30 - standard 30min slots`, () => {
+    const periodWithClearedDays = [
+      {
+        day: `2025-07-29` as Date_ISO_Type,
+        employees: [
+          {
+            employeeId: 1,
+            startWorkingTime: dayjs.utc(`2025-07-29T08:00:00.000Z`),
+            endWorkingTime: dayjs.utc(`2025-07-29T21:30:00.000Z`),
+            blockedTimes: [],
+            availableTimes: [
+              {
+                // 19:22:30 should round to 19:30:00
+                minPossibleStartTime: dayjs.utc(`2025-07-29T19:22:30.000Z`),
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`)
+              }
+            ]
+          }
+        ],
+        serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
+        serviceId: 1
+      }
+    ];
+
+    const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
+    const slots = result[0].employees[0].availableTimeSlots;
+
+    // Should have: 19:30-20:00 (30min), 20:00-20:30 (30min)
+    expect(slots).toHaveLength(3);
+    expect(slots[0].startTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
+    expect(slots[0].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+    expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+    expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`21:00:00`);
+  });
+
+  it(`should handle time that rounds to :45 - first slot only 15min`, () => {
+    const periodWithClearedDays = [
+      {
+        day: `2025-07-29` as Date_ISO_Type,
+        employees: [
+          {
+            employeeId: 1,
+            startWorkingTime: dayjs.utc(`2025-07-29T08:00:00.000Z`),
+            endWorkingTime: dayjs.utc(`2025-07-29T21:30:00.000Z`),
+            blockedTimes: [],
+            availableTimes: [
+              {
+                // 19:37:22 should round to 19:45:00
+                minPossibleStartTime: dayjs.utc(`2025-07-29T19:37:22.000Z`),
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`)
+              }
+            ]
+          }
+        ],
+        serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
+        serviceId: 1
+      }
+    ];
+
+    const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
+    const slots = result[0].employees[0].availableTimeSlots;
+
+    // Should have: 19:45-20:00 (15min), 20:00-20:30 (30min)
+    expect(slots).toHaveLength(3);
+
+    // First slot: 19:45-20:00 (only 15 minutes because it starts at :45)
+    expect(slots[0].startTime.format(`HH:mm:ss`)).toBe(`19:45:00`);
+    expect(slots[0].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+
+    // Second slot: 20:00-20:30 (standard 30 minutes)
+      expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+      expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+      expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+      expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`21:00:00`);
+  });
+
+  it(`should handle time already at :00 boundary - standard slots`, () => {
+    const periodWithClearedDays = [
+      {
+        day: `2025-07-29` as Date_ISO_Type,
+        employees: [
+          {
+            employeeId: 1,
+            startWorkingTime: dayjs.utc(`2025-07-29T08:00:00.000Z`),
+            endWorkingTime: dayjs.utc(`2025-07-29T21:30:00.000Z`),
+            blockedTimes: [],
+            availableTimes: [
+              {
+                // Already at :00 boundary
+                minPossibleStartTime: dayjs.utc(`2025-07-29T19:00:00.000Z`),
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:00:00.000Z`)
+              }
+            ]
+          }
+        ],
+        serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
+        serviceId: 1
+      }
+    ];
+
+    const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
+    const slots = result[0].employees[0].availableTimeSlots;
+
+    // Should have: 19:00-19:30 (30min), 19:30-20:00 (30min)
+    expect(slots).toHaveLength(3);
+    expect(slots[0].startTime.format(`HH:mm:ss`)).toBe(`19:00:00`);
+    expect(slots[0].endTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
+    expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
+    expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
   });
 });
