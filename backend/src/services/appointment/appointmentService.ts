@@ -404,16 +404,27 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     console.error(`Failed to send confirmation email for appointment ${firstSavedAppointment.appointmentId}: `, error);
   }
 
-  return {
-    id: firstSavedAppointment.appointmentId,
+  const response: CreateAppointmentServiceResponseSuccessType = {
     date: appointment.date,
-    timeStart: appointment.service.startTime,
-    serviceName: firstSavedAppointment.serviceName,
     lastName: formatName(appointment.lastName),
     firstName: formatName(appointment.firstName),
-    location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+    service: {
+      id: firstSavedAppointment.appointmentId,
+      name: firstSavedAppointment.serviceName,
+      timeStart: appointment.service.startTime,
+    },
     company: company,
-  };
+  }
+
+  if (secondSavedAppointment) {
+    response.service.secondService = {
+      id: secondSavedAppointment.appointmentId,
+      name: secondSavedAppointment.serviceName,
+      timeStart: appointment.service.secondService?.startTime,
+    }
+  }
+
+  return response;
 }
 
 export interface SaveAppointmentResult {

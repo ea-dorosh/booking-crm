@@ -155,12 +155,18 @@ export interface CreateAppointmentServiceResponseErrorType {
 }
 
 export interface CreateAppointmentServiceResponseSuccessType {
-  id: number;
   date: string;
-  timeStart: string;
-  serviceName: string;
   lastName: string;
   firstName: string;
-  location: string;
+  service: {
+    id: number;
+    name: string;
+    timeStart: string;
+    secondService?: {
+      id?: number;
+      name?: string;
+      timeStart?: string;
+    };
+  };
   company: CompanyResponseData;
 }
