@@ -504,69 +504,51 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
           .add(minutes, 'minute')
           .add(seconds, 'second');
 
-        // Find all available slots for second service that start at or after first service ends
-        const availableSecondSlots: Array<{
-          slot: AvailableTimeSlot;
-          employeeId: number;
-        }> = [];
+        // Find all employees in second service who can start at this end time
+        const availableSecondEmployees: number[] = [];
+        const matchingSlots: AvailableTimeSlot[] = [];
 
         secondServiceDay.employees.forEach(secondEmployee => {
-          const availableSlots = secondEmployee.availableTimeSlots.filter(
-            slot => slot.startTime.isSameOrAfter(firstServiceEndTime)
+          const matchingSlot = secondEmployee.availableTimeSlots.find(
+            slot => slot.startTime.isSameOrAfter(firstServiceEndTime) &&
+                   slot.startTime.isSameOrBefore(firstServiceEndTime.add(30, 'minute'))
           );
 
-          availableSlots.forEach(slot => {
-            availableSecondSlots.push({
-              slot,
-              employeeId: secondEmployee.employeeId
-            });
-          });
+          if (matchingSlot) {
+            availableSecondEmployees.push(secondEmployee.employeeId);
+            matchingSlots.push(matchingSlot);
+          }
         });
 
-        // Find the earliest available slot for second service
-        if (availableSecondSlots.length > 0) {
-          // Sort by start time and take the earliest
-          const sortedSlots = availableSecondSlots.sort((a, b) =>
-            a.slot.startTime.isBefore(b.slot.startTime) ? -1 : 1
+        // If we found employees who can do second service
+        if (availableSecondEmployees.length > 0 && matchingSlots.length > 0) {
+          const secondServiceSlot = matchingSlots[0]; // Use first matching slot
+
+          // Check if this combination already exists
+          const existingSlot = combinedTimeSlots.find(
+            slot => slot.startTime === firstTimeSlot.startTime.toISOString()
           );
 
-          const earliestSlot = sortedSlots[0];
-
-          // Find all employees who can work at this earliest time
-          const availableSecondEmployees = availableSecondSlots
-            .filter(item => item.slot.startTime.isSame(earliestSlot.slot.startTime))
-            .map(item => item.employeeId);
-
-          // If we found employees who can do second service
-          if (availableSecondEmployees.length > 0) {
-            const secondServiceSlot = earliestSlot.slot;
-
-            // Check if this combination already exists
-            const existingSlot = combinedTimeSlots.find(
-              slot => slot.startTime === firstTimeSlot.startTime.toISOString()
-            );
-
-            if (existingSlot) {
-              // Add this employee to existing slot
-              if (!existingSlot.employeeIds.includes(firstEmployee.employeeId)) {
-                existingSlot.employeeIds.push(firstEmployee.employeeId);
-              }
-            } else {
-              // Create new combined slot
-              const newSlot = {
-                startTime: firstTimeSlot.startTime.toISOString(),
-                endTime: firstTimeSlot.endTime.toISOString(),
-                employeeIds: [firstEmployee.employeeId],
-                serviceId: firstServiceDay.serviceId,
-                secondService: {
-                  startTime: secondServiceSlot.startTime.toISOString(),
-                  endTime: secondServiceSlot.endTime.toISOString(),
-                  employeeIds: [...availableSecondEmployees],
-                  serviceId: secondServiceDay.serviceId,
-                }
-              };
-              combinedTimeSlots.push(newSlot);
+          if (existingSlot) {
+            // Add this employee to existing slot
+            if (!existingSlot.employeeIds.includes(firstEmployee.employeeId)) {
+              existingSlot.employeeIds.push(firstEmployee.employeeId);
             }
+          } else {
+            // Create new combined slot
+            const newSlot = {
+              startTime: firstTimeSlot.startTime.toISOString(),
+              endTime: firstTimeSlot.endTime.toISOString(),
+              employeeIds: [firstEmployee.employeeId],
+              serviceId: firstServiceDay.serviceId,
+              secondService: {
+                startTime: secondServiceSlot.startTime.toISOString(),
+                endTime: secondServiceSlot.endTime.toISOString(),
+                employeeIds: [...availableSecondEmployees],
+                serviceId: secondServiceDay.serviceId,
+              }
+            };
+            combinedTimeSlots.push(newSlot);
           }
         }
       });
