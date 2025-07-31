@@ -106,6 +106,8 @@ const getGroupedTimeSlots = async (
   console.log(`timeSlotsDataForFirstService: `, JSON.stringify(timeSlotsDataForFirstService, null, 2));
   const timeSlotsDataForSecondService = generateTimeSlotsFromAvailableTimes(periodWithClearedDaysForSecondService);
 
+  console.log(`timeSlotsDataForSecondService: `, JSON.stringify(timeSlotsDataForSecondService, null, 2));
+
   // Process based on number of services
   let filteredTimeSlotsDataForTwoServices;
 
