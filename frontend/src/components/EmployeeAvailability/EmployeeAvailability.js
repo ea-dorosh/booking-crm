@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import DayFormRow from "@/components/DayFormRow/DayFormRow";
 import daysOfWeek from "@/constants/daysOfWeek";
-import { 
+import {
   fetchEmployeeAvailability,
   cleanEmployeeAvailability,
   applyEmployeeAvailability,
@@ -53,23 +53,16 @@ export default function EmployeeAvailability({ employeeId }) {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Box mt={3}>
-        {daysOfWeek.map((day) => (
-          <DayFormRow
-            key={day.id}
-            day={day}
-            employeeAvailability={getEmployeeAvailabilityByDayId(day.id)}
-            applyEmployeeAvailability={applyEmployeeAvailabilityHandler}
-            deleteEmployeeAvailability={deleteEmployeeAvailabilityHandler}
-          />
-        ))}
-      </Box>
+    <Box sx={{ marginTop: 1 }}>
+      {daysOfWeek.map((day) => (
+        <DayFormRow
+          key={day.id}
+          day={day}
+          employeeAvailability={getEmployeeAvailabilityByDayId(day.id)}
+          applyEmployeeAvailability={applyEmployeeAvailabilityHandler}
+          deleteEmployeeAvailability={deleteEmployeeAvailabilityHandler}
+        />
+      ))}
     </Box>
   );
 }

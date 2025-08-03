@@ -1,5 +1,4 @@
 import {
-  Edit,
   Person,
   Email,
 } from "@mui/icons-material";
@@ -38,6 +37,7 @@ export default function EmployeesContainer({
 
           <AddButton
             to="/employees/create-employee"
+            ml={1}
           >
             Add Employee
           </AddButton>
@@ -121,7 +121,6 @@ export default function EmployeesContainer({
                     component={RouterLink}
                     to={`/employees/${employee.employeeId}`}
                     variant="outlined"
-                    startIcon={<Edit />}
                     size="small"
                     sx={{
                       borderRadius: 2,
@@ -133,7 +132,7 @@ export default function EmployeesContainer({
                       }
                     }}
                   >
-                    Edit Details
+                    Details
                   </Button>
                 </Box>
               </CardContent>

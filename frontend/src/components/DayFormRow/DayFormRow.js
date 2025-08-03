@@ -1,5 +1,5 @@
-import { 
-  AddCircle,
+import {
+  Add,
   Delete,
 } from '@mui/icons-material';
 import {
@@ -11,6 +11,8 @@ import {
   Select,
   Typography,
   IconButton,
+  Stack,
+  Paper,
 } from "@mui/material";
 import dayjs from 'dayjs';
 import { useState, useEffect, useMemo } from "react";
@@ -95,128 +97,48 @@ export default function DayFormRow({
     if (!startTime || !endTime || dayjs(startTime) > dayjs(endTime)) {
       return true;
     }
-
     return !isTimeChanged;
   }, [isTimeChanged, startTime, endTime]);
 
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-      }}
-      mb={2.5}
-    >
-      <Typography
+  if (isEditMode) {
+    return (
+      <Paper
         sx={{
-          minWidth: `100px`,
-          flexShrink: 0,
+          padding: 2,
+          marginBottom: 1.5,
+          backgroundColor: 'primary.50',
+          border: '1px solid',
+          borderColor: 'primary.200'
         }}
-        variant="caption"
       >
-        {day.name}
-      </Typography>
-
-      {!employeeAvailability && !isEditMode && <Box sx={{
-        display: "flex",
-        alignItems: "center",
-        width: `100%`,
-      }}>
-        <Typography
-          variant="caption"
-          sx={{ width: `120px` }}
-        >
-          Not working
+        <Typography variant="body2" sx={{ fontWeight: 600, marginBottom: 1.5 }}>
+          {day.name}
         </Typography>
 
-        <Button 
-          onClick={() => setIsEditMode(true)}
-          size="small"
-          variant="contained"
-          sx={{ flexGrow: 1 }}
-          startIcon={<AddCircle />}
-        >
-          Add
-        </Button>
-      </Box>}
-
-      {employeeAvailability && !isEditMode && <Box sx={{
-        display: "flex",
-        alignItems: "center",
-        width: `100%`,
-      }}>
-        <Typography
-          variant="caption"
-          sx={{ width: `120px` }}
-        >
-          {formattedTime(employeeAvailability.startTime)} - {formattedTime(employeeAvailability.endTime)}
-        </Typography>
-
-        <Button
-          onClick={() => setIsEditMode(true)}
-          size="small"
-          variant="outlined"
-          sx={{ 
-            flexGrow: 1,
-            marginRight: `20px`
-          }}
-        >
-          Change
-        </Button>
-
-        <IconButton
-          onClick={onDeleteEmployeeAvailability}
-          variant="outlined"
-          color="error"
-        >
-          <Delete />
-        </IconButton>
-      </Box>}
-
-      {isEditMode && <Box>
-        <Box sx={{
-          display: "flex",
-          alignItems: "center",
-        }}>
-          <FormControl size="small" sx={{ marginRight: `15px` }}>
-            <InputLabel id="start-select-label">From:</InputLabel>
-
+        <Stack direction="row" spacing={1} sx={{ marginBottom: 1.5 }}>
+          <FormControl size="small" sx={{ minWidth: 80 }}>
+            <InputLabel>From</InputLabel>
             <Select
-              sx={{ width: `90px` }}
-              labelId="start-select-label"
-              id="start-select"
               value={startTime}
-              label="From:"
+              label="From"
               onChange={handleStartTimeChange}
-              MenuProps={{
-                style: {
-                  maxHeight: 400,
-                },
-              }}
+              MenuProps={{ style: { maxHeight: 300 } }}
             >
               {timeSlots.map((timeSlot) => (
                 <MenuItem key={timeSlot.startTime} value={timeSlot.startTime}>
-                  { formattedTime(timeSlot.startTime) }
+                  {formattedTime(timeSlot.startTime)}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ marginRight: `20px` }}>
-            <InputLabel id="end-select-label">To:</InputLabel>
-
+          <FormControl size="small" sx={{ minWidth: 80 }}>
+            <InputLabel>To</InputLabel>
             <Select
-              sx={{ width: `90px` }}
-              labelId="end-select-label"
-              id="end-select"
               value={endTime}
-              label="To:"
+              label="To"
               onChange={handleEndTimeChange}
-              MenuProps={{
-                style: {
-                  maxHeight: 400,
-                },
-              }}
+              MenuProps={{ style: { maxHeight: 300 } }}
             >
               {timeSlots.map((timeSlot) => (
                 <MenuItem key={timeSlot.endTime} value={timeSlot.endTime}>
@@ -225,32 +147,111 @@ export default function DayFormRow({
               ))}
             </Select>
           </FormControl>
-        </Box>
+        </Stack>
 
-        <Box sx={{ 
-          display: `flex`,
-          marginTop: `10px`,
-        }}>
+        <Stack direction="row" spacing={1}>
           <Button
-            sx={{ marginRight: `20px`, width: `90px`}}
             size="small"
             variant="contained"
             onClick={onApplyEmployeeAvailability}
             disabled={Boolean(isApplyButtonDisabled)}
+            sx={{ minWidth: 70 }}
           >
-            Apply
+            Save
           </Button>
-
           <Button
-            sx={{ width: `90px`}}
             size="small"
             variant="outlined"
             onClick={onDiscardChanges}
+            sx={{ minWidth: 70 }}
           >
-            Discard
+            Cancel
           </Button>
-        </Box>
-      </Box>}
+        </Stack>
+      </Paper>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 1.5,
+        marginBottom: 1,
+        backgroundColor: 'grey.50',
+        borderRadius: 1,
+        border: '1px solid',
+        borderColor: 'grey.200',
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            minWidth: 80,
+            fontWeight: 500,
+            color: 'text.primary'
+          }}
+        >
+          {day.name}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{
+            marginLeft: 2,
+            color: employeeAvailability ? 'text.primary' : 'text.secondary'
+          }}
+        >
+          {employeeAvailability
+            ? `${formattedTime(employeeAvailability.startTime)} - ${formattedTime(employeeAvailability.endTime)}`
+            : 'Not working'
+          }
+        </Typography>
+      </Box>
+
+      <Stack direction="row" spacing={0.5}>
+        {employeeAvailability ? (
+          <>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setIsEditMode(true)}
+              sx={{
+                minWidth: 'auto',
+                padding: '4px 8px',
+                fontSize: '0.75rem'
+              }}
+            >
+              Change
+            </Button>
+            <IconButton
+              size="small"
+              onClick={onDeleteEmployeeAvailability}
+              color="error"
+              sx={{ padding: '4px' }}
+            >
+              <Delete sx={{ fontSize: 16 }} />
+            </IconButton>
+          </>
+        ) : (
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<Add sx={{ fontSize: 16 }} />}
+            onClick={() => setIsEditMode(true)}
+            sx={{
+              minWidth: 'auto',
+              padding: '4px 8px',
+              fontSize: '0.75rem'
+            }}
+          >
+            Add
+          </Button>
+        )}
+      </Stack>
     </Box>
   );
 }
