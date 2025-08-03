@@ -5,7 +5,6 @@ import {
 import {
   AppBar as MuiAppBar,
   Box,
-  CssBaseline,
   Divider,
   Drawer as MuiDrawer,
   IconButton,
@@ -13,89 +12,49 @@ import {
   Toolbar,
   Typography
 } from '@mui/material';
-import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import * as React from 'react';
 import { useLocation } from "react-router-dom";
 import { MainListItems, SecondaryListItems } from './listItems';
 
 const drawerWidth = 240;
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
+const AppBar = styled(MuiAppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
+}));
+
+const CollapsedDrawer = styled(MuiDrawer)(({ theme }) => ({
+  '& .MuiDrawer-paper': {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    width: 52,
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-  }),
+    boxSizing: 'border-box',
+    overflowX: 'hidden',
+    '& .MuiListItemText-root': {
+      opacity: 0,
+    },
+    '& .MuiListItemButton-root': {
+      paddingLeft: 20,
+      paddingRight: 20,
+      justifyContent: 'center',
+    },
+    '& .MuiListItemIcon-root': {
+      minWidth: 'auto',
+      marginRight: 0,
+    },
+  },
 }));
 
-const DrawerFixed = styled(
-  MuiDrawer,
-  { shouldForwardProp: (prop) => prop !== 'open' },
-)(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
-    },
-  }),
-);
-const DrawerHidden = styled(
-  MuiDrawer,
-)(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
-    },
-  }),
-);
-
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const ExpandedDrawer = styled(MuiDrawer)(() => ({
+  '& .MuiDrawer-paper': {
+    width: drawerWidth,
+    boxSizing: 'border-box',
+  },
+}));
 
 export default function PageContainer({
   pageTitle,
@@ -104,114 +63,112 @@ export default function PageContainer({
 }) {
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-
-        <AppBar position="absolute" open={open}>
-          <Toolbar
-            sx={{
-              pr: '24px', // keep right padding when drawer closed
-            }}
-          >
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={toggleDrawer}
-              sx={{
-                marginRight: '36px',
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <Menu />
-            </IconButton>
-
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{ flexGrow: 1 }}
-            >
-              { pageTitle }
-            </Typography>
-          </Toolbar>
-        </AppBar>
-
-        {!hideSideNav && <DrawerFixed
-          variant={`permanent`}
-          open={open}
+    <Box sx={{ display: 'flex' }}>
+      <AppBar position="absolute">
+        <Toolbar
+          sx={{
+            pr: '24px', // keep right padding when drawer closed
+          }}
         >
-          <Toolbar
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={toggleDrawer}
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
+              marginRight: '36px',
+              ml: '-9px',
+
+              '&:hover': {
+                backgroundColor: 'transparent',
+              },
             }}
           >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeft />
-            </IconButton>
-          </Toolbar>
+            <Menu />
+          </IconButton>
 
+          <Typography
+            component="h1"
+            variant="h6"
+            color="inherit"
+            noWrap
+            sx={{ flexGrow: 1 }}
+          >
+            { pageTitle }
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {!hideSideNav && (
+        /* Collapsed menu - always visible on normal pages */
+        <CollapsedDrawer variant="permanent">
+          <Toolbar />
           <Divider />
-
-          <List component="nav">
+          <List component="nav" sx={{ px: .5 }}>
             <MainListItems location={location} />
-
             <Divider sx={{ my: 1 }} />
-
             <SecondaryListItems location={location} />
           </List>
-        </DrawerFixed>}
+        </CollapsedDrawer>
+      )}
 
-        {hideSideNav && <DrawerHidden
-          variant={`temporary`}
-          open={open}
+      {/* Expanded menu - overlay when hamburger clicked (on all pages) */}
+      <ExpandedDrawer
+        variant="temporary"
+        open={open}
+        onClose={toggleDrawer}
+        ModalProps={{
+          keepMounted: true,
+        }}
+      >
+        <Toolbar
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            px: [1],
+          }}
         >
-          <Toolbar
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
-            }}
-          >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeft />
-            </IconButton>
-          </Toolbar>
+          <IconButton onClick={toggleDrawer}>
+            <ChevronLeft />
+          </IconButton>
+        </Toolbar>
 
-          <Divider />
+        <Divider />
 
-          <List component="nav">
-            <MainListItems location={location} />
+        <List component="nav" sx={{ px: 1, }}>
+          <MainListItems location={location} />
+          <Divider sx={{ my: 1 }} />
+          <SecondaryListItems location={location} />
+        </List>
+      </ExpandedDrawer>
 
-            <Divider sx={{ my: 1 }} />
-
-            <SecondaryListItems location={location} />
-          </List>
-        </DrawerHidden>}
+      <Box
+        component="main"
+        sx={{
+          backgroundColor: (theme) =>
+            theme.palette.mode === 'light'
+              ? theme.palette.grey[100]
+              : theme.palette.grey[900],
+          flexGrow: 1,
+          height: '100vh',
+          overflow: 'auto',
+        }}
+      >
+        <Toolbar />
 
         <Box sx={{
-          marginTop: `64px`,
-          padding: `0 16px 20px 16px`,
-          width: `100%`,
-          maxWidth: `768px`,
-
-          '@media (max-width: 768px)': {
-            maxWidth: `calc(100% - ${!hideSideNav ? `56px` : `0px`})`,
-          },
+          padding: '24px',
+          minHeight: 'calc(100vh - 64px)',
         }}>
           {children}
         </Box>
       </Box>
-    </ThemeProvider>
+    </Box>
   );
 }

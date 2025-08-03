@@ -1,12 +1,12 @@
 import {
-  AccountCircle,
-  Construction,
-  Dashboard,
-  Description,
-  Face4,
-  People,
-  Business,
-  Event,
+  HomeRounded,
+  CalendarMonthRounded,
+  MiscellaneousServicesRounded,
+  GroupsRounded,
+  PersonSearchRounded,
+  ReceiptLongRounded,
+  CorporateFareRounded,
+  AccountBoxRounded,
 } from '@mui/icons-material';
 import {
   ListItemButton,
@@ -15,73 +15,66 @@ import {
 } from '@mui/material';
 import { Link } from "react-router-dom";
 
+const isActiveRoute = (currentPath, targetPath) => {
+  if (targetPath === '/') {
+    return currentPath === '/';
+  }
+  return currentPath.startsWith(targetPath);
+};
+
 export const MainListItems = ({location}) => (
   <>
-    <Link to={`/`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/')}>
         <ListItemIcon>
-          <Dashboard sx={{ color: location?.pathname === `/` ? `primary.main` : `#0000008a` }} />
+          <HomeRounded />
         </ListItemIcon>
-
-        <ListItemText primary="Dashboard" sx={{
-          color: location?.pathname === `/` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Dashboard" />
       </ListItemButton>
     </Link>
 
-    <Link to={`/appointments`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/appointments`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/appointments')}>
         <ListItemIcon>
-          <Event sx={{ color: location?.pathname === `/appointments` ? `primary.main` : `#0000008a` }} />
+          <CalendarMonthRounded />
         </ListItemIcon>
-        <ListItemText primary="Appointments" sx={{
-          color: location?.pathname === `/appointments` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Appointments" />
       </ListItemButton>
     </Link>
 
-    <Link to={`/services`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/services`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/services')}>
         <ListItemIcon>
-          <Construction sx={{ color: location?.pathname === `/services` ? `primary.main` : `#0000008a` }} />
+          <MiscellaneousServicesRounded />
         </ListItemIcon>
-        <ListItemText primary="Services" sx={{
-          color: location?.pathname === `/services` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Services" />
       </ListItemButton>
     </Link>
 
-    <Link to={`/employees`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/employees`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/employees')}>
         <ListItemIcon>
-          <People sx={{ color: location?.pathname === `/employees` ? `primary.main` : `#0000008a` }} />
+          <GroupsRounded />
         </ListItemIcon>
-
-        <ListItemText primary="Employees" sx={{
-          color: location?.pathname === `/employees` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Employees" />
       </ListItemButton>
     </Link>
 
-    <Link to={`/customers`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/customers`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/customers')}>
         <ListItemIcon>
-          <Face4 sx={{ color: location?.pathname === `/customers` ? `primary.main` : `#0000008a` }} />
+          <PersonSearchRounded />
         </ListItemIcon>
-        <ListItemText primary="Customers" sx={{
-          color: location?.pathname === `/customers` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Customers" />
       </ListItemButton>
     </Link>
 
-    <Link to={`/invoices`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/invoices`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/invoices')}>
         <ListItemIcon>
-          <Description sx={{ color: location?.pathname === `/invoices` ? `primary.main` : `#0000008a` }} />
+          <ReceiptLongRounded />
         </ListItemIcon>
-        <ListItemText primary="Invoices" sx={{
-          color: location?.pathname === `/invoices` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Invoices" />
       </ListItemButton>
     </Link>
   </>
@@ -89,25 +82,21 @@ export const MainListItems = ({location}) => (
 
 export const SecondaryListItems = ({location}) => (
   <>
-    <Link to={`/company`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/company`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/company')}>
         <ListItemIcon>
-          <Business sx={{ color: location?.pathname === `/company` ? `primary.main` : `#0000008a` }} />
+          <CorporateFareRounded />
         </ListItemIcon>
-        <ListItemText primary="Company" sx={{
-          color: location?.pathname === `/company` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Company" />
       </ListItemButton>
     </Link>
 
-    <Link to={`/account`} style={{ textDecoration: `none`, color: `#0000008a` }}>
-      <ListItemButton>
+    <Link to={`/account`} style={{ textDecoration: `none` }}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, '/account')}>
         <ListItemIcon>
-          <AccountCircle sx={{ color: location?.pathname === `/account` ? `primary.main` : `#0000008a` }} />
+          <AccountBoxRounded />
         </ListItemIcon>
-        <ListItemText primary="Account" sx={{
-          color: location?.pathname === `/account` ? `primary.main` : `#0000008a`,
-        }}/>
+        <ListItemText primary="Account" />
       </ListItemButton>
     </Link>
   </>

@@ -1,117 +1,170 @@
-import { 
-  AddCircle,
+import {
   Edit,
+  Person,
+  Email,
 } from "@mui/icons-material";
-import { 
+import {
   Box,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
   Typography,
-  Card, 
-  CardHeader,
+  Card,
+  CardContent,
   Avatar,
+  Button,
+  Grid,
+  Paper,
+  Chip,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
+import AddButton from '@/components/common/AddButton';
 
-export default function EmployeesContainer({ 
+export default function EmployeesContainer({
   employees,
 }) {
   return (
-    <Box>
-      <Box
-        sx={{
-          display: `flex`,
-          alignItems: `center`,
-          marginTop: `20px`,
-          marginLeft: `auto`,
-          backgroundColor: `#1976d2`,
-          width: `fit-content`,
-          padding: `10px 20px 10px 30px`,
-          borderRadius: `50px`,
-        }}
-      >
-        <Typography variant="button"
-          sx={{color: `#fff`}}
-        >
-          add employee
+    <Box sx={{ padding: { xs: 2, md: 3 } }}>
+      {/* Header */}
+      <Box sx={{ marginBottom: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, marginBottom: 1 }}>
+          Team Members
         </Typography>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <Typography variant="body1" color="text.secondary">
+            Manage your employees and their information
+          </Typography>
 
-        <RouterLink to={`/employees/create-employee`}>
-          <IconButton
-            sx={{color: `#fff`}}
+          <AddButton
+            to="/employees/create-employee"
           >
-            <AddCircle />
-          </IconButton>
-        </RouterLink>
+            Add Employee
+          </AddButton>
+        </Box>
       </Box>
 
-      <List
-        sx={{
-          display: `flex`,
-          flexDirection: `column`,
-          gap: `1.5rem`,
-          marginTop: `2rem`,
-          maxWidth: `768px`,
-        }}
-      >
+      {/* Employees Grid */}
+      <Grid container spacing={3}>
         {employees.map((employee) => (
-          <Card 
-            key={employee.employeeId}
-            sx={{
-              display: `flex`,
-              alignItems: `center`,
-              gap: `1rem`,
-            }}
-          >
-            <Box sx={{
-              width: `80%`,
-              paddingRight: `1rem`,
-            }}>
-              <CardHeader
-                sx={{
-                  '& .MuiCardHeader-title': {
-                    fontSize: `1.2rem`,
-                  },
-                }}
-                title={`${employee.firstName} ${employee.lastName}`}
-                subheader={employee.email}
-                avatar={
-                  <Avatar src={employee.image}/>
-                }
-              />
-            </Box>            
-
-            <Box sx={{ width: `30px` }}>
-              <RouterLink
-                style={{
-                  height: `100%`,
-                  width: `100%`,
-                  display: `flex`,
-                  alignItems: `center`,
-                  justifyContent: `center`,
-                }}
-                to={`/employees/${employee.employeeId}`}
-              >
-                <ListItemButton
-                  sx={{ 
-                    padding: `0`,
-                    display: `flex`,
-                    flexGrow: `0`,
+          <Grid item xs={12} sm={6} md={4} key={employee.employeeId}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* Card Content */}
+              <CardContent sx={{
+                padding: 3,
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center'
+              }}>
+                {/* Avatar */}
+                <Avatar
+                  src={employee.image}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    marginBottom: 2,
+                    border: '4px solid',
+                    borderColor: 'primary.50',
                   }}
                 >
-                  <ListItemIcon sx={{
-                    minWidth: `0`,
-                  }}>
-                    <Edit />
-                  </ListItemIcon>
-                </ListItemButton>
-              </RouterLink>
-            </Box>
-          </Card>
+                  <Person sx={{ fontSize: 40 }} />
+                </Avatar>
+
+                {/* Name */}
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    marginBottom: 0.5,
+                    color: 'text.primary'
+                  }}
+                >
+                  {`${employee.firstName} ${employee.lastName}`}
+                </Typography>
+
+                {/* Email */}
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  marginBottom: 2,
+                  color: 'text.secondary'
+                }}>
+                  <Email sx={{ fontSize: 16 }} />
+                  <Typography variant="body2">
+                    {employee.email}
+                  </Typography>
+                </Box>
+
+                {/* Status Chip */}
+                <Chip
+                  label="Active"
+                  color="success"
+                  size="small"
+                  sx={{
+                    fontWeight: 500,
+                    marginBottom: 2
+                  }}
+                />
+
+                {/* Action Button */}
+                <Box sx={{ marginTop: 'auto' }}>
+                  <Button
+                    component={RouterLink}
+                    to={`/employees/${employee.employeeId}`}
+                    variant="outlined"
+                    startIcon={<Edit />}
+                    size="small"
+                    sx={{
+                      borderRadius: 2,
+                      borderColor: 'primary.200',
+                      color: 'primary.600',
+                      '&:hover': {
+                        borderColor: 'primary.400',
+                        backgroundColor: 'primary.50',
+                      }
+                    }}
+                  >
+                    Edit Details
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </List>
+      </Grid>
+
+      {/* Empty State */}
+      {employees.length === 0 && (
+        <Paper
+          sx={{
+            padding: 6,
+            textAlign: 'center',
+            backgroundColor: 'grey.50',
+            border: '2px dashed',
+            borderColor: 'grey.300',
+          }}
+        >
+          <Person sx={{ fontSize: 60, color: 'grey.400', marginBottom: 2 }} />
+          <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+            No employees found
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
+            Get started by adding your first team member
+          </Typography>
+          <AddButton to="/employees/create-employee">
+            Add First Employee
+          </AddButton>
+        </Paper>
+      )}
     </Box>
   );
 }
