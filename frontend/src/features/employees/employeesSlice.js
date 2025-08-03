@@ -19,9 +19,9 @@ export const fetchEmployees = createAsyncThunk(
 
 export const fetchEmployeeAppointments = createAsyncThunk(
   `customer/fetchEmployeeLastAppointments`,
-  async (id, thunkAPI) => {
+  async ({ id, filters = {} }, thunkAPI) => {
     try {
-      const data = await employeesService.getEmployeeAppointments(id);
+      const data = await employeesService.getEmployeeAppointments(id, filters);
 
       return data;
     } catch (error) {
@@ -113,7 +113,6 @@ const employeesSlice = createSlice({
         state.updateFormErrors = action.payload;
       })
       .addCase(fetchEmployeeAppointments.pending, (state) => {
-        state.lastAppointments = null;
         state.lastAppointmentsError = null;
         state.isLastAppointmentsPending = true;
       })

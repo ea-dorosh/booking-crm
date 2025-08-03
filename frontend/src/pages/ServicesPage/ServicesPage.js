@@ -7,6 +7,9 @@ import { fetchServiceCategories } from '@/features/serviceCategories/serviceCate
 import { fetchServices } from '@/features/services/servicesSlice';
 import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
+// SessionStorage key for general page scroll position
+const SERVICES_PAGE_SCROLL_KEY = 'services-page-scroll-position';
+
 export default function ServicesPage() {
   const dispatch = useDispatch();
   const services = useSelector(state => state.services.data);
@@ -32,6 +35,39 @@ export default function ServicesPage() {
 
     Promise.all(promises);
   }, []);
+
+  useEffect(() => {
+    // Save scroll position when navigating away
+    const saveScrollPosition = () => {
+      sessionStorage.setItem(SERVICES_PAGE_SCROLL_KEY, window.scrollY.toString());
+    };
+
+    window.addEventListener('beforeunload', saveScrollPosition);
+    window.addEventListener('popstate', saveScrollPosition);
+
+    return () => {
+      saveScrollPosition();
+      window.removeEventListener('beforeunload', saveScrollPosition);
+      window.removeEventListener('popstate', saveScrollPosition);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (services && employees && serviceSubCategories && serviceCategories) {
+      const savedScrollPosition = sessionStorage.getItem(SERVICES_PAGE_SCROLL_KEY);
+
+      if (savedScrollPosition) {
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const targetScroll = parseInt(savedScrollPosition, 10);
+            console.log('✅ [ServicesPage] Restoring scroll to:', targetScroll);
+            window.scrollTo(0, targetScroll);
+          }, 200);
+        });
+      }
+    }
+  }, [services, employees, serviceSubCategories, serviceCategories]);
 
   return (
     <PageContainer pageTitle="Services">

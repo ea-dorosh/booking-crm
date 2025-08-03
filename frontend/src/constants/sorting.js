@@ -6,7 +6,7 @@ export const SORT_DIRECTION = {
 
 export const APPOINTMENTS_SORT_RULE = {
   DATE: `date`,
-  CREATED_DATE: `createdDate`,
+  CREATED_DATE: `created_date`,
 };
 
 export const CUSTOMERS_SORT_RULE = {

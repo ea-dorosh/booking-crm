@@ -1,111 +1,133 @@
 import {
+  CalendarToday,
+  Schedule,
+  Person,
+  MiscellaneousServices,
+} from "@mui/icons-material";
+import {
   Box,
-  Typography, 
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Avatar,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import { appointmentStatusEnum } from '@/enums/enums';
-import { 
+import {
   formatFromDateTimeToStringDate,
   formattedDateToTime,
   formatTimeToString,
 } from "@/utils/formatters";
 
-export default function EmployeeAppointments({ appointments }) {
+const getStatusConfig = (status) => {
+  switch(status) {
+  case appointmentStatusEnum.canceled:
+    return { label: 'Canceled', color: 'error' };
+  case appointmentStatusEnum.active:
+    return { label: 'Active', color: 'success' };
+  default:
+    return { label: 'Unknown', color: 'default' };
+  }
+};
 
-  return (<>
-    <Typography variant="h5">
-      Appointments
-    </Typography>
+export default function EmployeeAppointments({ appointments, onAppointmentClick }) {
+  if (!appointments || appointments.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+        <Typography variant="body2">
+          No appointments found
+        </Typography>
+      </Box>
+    );
+  }
 
-    {appointments.length === 0 && <Typography
-      sx={{
-        marginTop: `1rem`,
-      }}
-    ><i>No appointments yet</i>
-    </Typography>}
+  return (
+    <Stack spacing={1.5}>
+      {appointments.map((appointment) => {
+        const statusConfig = getStatusConfig(appointment.status);
 
-    {appointments.length > 0 && <Box 
-      sx={{
-        display: `flex`,
-        flexDirection: `column`,
-        gap: `.5rem`,
-        marginTop: `1rem`,
-        maxWidth: `768px`,
-      }}
-    >
-      {appointments.map((appointment, index) => (
-        <Box
-          key={appointment.id}
-          component={RouterLink}
-          to={`/appointments/${appointment.id}`}
-          sx={{
-            display: `flex`,
-            alignItems: `flex-start`,
-            flexDirection: `column`,
-            width: `100%`,
-            gap: `.4rem`,
-            padding: `.8rem 0 .4rem 0`,
-            borderBottom: index !== appointments.length - 1 && `1px solid #ddd`,
-            textDecoration: `none`,
-            color: `#333`,
-            position: `relative`,
-          }}
-        >
-          {appointment.status === appointmentStatusEnum.canceled && <Box sx={{
-            fontSize: `.5rem`,
-            bgcolor: `red`,
-            color: `#fff`,
-            marginLeft: `auto`,
-            position: `absolute`,
-            padding: `1px 4px`,
-            left: `0`,
-            top: `-2px`,
-          }}>
-            canceled
-          </Box>}
-
-          <Typography 
+        return (
+          <Card
+            key={appointment.id}
+            component={RouterLink}
+            to={`/appointments/${appointment.id}`}
+            onClick={onAppointmentClick}
             sx={{
-              fontSize: `.8rem`,
-              color: `green`,
-              marginLeft: `auto`,
-              position: `absolute`,
-              right: `0`,
-              top: `-4px`,
+              textDecoration: 'none',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: 3,
+              },
+              border: '1px solid',
+              borderColor: 'grey.200',
             }}
           >
-            Added: {formatFromDateTimeToStringDate(appointment.createdDate)}
-          </Typography>
-    
-          <Typography sx={{
-            fontSize: `1rem`,
-            fontWeight: `bold`,
-          }}>
-            {formatFromDateTimeToStringDate(appointment.date)} 
-            <Typography 
-              component="span"
-              sx={{
-                color: `#777`,
-                ml: `.5rem`,
-              }}>
-              {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
-            </Typography>
-          </Typography>
-    
-          <Typography sx={{
-            fontSize: `.8rem`,
-          }}>
-            {appointment.service.name} - <b>{formatTimeToString(appointment.service.duration)}</b>
-          </Typography>
+            <CardContent sx={{ padding: 2 }}>
+              {/* Header with date and status */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CalendarToday sx={{ fontSize: 16, color: 'primary.500' }} />
+                  <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+                    {formatFromDateTimeToStringDate(appointment.date)}
+                  </Typography>
+                </Box>
 
-          <Typography sx={{
-            fontSize: `.8rem`,
-          }}>
-            {appointment.customer.firstName} {appointment.customer.lastName}
-          </Typography>
-        </Box>
-      ))}
-    </Box>}
-  </>
+                <Stack direction="row" spacing={1}>
+                  <Chip
+                    label={statusConfig.label}
+                    color={statusConfig.color}
+                    size="small"
+                    sx={{ fontWeight: 500, fontSize: '0.7rem' }}
+                  />
+                  <Chip
+                    label={`Added: ${formatFromDateTimeToStringDate(appointment.createdDate)}`}
+                    variant="outlined"
+                    size="small"
+                    sx={{ fontSize: '0.65rem', color: 'text.secondary' }}
+                  />
+                </Stack>
+              </Box>
+
+              {/* Time */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 1.5 }}>
+                <Schedule sx={{ fontSize: 16, color: 'grey.600' }} />
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
+                </Typography>
+              </Box>
+
+              {/* Service */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginBottom: 1.5 }}>
+                <MiscellaneousServices sx={{ fontSize: 16, color: 'grey.600' }} />
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {appointment.service.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Duration: {formatTimeToString(appointment.service.duration)}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Customer */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Person sx={{ fontSize: 16, color: 'grey.600' }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+                    {appointment.customer.firstName?.[0]}{appointment.customer.lastName?.[0]}
+                  </Avatar>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {appointment.customer.firstName} {appointment.customer.lastName}
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </Stack>
   );
 }

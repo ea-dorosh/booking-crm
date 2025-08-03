@@ -14,6 +14,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 const STORAGE_KEY = 'services-accordion-state';
 const SCROLL_SERVICE_KEY = 'services-scroll-to-service';
+const SERVICES_PAGE_SCROLL_KEY = 'services-page-scroll-position';
 
 export default function ServicesList({ services, employees, categories }) {
   const [expandedAccordions, setExpandedAccordions] = useState({});
@@ -71,6 +72,9 @@ export default function ServicesList({ services, employees, categories }) {
 
   const handleServiceClick = (serviceId) => {
     sessionStorage.setItem(SCROLL_SERVICE_KEY, serviceId.toString());
+
+    // Save current page scroll position for general navigation
+    sessionStorage.setItem(SERVICES_PAGE_SCROLL_KEY, window.scrollY.toString());
   };
 
   // Auto-expand accordions when employee filter changes
