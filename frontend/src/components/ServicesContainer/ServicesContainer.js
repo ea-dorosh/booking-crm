@@ -1,11 +1,14 @@
 import { Box } from "@mui/material";
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
 import AddButton from './AddButton';
 import CategoriesList from './CategoriesList';
+import FilterButton from './FilterButton';
 import ServicesList from './ServicesList';
 import SubCategoriesList from './SubCategoriesList';
+import { selectFilteredServices } from '@/features/services/servicesSelectors';
 
 const SERVICES = `services`;
 const SUB_CATEGORIES = `sub-categories`;
@@ -33,7 +36,6 @@ const TABS = {
 };
 
 export default function ServicesContainer({
-  services,
   employees,
   subCategories,
   categories,
@@ -41,6 +43,7 @@ export default function ServicesContainer({
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
+  const filteredServices = useSelector(selectFilteredServices);
 
   // Get active tab from URL query parameter
   useEffect(() => {
@@ -64,13 +67,13 @@ export default function ServicesContainer({
   const renderContent = () => {
     switch (activeTab) {
     case TABS[SERVICES].value:
-      return <ServicesList services={services} employees={employees} categories={categories} />;
+      return <ServicesList services={filteredServices} employees={employees} categories={categories} />;
     case TABS[SUB_CATEGORIES].value:
       return <SubCategoriesList subCategories={subCategories} categories={categories} />;
     case TABS[CATEGORIES].value:
       return <CategoriesList categories={categories} />;
     default:
-      return <ServicesList services={services} employees={employees} categories={categories} />;
+      return <ServicesList services={filteredServices} employees={employees} categories={categories} />;
     }
   };
 
@@ -82,7 +85,12 @@ export default function ServicesContainer({
         activeTab={activeTab}
       />
 
-      <AddButton activeTab={activeTab} tabs={TABS} />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        {activeTab === TABS[SERVICES].value && (
+          <FilterButton employees={employees} />
+        )}
+        <AddButton activeTab={activeTab} tabs={TABS} />
+      </Box>
 
       {renderContent()}
     </Box>

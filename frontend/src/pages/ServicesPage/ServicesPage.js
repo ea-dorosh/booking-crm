@@ -36,7 +36,6 @@ export default function ServicesPage() {
   return (
     <PageContainer pageTitle="Services">
       <ServicesContainer
-        services={services}
         employees={employees}
         subCategories={serviceSubCategories}
         categories={serviceCategories}

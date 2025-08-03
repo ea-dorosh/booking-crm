@@ -78,6 +78,7 @@ const servicesSlice = createSlice({
     updateFormData: null,
     isUpdateServiceRequestPending: false,
     updateFormErrors: null,
+    selectedEmployees: JSON.parse(sessionStorage.getItem('services-employee-filter') || '[]'),
   },
   reducers: {
     cleanError: (state, action) => {
@@ -89,6 +90,26 @@ const servicesSlice = createSlice({
     },
     cleanErrors: (state) => {
       state.updateFormErrors = null;
+    },
+    setSelectedEmployees: (state, action) => {
+      state.selectedEmployees = action.payload;
+      sessionStorage.setItem('services-employee-filter', JSON.stringify(action.payload));
+    },
+    toggleEmployeeFilter: (state, action) => {
+      const employeeId = action.payload;
+      const currentSelection = state.selectedEmployees;
+
+      if (currentSelection.includes(employeeId)) {
+        state.selectedEmployees = currentSelection.filter(id => id !== employeeId);
+      } else {
+        state.selectedEmployees = [...currentSelection, employeeId];
+      }
+
+      sessionStorage.setItem('services-employee-filter', JSON.stringify(state.selectedEmployees));
+    },
+    clearEmployeeFilter: (state) => {
+      state.selectedEmployees = [];
+      sessionStorage.removeItem('services-employee-filter');
     },
   },
   extraReducers: (builder) => {
@@ -132,5 +153,8 @@ const servicesSlice = createSlice({
 export const {
   cleanError,
   cleanErrors,
+  setSelectedEmployees,
+  toggleEmployeeFilter,
+  clearEmployeeFilter,
 } = servicesSlice.actions;
 export default servicesSlice.reducer;

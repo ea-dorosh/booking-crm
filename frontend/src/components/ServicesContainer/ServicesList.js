@@ -9,6 +9,7 @@ import {
   Divider
 } from "@mui/material";
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 
 const STORAGE_KEY = 'services-accordion-state';
@@ -17,6 +18,7 @@ const SCROLL_SERVICE_KEY = 'services-scroll-to-service';
 export default function ServicesList({ services, employees, categories }) {
   const [expandedAccordions, setExpandedAccordions] = useState({});
   const serviceRefs = useRef({});
+  const selectedEmployees = useSelector(state => state.services.selectedEmployees);
 
   useEffect(() => {
     const savedState = sessionStorage.getItem(STORAGE_KEY);
@@ -70,6 +72,35 @@ export default function ServicesList({ services, employees, categories }) {
   const handleServiceClick = (serviceId) => {
     sessionStorage.setItem(SCROLL_SERVICE_KEY, serviceId.toString());
   };
+
+  // Auto-expand accordions when employee filter changes
+  useEffect(() => {
+    if (!services || !categories || selectedEmployees.length === 0) return;
+
+    const accordionsToExpand = {};
+
+    // Find all categories and subcategories that contain filtered services
+    services.forEach(service => {
+      // Check if this service has any of the selected employees
+      const hasSelectedEmployee = service.employeePrices?.some(empPrice =>
+        selectedEmployees.includes(empPrice.employeeId)
+      );
+
+      if (hasSelectedEmployee) {
+        const categoryAccordionId = `category-${service.categoryId}`;
+        const subCategoryAccordionId = `subcategory-${service.categoryId}-${service.subCategoryId}`;
+
+        accordionsToExpand[categoryAccordionId] = true;
+        accordionsToExpand[subCategoryAccordionId] = true;
+      }
+    });
+
+    // Update expanded accordions to include the new ones
+    setExpandedAccordions(prev => ({
+      ...prev,
+      ...accordionsToExpand
+    }));
+  }, [selectedEmployees, services, categories]);
 
   const groupedServices = useMemo(() => {
     if (!services || !categories) return {};
