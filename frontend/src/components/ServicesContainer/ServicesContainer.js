@@ -34,6 +34,7 @@ const TABS = {
 
 export default function ServicesContainer({
   services,
+  employees,
   subCategories,
   categories,
 }) {
@@ -63,13 +64,13 @@ export default function ServicesContainer({
   const renderContent = () => {
     switch (activeTab) {
     case TABS[SERVICES].value:
-      return <ServicesList services={services} />;
+      return <ServicesList services={services} employees={employees} categories={categories} />;
     case TABS[SUB_CATEGORIES].value:
       return <SubCategoriesList subCategories={subCategories} categories={categories} />;
     case TABS[CATEGORIES].value:
       return <CategoriesList categories={categories} />;
     default:
-      return <ServicesList services={services} />;
+      return <ServicesList services={services} employees={employees} categories={categories} />;
     }
   };
 
