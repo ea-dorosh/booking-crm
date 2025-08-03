@@ -10,17 +10,19 @@ import {
   AppointmentFormDataType,
   CreateAppointmentServiceResponseErrorType,
   CreateAppointmentServiceResponseSuccessType,
-  ServiceBookingBaseType,
   AppointmentFormDataServiceType,
  } from '@/@types/appointmentsTypes.js';
  import { CompanyResponseData } from '@/@types/companyTypes.js';
  import {
   AppointmentStatusEnum,
+  DEFAULT_APPOINTMENT_SORT_FIELD,
   CustomerNewStatusEnum,
 } from '@/enums/enums.js';
 import {
   Date_ISO_Type,
   Time_HH_MM_SS_Type,
+  SortDirection,
+  AppointmentSortField,
 } from '@/@types/utilTypes.js';
 import { getCompany } from '@/services/company/companyService.js';
 import { getEmployee } from '@/services/employees/employeesService.js';
@@ -32,7 +34,6 @@ import {
 import {
   createGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
-  CreateGoogleCalendarEventInputType,
 } from '@/services/googleCalendar/googleCalendarService.js';
 import {
   validateAppointmentDetailsData,
@@ -53,22 +54,71 @@ import {
 } from '@/utils/formatters.js';
 import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
 
+interface GetAppointmentsOptions {
+  startDate: Date_ISO_Type;
+  endDate?: Date_ISO_Type | null;
+  status?: AppointmentStatusEnum | null;
+  employeeId?: number | null;
+  sortBy?: AppointmentSortField;
+  sortOrder?: SortDirection;
+}
+
 async function getAppointments(
   dbPool: Pool,
-  startDate: Date_ISO_Type,
-  status: AppointmentStatusEnum | null = null
+  options: GetAppointmentsOptions | Date_ISO_Type,
+  legacyStatus?: AppointmentStatusEnum | null
 ): Promise<AppointmentDataType[]> {
 
-  console.log(`status: `, status);
+  // Handle backward compatibility with old function signature
+  let finalOptions: GetAppointmentsOptions;
+  if (typeof options === 'string') {
+    finalOptions = {
+      startDate: options,
+      status: legacyStatus || null,
+      sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
+      sortOrder: 'asc'
+    };
+  } else {
+    finalOptions = {
+      sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
+      sortOrder: 'asc',
+      ...options
+    };
+  }
+
+  const { startDate, endDate, status, employeeId, sortBy, sortOrder } = finalOptions;
+
+  // Build dynamic WHERE clause
+  const whereConditions: string[] = ['date >= ?'];
+  const queryParams: any[] = [startDate];
+
+  if (endDate) {
+    whereConditions.push('date <= ?');
+    queryParams.push(endDate);
+  }
+
+  if (status !== null && status !== undefined) {
+    whereConditions.push('status = ?');
+    queryParams.push(status);
+  }
+
+    if (employeeId !== null && employeeId !== undefined) {
+    whereConditions.push('employee_id = ?');
+    queryParams.push(employeeId);
+  }
+
+  // Build ORDER BY clause
+  const orderByColumn = sortBy === 'created_date' ? 'created_date' : 'date';
+  const orderDirection = sortOrder === 'desc' ? 'DESC' : 'ASC';
+
   const sql = `
     SELECT *
     FROM SavedAppointments
-    WHERE
-      date >= ?
-      AND (status = COALESCE(?, status))
+    WHERE ${whereConditions.join(' AND ')}
+    ORDER BY ${orderByColumn} ${orderDirection}
   `;
 
-  const [appointmentsResults] = await dbPool.query<AppointmentRowType[]>(sql, [startDate, status]);
+  const [appointmentsResults] = await dbPool.query<AppointmentRowType[]>(sql, queryParams);
 
   const appointmentsData: AppointmentDataType[] = appointmentsResults.map((row) => {
     return {

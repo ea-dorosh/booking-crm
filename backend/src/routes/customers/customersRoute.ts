@@ -7,6 +7,7 @@ import {
 } from '@/@types/expressTypes.js';
 import { RowDataPacket } from 'mysql2';
 import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
+import { AppointmentStatusEnum } from '@/enums/enums.js';
 
 const router = express.Router();
 
@@ -256,7 +257,7 @@ router.get(`/:id/saved-appointments`, async (request: CustomRequestType, respons
         firstName: ``,
         lastName: ``,
       },
-      status: row.status,
+      status: Number(row.status) as AppointmentStatusEnum,
       location: row.location,
     }));
 

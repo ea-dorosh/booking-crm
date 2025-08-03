@@ -143,7 +143,7 @@ export interface SavedAppointmentItemDataType {
     firstName: string,
     lastName: string,
   },
-  status: string;
+  status: AppointmentStatusEnum;
   location: string;
 }
 

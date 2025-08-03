@@ -24,7 +24,7 @@ export enum PaymentMethodEnum {
   CreditDebitCards = 2,
   Giropay = 3,
   OnlineBankTransfer = 4,
-}    
+}
 
 export enum PaymentStatusEnum {
   Declined = 0,
@@ -35,3 +35,7 @@ export enum PaymentStatusEnum {
 export enum InvoiceStatusEnum {
   Paid = 1,
 }
+
+// Default sorting constants
+export const DEFAULT_APPOINTMENT_SORT_FIELD = 'date' as const;
+export const DEFAULT_SORT_DIRECTION = 'desc' as const;

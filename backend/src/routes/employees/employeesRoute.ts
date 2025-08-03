@@ -3,14 +3,22 @@ import { formatName, formatPhone } from '@/utils/formatters.js';
 import { validateEmployeeData } from '@/validators/employeesValidators.js';
 import { upload } from '@/utils/uploadFile.js';
 import { getEmployees } from '@/services/employees/employeesService.js';
-import { getCustomers } from '@/services/customer/customerService.js';
 import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { ResultSetHeader, RowDataPacket } from 'mysql2';
+import {
+  Date_ISO_Type,
+  SortDirection,
+  AppointmentSortField,
+} from '@/@types/utilTypes.js';
+import { ResultSetHeader } from 'mysql2';
 import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
 import { getEmployeeAvailability } from '@/services/employees/employeesService.js';
+import {
+  DEFAULT_APPOINTMENT_SORT_FIELD,
+  DEFAULT_SORT_DIRECTION,
+} from '@/enums/enums.js';
 
 const router = express.Router();
 
@@ -230,78 +238,62 @@ router.delete(`/:id/availability`, async (req: CustomRequestType, res: CustomRes
 router.get(`/:id/appointments`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
     response.status(500).json({ message: `Database connection not initialized` });
-
     return;
   }
 
-  const employeeId = request.params.id;
-  const customers = await getCustomers(request.dbPool);
+  const employeeId = Number(request.params.id);
+  const startDate = ((request.query?.startDate as string) || new Date().toISOString().split('T')[0]) as Date_ISO_Type;
+  const endDate = (request.query?.endDate as string | null) as Date_ISO_Type | null;
 
-  const sql = `
-    SELECT
-      id,
-      date,
-      time_start,
-      time_end,
-      service_id,
-      service_name,
-      created_date,
-      service_duration,
-      customer_id,
-      status,
-      location
-    FROM SavedAppointments
-    WHERE employee_id = ?
-  `;
-
-  interface EmployeeSavedAppointmentsRowType extends RowDataPacket {
-    id: number;
-    date: string;
-    time_start: string;
-    time_end: string;
-    service_id: number;
-    service_name: string;
-    created_date: string;
-    service_duration: number;
-    customer_id: number;
-    status: string;
-    location: string;
+  let status: number | null = null;
+  if (request.query?.status !== undefined) {
+    status = request.query.status === 'null' ? null : Number(request.query.status);
   }
 
-  try {
-    const [results] = await request.dbPool.query<EmployeeSavedAppointmentsRowType[]>(sql, [employeeId]);
+  const sortBy = (request.query?.sortBy as AppointmentSortField) || DEFAULT_APPOINTMENT_SORT_FIELD;
+  const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
-    const savedAppointments: SavedAppointmentItemDataType[] = results.map((row) => ({
-      id: row.id,
-      date: row.date,
-      timeStart: row.time_start,
-      timeEnd: row.time_end,
-      createdDate: row.created_date,
+  try {
+    const { getAppointments } = await import('@/services/appointment/appointmentService.js');
+
+    const appointmentsData = await getAppointments(request.dbPool, {
+      startDate,
+      endDate,
+      status,
+      employeeId,
+      sortBy,
+      sortOrder,
+    });
+
+    const savedAppointments: SavedAppointmentItemDataType[] = appointmentsData.map((appointment) => ({
+      id: appointment.id,
+      date: appointment.date,
+      timeStart: appointment.timeStart,
+      timeEnd: appointment.timeEnd,
+      createdDate: appointment.createdDate,
       service: {
-        id: row.service_id,
-        name: row.service_name,
-        duration: row.service_duration,
+        id: 0, // Service ID not available in AppointmentDataType, would need DB join
+        name: appointment.serviceName,
+        duration: appointment.serviceDuration,
       },
       employee: {
-        id: Number(employeeId),
-        firstName: ``,
-        lastName: ``,
+        id: appointment.employee.id,
+        firstName: appointment.employee.firstName || ``,
+        lastName: appointment.employee.lastName || ``,
       },
       customer: {
-        id: row.customer_id,
-        firstName: customers.find(customer => customer.id === row.customer_id)?.firstName || ``,
-        lastName: customers.find(customer => customer.id === row.customer_id)?.lastName || ``,
+        id: appointment.customer.id,
+        firstName: appointment.customer.firstName,
+        lastName: appointment.customer.lastName,
       },
-      status: row.status,
-      location: row.location,
+      status: appointment.status,
+      location: ``, // Location not available in AppointmentDataType
     }));
 
     response.json(savedAppointments);
-
-    return;
   } catch (error) {
     response.status(500).json({
-      errorMessage: `Error fetching Saved Appointments`,
+      errorMessage: `Error fetching Employee Appointments`,
       message: (error as Error).message,
     });
   }
