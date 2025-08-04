@@ -243,14 +243,9 @@ const theme = createTheme({
           fontWeight: 500,
           padding: '10px 24px',
           boxShadow: 'none',
-          '&:hover': {
-            boxShadow: '0px 4px 8px 0px rgba(0,0,0,0.12)',
-          },
         },
         contained: {
-          '&:hover': {
-            boxShadow: '0px 4px 12px 0px rgba(0,0,0,0.15)',
-          },
+          // Removed hover styles
         },
       },
     },
@@ -260,11 +255,7 @@ const theme = createTheme({
           borderRadius: 16,
           boxShadow: '0px 2px 8px 0px rgba(0,0,0,0.08)',
           border: `1px solid ${colors.neutral[100]}`,
-          '&:hover': {
-            boxShadow: '0px 4px 16px 0px rgba(0,0,0,0.12)',
-            transform: 'translateY(-2px)',
-            transition: 'all 0.2s ease-in-out',
-          },
+          // Removed hover styles
         },
       },
     },
@@ -299,9 +290,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 10,
-          '&:hover': {
-            backgroundColor: colors.neutral[50],
-          },
+          // Removed hover styles
         },
       },
     },
@@ -317,9 +306,7 @@ const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             borderRadius: 12,
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: colors.primary[300],
-            },
+            // Removed hover styles
           },
         },
       },
@@ -343,8 +330,6 @@ const theme = createTheme({
     },
     MuiDrawer: {
       styleOverrides: {
-
-        // for this .css-a2nuku-MuiDrawer-docked .MuiDrawer-paper selector width 52px
         paper: {
           borderRadius: 0,
           borderRight: `0px solid ${colors.neutral[100]}`,
@@ -360,15 +345,11 @@ const theme = createTheme({
           paddingLeft: `14px`,
           paddingRight: `14px`,
           minHeight: 48,
-          '&:hover': {
-            backgroundColor: colors.primary[50],
-          },
+          // Removed hover styles
           '&.Mui-selected': {
             backgroundColor: colors.primary[100],
             color: colors.primary[700],
-            '&:hover': {
-              backgroundColor: colors.primary[100],
-            },
+            // Removed hover styles
           },
         },
       },

@@ -1,18 +1,13 @@
-import { Edit as EditIcon } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Typography,
-  List,
-  LinearProgress,
-} from "@mui/material";
+
+import { Box, LinearProgress } from '@mui/material';
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
+import ServiceDetails from './components/ServiceDetails';
+import ServiceEditForm from './components/ServiceEditForm';
+import ServiceNotFound from './components/ServiceNotFound';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
-import ListItemText from "@/components/ListItemText/ListItemText";
 import PageContainer from '@/components/PageContainer/PageContainer';
-import ServiceForm from "@/components/ServiceForm/ServiceForm";
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
@@ -37,7 +32,6 @@ export default function ServicesDetailPage() {
   const {
     updateFormErrors,
     isServicesRequestPending,
-    isUpdateServiceRequestPending,
   } = useSelector(state => state.services);
 
   const serviceSubCategories = useSelector(state => state.serviceSubCategories.data);
@@ -68,10 +62,7 @@ export default function ServicesDetailPage() {
     Promise.all(promises);
   }, []);
 
-  const getEmployeeName = (employeeId) => {
-    const employee = employees.find(emp => emp.employeeId === employeeId);
-    return employee ? `${employee.firstName} ${employee.lastName}` : '';
-  };
+
 
   const updateServiceHandler = async (service) => {
     try {
@@ -107,118 +98,83 @@ export default function ServicesDetailPage() {
     navigate(`/services`);
   };
 
-  return (
-    <PageContainer
-      pageTitle={service ?
-        `${service.name}`
-        :
-        `New Service`
-      }
-      hideSideNav
-    >
-      <GoBackNavigation />
+  const handleEditClick = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(true);
+  };
 
-      {(isUpdateServiceRequestPending || isServicesRequestPending) && <Box mt={2}>
-        <LinearProgress />
-      </Box>}
+  const handleCancelEdit = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(false);
+  };
 
-      {isEditMode && serviceSubCategories && serviceCategories && <Box mt={3}>
-        <ServiceForm
-          employees={employees || []}
+  // Determine page title
+  const getPageTitle = () => {
+    if (isEditMode) {
+      return service ? `Edit ${service.name}` : `New Service`;
+    }
+    if (!service && !shouldShowServiceForm) {
+      return "Service Not Found";
+    }
+    return service ? service.name : "New Service";
+  };
+
+  // Determine content to render
+  const renderContent = () => {
+    // Show edit form
+    if (isEditMode && serviceSubCategories && serviceCategories) {
+      return (
+        <ServiceEditForm
           service={service}
+          employees={employees}
           serviceSubCategories={serviceSubCategories}
           serviceCategories={serviceCategories}
-          createNewService={updateServiceHandler}
-          formErrors={updateFormErrors}
-          cleanError={handleCleanError}
-          cleanErrors={handleCleanErrors}
+          updateFormErrors={updateFormErrors}
+          shouldShowServiceForm={shouldShowServiceForm}
+          onUpdateService={updateServiceHandler}
+          onCleanError={handleCleanError}
+          onCleanErrors={handleCleanErrors}
+          onDeleteService={onDeleteServiceClick}
+          onCancel={handleCancelEdit}
         />
+      );
+    }
 
-        <Box mt={2} sx={{width:`100%`}}>
-          {!shouldShowServiceForm && <Button
-            variant="outlined"
-            onClick={() => {
-              dispatch(cleanErrors());
-              setIsEditMode(false);
-            }}
-            sx={{width:`100%`}}
-          >
-            Cancel
-          </Button>}
-        </Box>
+    // Show not found
+    if (!service && !shouldShowServiceForm) {
+      return <ServiceNotFound onBackToServices={() => navigate('/services')} />;
+    }
 
-        <Box mt={2} sx={{ width: `100%` }}>
-          <Button
-            variant="outlined"
-            onClick={onDeleteServiceClick}
-            sx={{width:`100%`}}
-            color="error"
-          >
-            Delete Service
-          </Button>
-        </Box>
-      </Box>}
+    // Show service details
+    if (service && serviceSubCategories && serviceCategories) {
+      return (
+        <ServiceDetails
+          service={service}
+          employees={employees}
+          serviceCategories={serviceCategories}
+          serviceSubCategories={serviceSubCategories}
+          onEditClick={handleEditClick}
+        />
+      );
+    }
 
-      {!isEditMode && service && serviceSubCategories && serviceCategories && <Box mt={3}>
-        <List>
-          <ListItemText
-            value={service.name}
-            label="Service Name"
-          />
+    // Loading state
+    return null;
+  };
 
-          <ListItemText
-            value={serviceCategories?.find(category => category.id === service.categoryId)?.name || `-`}
-            label="Service Category"
-          />
+  return (
+    <PageContainer pageTitle={getPageTitle()} hideSideNav>
+      <Box sx={{ padding: { xs: 0, md: 0 } }}>
+        <GoBackNavigation />
 
-          <ListItemText
-            value={serviceSubCategories.find(subCategory => subCategory.id === service.subCategoryId).name || `-`}
-            label="Service Sub Category"
-          />
-
-          <ListItemText
-            value={service.durationTime}
-            label="Duration Time"
-          />
-
-          <ListItemText
-            value={service.bufferTime || `-`}
-            label="Buffer Time"
-          />
-
-          <ListItemText
-            value={service.bookingNote || `-`}
-            label="Note"
-          />
-
-          <Box sx={{marginTop: `20px`}}>
-            <Typography>
-              This service is provided by the following masters:
-            </Typography>
-
-            <List>
-              {service.employeePrices.map((employeePrice) => (
-                <ListItemText
-                  key={employeePrice.employeeId}
-                  value={getEmployeeName(employeePrice.employeeId)}
-                  label={employeePrice.price}
-                />
-              ))}
-            </List>
+        {isServicesRequestPending && (
+          <Box sx={{ marginTop: 1 }}>
+            <LinearProgress />
           </Box>
+        )}
 
-          <Button
-            startIcon={<EditIcon />}
-            onClick={() => {
-              dispatch(cleanErrors());
-              setIsEditMode(true);
-            }}
-            variant="outlined"
-          >
-            Update
-          </Button>
-        </List>
-      </Box>}
+        {renderContent()}
+      </Box>
     </PageContainer>
   );
 }
