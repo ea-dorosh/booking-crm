@@ -103,7 +103,6 @@ export default function EmployeeDetailPage() {
   useEffect(() => {
     // Load appointments if we have employeeId and not in create mode
     if (employeeId && !shouldShowCreateEmployeeForm) {
-      console.log('🟩 [useEffect #2] Loading appointments');
       loadAppointments();
     }
   }, [appointmentFilters]);
@@ -185,13 +184,13 @@ export default function EmployeeDetailPage() {
         hideSideNav
       >
         <Box sx={{ padding: { xs: 1, md: 2 } }}>
-          <GoBackNavigation />
-
-          {(isCustomersDataRequestPending || isLastAppointmentsPending) && (
-            <Box sx={{ marginTop: 2 }}>
+          <Box sx={{ marginTop: 1, position: 'relative' }}>
+            {(isCustomersDataRequestPending || isLastAppointmentsPending) && (
               <LinearProgress />
-            </Box>
-          )}
+            )}
+          </Box>
+
+          <GoBackNavigation />
 
           <Card sx={{ marginTop: 2 }}>
             <CardContent sx={{ padding: 2 }}>
@@ -205,22 +204,13 @@ export default function EmployeeDetailPage() {
                 formErrors={formErrors}
                 cleanError={handleCleanError}
                 cleanErrors={handleCleanErrors}
+                onCancel={() => {
+                  dispatch(cleanErrors());
+                  setIsEditMode(false);
+                }}
               />
 
-              {!shouldShowCreateEmployeeForm && (
-                <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => {
-                      dispatch(cleanErrors());
-                      setIsEditMode(false);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
-              )}
+
             </CardContent>
           </Card>
         </Box>

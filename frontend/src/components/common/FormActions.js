@@ -15,16 +15,35 @@ const FormActions = ({
   sx = {},
 }) => {
   const hasErrors = disabled || (isPending && disabled);
+  const hasTwoButtons = showCancel && onCancel;
 
   return (
     <Box
       sx={{
         display: `flex`,
+        flexDirection: 'row',
         gap: 2,
         mt: 2.5,
+        justifyContent: 'flex-start',
+        width: '100%',
         ...sx,
       }}
     >
+      {showCancel && onCancel && (
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={onCancel}
+          disabled={isPending}
+          sx={{
+            flex: 1,
+            minWidth: 120
+          }}
+        >
+          {cancelText}
+        </Button>
+      )}
+
       <Button
         type="submit"
         variant="contained"
@@ -32,22 +51,14 @@ const FormActions = ({
         onClick={onSubmit}
         disabled={hasErrors}
         endIcon={isPending && <CircularProgress size={16} />}
-        sx={{ flexGrow: 1 }}
+        sx={{
+          flex: hasTwoButtons ? 1 : 'none',
+          width: hasTwoButtons ? 'auto' : '100%',
+          minWidth: hasTwoButtons ? 120 : 'auto'
+        }}
       >
         {submitText}
       </Button>
-
-      {showCancel && onCancel && (
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={onCancel}
-          disabled={isPending}
-          sx={{ flexGrow: 1 }}
-        >
-          {cancelText}
-        </Button>
-      )}
     </Box>
   );
 };

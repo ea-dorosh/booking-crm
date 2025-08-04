@@ -2,7 +2,6 @@ import {
   FormControl,
   FormHelperText,
   TextField,
-  InputLabel,
   Select,
   MenuItem,
   FormControlLabel,
@@ -10,6 +9,7 @@ import {
   RadioGroup,
   FormLabel,
   Box,
+  Typography,
 } from "@mui/material";
 
 const FormField = ({
@@ -44,8 +44,9 @@ const FormField = ({
       return (
         <Select
           {...commonProps}
-          labelId={`${name}-label`}
-          label={label}
+          size="small"
+          displayEmpty
+          sx={{ width: '100%' }}
         >
           {options.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -92,10 +93,11 @@ const FormField = ({
       return (
         <TextField
           {...commonProps}
-          label={label}
           variant="outlined"
           multiline
           rows={rows}
+          size="small"
+          sx={{ width: '100%' }}
         />
       );
 
@@ -103,28 +105,42 @@ const FormField = ({
       return (
         <TextField
           {...commonProps}
-          label={label}
           variant="outlined"
           type={type}
+          size="small"
+          sx={{ width: '100%' }}
         />
       );
     }
   };
 
   return (
-    <FormControl error={Boolean(error)} sx={{ width: `100%` }}>
-      {type === "select" && (
-        <InputLabel id={`${name}-label`}>{label}</InputLabel>
+    <Box sx={{ width: `100%` }}>
+      {/* Label above field (except for radio which has its own label) */}
+      {type !== "radio" && (
+        <Typography
+          variant="body2"
+          sx={{
+            mb: 0.5,
+            fontWeight: 500,
+            color: error ? 'error.main' : 'text.primary'
+          }}
+        >
+          {label}
+          {required && <span style={{ color: 'red', marginLeft: 2 }}>*</span>}
+        </Typography>
       )}
 
-      {renderField()}
+      <FormControl error={Boolean(error)} sx={{ width: `100%` }}>
+        {renderField()}
 
-      {error && (
-        <FormHelperText sx={{ color: 'error.main' }}>
-          {error}
-        </FormHelperText>
-      )}
-    </FormControl>
+        {error && (
+          <FormHelperText sx={{ color: 'error.main', mt: 0.5 }}>
+            {error}
+          </FormHelperText>
+        )}
+      </FormControl>
+    </Box>
   );
 };
 
