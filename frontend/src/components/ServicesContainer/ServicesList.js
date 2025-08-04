@@ -1,111 +1,18 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Business, AccessTime, Euro } from "@mui/icons-material";
 import {
   Box,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Card,
+  CardContent,
   Chip,
-  Divider
+  Grid,
+  Paper,
+  Button,
 } from "@mui/material";
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
-const STORAGE_KEY = 'services-accordion-state';
-const SCROLL_SERVICE_KEY = 'services-scroll-to-service';
-const SERVICES_PAGE_SCROLL_KEY = 'services-page-scroll-position';
-
 export default function ServicesList({ services, employees, categories }) {
-  const [expandedAccordions, setExpandedAccordions] = useState({});
-  const serviceRefs = useRef({});
-  const selectedEmployees = useSelector(state => state.services.selectedEmployees);
-
-  useEffect(() => {
-    const savedState = sessionStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-      try {
-        setExpandedAccordions(JSON.parse(savedState));
-      } catch (error) {
-        console.error('Error parsing accordion state from sessionStorage:', error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(expandedAccordions));
-  }, [expandedAccordions]);
-
-  useEffect(() => {
-    const scrollToServiceId = sessionStorage.getItem(SCROLL_SERVICE_KEY);
-
-    if (scrollToServiceId && services && categories) {
-      const targetService = services.find(service => service.id.toString() === scrollToServiceId);
-
-      if (targetService) {
-        const categoryAccordionId = `category-${targetService.categoryId}`;
-        const subCategoryAccordionId = `subcategory-${targetService.categoryId}-${targetService.subCategoryId}`;
-
-        setExpandedAccordions(prev => ({
-          ...prev,
-          [categoryAccordionId]: true,
-          [subCategoryAccordionId]: true
-        }));
-
-        setTimeout(() => {
-          const serviceElement = serviceRefs.current[scrollToServiceId];
-          if (serviceElement) {
-            const elementRect = serviceElement.getBoundingClientRect();
-            const offset = 80;
-
-            window.scrollTo({
-              top: window.scrollY + elementRect.top - offset,
-              behavior: 'smooth'
-            });
-          }
-
-          sessionStorage.removeItem(SCROLL_SERVICE_KEY);
-        }, 500);
-      }
-    }
-  }, [services, categories]);
-
-  const handleServiceClick = (serviceId) => {
-    sessionStorage.setItem(SCROLL_SERVICE_KEY, serviceId.toString());
-
-    // Save current page scroll position for general navigation
-    sessionStorage.setItem(SERVICES_PAGE_SCROLL_KEY, window.scrollY.toString());
-  };
-
-  // Auto-expand accordions when employee filter changes
-  useEffect(() => {
-    if (!services || !categories || selectedEmployees.length === 0) return;
-
-    const accordionsToExpand = {};
-
-    // Find all categories and subcategories that contain filtered services
-    services.forEach(service => {
-      // Check if this service has any of the selected employees
-      const hasSelectedEmployee = service.employeePrices?.some(empPrice =>
-        selectedEmployees.includes(empPrice.employeeId)
-      );
-
-      if (hasSelectedEmployee) {
-        const categoryAccordionId = `category-${service.categoryId}`;
-        const subCategoryAccordionId = `subcategory-${service.categoryId}-${service.subCategoryId}`;
-
-        accordionsToExpand[categoryAccordionId] = true;
-        accordionsToExpand[subCategoryAccordionId] = true;
-      }
-    });
-
-    // Update expanded accordions to include the new ones
-    setExpandedAccordions(prev => ({
-      ...prev,
-      ...accordionsToExpand
-    }));
-  }, [selectedEmployees, services, categories]);
-
   const groupedServices = useMemo(() => {
     if (!services || !categories) return {};
 
@@ -154,185 +61,194 @@ export default function ServicesList({ services, employees, categories }) {
     return `${minPrice}€ - ${maxPrice}€`;
   };
 
-  const handleAccordionChange = (accordionId) => (event, isExpanded) => {
-    setExpandedAccordions(prev => ({
-      ...prev,
-      [accordionId]: isExpanded
-    }));
-  };
-
   if (!services || services.length === 0) {
     return (
-      <Box sx={{ padding: '2rem', textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
+      <Paper
+        sx={{
+          padding: 6,
+          textAlign: 'center',
+          backgroundColor: 'grey.50',
+          border: '2px dashed',
+          borderColor: 'grey.300',
+        }}
+      >
+        <Business sx={{ fontSize: 60, color: 'grey.400', marginBottom: 2 }} />
+        <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
           No services found
         </Typography>
-      </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
+          Get started by adding your first service
+        </Typography>
+        <Button
+          component={RouterLink}
+          to="/services/create-service"
+          variant="contained"
+          size="small"
+        >
+          Add First Service
+        </Button>
+      </Paper>
     );
   }
 
   return (
-    <Box sx={{ marginTop: '1rem', maxWidth: '100%' }}>
+    <Box sx={{ padding: { xs: 0, md: 0 } }}>
       {Object.entries(groupedServices).map(([categoryId, categoryData]) => (
-        <Accordion
-          key={`category-${categoryId}`}
-          expanded={expandedAccordions[`category-${categoryId}`] || false}
-          onChange={handleAccordionChange(`category-${categoryId}`)}
-          sx={{
-            marginBottom: '1rem',
-            border: '1px solid #e0e0e0',
-            borderRadius: '8px !important',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            '&:before': { display: 'none' },
-            '&.Mui-expanded': {
-              margin: '0 0 1rem 0'
-            }
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            sx={{
-              backgroundColor: '#f5f5f5',
-              borderRadius: '8px 8px 0 0',
-              '& .MuiAccordionSummary-content': {
-                margin: '12px 0'
-              }
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 'bold',
-                fontSize: '1.1rem'
-              }}
-            >
+        <Box key={categoryId} sx={{ marginBottom: 4 }}>
+          {/* Category Header */}
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, marginBottom: 1 }}>
               {categoryData.categoryName}
             </Typography>
-          </AccordionSummary>
+            <Typography variant="body2" color="text.secondary">
+              {Object.values(categoryData.subCategories).reduce((total, subCat) => total + subCat.services.length, 0)} services
+            </Typography>
+          </Box>
 
-          <AccordionDetails sx={{ padding: 0 }}>
-            {Object.entries(categoryData.subCategories).map(([subCategoryId, subCategoryData]) => (
-              <Accordion
-                key={`subcategory-${categoryId}-${subCategoryId}`}
-                expanded={expandedAccordions[`subcategory-${categoryId}-${subCategoryId}`] || false}
-                onChange={handleAccordionChange(`subcategory-${categoryId}-${subCategoryId}`)}
-                sx={{
-                  boxShadow: 'none',
-                  border: 'none',
-                  borderTop: '1px solid #e0e0e0',
-                  '&:before': { display: 'none' },
-                  borderRadius: 0,
-                  '&.Mui-expanded': {
-                    margin: 0
-                  }
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  sx={{
-                    backgroundColor: '#fafafa',
-                    minHeight: '48px',
-                    '& .MuiAccordionSummary-content': {
-                      margin: '8px 0'
-                    }
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: '500',
-                      fontSize: '1.05rem'
-                    }}
-                  >
-                    {subCategoryData.subCategoryName}
-                  </Typography>
-                </AccordionSummary>
+          {/* Sub Categories */}
+          {Object.entries(categoryData.subCategories).map(([subCategoryId, subCategoryData]) => (
+            <Box key={subCategoryId} sx={{ marginBottom: 3 }}>
+              {/* Sub Category Header */}
+              <Box sx={{ marginBottom: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                  {subCategoryData.subCategoryName}
+                </Typography>
+              </Box>
 
-                <AccordionDetails sx={{ padding: '8px 16px' }}>
-                  {subCategoryData.services.map((service, index) => (
-                    <Box key={service.id}>
-                      <Box
-                        ref={(el) => serviceRefs.current[service.id] = el}
-                        component={RouterLink}
-                        to={`/services/${service.id}`}
-                        onClick={() => handleServiceClick(service.id)}
-                        sx={{
-                          display: 'block',
-                          padding: '12px 0',
-                          textDecoration: 'none',
-                          color: 'inherit',
-                          '&:hover': {
-                            backgroundColor: '#f9f9f9'
-                          }
-                        }}
-                      >
+              {/* Services Grid */}
+              <Grid container spacing={2}>
+                {subCategoryData.services.map((service) => (
+                  <Grid item xs={12} sm={6} md={4} key={service.id}>
+                    <Card
+                      sx={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        }
+                      }}
+                    >
+                      <CardContent sx={{
+                        padding: 2.5,
+                        flexGrow: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}>
+                        {/* Service Name */}
                         <Typography
-                          variant="subtitle2"
+                          variant="h6"
                           sx={{
-                            fontWeight: 'bold',
-                            marginBottom: '4px',
+                            fontWeight: 600,
+                            marginBottom: 1,
+                            color: 'text.primary',
                             fontSize: '1.1rem'
                           }}
                         >
                           {service.name}
                         </Typography>
 
+                        {/* Price and Duration */}
                         <Box sx={{
                           display: 'flex',
-                          justifyContent: 'space-between',
                           alignItems: 'center',
-                          marginBottom: '8px'
+                          gap: 1,
+                          marginBottom: 1.5,
                         }}>
+                          <Euro sx={{ fontSize: 16, color: 'primary.main' }} />
                           <Typography
-                            variant="body2"
+                            variant="body1"
                             color="primary"
-                            sx={{ fontWeight: '500', fontSize: '1rem' }}
+                            sx={{ fontWeight: 600, fontSize: '1rem' }}
                           >
                             {getPriceRange(service.employeePrices)}
                           </Typography>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                          >
+                        </Box>
+
+                        <Box sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          marginBottom: 2,
+                          color: 'text.secondary'
+                        }}>
+                          <AccessTime sx={{ fontSize: 16 }} />
+                          <Typography variant="body2">
                             {service.durationTime}
                           </Typography>
                         </Box>
 
+                        {/* Employee Chips */}
                         {service.employeePrices && service.employeePrices.length > 0 && (
                           <Box sx={{
                             display: 'flex',
                             flexWrap: 'wrap',
-                            gap: '4px',
-                            marginTop: '8px'
+                            gap: 0.5,
+                            marginBottom: 2,
+                            flexGrow: 1
                           }}>
-                            {service.employeePrices.map((empPrice) => (
+                            {service.employeePrices.slice(0, 3).map((empPrice) => (
                               <Chip
                                 key={empPrice.employeeId}
                                 label={`${getEmployeeName(empPrice.employeeId)} - ${empPrice.price}€`}
                                 size="small"
                                 variant="outlined"
                                 sx={{
-                                  fontSize: '0.8rem',
-                                  height: '28px',
-                                  borderColor: '#e0e0e0',
-                                  color: '#666'
+                                  fontSize: '0.75rem',
+                                  height: '24px',
+                                  borderColor: 'primary.200',
+                                  color: 'primary.600',
+                                  backgroundColor: 'primary.50'
                                 }}
                               />
                             ))}
+                            {service.employeePrices.length > 3 && (
+                              <Chip
+                                label={`+${service.employeePrices.length - 3} more`}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  height: '24px',
+                                  borderColor: 'grey.300',
+                                  color: 'text.secondary'
+                                }}
+                              />
+                            )}
                           </Box>
                         )}
-                      </Box>
 
-                      {index < subCategoryData.services.length - 1 && (
-                        <Divider sx={{ margin: '0 -16px' }} />
-                      )}
-                    </Box>
-                  ))}
-                </AccordionDetails>
-              </Accordion>
-            ))}
-          </AccordionDetails>
-        </Accordion>
+                        {/* Action Button */}
+                        <Box sx={{ marginTop: 'auto' }}>
+                          <Button
+                            component={RouterLink}
+                            to={`/services/${service.id}`}
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            sx={{
+                              borderRadius: 2,
+                              borderColor: 'primary.200',
+                              color: 'primary.600',
+                              '&:hover': {
+                                borderColor: 'primary.400',
+                                backgroundColor: 'primary.50',
+                              }
+                            }}
+                          >
+                            View Details
+                          </Button>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          ))}
+        </Box>
       ))}
     </Box>
   );

@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import { Business, Category, List } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,18 +21,21 @@ const TABS = {
     value: SERVICES,
     url: `/services/create-service`,
     buttonText: `add service`,
+    icon: <List />,
   },
   [SUB_CATEGORIES]: {
     label: `Sub Categories`,
     value: SUB_CATEGORIES,
     url: `/sub-categories/create-sub-category`,
     buttonText: `add sub category`,
+    icon: <Category />,
   },
   [CATEGORIES]: {
     label: `Categories`,
     value: CATEGORIES,
     url: `/categories/create-category`,
     buttonText: `add category`,
+    icon: <Business />,
   },
 };
 
@@ -77,21 +81,49 @@ export default function ServicesContainer({
     }
   };
 
-  return (
-    <Box>
-      <Tabs
-        tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
-        onChange={handleTabChange}
-        activeTab={activeTab}
-      />
+  const getTabDescription = () => {
+    switch (activeTab) {
+    case TABS[SERVICES].value:
+      return "Manage your services and their pricing";
+    case TABS[SUB_CATEGORIES].value:
+      return "Organize services into sub-categories";
+    case TABS[CATEGORIES].value:
+      return "Manage service categories";
+    default:
+      return "Manage your services and their pricing";
+    }
+  };
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        {activeTab === TABS[SERVICES].value && (
-          <FilterButton employees={employees} />
-        )}
-        <AddButton activeTab={activeTab} tabs={TABS} />
+  return (
+    <Box sx={{ padding: { xs: 0, md: 3 } }}>
+      {/* Header */}
+      <Box sx={{ marginBottom: 3, padding: { xs: 0, md: 0 } }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, marginBottom: 1 }}>
+          {TABS[activeTab].label}
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ marginBottom: 2 }}>
+          {getTabDescription()}
+        </Typography>
+
+        {/* Action Buttons */}
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          {activeTab === TABS[SERVICES].value && (
+            <FilterButton employees={employees} categories={categories} subCategories={subCategories} sx={{ mr: `auto` }} />
+          )}
+          <AddButton activeTab={activeTab} tabs={TABS} />
+        </Box>
       </Box>
 
+      {/* Tabs */}
+      <Box sx={{ marginBottom: 3, padding: { xs: 0, md: 0 } }}>
+        <Tabs
+          tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
+          onChange={handleTabChange}
+          activeTab={activeTab}
+        />
+      </Box>
+
+      {/* Content */}
       {renderContent()}
     </Box>
   );

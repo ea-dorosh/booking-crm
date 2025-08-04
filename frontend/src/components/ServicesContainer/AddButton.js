@@ -1,5 +1,5 @@
-import { AddCircle } from "@mui/icons-material";
-import { IconButton, Typography, Box } from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function AddButton({ activeTab, tabs }) {
@@ -10,32 +10,24 @@ export default function AddButton({ activeTab, tabs }) {
   }
 
   return (
-    <Box
+    <Button
+      component={RouterLink}
+      to={currentTab.url}
+      variant="contained"
+      startIcon={<Add />}
       sx={{
-        display: `flex`,
-        alignItems: `center`,
-        marginTop: `20px`,
-        marginLeft: `auto`,
-        backgroundColor: `#1976d2`,
-        width: `fit-content`,
-        padding: `10px 20px 10px 30px`,
-        borderRadius: `50px`,
+        borderRadius: 2,
+        textTransform: 'none',
+        fontWeight: 500,
+        padding: '8px 16px',
+        fontSize: '0.875rem',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        '&:hover': {
+          boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+        }
       }}
     >
-      <Typography
-        variant="button"
-        sx={{ color: `#fff` }}
-      >
-        {currentTab.buttonText}
-      </Typography>
-
-      <RouterLink to={currentTab.url}>
-        <IconButton
-          sx={{ color: `#fff` }}
-        >
-          <AddCircle />
-        </IconButton>
-      </RouterLink>
-    </Box>
+      {currentTab.buttonText}
+    </Button>
   );
 }

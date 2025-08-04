@@ -1,22 +1,32 @@
+import { ExpandMore } from '@mui/icons-material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import {
-  IconButton,
-  Typography,
-  Box,
+  Button,
   Popover,
   FormControlLabel,
   Checkbox,
-  Button,
-  Divider,
-  Badge
+  Box,
+  Badge,
+  Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Grid,
 } from "@mui/material";
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { toggleEmployeeFilter, clearEmployeeFilter } from '@/features/services/servicesSlice';
+import {
+  toggleEmployeeFilter,
+  toggleCategoryFilter,
+  toggleSubCategoryFilter,
+  clearServicesFilters
+} from '@/features/services/servicesSlice';
 
-export default function FilterButton({ employees }) {
+export default function FilterButton({ employees, categories, subCategories, sx }) {
   const dispatch = useDispatch();
   const selectedEmployees = useSelector(state => state.services.selectedEmployees);
+  const selectedCategories = useSelector(state => state.services.selectedCategories || []);
+  const selectedSubCategories = useSelector(state => state.services.selectedSubCategories || []);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleFilterClick = (event) => {
@@ -31,11 +41,20 @@ export default function FilterButton({ employees }) {
     dispatch(toggleEmployeeFilter(employeeId));
   };
 
+  const handleCategoryToggle = (categoryId) => {
+    dispatch(toggleCategoryFilter(categoryId));
+  };
+
+  const handleSubCategoryToggle = (subCategoryId) => {
+    dispatch(toggleSubCategoryFilter(subCategoryId));
+  };
+
   const handleClearFilter = () => {
-    dispatch(clearEmployeeFilter());
+    dispatch(clearServicesFilters());
   };
 
   const isOpen = Boolean(anchorEl);
+  const totalSelected = selectedEmployees.length + selectedCategories.length + selectedSubCategories.length;
 
   if (!employees || employees.length === 0) {
     return null;
@@ -43,35 +62,31 @@ export default function FilterButton({ employees }) {
 
   return (
     <>
-      <Box
-        sx={{
-          display: `flex`,
-          alignItems: `center`,
-          marginTop: `20px`,
-          marginRight: `10px`,
-          backgroundColor: selectedEmployees.length > 0 ? `#4caf50` : `#757575`,
-          width: `fit-content`,
-          padding: `10px 20px 10px 30px`,
-          borderRadius: `50px`,
-          cursor: 'pointer'
-        }}
-        onClick={handleFilterClick}
-      >
-        <Typography
-          variant="button"
-          sx={{ color: `#fff`, marginRight: '8px' }}
-        >
-          Filter
-        </Typography>
-
-        <Badge badgeContent={selectedEmployees.length} color="error">
-          <IconButton
-            sx={{ color: `#fff` }}
-          >
+      <Button
+        variant="outlined"
+        startIcon={
+          <Badge badgeContent={totalSelected} color="primary">
             <FilterListIcon />
-          </IconButton>
-        </Badge>
-      </Box>
+          </Badge>
+        }
+        onClick={handleFilterClick}
+        sx={{
+          borderRadius: 2,
+          textTransform: 'none',
+          fontWeight: 500,
+          padding: '8px 16px',
+          fontSize: '0.875rem',
+          borderColor: totalSelected > 0 ? 'primary.main' : 'grey.300',
+          color: totalSelected > 0 ? 'primary.main' : 'text.secondary',
+          '&:hover': {
+            borderColor: 'primary.main',
+            backgroundColor: 'primary.50',
+          },
+          ...sx,
+        }}
+      >
+        Filter
+      </Button>
 
       <Popover
         open={isOpen}
@@ -79,71 +94,201 @@ export default function FilterButton({ employees }) {
         onClose={handleFilterClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'right',
+          horizontal: 'center',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'right',
+          horizontal: 'center',
         }}
-        PaperProps={{
-          sx: {
-            maxWidth: '300px',
-            maxHeight: '400px',
-            overflow: 'auto'
+        slotProps={{
+          paper: {
+            sx: {
+              width: { xs: '90vw', sm: '90vw', md: '600px' },
+              maxWidth: '600px',
+              maxHeight: { xs: '70vh', sm: '75vh', md: '80vh' },
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              borderRadius: { xs: 2, sm: 2 },
+              margin: { xs: '8px auto', sm: 'auto' },
+              left: { xs: '5vw !important', sm: 'auto' },
+              right: { xs: '5vw !important', sm: 'auto' },
+            }
           }
         }}
       >
-        <Box sx={{ padding: '16px' }}>
+        <Box sx={{
+          padding: '12px',
+          maxHeight: { xs: '70vh', sm: '75vh', md: '80vh' },
+          overflow: 'auto'
+        }}>
           <Box sx={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             alignItems: 'center',
             marginBottom: '12px'
           }}>
-            <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
-              Filter by Employees
-            </Typography>
-            {selectedEmployees.length > 0 && (
+            {totalSelected > 0 && (
               <Button
                 size="small"
                 onClick={handleClearFilter}
-                sx={{ fontSize: '0.75rem', marginLeft: '14px' }}
+                sx={{ fontSize: '0.75rem' }}
               >
-                Clear
+                Clear All
               </Button>
             )}
           </Box>
 
-          <Divider sx={{ marginBottom: '12px' }} />
+          {/* Employees */}
+          <Box sx={{ marginBottom: '16px' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '8px' }}>
+              Employees
+            </Typography>
+            <Grid container spacing={0.5}>
+              {employees.map((employee) => (
+                <Grid item xs={12} sm={6} key={employee.employeeId}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedEmployees.includes(employee.employeeId)}
+                        onChange={() => handleEmployeeToggle(employee.employeeId)}
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Typography sx={{ fontSize: '0.85rem' }}>
+                        {`${employee.firstName} ${employee.lastName}`}
+                      </Typography>
+                    }
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '100%',
+                      margin: '0',
+                      padding: '0',
+                      borderRadius: '4px',
+                      '&:hover': {
+                        backgroundColor: '#f5f5f5'
+                      }
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
 
-          {employees.map((employee) => (
-            <FormControlLabel
-              key={employee.employeeId}
-              control={
-                <Checkbox
-                  checked={selectedEmployees.includes(employee.employeeId)}
-                  onChange={() => handleEmployeeToggle(employee.employeeId)}
-                  size="small"
-                />
-              }
-              label={
-                <Typography sx={{ fontSize: '0.9rem' }}>
-                  {`${employee.firstName} ${employee.lastName}`}
-                </Typography>
-              }
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                width: '100%',
-                margin: '4px 0',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                '&:hover': {
-                  backgroundColor: '#f5f5f5'
-                }
-              }}
-            />
-          ))}
+          {/* Categories */}
+          {categories && categories.length > 0 && (
+            <Box sx={{ marginBottom: '16px' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '8px' }}>
+                Categories
+              </Typography>
+              <Grid container spacing={0.5}>
+                {categories.map((category) => (
+                  <Grid item xs={12} sm={6} key={category.id}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedCategories.includes(category.id)}
+                          onChange={() => handleCategoryToggle(category.id)}
+                          size="small"
+                        />
+                      }
+                      label={
+                        <Typography sx={{ fontSize: '0.85rem' }}>
+                          {category.name}
+                        </Typography>
+                      }
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '100%',
+                        margin: '0',
+                        padding: '0',
+                        borderRadius: '4px',
+                        '&:hover': {
+                          backgroundColor: '#f5f5f5'
+                        }
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
+
+          {/* Sub-Categories */}
+          {subCategories && subCategories.length > 0 && (
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '8px' }}>
+                Sub-Categories
+              </Typography>
+
+              {/* Group subcategories by category */}
+              {categories && categories.map((category) => {
+                const categorySubCategories = subCategories.filter(
+                  subCat => subCat.categoryId === category.id
+                );
+
+                if (categorySubCategories.length === 0) return null;
+
+                return (
+                  <Accordion key={category.id} sx={{
+                    boxShadow: 'none',
+                    border: '1px solid #e0e0e0',
+                    marginBottom: '6px',
+                    '&:before': { display: 'none' }
+                  }}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMore />}
+                      sx={{
+                        minHeight: '36px',
+                        '& .MuiAccordionSummary-content': {
+                          margin: '8px 0'
+                        }
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                        {category.name}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ padding: '8px 12px' }}>
+                      <Grid container spacing={0.5}>
+                        {categorySubCategories.map((subCategory) => (
+                          <Grid item xs={12} sm={6} key={subCategory.id}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={selectedSubCategories.includes(subCategory.id)}
+                                  onChange={() => handleSubCategoryToggle(subCategory.id)}
+                                  size="small"
+                                />
+                              }
+                              label={
+                                <Typography sx={{ fontSize: '0.8rem' }}>
+                                  {subCategory.name}
+                                </Typography>
+                              }
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                width: '100%',
+                                margin: '1px 0',
+                                padding: '2px 4px',
+                                borderRadius: '3px',
+                                '&:hover': {
+                                  backgroundColor: '#f5f5f5'
+                                }
+                              }}
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
+            </Box>
+          )}
         </Box>
       </Popover>
     </>

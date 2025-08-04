@@ -79,6 +79,8 @@ const servicesSlice = createSlice({
     isUpdateServiceRequestPending: false,
     updateFormErrors: null,
     selectedEmployees: JSON.parse(sessionStorage.getItem('services-employee-filter') || '[]'),
+    selectedCategories: JSON.parse(sessionStorage.getItem('services-category-filter') || '[]'),
+    selectedSubCategories: JSON.parse(sessionStorage.getItem('services-subcategory-filter') || '[]'),
   },
   reducers: {
     cleanError: (state, action) => {
@@ -110,6 +112,38 @@ const servicesSlice = createSlice({
     clearEmployeeFilter: (state) => {
       state.selectedEmployees = [];
       sessionStorage.removeItem('services-employee-filter');
+    },
+    toggleCategoryFilter: (state, action) => {
+      const categoryId = action.payload;
+      const currentSelection = state.selectedCategories;
+
+      if (currentSelection.includes(categoryId)) {
+        state.selectedCategories = currentSelection.filter(id => id !== categoryId);
+      } else {
+        state.selectedCategories = [...currentSelection, categoryId];
+      }
+
+      sessionStorage.setItem('services-category-filter', JSON.stringify(state.selectedCategories));
+    },
+    toggleSubCategoryFilter: (state, action) => {
+      const subCategoryId = action.payload;
+      const currentSelection = state.selectedSubCategories;
+
+      if (currentSelection.includes(subCategoryId)) {
+        state.selectedSubCategories = currentSelection.filter(id => id !== subCategoryId);
+      } else {
+        state.selectedSubCategories = [...currentSelection, subCategoryId];
+      }
+
+      sessionStorage.setItem('services-subcategory-filter', JSON.stringify(state.selectedSubCategories));
+    },
+    clearServicesFilters: (state) => {
+      state.selectedEmployees = [];
+      state.selectedCategories = [];
+      state.selectedSubCategories = [];
+      sessionStorage.removeItem('services-employee-filter');
+      sessionStorage.removeItem('services-category-filter');
+      sessionStorage.removeItem('services-subcategory-filter');
     },
   },
   extraReducers: (builder) => {
@@ -156,5 +190,8 @@ export const {
   setSelectedEmployees,
   toggleEmployeeFilter,
   clearEmployeeFilter,
+  toggleCategoryFilter,
+  toggleSubCategoryFilter,
+  clearServicesFilters,
 } = servicesSlice.actions;
 export default servicesSlice.reducer;
