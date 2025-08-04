@@ -1,27 +1,11 @@
-import { Edit, Person, Email, Phone, CalendarMonth } from "@mui/icons-material";
-import {
-  Button,
-  Typography,
-  Box,
-  LinearProgress,
-  Card,
-  CardContent,
-  Avatar,
-  Grid,
-  Stack,
-  Chip,
-  Paper,
-  CircularProgress
-} from "@mui/material";
+import { Box, LinearProgress } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
-import AppointmentFilters from "@/components/EmployeeAppointments/AppointmentFilters";
-import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppointments";
-import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
-import EmployeeForm from "@/components/EmployeeForm/EmployeeForm";
+import EmployeeDetails from './components/EmployeeDetails';
+import EmployeeEditForm from './components/EmployeeEditForm';
+import EmployeeNotFound from './components/EmployeeNotFound';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
-import GoogleCalendarIntegration from '@/components/GoogleCalendarIntegration/GoogleCalendarIntegration';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import {
   fetchEmployees,
@@ -152,6 +136,16 @@ export default function EmployeeDetailPage() {
     dispatch(cleanErrors());
   };
 
+  const handleCancelEdit = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(false);
+  };
+
+  const handleEditClick = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(true);
+  };
+
   const handleFiltersChange = (newFilters) => {
     setAppointmentFilters(newFilters);
 
@@ -177,261 +171,71 @@ export default function EmployeeDetailPage() {
     sessionStorage.setItem(SCROLL_POSITION_KEY, window.scrollY.toString());
   };
 
-  if (isEditMode) {
-    return (
-      <PageContainer
-        pageTitle={employee ? `Edit ${employee.firstName} ${employee.lastName}` : `New Employee`}
-        hideSideNav
-      >
-        <Box sx={{ padding: { xs: 1, md: 2 } }}>
-          <Box sx={{ marginTop: 1, position: 'relative' }}>
-            {(isCustomersDataRequestPending || isLastAppointmentsPending) && (
-              <LinearProgress />
-            )}
-          </Box>
+  // Determine page title
+  const getPageTitle = () => {
+    if (isEditMode) {
+      return employee ? `Edit ${employee.firstName} ${employee.lastName}` : `New Employee`;
+    }
+    if (!employee && !shouldShowCreateEmployeeForm) {
+      return "Employee Not Found";
+    }
+    return employee ? `${employee.firstName} ${employee.lastName}` : "Employee Details";
+  };
 
-          <GoBackNavigation />
+  // Determine content to render
+  const renderContent = () => {
+    // Show edit form
+    if (isEditMode) {
+      return (
+        <EmployeeEditForm
+          employee={employee}
+          shouldShowCreateEmployeeForm={shouldShowCreateEmployeeForm}
+          updateEmployeeHandler={updateEmployeeHandler}
+          formErrors={formErrors}
+          handleCleanError={handleCleanError}
+          handleCleanErrors={handleCleanErrors}
+          handleCancelEdit={handleCancelEdit}
+        />
+      );
+    }
 
-          <Card sx={{ marginTop: 2 }}>
-            <CardContent sx={{ padding: 2 }}>
-              <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: 600, fontSize: '1.2rem' }}>
-                {shouldShowCreateEmployeeForm ? 'Create New Employee' : 'Edit Employee Information'}
-              </Typography>
+    // Show not found
+    if (!employee && !shouldShowCreateEmployeeForm) {
+      return <EmployeeNotFound />;
+    }
 
-              <EmployeeForm
-                employee={employee}
-                createEmployee={updateEmployeeHandler}
-                formErrors={formErrors}
-                cleanError={handleCleanError}
-                cleanErrors={handleCleanErrors}
-                onCancel={() => {
-                  dispatch(cleanErrors());
-                  setIsEditMode(false);
-                }}
-              />
+    // Show employee details
+    if (employee) {
+      return (
+        <EmployeeDetails
+          employee={employee}
+          appointmentFilters={appointmentFilters}
+          lastAppointments={lastAppointments}
+          isLastAppointmentsPending={isLastAppointmentsPending}
+          handleFiltersChange={handleFiltersChange}
+          handleClearFilters={handleClearFilters}
+          handleAppointmentClick={handleAppointmentClick}
+          handleEditClick={handleEditClick}
+        />
+      );
+    }
 
-
-            </CardContent>
-          </Card>
-        </Box>
-      </PageContainer>
-    );
-  }
+    // Loading state
+    return null;
+  };
 
   return (
-    <PageContainer
-      pageTitle={employee ? `${employee.firstName} ${employee.lastName}` : `Employee Details`}
-      hideSideNav
-    >
+    <PageContainer pageTitle={getPageTitle()} hideSideNav>
       <Box sx={{ padding: { xs: 1, md: 2 } }}>
-        <GoBackNavigation />
+        {!isEditMode && <GoBackNavigation />}
 
         {(isCustomersDataRequestPending || isLastAppointmentsPending) && (
-          <Box sx={{ marginTop: 2 }}>
+          <Box sx={{ marginTop: 1 }}>
             <LinearProgress />
           </Box>
         )}
 
-        {employee && (
-          <>
-            {/* Employee Info Card */}
-            <Card sx={{ marginTop: 2 }}>
-              <CardContent sx={{ padding: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<Edit sx={{ fontSize: '16px' }} />}
-                    onClick={() => {
-                      dispatch(cleanErrors());
-                      setIsEditMode(true);
-                    }}
-                    sx={{
-                      borderRadius: 1,
-                      padding: '6px 12px',
-                      fontSize: '0.8rem',
-                      fontWeight: 500,
-                      textTransform: 'none',
-                      minWidth: 'auto'
-                    }}
-                  >
-                    Edit
-                  </Button>
-                </Box>
-
-                <Grid container spacing={2}>
-                  {/* Employee Avatar & Status */}
-                  <Grid item xs={12} md={4}>
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      textAlign: 'center'
-                    }}>
-                      <Avatar
-                        src={employee.image}
-                        sx={{
-                          width: 100,
-                          height: 100,
-                          marginBottom: 1.5,
-                          border: '3px solid',
-                          borderColor: 'primary.50',
-                        }}
-                      >
-                        <Person sx={{ fontSize: 50 }} />
-                      </Avatar>
-
-                      <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1 }}>
-                        {`${employee.firstName} ${employee.lastName}`}
-                      </Typography>
-
-                      <Chip
-                        label="Active"
-                        color="success"
-                        size="small"
-                        sx={{ fontWeight: 500 }}
-                      />
-                    </Box>
-                  </Grid>
-
-                  {/* Employee Information */}
-                  <Grid item xs={12} md={8}>
-                    <Paper sx={{ padding: 2, backgroundColor: 'grey.50', border: '1px solid', borderColor: 'grey.200' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1.5, fontSize: '1.1rem' }}>
-                        Contact Information
-                      </Typography>
-
-                      <Stack spacing={1.5}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Email sx={{ color: 'primary.500', fontSize: 18 }} />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                              Email Address
-                            </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {employee.email}
-                            </Typography>
-                          </Box>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Phone sx={{ color: 'primary.500', fontSize: 18 }} />
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                              Phone Number
-                            </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {employee.phone || 'Not provided'}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Stack>
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-
-            {/* Google Calendar Integration */}
-            <Card sx={{ marginTop: 2 }}>
-              <CardContent sx={{ padding: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1.5, fontSize: '1.1rem' }}>
-                  <CalendarMonth sx={{ verticalAlign: 'middle', marginRight: 1, fontSize: '1.2rem' }} />
-                  Calendar Integration
-                </Typography>
-                <GoogleCalendarIntegration employeeId={employee.employeeId} />
-              </CardContent>
-            </Card>
-
-            {/* Employee Availability */}
-            <Card sx={{ marginTop: 2 }}>
-              <CardContent sx={{ padding: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1.5, fontSize: '1.1rem' }}>
-                  Work Schedule
-                </Typography>
-                <EmployeeAvailability employeeId={employee.employeeId} />
-              </CardContent>
-            </Card>
-
-            {/* Recent Appointments with Filters */}
-            <Box sx={{ marginTop: 2, position: 'relative' }}>
-              <AppointmentFilters
-                filters={appointmentFilters}
-                onFiltersChange={handleFiltersChange}
-                onClearFilters={handleClearFilters}
-                appointmentsCount={lastAppointments?.length || 0}
-              />
-
-              {/* Appointments Container with Overlay */}
-              <Box sx={{ position: 'relative' }}>
-                {/* Appointments Content */}
-                {lastAppointments && lastAppointments.length > 0 && (
-                  <EmployeeAppointments appointments={lastAppointments} onAppointmentClick={handleAppointmentClick} />
-                )}
-
-                {/* Show message when no appointments */}
-                {((lastAppointments && lastAppointments.length === 0) || (!lastAppointments && !isLastAppointmentsPending)) && (
-                  <Box sx={{
-                    textAlign: 'center',
-                    py: 4,
-                    color: 'text.secondary'
-                  }}>
-                    <Typography variant="body2">
-                      {lastAppointments ? 'No appointments found with current filters' : 'No appointments yet'}
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* Loading Overlay */}
-                {isLastAppointmentsPending && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: lastAppointments && lastAppointments.length > 0 ? 0 : 'auto',
-                      minHeight: lastAppointments && lastAppointments.length === 0 ? '200px' : 'auto',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      backdropFilter: 'blur(2px)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 10,
-                      borderRadius: 1,
-                    }}
-                  >
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: 1
-                    }}>
-                      <CircularProgress size={24} thickness={4} />
-                      <Typography variant="body2" color="text.secondary">
-                        Loading appointments...
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          </>
-        )}
-
-        {!employee && !shouldShowCreateEmployeeForm && (
-          <Card sx={{ marginTop: 2 }}>
-            <CardContent sx={{ padding: 4, textAlign: 'center' }}>
-              <Person sx={{ fontSize: 48, color: 'grey.400', marginBottom: 1.5 }} />
-              <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1, fontSize: '1.1rem' }}>
-                Employee not found
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                The employee you&apos;re looking for doesn&apos;t exist or has been removed.
-              </Typography>
-            </CardContent>
-          </Card>
-        )}
+        {renderContent()}
       </Box>
     </PageContainer>
   );

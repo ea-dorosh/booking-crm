@@ -89,66 +89,68 @@ export default function ServiceCategoryDetailPage() {
       }
       hideSideNav
     >
-      <GoBackNavigation />
+      <Box sx={{ padding: { xs: 0, md: 0 } }}>
+        {!isEditMode && <GoBackNavigation />}
 
-      {(isUpdateCategoryRequestPending || areCategoriesFetching) && <Box mt={2}>
-        <LinearProgress />
-      </Box>}
+        {(isUpdateCategoryRequestPending || areCategoriesFetching) && <Box mt={2}>
+          <LinearProgress />
+        </Box>}
 
-      {isEditMode && <Box mt={3}>
-        <ServiceCategoryForm
-          category={serviceCategory}
-          submitForm={categoryHandler}
-          formErrors={updateFormErrors}
-          cleanError={handleCleanError}
-          cleanErrors={handleCleanErrors}
-        />
-
-        <Box mt={2} sx={{width:`100%`}}>
-          {!shouldShowCategoryForm && <Button
-            variant="outlined"
-            onClick={() => {
-              dispatch(cleanErrors());
-              setIsEditMode(false);
-            }}
-            sx={{width:`100%`}}
-          >
-            Cancel
-          </Button>}
-        </Box>
-      </Box>}
-
-      {!isEditMode && serviceCategory && <Box mt={3}>
-        <List>
-          <ListItemText
-            value={serviceCategory.name}
-            label="Category Name"
+        {isEditMode && <Box mt={3}>
+          <ServiceCategoryForm
+            category={serviceCategory}
+            submitForm={categoryHandler}
+            formErrors={updateFormErrors}
+            cleanError={handleCleanError}
+            cleanErrors={handleCleanErrors}
           />
 
-          <ListItemText
-            value={serviceCategory.status}
-            label="Status"
-          />
+          <Box mt={2} sx={{width:`100%`}}>
+            {!shouldShowCategoryForm && <Button
+              variant="outlined"
+              onClick={() => {
+                dispatch(cleanErrors());
+                setIsEditMode(false);
+              }}
+              sx={{width:`100%`}}
+            >
+              Cancel
+            </Button>}
+          </Box>
+        </Box>}
 
-          {serviceCategory.image && (
+        {!isEditMode && serviceCategory && <Box mt={3}>
+          <List>
             <ListItemText
-              value=""
-              label="Image"
-              image={serviceCategory.image}
+              value={serviceCategory.name}
+              label="Category Name"
             />
-          )}
 
-          <Button
-            variant="outlined"
-            onClick={() => {
-              dispatch(cleanErrors());
-              setIsEditMode(true);
-            }}
-          >
-            Update
-          </Button>
-        </List>
-      </Box>}
+            <ListItemText
+              value={serviceCategory.status}
+              label="Status"
+            />
+
+            {serviceCategory.image && (
+              <ListItemText
+                value=""
+                label="Image"
+                image={serviceCategory.image}
+              />
+            )}
+
+            <Button
+              variant="outlined"
+              onClick={() => {
+                dispatch(cleanErrors());
+                setIsEditMode(true);
+              }}
+            >
+              Update
+            </Button>
+          </List>
+        </Box>}
+      </Box>
     </PageContainer>
   );
 }

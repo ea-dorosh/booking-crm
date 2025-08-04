@@ -165,7 +165,7 @@ export default function ServicesDetailPage() {
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
       <Box sx={{ padding: { xs: 0, md: 0 } }}>
-        <GoBackNavigation />
+        {!isEditMode && <GoBackNavigation />}
 
         {isServicesRequestPending && (
           <Box sx={{ marginTop: 1 }}>

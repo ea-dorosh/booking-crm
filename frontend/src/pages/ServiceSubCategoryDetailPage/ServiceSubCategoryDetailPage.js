@@ -103,67 +103,69 @@ export default function ServiceSubCategoryDetailPage() {
       }
       hideSideNav
     >
-      <GoBackNavigation />
+      <Box sx={{ padding: { xs: 0, md: 0 } }}>
+        {!isEditMode && <GoBackNavigation />}
 
-      {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && <Box mt={2}>
-        <LinearProgress />
-      </Box>}
+        {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && <Box mt={2}>
+          <LinearProgress />
+        </Box>}
 
-      {isEditMode && serviceCategories && <Box mt={3}>
-        <ServiceSubCategoryForm
-          subCategory={serviceSubCategory}
-          submitForm={subCategoryHandler}
-          formErrors={updateFormErrors}
-          cleanError={handleCleanError}
-          cleanErrors={handleCleanErrors}
-          serviceCategories={serviceCategories}
-        />
+        {isEditMode && serviceCategories && <Box mt={3}>
+          <ServiceSubCategoryForm
+            subCategory={serviceSubCategory}
+            submitForm={subCategoryHandler}
+            formErrors={updateFormErrors}
+            cleanError={handleCleanError}
+            cleanErrors={handleCleanErrors}
+            serviceCategories={serviceCategories}
+          />
 
-        <Box mt={2} sx={{width:`100%`}}>
-          {!shouldShowSubCategoryForm && <Button
-            variant="outlined"
-            onClick={() => {
-              dispatch(cleanErrors());
-              setIsEditMode(false);
-            }}
-            sx={{width:`100%`}}
-          >
+          <Box mt={2} sx={{width:`100%`}}>
+            {!shouldShowSubCategoryForm && <Button
+              variant="outlined"
+              onClick={() => {
+                dispatch(cleanErrors());
+                setIsEditMode(false);
+              }}
+              sx={{width:`100%`}}
+            >
             Cancel
-          </Button>}
-        </Box>
-      </Box>}
+            </Button>}
+          </Box>
+        </Box>}
 
-      {!isEditMode && serviceSubCategory && serviceCategories && <Box mt={3}>
-        <List>
-          <ListItemText
-            value={serviceSubCategory.name}
-            label="Sub Category Name"
-          />
-
-          <ListItemText
-            value={serviceCategories.find(cat => cat.id === serviceSubCategory.categoryId)?.name || `No category`}
-            label="Category"
-          />
-
-          {serviceSubCategory.image && (
+        {!isEditMode && serviceSubCategory && serviceCategories && <Box mt={3}>
+          <List>
             <ListItemText
-              value=""
-              label="Image"
-              image={serviceSubCategory.image}
+              value={serviceSubCategory.name}
+              label="Sub Category Name"
             />
-          )}
 
-          <Button
-            variant="outlined"
-            onClick={() => {
-              dispatch(cleanErrors());
-              setIsEditMode(true);
-            }}
-          >
+            <ListItemText
+              value={serviceCategories.find(cat => cat.id === serviceSubCategory.categoryId)?.name || `No category`}
+              label="Category"
+            />
+
+            {serviceSubCategory.image && (
+              <ListItemText
+                value=""
+                label="Image"
+                image={serviceSubCategory.image}
+              />
+            )}
+
+            <Button
+              variant="outlined"
+              onClick={() => {
+                dispatch(cleanErrors());
+                setIsEditMode(true);
+              }}
+            >
             Update
-          </Button>
-        </List>
-      </Box>}
+            </Button>
+          </List>
+        </Box>}
+      </Box>
     </PageContainer>
   );
 }

@@ -20,7 +20,7 @@ export default function EmployeesContainer({
   employees,
 }) {
   return (
-    <Box sx={{ padding: { xs: 2, md: 3 } }}>
+    <Box sx={{ padding: { xs: 0, md: 0 } }}>
       {/* Header */}
       <Box sx={{ marginBottom: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, marginBottom: 1 }}>
