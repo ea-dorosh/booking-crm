@@ -13,6 +13,7 @@ import invoicesSlice from '@/features/invoices/invoicesSlice';
 import serviceCategoriesSlice from '@/features/serviceCategories/serviceCategoriesSlice';
 import servicesSlice from '@/features/services/servicesSlice';
 import serviceSubCategoriesSlice from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
+import trackingSlice from '@/features/tracking/trackingSlice';
 
 export default configureStore({
   reducer: {
@@ -30,5 +31,6 @@ export default configureStore({
     serviceSubCategories: serviceSubCategoriesSlice,
     serviceCategories: serviceCategoriesSlice,
     services: servicesSlice,
+    tracking: trackingSlice,
   },
 });

@@ -18,6 +18,7 @@ import employeesRouter from '@/routes/employees/employeesRoute.js';
 import googleCalendarRouter from '@/routes/googleCalendar/googleCalendarRoute.js';
 import invoicesRouter from '@/routes/invoices/invoicesRoute.js';
 import servicesRouter from '@/routes/services/servicesRoute.js';
+import trackingRouter from '@/routes/tracking/trackingRoute.js';
 import userRouter from '@/routes/user/userRoute.js';
 
 // routes for client site
@@ -26,6 +27,7 @@ import calendarPublicRouter from '@/routes/calendar/calendarRoute.public.js';
 import companyPublicRouter from '@/routes/company/companyRoute.public.js';
 import employeesPublicRouter from '@/routes/employees/employeesRoute.public.js';
 import servicesPublicRouter from '@/routes/services/servicesRoute.public.js';
+import trackingPublicRouter from '@/routes/tracking/trackingRoute.public.js';
 
 const envFile = process.env.NODE_ENV === `production`
   ? `.env.production`
@@ -89,6 +91,7 @@ app.use(`/api/protected/employees`, databaseMiddleware, employeesRouter);
 app.use(`/api/protected/google-calendar`, databaseMiddleware, googleCalendarRouter);
 app.use(`/api/protected/invoices`, databaseMiddleware, invoicesRouter);
 app.use(`/api/protected/services`, databaseMiddleware, servicesRouter);
+app.use(`/api/protected/tracking`, databaseMiddleware, trackingRouter);
 app.use(`/api/protected/user`, databaseMiddleware, userRouter);
 
 // Use client site routes
@@ -97,6 +100,7 @@ app.use(`/api/public/calendar`, databaseSelectionMiddleware, calendarPublicRoute
 app.use(`/api/public/company`, databaseSelectionMiddleware, companyPublicRouter);
 app.use(`/api/public/employees`, databaseSelectionMiddleware, employeesPublicRouter);
 app.use(`/api/public/services`, databaseSelectionMiddleware, servicesPublicRouter);
+app.use(`/api/public/tracking`, databaseSelectionMiddleware, trackingPublicRouter);
 
 app.listen(port, `0.0.0.0`, () => {
   console.log(`Server is running on internal port ${port} and externally accessible as ${process.env.SERVER_API_URL}`);
