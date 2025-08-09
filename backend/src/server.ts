@@ -36,6 +36,9 @@ dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 const app = express();
 
+// Trust reverse proxies so req.ip and X-Forwarded-* are respected
+app.set('trust proxy', true);
+
 app.use(morgan(`dev`));
 
 const port = parseInt(process.env.PORT || `3500`, 10);

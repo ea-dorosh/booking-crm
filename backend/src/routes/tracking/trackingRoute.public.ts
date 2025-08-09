@@ -5,6 +5,19 @@ import {
 } from '@/@types/expressTypes.js';
 import { saveQrScan, QrScanData } from '@/services/tracking/trackingService.js';
 
+function getClientIpFromRequest(req: express.Request): string | undefined {
+  // Common proxy/CDN headers precedence
+  const xForwardedFor = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim();
+  const cfConnectingIp = req.headers['cf-connecting-ip'] as string | undefined;
+  const xRealIp = req.headers['x-real-ip'] as string | undefined;
+
+  // Express will respect X-Forwarded-* if trust proxy is enabled
+  const expressIp = req.ip;
+  const socketIp = req.socket?.remoteAddress;
+
+  return xForwardedFor || cfConnectingIp || xRealIp || expressIp || socketIp || undefined;
+}
+
 const router = express.Router();
 
 router.post(`/qr-scan`, async (request: CustomRequestType, response: CustomResponseType) => {
@@ -14,9 +27,10 @@ router.post(`/qr-scan`, async (request: CustomRequestType, response: CustomRespo
   }
 
   try {
+    const clientIp = getClientIpFromRequest(request);
     const scanData: QrScanData = {
       userAgent: request.headers['user-agent'] || undefined,
-      ipAddress: request.ip || request.socket?.remoteAddress || undefined,
+      ipAddress: clientIp,
       referrer: request.headers.referer || undefined,
       deviceInfo: request.body.source === 'server-side' ? {
         source: 'server-side',
