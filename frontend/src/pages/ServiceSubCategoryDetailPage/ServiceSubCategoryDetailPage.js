@@ -2,7 +2,6 @@ import {
   Box,
   LinearProgress,
   Button,
-  List,
 } from "@mui/material";
 import {
   useEffect,
@@ -16,8 +15,8 @@ import {
   useParams,
   useNavigate,
 } from "react-router-dom";
+import SubCategoryDetails from '../../components/SubCategoryDetails/SubCategoryDetails';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
-import ListItemText from '@/components/ListItemText/ListItemText';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceSubCategoryForm from "@/components/ServiceSubCategoryForm/ServiceSubCategoryForm";
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
@@ -94,77 +93,66 @@ export default function ServiceSubCategoryDetailPage() {
     dispatch(cleanErrors());
   };
 
+  const getPageTitle = () => {
+    if (isEditMode) return serviceSubCategory ? `Edit ${serviceSubCategory.name}` : `New Sub Category`;
+    return serviceSubCategory ? serviceSubCategory.name : `New Sub Category`;
+  };
+
+  const handleEditClick = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(false);
+  };
+
   return (
-    <PageContainer
-      pageTitle={serviceSubCategory ?
-        `${serviceSubCategory.name}`
-        :
-        `New Sub Category`
-      }
-      hideSideNav
-    >
-      <Box sx={{ padding: { xs: 0, md: 0 } }}>
+    <PageContainer pageTitle={getPageTitle()} hideSideNav>
+      <Box sx={{ padding: { xs: 0, md: 0, maxWidth: `768px` } }}>
         {!isEditMode && <GoBackNavigation />}
 
-        {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && <Box mt={2}>
-          <LinearProgress />
-        </Box>}
-
-        {isEditMode && serviceCategories && <Box mt={3}>
-          <ServiceSubCategoryForm
-            subCategory={serviceSubCategory}
-            submitForm={subCategoryHandler}
-            formErrors={updateFormErrors}
-            cleanError={handleCleanError}
-            cleanErrors={handleCleanErrors}
-            serviceCategories={serviceCategories}
-          />
-
-          <Box mt={2} sx={{width:`100%`}}>
-            {!shouldShowSubCategoryForm && <Button
-              variant="outlined"
-              onClick={() => {
-                dispatch(cleanErrors());
-                setIsEditMode(false);
-              }}
-              sx={{width:`100%`}}
-            >
-            Cancel
-            </Button>}
+        {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && (
+          <Box mt={2}>
+            <LinearProgress />
           </Box>
-        </Box>}
+        )}
 
-        {!isEditMode && serviceSubCategory && serviceCategories && <Box mt={3}>
-          <List>
-            <ListItemText
-              value={serviceSubCategory.name}
-              label="Sub Category Name"
+        {isEditMode && serviceCategories && (
+          <Box mt={3}>
+            <ServiceSubCategoryForm
+              subCategory={serviceSubCategory}
+              submitForm={subCategoryHandler}
+              formErrors={updateFormErrors}
+              cleanError={handleCleanError}
+              cleanErrors={handleCleanErrors}
+              serviceCategories={serviceCategories}
             />
 
-            <ListItemText
-              value={serviceCategories.find(cat => cat.id === serviceSubCategory.categoryId)?.name || `No category`}
-              label="Category"
+            <Box mt={2} sx={{ width: `100%` }}>
+              {!shouldShowSubCategoryForm && (
+                <Button
+                  variant="outlined"
+                  onClick={handleCancelEdit}
+                  sx={{ width: `100%` }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </Box>
+          </Box>
+        )}
+
+        {!isEditMode && serviceSubCategory && serviceCategories && (
+          <Box mt={3}>
+            <SubCategoryDetails
+              subCategory={serviceSubCategory}
+              serviceCategories={serviceCategories}
+              onEditClick={handleEditClick}
             />
-
-            {serviceSubCategory.image && (
-              <ListItemText
-                value=""
-                label="Image"
-                image={serviceSubCategory.image}
-              />
-            )}
-
-            <Button
-              variant="outlined"
-              onClick={() => {
-                dispatch(cleanErrors());
-                setIsEditMode(true);
-              }}
-            >
-            Update
-            </Button>
-          </List>
-        </Box>}
+          </Box>
+        )}
       </Box>
     </PageContainer>
   );

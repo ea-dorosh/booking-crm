@@ -2,7 +2,6 @@ import {
   Box,
   LinearProgress,
   Button,
-  List,
 } from "@mui/material";
 import {
   useEffect,
@@ -16,8 +15,8 @@ import {
   useParams,
   useNavigate,
 } from "react-router-dom";
+import CategoryDetails from '../../components/CategoryDetails/CategoryDetails';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
-import ListItemText from '@/components/ListItemText/ListItemText';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceCategoryForm from "@/components/ServiceCategoryForm/ServiceCategoryForm";
 import {
@@ -80,76 +79,64 @@ export default function ServiceCategoryDetailPage() {
     dispatch(cleanErrors());
   };
 
+  const getPageTitle = () => {
+    if (isEditMode) return serviceCategory ? `Edit ${serviceCategory.name}` : `New Category`;
+    return serviceCategory ? serviceCategory.name : `New Category`;
+  };
+
+  const handleEditClick = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    dispatch(cleanErrors());
+    setIsEditMode(false);
+  };
+
   return (
-    <PageContainer
-      pageTitle={serviceCategory ?
-        `${serviceCategory.name}`
-        :
-        `New Category`
-      }
-      hideSideNav
-    >
+    <PageContainer pageTitle={getPageTitle()} hideSideNav>
       <Box sx={{ padding: { xs: 0, md: 0 } }}>
         {!isEditMode && <GoBackNavigation />}
 
-        {(isUpdateCategoryRequestPending || areCategoriesFetching) && <Box mt={2}>
-          <LinearProgress />
-        </Box>}
-
-        {isEditMode && <Box mt={3}>
-          <ServiceCategoryForm
-            category={serviceCategory}
-            submitForm={categoryHandler}
-            formErrors={updateFormErrors}
-            cleanError={handleCleanError}
-            cleanErrors={handleCleanErrors}
-          />
-
-          <Box mt={2} sx={{width:`100%`}}>
-            {!shouldShowCategoryForm && <Button
-              variant="outlined"
-              onClick={() => {
-                dispatch(cleanErrors());
-                setIsEditMode(false);
-              }}
-              sx={{width:`100%`}}
-            >
-              Cancel
-            </Button>}
+        {(isUpdateCategoryRequestPending || areCategoriesFetching) && (
+          <Box mt={2}>
+            <LinearProgress />
           </Box>
-        </Box>}
+        )}
 
-        {!isEditMode && serviceCategory && <Box mt={3}>
-          <List>
-            <ListItemText
-              value={serviceCategory.name}
-              label="Category Name"
+        {isEditMode && (
+          <Box mt={3}>
+            <ServiceCategoryForm
+              category={serviceCategory}
+              submitForm={categoryHandler}
+              formErrors={updateFormErrors}
+              cleanError={handleCleanError}
+              cleanErrors={handleCleanErrors}
             />
 
-            <ListItemText
-              value={serviceCategory.status}
-              label="Status"
+            <Box mt={2} sx={{ width: `100%` }}>
+              {!shouldShowCategoryForm && (
+                <Button
+                  variant="outlined"
+                  onClick={handleCancelEdit}
+                  sx={{ width: `100%` }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </Box>
+          </Box>
+        )}
+
+        {!isEditMode && serviceCategory && (
+          <Box mt={3}>
+            <CategoryDetails
+              category={serviceCategory}
+              onEditClick={handleEditClick}
             />
-
-            {serviceCategory.image && (
-              <ListItemText
-                value=""
-                label="Image"
-                image={serviceCategory.image}
-              />
-            )}
-
-            <Button
-              variant="outlined"
-              onClick={() => {
-                dispatch(cleanErrors());
-                setIsEditMode(true);
-              }}
-            >
-              Update
-            </Button>
-          </List>
-        </Box>}
+          </Box>
+        )}
       </Box>
     </PageContainer>
   );

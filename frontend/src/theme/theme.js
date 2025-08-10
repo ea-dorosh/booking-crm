@@ -318,6 +318,26 @@ const theme = createTheme({
           fontWeight: 500,
         },
       },
+      variants: [
+        {
+          props: { color: 'success', variant: 'filled' },
+          style: {
+            backgroundColor: colors.success[500],
+            color: '#ffffff',
+            '& .MuiChip-label': {
+              fontWeight: 700,
+            },
+          },
+        },
+        {
+          props: { color: 'success', variant: 'outlined' },
+          style: {
+            borderColor: colors.success[300],
+            color: colors.success[700],
+            backgroundColor: colors.success[50],
+          },
+        },
+      ],
     },
     MuiAppBar: {
       styleOverrides: {

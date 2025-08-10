@@ -72,7 +72,7 @@ export default function ServicesDetailPage() {
       dispatch(cleanErrors());
 
       if (!service.id) {
-        navigate(`/services/${serviceId}`);
+        navigate(`/services/${serviceId}`, { replace: true });
       }
 
       dispatch(fetchServices());

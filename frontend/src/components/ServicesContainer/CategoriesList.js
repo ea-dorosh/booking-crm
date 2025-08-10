@@ -1,5 +1,5 @@
-import { Business } from "@mui/icons-material";
-import { Box, Typography, Card, CardContent, Grid, Paper, Button } from "@mui/material";
+import { Business, ChevronRight } from "@mui/icons-material";
+import { Box, Typography, Card, Grid, Paper, CardActionArea } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function CategoriesList({ categories }) {
@@ -21,27 +21,41 @@ export default function CategoriesList({ categories }) {
         <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
           Get started by adding your first category
         </Typography>
-        <Button
-          component={RouterLink}
-          to="/categories/create-category"
-          variant="contained"
-          size="small"
-        >
-          Add First Category
-        </Button>
+        <RouterLink to="/categories/create-category" style={{ textDecoration: `none` }}>
+          <Box
+            component="span"
+            sx={{
+              display: `inline-block`,
+              px: 2,
+              py: 1,
+              borderRadius: 1,
+              backgroundColor: 'primary.main',
+              color: 'primary.contrastText',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            Add First Category
+          </Box>
+        </RouterLink>
       </Paper>
     );
   }
 
   return (
-    <Grid container spacing={3} sx={{ padding: { xs: 0, md: 0 } }}>
+    <Grid
+      container
+      spacing={{ xs: 2, sm: 3 }}
+      sx={{ px: { xs: 1, sm: 0 } }}
+    >
       {categories.map((category) => (
         <Grid item xs={12} sm={6} md={4} key={category.id}>
           <Card
             sx={{
               height: '100%',
+              width: '100%',
+              minWidth: 0,
               display: 'flex',
-              flexDirection: 'column',
               transition: 'all 0.2s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-2px)',
@@ -49,70 +63,53 @@ export default function CategoriesList({ categories }) {
               }
             }}
           >
-            <CardContent sx={{
-              padding: 2.5,
-              flexGrow: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              {/* Category Image */}
+            <CardActionArea
+              component={RouterLink}
+              to={`/categories/${category.id}`}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                p: 2,
+                width: '100%',
+                minWidth: 0,
+              }}
+            >
               <Box
                 sx={{
-                  width: 80,
-                  height: 80,
-                  marginBottom: 2,
+                  width: 'clamp(44px, 18vw, 72px)',
+                  height: 'clamp(44px, 18vw, 72px)',
                   borderRadius: 2,
                   overflow: 'hidden',
                   border: '3px solid',
                   borderColor: 'primary.50',
+                  flexShrink: 0,
                 }}
               >
                 <img
                   src={category.image}
                   alt={category.name}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               </Box>
 
-              {/* Category Name */}
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  marginBottom: 1,
-                  color: 'text.primary'
-                }}
-              >
-                {category.name}
-              </Typography>
-
-              {/* Action Button */}
-              <Box sx={{ marginTop: 'auto' }}>
-                <Button
-                  component={RouterLink}
-                  to={`/categories/${category.id}`}
-                  variant="outlined"
-                  size="small"
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="h6"
                   sx={{
-                    borderRadius: 2,
-                    borderColor: 'primary.200',
-                    color: 'primary.600',
-                    '&:hover': {
-                      borderColor: 'primary.400',
-                      backgroundColor: 'primary.50',
-                    }
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    whiteSpace: 'normal',
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
                   }}
                 >
-                  View Details
-                </Button>
+                  {category.name}
+                </Typography>
               </Box>
-            </CardContent>
+
+              <ChevronRight sx={{ color: 'grey.500', flexShrink: 0 }} />
+            </CardActionArea>
           </Card>
         </Grid>
       ))}

@@ -8,6 +8,7 @@ import {
   Grid,
   Paper,
   Button,
+  CardActionArea,
 } from "@mui/material";
 import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -131,117 +132,101 @@ export default function ServicesList({ services, employees, categories }) {
                         }
                       }}
                     >
-                      <CardContent sx={{
-                        padding: 2.5,
-                        flexGrow: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}>
-                        {/* Service Name */}
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            marginBottom: 1,
-                            color: 'text.primary',
-                            fontSize: '1.1rem'
-                          }}
-                        >
-                          {service.name}
-                        </Typography>
-
-                        {/* Price and Duration */}
-                        <Box sx={{
+                      <CardActionArea
+                        component={RouterLink}
+                        to={`/services/${service.id}`}
+                        sx={{ height: '100%' }}
+                      >
+                        <CardContent sx={{
+                          padding: 2.5,
+                          flexGrow: 1,
                           display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          marginBottom: 1.5,
+                          flexDirection: 'column',
                         }}>
-                          <Euro sx={{ fontSize: 16, color: 'primary.main' }} />
+                          {/* Service Name */}
                           <Typography
-                            variant="body1"
-                            color="primary"
-                            sx={{ fontWeight: 600, fontSize: '1rem' }}
-                          >
-                            {getPriceRange(service.employeePrices)}
-                          </Typography>
-                        </Box>
-
-                        <Box sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          marginBottom: 2,
-                          color: 'text.secondary'
-                        }}>
-                          <AccessTime sx={{ fontSize: 16 }} />
-                          <Typography variant="body2">
-                            {service.durationTime}
-                          </Typography>
-                        </Box>
-
-                        {/* Employee Chips */}
-                        {service.employeePrices && service.employeePrices.length > 0 && (
-                          <Box sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 0.5,
-                            marginBottom: 2,
-                            flexGrow: 1
-                          }}>
-                            {service.employeePrices.slice(0, 3).map((empPrice) => (
-                              <Chip
-                                key={empPrice.employeeId}
-                                label={`${getEmployeeName(empPrice.employeeId)} - ${empPrice.price}€`}
-                                size="small"
-                                variant="outlined"
-                                sx={{
-                                  fontSize: '0.75rem',
-                                  height: '24px',
-                                  borderColor: 'primary.200',
-                                  color: 'primary.600',
-                                  backgroundColor: 'primary.50'
-                                }}
-                              />
-                            ))}
-                            {service.employeePrices.length > 3 && (
-                              <Chip
-                                label={`+${service.employeePrices.length - 3} more`}
-                                size="small"
-                                variant="outlined"
-                                sx={{
-                                  fontSize: '0.75rem',
-                                  height: '24px',
-                                  borderColor: 'grey.300',
-                                  color: 'text.secondary'
-                                }}
-                              />
-                            )}
-                          </Box>
-                        )}
-
-                        {/* Action Button */}
-                        <Box sx={{ marginTop: 'auto' }}>
-                          <Button
-                            component={RouterLink}
-                            to={`/services/${service.id}`}
-                            variant="outlined"
-                            size="small"
-                            fullWidth
+                            variant="h6"
                             sx={{
-                              borderRadius: 2,
-                              borderColor: 'primary.200',
-                              color: 'primary.600',
-                              '&:hover': {
-                                borderColor: 'primary.400',
-                                backgroundColor: 'primary.50',
-                              }
+                              fontWeight: 600,
+                              marginBottom: 1,
+                              color: 'text.primary',
+                              fontSize: '1.1rem'
                             }}
                           >
-                            View Details
-                          </Button>
-                        </Box>
-                      </CardContent>
+                            {service.name}
+                          </Typography>
+
+                          {/* Price and Duration */}
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            marginBottom: 1.5,
+                          }}>
+                            <Euro sx={{ fontSize: 16, color: 'primary.main' }} />
+                            <Typography
+                              variant="body1"
+                              color="primary"
+                              sx={{ fontWeight: 600, fontSize: '1rem' }}
+                            >
+                              {getPriceRange(service.employeePrices)}
+                            </Typography>
+                          </Box>
+
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            marginBottom: 2,
+                            color: 'text.secondary'
+                          }}>
+                            <AccessTime sx={{ fontSize: 16 }} />
+                            <Typography variant="body2">
+                              {service.durationTime}
+                            </Typography>
+                          </Box>
+
+                          {/* Employee Chips */}
+                          {service.employeePrices && service.employeePrices.length > 0 && (
+                            <Box sx={{
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              gap: 0.5,
+                              marginBottom: 2,
+                              flexGrow: 1
+                            }}>
+                              {service.employeePrices.slice(0, 3).map((empPrice) => (
+                                <Chip
+                                  key={empPrice.employeeId}
+                                  label={`${getEmployeeName(empPrice.employeeId)} - ${empPrice.price}€`}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    fontSize: '0.75rem',
+                                    height: '24px',
+                                    borderColor: 'primary.200',
+                                    color: 'primary.600',
+                                    backgroundColor: 'primary.50'
+                                  }}
+                                />
+                              ))}
+                              {service.employeePrices.length > 3 && (
+                                <Chip
+                                  label={`+${service.employeePrices.length - 3} more`}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{
+                                    fontSize: '0.75rem',
+                                    height: '24px',
+                                    borderColor: 'grey.300',
+                                    color: 'text.secondary'
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          )}
+                        </CardContent>
+                      </CardActionArea>
                     </Card>
                   </Grid>
                 ))}
