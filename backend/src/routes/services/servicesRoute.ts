@@ -7,6 +7,7 @@ import {
   getServiceCategories,
   createServiceCategory,
   updateServiceCategory,
+  updateServiceCategoryStatus,
   updateService,
   updateServiceSubCategory,
 } from '@/services/service/serviceService.js';
@@ -319,10 +320,27 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
   }
 
   const categoryId = Number(req.params.id);
-  const { name } = req.body;
+  const { name, status } = req.body;
   const imgPath = req.file?.filename || null;
 
   try {
+    if (typeof status === 'string' && status.length > 0 && !name && !imgPath) {
+      const { categoryId: updatedCategoryId, validationErrors } = await updateServiceCategoryStatus(req.dbPool, categoryId, status);
+
+      if (validationErrors) {
+        res.status(428).json({ errors: validationErrors });
+        return;
+      }
+
+      if (updatedCategoryId) {
+        res.json({
+          message: `Category status updated successfully`,
+          data: updatedCategoryId,
+        });
+        return;
+      }
+    }
+
     const { categoryId: updatedCategoryId, validationErrors } = await updateServiceCategory(req.dbPool, categoryId, name, imgPath);
 
     if (validationErrors) {

@@ -94,6 +94,13 @@ export default function ServiceCategoryDetailPage() {
     setIsEditMode(false);
   };
 
+  const handleArchive = async () => {
+    if (!serviceCategory) return;
+    await dispatch(updateCategory({ id: serviceCategory.id, status: 'archived' }));
+    await dispatch(fetchServiceCategories());
+    navigate('/services?tab=categories');
+  };
+
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
       <Box sx={{ padding: { xs: 0, md: 0 } }}>
@@ -134,6 +141,7 @@ export default function ServiceCategoryDetailPage() {
             <CategoryDetails
               category={serviceCategory}
               onEditClick={handleEditClick}
+              onArchiveClick={handleArchive}
             />
           </Box>
         )}

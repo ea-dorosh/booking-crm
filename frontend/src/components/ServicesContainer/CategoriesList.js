@@ -1,5 +1,5 @@
 import { Business, ChevronRight } from "@mui/icons-material";
-import { Box, Typography, Card, Grid, Paper, CardActionArea } from "@mui/material";
+import { Box, Typography, Card, Grid, Paper, CardActionArea, Chip } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function CategoriesList({ categories }) {
@@ -106,9 +106,26 @@ export default function CategoriesList({ categories }) {
                 >
                   {category.name}
                 </Typography>
+
+                {category.status && (
+                  <Chip
+                    label={category.status}
+                    size="small"
+                    color={String(category.status).toLowerCase() === 'active' ? 'success' : undefined}
+                    variant={String(category.status).toLowerCase() === 'active' ? 'filled' : 'outlined'}
+                    sx={String(category.status).toLowerCase() !== 'active' ? {
+                      mt: 0.75,
+                      fontWeight: 600,
+                      height: 22,
+                      backgroundColor: 'grey.100',
+                      color: 'text.secondary',
+                    } : { mt: 0.75, fontWeight: 700, height: 22 }}
+                  />
+                )}
               </Box>
 
               <ChevronRight sx={{ color: 'grey.500', flexShrink: 0 }} />
+
             </CardActionArea>
           </Card>
         </Grid>

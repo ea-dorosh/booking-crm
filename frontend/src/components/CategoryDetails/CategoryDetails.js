@@ -1,4 +1,4 @@
-import { Edit } from "@mui/icons-material";
+import { Edit, DeleteOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -12,6 +12,7 @@ import {
 export default function CategoryDetails({
   category,
   onEditClick,
+  onArchiveClick,
 }) {
   return (
     <Card sx={{ marginTop: 1, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -46,25 +47,44 @@ export default function CategoryDetails({
             )}
           </Box>
 
-          <Button
-            variant="contained"
-            startIcon={<Edit sx={{ fontSize: '16px' }} />}
-            onClick={onEditClick}
-            sx={{
-              borderRadius: 1.5,
-              padding: '6px 12px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              textTransform: 'none',
-              minWidth: 'auto',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              '&:hover': {
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-              }
-            }}
-          >
-            Edit
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<DeleteOutline sx={{ fontSize: '16px' }} />}
+              color="error"
+              onClick={onArchiveClick}
+              sx={{
+                borderRadius: 1.5,
+                padding: '6px 12px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                minWidth: 'auto',
+              }}
+            >
+              Archive
+            </Button>
+
+            <Button
+              variant="contained"
+              startIcon={<Edit sx={{ fontSize: '16px' }} />}
+              onClick={onEditClick}
+              sx={{
+                borderRadius: 1.5,
+                padding: '6px 12px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                minWidth: 'auto',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                '&:hover': {
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                }
+              }}
+            >
+              Edit
+            </Button>
+          </Box>
         </Box>
 
         {/* Details Grid */}

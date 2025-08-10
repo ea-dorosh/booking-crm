@@ -619,6 +619,34 @@ async function updateServiceCategory(dbPool: Pool, categoryId: number, name: str
   }
 }
 
+async function updateServiceCategoryStatus(dbPool: Pool, categoryId: number, status: string): Promise<UpdateCategoryResult> {
+  // basic validation for status
+  const allowedStatuses = new Set([`active`, `archived`]);
+  if (!allowedStatuses.has(status)) {
+    return {
+      categoryId: null,
+      validationErrors: { status: `Invalid status value` } as unknown as CategoryValidationErrors,
+    };
+  }
+
+  const updateStatusQuery = `
+    UPDATE ServiceCategories
+    SET status = ?
+    WHERE id = ?;
+  `;
+
+  try {
+    await dbPool.query(updateStatusQuery, [status, categoryId]);
+
+    return {
+      categoryId,
+      validationErrors: null,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
 export {
   createService,
   createServiceCategory,
@@ -629,5 +657,6 @@ export {
   getServiceSubCategories,
   updateService,
   updateServiceCategory,
+  updateServiceCategoryStatus,
   updateServiceSubCategory,
 };
