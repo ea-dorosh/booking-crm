@@ -12,7 +12,8 @@ import {
 export default function CategoryDetails({
   category,
   onEditClick,
-  onArchiveClick,
+  onArchiveToggle,
+  onDeactivateToggle,
 }) {
   return (
     <Card sx={{ marginTop: 1, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -49,23 +50,6 @@ export default function CategoryDetails({
 
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
-              variant="outlined"
-              startIcon={<DeleteOutline sx={{ fontSize: '16px' }} />}
-              color="error"
-              onClick={onArchiveClick}
-              sx={{
-                borderRadius: 1.5,
-                padding: '6px 12px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                textTransform: 'none',
-                minWidth: 'auto',
-              }}
-            >
-              Archive
-            </Button>
-
-            <Button
               variant="contained"
               startIcon={<Edit sx={{ fontSize: '16px' }} />}
               onClick={onEditClick}
@@ -85,6 +69,41 @@ export default function CategoryDetails({
               Edit
             </Button>
           </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2, justifyContent: 'space-between' }}>
+          <Button
+            variant="outlined"
+            color={String(category.status).toLowerCase() === 'disabled' ? 'success' : 'warning'}
+            onClick={onDeactivateToggle}
+            sx={{
+              borderRadius: 1.5,
+              padding: '6px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              minWidth: 'auto',
+            }}
+          >
+            {String(category.status).toLowerCase() === 'disabled' ? 'Activate' : 'Deactivate'}
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<DeleteOutline sx={{ fontSize: '16px' }} />}
+            color={String(category.status).toLowerCase() === 'archived' ? 'success' : 'error'}
+            onClick={onArchiveToggle}
+            sx={{
+              borderRadius: 1.5,
+              padding: '6px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              minWidth: 'auto',
+            }}
+          >
+            {String(category.status).toLowerCase() === 'archived' ? 'Unarchive' : 'Archive'}
+          </Button>
         </Box>
 
         {/* Details Grid */}

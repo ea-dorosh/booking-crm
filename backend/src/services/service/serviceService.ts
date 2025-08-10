@@ -18,6 +18,7 @@ import {
   SubCategoryValidationErrors,
   CategoryValidationErrors
 } from '@/validators/servicesValidators.js';
+import { CategoryStatusEnum } from '@/enums/enums.js';
 
 interface SubCategoryRow extends RowDataPacket {
   id: number;
@@ -216,15 +217,27 @@ async function getServiceSubCategories(dbPool: Pool): Promise<SubCategoryData[]>
   return subCategoriesData;
 }
 
-async function getServiceCategories(dbPool: Pool): Promise<CategoryData[]> {
+async function getServiceCategories(dbPool: Pool, statuses?: string[]): Promise<CategoryData[]> {
+  const allowedStatuses = new Set<string>([
+    CategoryStatusEnum.Active,
+    CategoryStatusEnum.Archived,
+    CategoryStatusEnum.Disabled,
+  ]);
+  const filterStatuses = (Array.isArray(statuses) && statuses.length > 0 ? statuses : [`active`])
+    .map(s => String(s).toLowerCase())
+    .filter(s => allowedStatuses.has(s));
+
+  // Fallback to 'active' if after filtering we have none
+  const finalStatuses = filterStatuses.length > 0 ? filterStatuses : [`active`];
+
   const categoriesSql = `
     SELECT c.id, c.name, c.img, c.status, c.created_at, c.updated_at
     FROM ServiceCategories c
-    WHERE c.status = 'active'
+    WHERE c.status IN (?)
     ORDER BY c.name
   `;
 
-  const [categoriesResult] = await dbPool.query<CategoryRow[]>(categoriesSql);
+  const [categoriesResult] = await dbPool.query<CategoryRow[]>(categoriesSql, [finalStatuses]);
 
   const categoriesData: CategoryData[] = categoriesResult.map((row) => ({
     id: row.id,
@@ -621,7 +634,11 @@ async function updateServiceCategory(dbPool: Pool, categoryId: number, name: str
 
 async function updateServiceCategoryStatus(dbPool: Pool, categoryId: number, status: string): Promise<UpdateCategoryResult> {
   // basic validation for status
-  const allowedStatuses = new Set([`active`, `archived`]);
+  const allowedStatuses = new Set<string>([
+    CategoryStatusEnum.Active,
+    CategoryStatusEnum.Archived,
+    CategoryStatusEnum.Disabled,
+  ]);
   if (!allowedStatuses.has(status)) {
     return {
       categoryId: null,

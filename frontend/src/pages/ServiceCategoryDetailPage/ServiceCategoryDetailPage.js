@@ -19,6 +19,7 @@ import CategoryDetails from '../../components/CategoryDetails/CategoryDetails';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceCategoryForm from "@/components/ServiceCategoryForm/ServiceCategoryForm";
+import { categoryStatusEnum } from '@/enums/enums';
 import {
   fetchServiceCategories,
   updateCategory,
@@ -43,7 +44,12 @@ export default function ServiceCategoryDetailPage() {
 
   useEffect(() => {
     if (!serviceCategory && !shouldShowCategoryForm) {
-      dispatch(fetchServiceCategories());
+      const storedStatus = sessionStorage.getItem('categoriesStatusFilter');
+      const statuses = storedStatus === 'all'
+        ? [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]
+        : storedStatus ? [storedStatus] : [categoryStatusEnum.active];
+
+      dispatch(fetchServiceCategories(statuses));
     } else if (shouldShowCategoryForm) {
       dispatch(cleanErrors());
       setIsEditMode(true);
@@ -94,11 +100,22 @@ export default function ServiceCategoryDetailPage() {
     setIsEditMode(false);
   };
 
-  const handleArchive = async () => {
+  const handleArchiveToggle = async () => {
     if (!serviceCategory) return;
-    await dispatch(updateCategory({ id: serviceCategory.id, status: 'archived' }));
-    await dispatch(fetchServiceCategories());
-    navigate('/services?tab=categories');
+    const isArchived = String(serviceCategory.status).toLowerCase() === categoryStatusEnum.archived;
+    const nextStatus = isArchived ? categoryStatusEnum.active : categoryStatusEnum.archived;
+    console.log('[ServiceCategoryDetailPage] toggle archive category:', serviceCategory.id, '->', nextStatus);
+    await dispatch(updateCategory({ id: serviceCategory.id, status: nextStatus }));
+    await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
+  };
+
+  const handleDeactivateToggle = async () => {
+    if (!serviceCategory) return;
+    const isDisabled = String(serviceCategory.status).toLowerCase() === categoryStatusEnum.disabled;
+    const nextStatus = isDisabled ? categoryStatusEnum.active : categoryStatusEnum.disabled;
+    console.log('[ServiceCategoryDetailPage] toggle deactivate category:', serviceCategory.id, '->', nextStatus);
+    await dispatch(updateCategory({ id: serviceCategory.id, status: nextStatus }));
+    await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
   };
 
   return (
@@ -141,7 +158,8 @@ export default function ServiceCategoryDetailPage() {
             <CategoryDetails
               category={serviceCategory}
               onEditClick={handleEditClick}
-              onArchiveClick={handleArchive}
+              onArchiveToggle={handleArchiveToggle}
+              onDeactivateToggle={handleDeactivateToggle}
             />
           </Box>
         )}

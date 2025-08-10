@@ -39,3 +39,9 @@ export enum InvoiceStatusEnum {
 // Default sorting constants
 export const DEFAULT_APPOINTMENT_SORT_FIELD = 'date' as const;
 export const DEFAULT_SORT_DIRECTION = 'desc' as const;
+
+export enum CategoryStatusEnum {
+  Active = 'active',
+  Archived = 'archived',
+  Disabled = 'disabled',
+}

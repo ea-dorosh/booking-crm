@@ -1,7 +1,7 @@
 import { Business, Category, List } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { Box, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
 import AddButton from './AddButton';
@@ -9,6 +9,8 @@ import CategoriesList from './CategoriesList';
 import FilterButton from './FilterButton';
 import ServicesList from './ServicesList';
 import SubCategoriesList from './SubCategoriesList';
+import { categoryStatusEnum } from '@/enums/enums';
+import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { selectFilteredServices } from '@/features/services/servicesSelectors';
 
 const SERVICES = `services`;
@@ -44,10 +46,18 @@ export default function ServicesContainer({
   subCategories,
   categories,
 }) {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
+  const [categoryStatusFilter, setCategoryStatusFilter] = useState(categoryStatusEnum.active);
   const filteredServices = useSelector(selectFilteredServices);
+  const lastRequestedStatusKeyRef = useRef(null);
+
+  const requestedStatuses = useMemo(() => {
+    if (categoryStatusFilter === 'all') return [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled];
+    return [categoryStatusFilter];
+  }, [categoryStatusFilter]);
 
   // Get active tab from URL query parameter
   useEffect(() => {
@@ -57,6 +67,11 @@ export default function ServicesContainer({
     if (tabFromUrl && TABS[tabFromUrl]) {
       setActiveTab(tabFromUrl);
     }
+    // restore categories status filter from session storage
+    const storedStatus = sessionStorage.getItem('categoriesStatusFilter');
+    if (storedStatus) {
+      setCategoryStatusFilter(storedStatus);
+    }
   }, [location.search]);
 
   const handleTabChange = (newValue) => {
@@ -65,8 +80,33 @@ export default function ServicesContainer({
     // Update URL with new tab
     const urlParams = new URLSearchParams(location.search);
     urlParams.set('tab', newValue);
+
     navigate(`${location.pathname}?${urlParams.toString()}`, { replace: true });
   };
+
+  // persist categories status filter
+  useEffect(() => {
+    sessionStorage.setItem('categoriesStatusFilter', categoryStatusFilter);
+  }, [categoryStatusFilter]);
+
+  // fetch categories when status filter changes on Categories tab
+  useEffect(() => {
+    if (activeTab !== TABS[CATEGORIES].value) return;
+
+    const statusKey = requestedStatuses.join(',');
+    if (lastRequestedStatusKeyRef.current === statusKey && categories && categories.length) {
+      return;
+    }
+
+    // avoid duplicating the initial fetch that ServicesPage already did
+    if (!lastRequestedStatusKeyRef.current && categories && categories.length) {
+      lastRequestedStatusKeyRef.current = statusKey;
+      return;
+    }
+
+    lastRequestedStatusKeyRef.current = statusKey;
+    dispatch(fetchServiceCategories(requestedStatuses));
+  }, [activeTab, requestedStatuses.join(','), categories ? categories.length : 0]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -110,6 +150,7 @@ export default function ServicesContainer({
           {activeTab === TABS[SERVICES].value && (
             <FilterButton employees={employees} categories={categories} subCategories={subCategories} sx={{ mr: `auto` }} />
           )}
+
           <AddButton activeTab={activeTab} tabs={TABS} />
         </Box>
       </Box>
@@ -121,10 +162,29 @@ export default function ServicesContainer({
           onChange={handleTabChange}
           activeTab={activeTab}
         />
+
+        {activeTab === TABS[CATEGORIES].value && (
+          <ToggleButtonGroup
+            value={categoryStatusFilter}
+            exclusive
+            onChange={(_e, value) => value && setCategoryStatusFilter(value)}
+            size="small"
+            sx={{ mr: 'auto', mt: 2 }}
+          >
+            <ToggleButton value="all">all</ToggleButton>
+            <ToggleButton value={categoryStatusEnum.active}>active</ToggleButton>
+            <ToggleButton value={categoryStatusEnum.disabled}>not active</ToggleButton>
+            <ToggleButton value={categoryStatusEnum.archived}>deleted</ToggleButton>
+          </ToggleButtonGroup>
+        )}
       </Box>
 
       {/* Content */}
-      {renderContent()}
+      {activeTab === TABS[CATEGORIES].value ? (
+        <CategoriesList categories={categories} statusFilter={categoryStatusFilter} />
+      ) : (
+        renderContent()
+      )}
     </Box>
   );
 }

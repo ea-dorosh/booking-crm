@@ -74,7 +74,16 @@ router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType
   }
 
   try {
-    const categories = await getServiceCategories(req.dbPool);
+    // support query param status=active&status=archived etc or status=active,archived
+    let statuses: string[] | undefined = undefined;
+    const { status } = req.query as { status?: string | string[] };
+    if (Array.isArray(status)) {
+      statuses = status.flatMap(s => s.split(',')).map(s => s.trim());
+    } else if (typeof status === 'string') {
+      statuses = status.split(',').map(s => s.trim());
+    }
+
+    const categories = await getServiceCategories(req.dbPool, statuses);
 
     res.json(categories);
 

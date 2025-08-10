@@ -14,8 +14,15 @@ const appointmentStatusEnum = {
   canceled: 1,
 };
 
+const categoryStatusEnum = {
+  active: 'active',
+  archived: 'archived',
+  disabled: 'disabled',
+};
+
 export {
   appointmentStatusEnum,
   customerNewStatusEnum,
   salutationEnum,
+  categoryStatusEnum,
 };

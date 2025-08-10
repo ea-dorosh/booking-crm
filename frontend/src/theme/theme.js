@@ -397,6 +397,61 @@ const theme = createTheme({
         },
       },
     },
+    MuiToggleButtonGroup: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'transparent',
+          gap: 0, // seamless segmented control
+        },
+        grouped: {
+          margin: 0,
+          border: `1px solid ${colors.neutral[200]}`,
+          borderRadius: 0,
+          '&:not(:first-of-type)': {
+            borderLeft: `1px solid ${colors.neutral[200]}`,
+            marginLeft: -1, // collapse inner borders into 1px divider
+          },
+          '&:first-of-type': {
+            borderTopLeftRadius: 8,
+            borderBottomLeftRadius: 8,
+          },
+          '&:last-of-type': {
+            borderTopRightRadius: 8,
+            borderBottomRightRadius: 8,
+          },
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: 0,
+          fontWeight: 600,
+          color: colors.neutral[600],
+          backgroundColor: '#ffffff',
+          padding: '6px 12px',
+          borderColor: colors.neutral[200],
+          '&:hover': {
+            backgroundColor: colors.primary[50],
+            borderColor: colors.primary[200],
+          },
+          '&.Mui-selected': {
+            color: colors.primary[700],
+            backgroundColor: colors.primary[50],
+            borderColor: colors.primary[300],
+          },
+          '&.Mui-selected:hover': {
+            backgroundColor: colors.primary[100],
+            borderColor: colors.primary[300],
+          },
+        },
+        sizeSmall: {
+          padding: '4px 10px',
+          fontSize: '0.85rem',
+        },
+      },
+    },
   },
 });
 
