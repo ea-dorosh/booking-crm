@@ -29,7 +29,7 @@ interface SubCategoryRow extends RowDataPacket {
 interface ServiceRow extends RowDataPacket {
   id: number;
   name: string;
-  sub_category_id: number;
+  sub_category_id: number | null;
   category_id: number | null;
   duration_time: Time_HH_MM_SS_Type;
   buffer_time: Time_HH_MM_SS_Type;
@@ -54,7 +54,7 @@ interface ServiceData {
   id: number;
   name: string;
   categoryId: number | null;
-  subCategoryId: number;
+  subCategoryId: number | null;
   subCategoryName: string;
   durationTime: string;
   bufferTime: string;

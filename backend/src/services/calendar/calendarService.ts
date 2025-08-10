@@ -20,7 +20,6 @@ import { getGroupEmployeeAvailability } from '@/services/employees/employeesServ
 import { getService } from '@/services/service/serviceService.js';
 import { getServiceDuration } from '@/utils/timeUtils.js';
 import { Pool } from 'mysql2/promise';
-import { log } from 'console';
 
 /**
  * Get grouped time slots for one or two services

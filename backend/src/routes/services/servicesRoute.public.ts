@@ -102,14 +102,33 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     // Convert Map values to an array of services
     const services = Array.from(servicesMap.values());
 
-    // Group services by category and subcategory
+    // Group services by category. If category has no subcategories at all (all services have null subCategoryId),
+    // return services directly with a flag. Otherwise, group by subcategories and set the flag.
     const groupedData = categoriesData.map(category => {
       const categoryServices = services.filter(service => service.categoryId === category.id);
+
+      const hasAnySubcategory = categoryServices.some(service => service.subCategoryId !== null);
+
+      if (!hasAnySubcategory) {
+        return {
+          categoryId: category.id,
+          categoryName: category.name,
+          categoryImage: category.image,
+          hasSubCategories: false,
+          services: categoryServices,
+          subCategories: [],
+        };
+      }
 
       // Group services by subcategory within this category
       const subCategoriesMap = new Map();
 
       categoryServices.forEach(service => {
+        // Skip services without subcategory when category has subcategories
+        if (service.subCategoryId === null) {
+          return;
+        }
+
         const subCategoryId = service.subCategoryId;
 
         if (!subCategoriesMap.has(subCategoryId)) {
@@ -129,12 +148,16 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         categoryId: category.id,
         categoryName: category.name,
         categoryImage: category.image,
-        subCategories: Array.from(subCategoriesMap.values())
+        hasSubCategories: true,
+        subCategories: Array.from(subCategoriesMap.values()),
+        services: [],
       };
     });
 
     // Filter out categories that have no services
-    const filteredData = groupedData.filter(category => category.subCategories.length > 0);
+    const filteredData = groupedData.filter(category =>
+      category.hasSubCategories ? category.subCategories.length > 0 : category.services.length > 0
+    );
 
     res.json(filteredData);
   } catch (error) {

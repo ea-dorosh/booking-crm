@@ -195,7 +195,7 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
   }
 
   const {
-    servicePrice,
+    servicePrice, // eslint-disable-line @typescript-eslint/no-unused-vars
     servicePriceSum,
     serviceTaxAmountSum,
     serviceTotalAmountSum,

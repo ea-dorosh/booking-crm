@@ -20,8 +20,9 @@ const validateServiceData = (service: ServiceDataType): ServiceFormDataValidatio
     errors.categoryId = `Category is required`;
   }
 
-  if (!service.subCategoryId || service.subCategoryId <= 0) {
-    errors.subCategoryId = `Sub category is required`;
+  // subCategoryId is optional; if provided it must be a positive id
+  if (service.subCategoryId !== null && service.subCategoryId !== undefined && service.subCategoryId <= 0) {
+    errors.subCategoryId = `Invalid sub category`;
   }
 
   if (!service.durationTime || service.durationTime === `00:00:00`) {

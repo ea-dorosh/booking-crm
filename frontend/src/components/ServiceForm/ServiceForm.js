@@ -49,7 +49,7 @@ export default function ServiceForm({
       return acc;
     }, {}),
     categoryId: isEditMode ? service.categoryId : ``,
-    subCategoryId: isEditMode ? service.subCategoryId : ``,
+    subCategoryId: isEditMode ? (service.subCategoryId ?? ``) : ``,
     durationTime: isEditMode ? service.durationTime : ``,
     bufferTime: isEditMode && service.bufferTime ? service.bufferTime : ``,
     bookingNote: isEditMode ? service.bookingNote : ``,
@@ -76,8 +76,7 @@ export default function ServiceForm({
   // Check if category is selected
   const hasValidCategory = formData.categoryId && formData.categoryId !== '';
 
-  // Check if sub category is selected
-  const hasValidSubCategory = formData.subCategoryId && formData.subCategoryId !== '';
+
 
   // Filter sub categories based on selected category
   const filteredSubCategories = hasValidCategory
@@ -111,6 +110,13 @@ export default function ServiceForm({
     // Clear sub category when category changes
     if (name === 'categoryId') {
       updateFormData({ subCategoryId: '' });
+    }
+  };
+
+  const handleSubCategoryChange = (event) => {
+    handleChange(event);
+    if (cleanError) {
+      cleanError('subCategoryId');
     }
   };
 
@@ -172,14 +178,17 @@ export default function ServiceForm({
                 name="subCategoryId"
                 label="Sub-Category"
                 value={formData.subCategoryId}
-                onChange={handleChange}
+                onChange={handleSubCategoryChange}
                 error={formErrors?.subCategoryId}
-                required={true}
+                required={false}
                 disabled={!hasValidCategory}
-                options={filteredSubCategories.map(subCategory => ({
-                  value: subCategory.id,
-                  label: subCategory.name
-                }))}
+                options={[
+                  { value: '', label: 'Clear' },
+                  ...filteredSubCategories.map(subCategory => ({
+                    value: subCategory.id,
+                    label: subCategory.name
+                  }))
+                ]}
               />
             </Grid>
 
@@ -334,7 +343,7 @@ export default function ServiceForm({
           <FormActions
             onSubmit={handleSubmit}
             onCancel={onCancel}
-            disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidCategory || !hasValidSubCategory}
+            disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidCategory}
             isPending={false}
             submitText={isEditMode ? "Update Service" : "Create Service"}
             cancelText="Cancel"
