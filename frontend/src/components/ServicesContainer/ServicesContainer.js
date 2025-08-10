@@ -9,9 +9,10 @@ import CategoriesList from './CategoriesList';
 import FilterButton from './FilterButton';
 import ServicesList from './ServicesList';
 import SubCategoriesList from './SubCategoriesList';
-import { categoryStatusEnum } from '@/enums/enums';
+import { categoryStatusEnum, subCategoryStatusEnum } from '@/enums/enums';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { selectFilteredServices } from '@/features/services/servicesSelectors';
+import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
 const SERVICES = `services`;
 const SUB_CATEGORIES = `sub-categories`;
@@ -53,6 +54,8 @@ export default function ServicesContainer({
   const [categoryStatusFilter, setCategoryStatusFilter] = useState(categoryStatusEnum.active);
   const filteredServices = useSelector(selectFilteredServices);
   const lastRequestedStatusKeyRef = useRef(null);
+  const [subCategoryStatusFilter, setSubCategoryStatusFilter] = useState(subCategoryStatusEnum.active);
+  const lastRequestedSubStatusKeyRef = useRef(null);
 
   const requestedStatuses = useMemo(() => {
     if (categoryStatusFilter === 'all') return [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled];
@@ -107,6 +110,32 @@ export default function ServicesContainer({
     lastRequestedStatusKeyRef.current = statusKey;
     dispatch(fetchServiceCategories(requestedStatuses));
   }, [activeTab, requestedStatuses.join(','), categories ? categories.length : 0]);
+
+  const requestedSubStatuses = useMemo(() => {
+    if (subCategoryStatusFilter === 'all') return [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled];
+    return [subCategoryStatusFilter];
+  }, [subCategoryStatusFilter]);
+
+  useEffect(() => {
+    sessionStorage.setItem('subCategoriesStatusFilter', subCategoryStatusFilter);
+  }, [subCategoryStatusFilter]);
+
+  useEffect(() => {
+    if (activeTab !== TABS[SUB_CATEGORIES].value) return;
+
+    const statusKey = requestedSubStatuses.join(',');
+    if (lastRequestedSubStatusKeyRef.current === statusKey && subCategories && subCategories.length) {
+      return;
+    }
+
+    if (!lastRequestedSubStatusKeyRef.current && subCategories && subCategories.length) {
+      lastRequestedSubStatusKeyRef.current = statusKey;
+      return;
+    }
+
+    lastRequestedSubStatusKeyRef.current = statusKey;
+    dispatch(fetchServiceSubCategories(requestedSubStatuses));
+  }, [activeTab, requestedSubStatuses.join(','), subCategories ? subCategories.length : 0]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -175,6 +204,20 @@ export default function ServicesContainer({
             <ToggleButton value={categoryStatusEnum.active}>active</ToggleButton>
             <ToggleButton value={categoryStatusEnum.disabled}>not active</ToggleButton>
             <ToggleButton value={categoryStatusEnum.archived}>deleted</ToggleButton>
+          </ToggleButtonGroup>
+        )}
+        {activeTab === TABS[SUB_CATEGORIES].value && (
+          <ToggleButtonGroup
+            value={subCategoryStatusFilter}
+            exclusive
+            onChange={(_e, value) => value && setSubCategoryStatusFilter(value)}
+            size="small"
+            sx={{ mr: 'auto', mt: 2 }}
+          >
+            <ToggleButton value="all">all</ToggleButton>
+            <ToggleButton value={subCategoryStatusEnum.active}>active</ToggleButton>
+            <ToggleButton value={subCategoryStatusEnum.disabled}>not active</ToggleButton>
+            <ToggleButton value={subCategoryStatusEnum.archived}>deleted</ToggleButton>
           </ToggleButtonGroup>
         )}
       </Box>

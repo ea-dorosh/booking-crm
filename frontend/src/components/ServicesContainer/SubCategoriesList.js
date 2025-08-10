@@ -1,7 +1,8 @@
 import { Category, ChevronRight } from "@mui/icons-material";
-import { Box, Typography, Card, Grid, Paper, CardActionArea } from "@mui/material";
+import { Box, Typography, Card, Grid, Paper, CardActionArea, Chip } from "@mui/material";
 import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { subCategoryStatusEnum } from '@/enums/enums';
 
 export default function SubCategoriesList({ subCategories, categories }) {
   if (!subCategories || subCategories.length === 0) {
@@ -120,7 +121,7 @@ export default function SubCategoriesList({ subCategories, categories }) {
                       />
                     </Box>
 
-                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                       <Typography
                         variant="h6"
                         sx={{
@@ -133,6 +134,15 @@ export default function SubCategoriesList({ subCategories, categories }) {
                       >
                         {subCategory.name}
                       </Typography>
+                      {subCategory.status && (
+                        <Chip
+                          label={subCategory.status}
+                          size="small"
+                          color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? 'success' : undefined}
+                          variant={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? 'filled' : 'outlined'}
+                          sx={{ mt: 0.75 }}
+                        />
+                      )}
                     </Box>
 
                     <ChevronRight sx={{ color: 'grey.500', flexShrink: 0 }} />

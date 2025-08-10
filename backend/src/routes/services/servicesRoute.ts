@@ -10,6 +10,7 @@ import {
   updateServiceCategoryStatus,
   updateService,
   updateServiceSubCategory,
+  updateServiceSubCategoryStatus,
 } from '@/services/service/serviceService.js';
 import { upload } from '@/utils/uploadFile.js';
 import {
@@ -53,7 +54,16 @@ router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponse
   }
 
   try {
-    const subCategories = await getServiceSubCategories(req.dbPool);
+    // support query param status similar to categories
+    let statuses: string[] | undefined = undefined;
+    const { status } = req.query as { status?: string | string[] };
+    if (Array.isArray(status)) {
+      statuses = status.flatMap(s => s.split(',')).map(s => s.trim());
+    } else if (typeof status === 'string') {
+      statuses = status.split(',').map(s => s.trim());
+    }
+
+    const subCategories = await getServiceSubCategories(req.dbPool, statuses);
 
     res.json(subCategories);
 
@@ -239,9 +249,22 @@ router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomR
 
   const subCategoryId = Number(req.params.id);
   const subCategory: SubCategoryDataType = req.body;
+  const { status } = req.body as unknown as { status?: string };
   const imgPath = req.file?.filename || null;
 
   try {
+    if (typeof status === 'string' && status.length > 0 && !subCategory.name && !imgPath && subCategory.categoryId === undefined) {
+      const { subCategoryId: updatedId, validationErrors } = await updateServiceSubCategoryStatus(req.dbPool, subCategoryId, status);
+      if (validationErrors) {
+        res.status(428).json({ errors: validationErrors });
+        return;
+      }
+      if (updatedId) {
+        res.json({ message: `SubCategory status updated successfully`, data: updatedId });
+        return;
+      }
+    }
+
     const { subCategoryId: updatedSubCategoryId, validationErrors } = await updateServiceSubCategory(req.dbPool, subCategoryId, subCategory, imgPath);
 
     if (validationErrors) {

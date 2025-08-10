@@ -19,6 +19,7 @@ import SubCategoryDetails from '../../components/SubCategoryDetails/SubCategoryD
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceSubCategoryForm from "@/components/ServiceSubCategoryForm/ServiceSubCategoryForm";
+import { subCategoryStatusEnum } from '@/enums/enums';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
   fetchServiceSubCategories,
@@ -55,7 +56,11 @@ export default function ServiceSubCategoryDetailPage() {
     }
 
     if (!serviceSubCategory && !shouldShowSubCategoryForm) {
-      promises.push(dispatch(fetchServiceSubCategories()));
+      const storedStatus = sessionStorage.getItem('subCategoriesStatusFilter');
+      const statuses = storedStatus === 'all'
+        ? [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]
+        : storedStatus ? [storedStatus] : [subCategoryStatusEnum.active];
+      promises.push(dispatch(fetchServiceSubCategories(statuses)));
     } else if (shouldShowSubCategoryForm) {
       dispatch(cleanErrors());
       setIsEditMode(true);
@@ -108,6 +113,22 @@ export default function ServiceSubCategoryDetailPage() {
     setIsEditMode(false);
   };
 
+  const handleArchiveToggle = async () => {
+    if (!serviceSubCategory) return;
+    const isArchived = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.archived;
+    const nextStatus = isArchived ? subCategoryStatusEnum.active : subCategoryStatusEnum.archived;
+    await dispatch(updateSubCategory({ id: serviceSubCategory.id, status: nextStatus }));
+    await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
+  };
+
+  const handleDeactivateToggle = async () => {
+    if (!serviceSubCategory) return;
+    const isDisabled = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.disabled;
+    const nextStatus = isDisabled ? subCategoryStatusEnum.active : subCategoryStatusEnum.disabled;
+    await dispatch(updateSubCategory({ id: serviceSubCategory.id, status: nextStatus }));
+    await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
+  };
+
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
       <Box sx={{ padding: { xs: 0, md: 0, maxWidth: `768px` } }}>
@@ -150,6 +171,8 @@ export default function ServiceSubCategoryDetailPage() {
               subCategory={serviceSubCategory}
               serviceCategories={serviceCategories}
               onEditClick={handleEditClick}
+              onArchiveToggle={handleArchiveToggle}
+              onDeactivateToggle={handleDeactivateToggle}
             />
           </Box>
         )}

@@ -11,9 +11,13 @@ const getServices = async () => {
   }
 };
 
-const getServiceSubCategories = async () => {
+const getServiceSubCategories = async (statuses) => {
   try {
-    const response = await axios.get(`/services/sub-categories`);
+    const params = {};
+    if (Array.isArray(statuses) && statuses.length) {
+      params.status = statuses.join(',');
+    }
+    const response = await axios.get(`/services/sub-categories`, { params });
 
     return response.data;
   } catch (error) {

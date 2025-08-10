@@ -24,6 +24,7 @@ interface SubCategoryRow extends RowDataPacket {
   id: number;
   name: string;
   img: string | null;
+  status?: string;
   category_id: number | null;
 }
 
@@ -43,6 +44,7 @@ interface SubCategoryData {
   id: number;
   name: string;
   image: string | null;
+  status?: string;
   categoryId: number | null;
 }
 
@@ -199,18 +201,31 @@ async function getService(dbPool: Pool, serviceId: number): Promise<ServiceDetai
   return serviceData[0];
 }
 
-async function getServiceSubCategories(dbPool: Pool): Promise<SubCategoryData[]> {
+async function getServiceSubCategories(dbPool: Pool, statuses?: string[]): Promise<SubCategoryData[]> {
+  const allowedStatuses = new Set<string>([
+    CategoryStatusEnum.Active,
+    CategoryStatusEnum.Archived,
+    CategoryStatusEnum.Disabled,
+  ]);
+  const filterStatuses = (Array.isArray(statuses) && statuses.length > 0 ? statuses : [CategoryStatusEnum.Active])
+    .map(s => String(s).toLowerCase())
+    .filter(s => allowedStatuses.has(s));
+
+  const finalStatuses = filterStatuses.length > 0 ? filterStatuses : [CategoryStatusEnum.Active];
+
   const subCategoriesSql = `
-    SELECT c.id, c.name, c.img, c.category_id
+    SELECT c.id, c.name, c.img, c.status, c.category_id
     FROM ServiceSubCategories c
+    WHERE c.status IN (?)
   `;
 
-  const [subCategoriesResult] = await dbPool.query<SubCategoryRow[]>(subCategoriesSql);
+  const [subCategoriesResult] = await dbPool.query<SubCategoryRow[]>(subCategoriesSql, [finalStatuses]);
 
   const subCategoriesData: SubCategoryData[] = subCategoriesResult.map((row) => ({
     id: row.id,
     name: row.name,
     image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+    status: row.status,
     categoryId: row.category_id,
   }));
 
@@ -540,6 +555,35 @@ async function updateServiceSubCategory(dbPool: Pool, subCategoryId: number, sub
   }
 }
 
+async function updateServiceSubCategoryStatus(dbPool: Pool, subCategoryId: number, status: string): Promise<UpdateSubCategoryResult> {
+  const allowedStatuses = new Set<string>([
+    CategoryStatusEnum.Active,
+    CategoryStatusEnum.Archived,
+    CategoryStatusEnum.Disabled,
+  ]);
+
+  if (!allowedStatuses.has(String(status).toLowerCase())) {
+    return {
+      subCategoryId: null,
+      // Casting to keep shape similar; consumers only check existence
+      validationErrors: { status: 'Invalid status value' } as unknown as SubCategoryValidationErrors,
+    };
+  }
+
+  const updateStatusQuery = `
+    UPDATE ServiceSubCategories
+    SET status = ?
+    WHERE id = ?;
+  `;
+
+  await dbPool.query(updateStatusQuery, [status, subCategoryId]);
+
+  return {
+    subCategoryId,
+    validationErrors: null,
+  };
+}
+
 async function createServiceCategory(dbPool: Pool, name: string, imgPath: string | null): Promise<CreateCategoryResult> {
   // Validation
   const errors = validateCategoryData(name);
@@ -676,4 +720,5 @@ export {
   updateServiceCategory,
   updateServiceCategoryStatus,
   updateServiceSubCategory,
+  updateServiceSubCategoryStatus,
 };
