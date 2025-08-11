@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 const isAuthenticated = () => {
   // Placeholder for your authentication logic
   // e.g., check if a token exists in localStorage
-  return localStorage.getItem("token") !== null;
+  return localStorage.getItem(`token`) !== null;
 };
 
 export const ProtectedRoute = ({ children }) => {

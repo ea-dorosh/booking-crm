@@ -38,13 +38,27 @@ dayjs.locale(`de`);
 const filter = createFilterOptions();
 
 const daysToPay = [
-  { value: 0, name: `Today` },
-  { value: 1, name: `1` },
-  { value: 7, name: `7` },
-  { value: 14, name: `14` },
-  { value: 30, name: `30` },
-  { value: 60, name: `60` },
-  { value: 90, name: `90` },
+  {
+    value: 0, name: `Today`, 
+  },
+  {
+    value: 1, name: `1`, 
+  },
+  {
+    value: 7, name: `7`, 
+  },
+  {
+    value: 14, name: `14`, 
+  },
+  {
+    value: 30, name: `30`, 
+  },
+  {
+    value: 60, name: `60`, 
+  },
+  {
+    value: 90, name: `90`, 
+  },
 ];
 
 export default function InvoiceForm({
@@ -76,8 +90,8 @@ export default function InvoiceForm({
     dateIssued: dayjs(),
     dueDate: daysToPay[0].value,
     services: [{
-      id: '',
-      name: '',
+      id: ``,
+      name: ``,
       price: ``,
       quantity: 1,
       taxRate: `19`,
@@ -102,7 +116,9 @@ export default function InvoiceForm({
      * If the customerId and serviceId are set in the url, prefill the form
      */
     if (urlCustomerId) {
-      handleCustomerChange(null, {id: urlCustomerId, isCreateNew: false});
+      handleCustomerChange(null, {
+        id: urlCustomerId, isCreateNew: false,
+      });
     }
 
     if (urlServiceId) {
@@ -131,8 +147,8 @@ export default function InvoiceForm({
       services: [
         ...prev.services,
         {
-          id: '',
-          name: '',
+          id: ``,
+          name: ``,
           price: ``,
           quantity: 1,
           taxRate: `19`,
@@ -183,7 +199,9 @@ export default function InvoiceForm({
   };
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const {
+      name, value, 
+    } = event.target;
 
     if(formErrors && formErrors[name]) {
       cleanError(name);
@@ -252,7 +270,7 @@ export default function InvoiceForm({
   };
 
   const selectedCustomer = customers.find(
-    (customer) => customer.id === formData.customerId
+    (customer) => customer.id === formData.customerId,
   ) || null;
 
   const handleSubmit = async (event) => {
@@ -301,28 +319,32 @@ export default function InvoiceForm({
             const filtered = filter(options, params);
             if (filtered.length === 0) {
               filtered.push({
-                label: "Create New Client",
+                label: `Create New Client`,
                 isCreateNew: true,
               });
             }
             return filtered;
           }}
           renderOption={(props, option) => {
-            const { key, ...otherProps } = props;
+            const {
+              key, ...otherProps 
+            } = props;
 
             if (option.isCreateNew) {
               return (
                 <li
                   key={key}
                   {...otherProps}
-                  style={{ fontWeight: "bold" }}
+                  style={{ fontWeight: `bold` }}
                 >
                   {option.label}
                 </li>
               );
             }
             return (
-              <li {...otherProps} key={key} style={{display: `flex`, flexDirection: `column`, alignItems: `flex-start`}}>
+              <li {...otherProps} key={key} style={{
+                display: `flex`, flexDirection: `column`, alignItems: `flex-start`,
+              }}>
                 {option.lastName} {option.firstName}
 
                 <Typography variant="body2" color="text.secondary">
@@ -350,7 +372,9 @@ export default function InvoiceForm({
       </FormControl>}
 
       {formErrors?.customerId &&
-        <FormHelperText sx={{width: `100%`, color: `#d32f2f`, mt: `-.8rem`}} >
+        <FormHelperText sx={{
+          width: `100%`, color: `#d32f2f`, mt: `-.8rem`,
+        }} >
           {formErrors.customerId}
         </FormHelperText>
       }
@@ -486,7 +510,9 @@ export default function InvoiceForm({
         Date
       </Typography>
 
-      <Box sx={{ display: `flex`, gap: `1rem` }}>
+      <Box sx={{
+        display: `flex`, gap: `1rem`, 
+      }}>
         <FormControl error={Boolean(formErrors?.dateIssued)}>
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="de">
             <DatePicker
@@ -550,7 +576,9 @@ export default function InvoiceForm({
               },
             }}
           >
-            <Box sx={{ display: `flex`, gap: `.5rem` }}>
+            <Box sx={{
+              display: `flex`, gap: `.5rem`, 
+            }}>
               <IconButton
                 color="error"
                 onClick={() => handleRemoveService(index)}
@@ -577,7 +605,7 @@ export default function InvoiceForm({
               </Typography>
 
               <FormControl
-                sx={{width: `100%`}}
+                sx={{ width: `100%` }}
                 error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.name)}
               >
                 <Autocomplete
@@ -588,7 +616,7 @@ export default function InvoiceForm({
                     return filtered;
                   }}
                   getOptionLabel={(option) => {
-                    if (typeof option === "string") {
+                    if (typeof option === `string`) {
                       return option;
                     }
 
@@ -603,7 +631,9 @@ export default function InvoiceForm({
                   }}
                   onChange={(event, value)=>handleServiceAutocompleteChange(event, value, index)}
                   renderOption={(props, option) => {
-                    const { key, ...otherProps } = props;
+                    const {
+                      key, ...otherProps 
+                    } = props;
 
                     return (
                       <li {...otherProps} key={key}>
@@ -636,7 +666,9 @@ export default function InvoiceForm({
             }}>
               <FormControl
                 error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity)}
-                sx={{position: `relative`, flexGrow: 1}}
+                sx={{
+                  position: `relative`, flexGrow: 1,
+                }}
               >
                 <TextField
                   value={service.quantity}
@@ -707,8 +739,8 @@ export default function InvoiceForm({
                   disabled={isPending}
                   type="text"
                   inputProps={{
-                    inputMode: 'decimal',
-                    pattern: '[0-9]+([.,][0-9]+)?'
+                    inputMode: `decimal`,
+                    pattern: `[0-9]+([.,][0-9]+)?`,
                   }}
                 />
 
@@ -729,8 +761,8 @@ export default function InvoiceForm({
                   name="taxRate"
                   type="text"
                   inputProps={{
-                    inputMode: 'decimal',
-                    pattern: '[0-9]+([.,][0-9]+)?'
+                    inputMode: `decimal`,
+                    pattern: `[0-9]+([.,][0-9]+)?`,
                   }}
                   onChange={(event) => handleServiceFieldChange(index, `taxRate`, event.target.value)}
                   disabled={isPending}
@@ -744,13 +776,15 @@ export default function InvoiceForm({
               </FormControl>
             </Box>
 
-            <Box sx={{ display: `flex`,justifyContent: `flex-end`}}>
+            <Box sx={{
+              display: `flex`,justifyContent: `flex-end`,
+            }}>
               <FormControlLabel
                 control={
                   <Checkbox
                     checked={service.isTaxesIncluded}
                     onChange={(event) => handleServiceFieldChange(index, `isTaxesIncluded`, event.target.checked)}
-                    inputProps={{ 'aria-label': 'controlled' }}
+                    inputProps={{ 'aria-label': `controlled` }}
                   />
                 }
                 labelPlacement="start"

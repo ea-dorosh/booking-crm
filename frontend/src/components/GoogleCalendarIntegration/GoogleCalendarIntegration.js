@@ -10,7 +10,7 @@ import {
   Card,
   CardContent,
   Stack,
-  Chip
+  Chip,
 } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import axios from '../../services/axios.service.js';
@@ -18,8 +18,10 @@ import axios from '../../services/axios.service.js';
 const GoogleCalendarIntegration = ({ employeeId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [status, setStatus] = useState({ enabled: false, calendarId: null });
-  const [calendarId, setCalendarId] = useState('');
+  const [status, setStatus] = useState({
+    enabled: false, calendarId: null, 
+  });
+  const [calendarId, setCalendarId] = useState(``);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
 
@@ -32,13 +34,13 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
 
   // Effect to check for OAuth code in localStorage on load
   useEffect(() => {
-    const oauthCode = localStorage.getItem('google_oauth_code');
-    const savedCalendarId = localStorage.getItem('google_calendar_id') || calendarId;
+    const oauthCode = localStorage.getItem(`google_oauth_code`);
+    const savedCalendarId = localStorage.getItem(`google_calendar_id`) || calendarId;
 
     if (oauthCode && employeeId && savedCalendarId) {
       handleAuthCallback(oauthCode, savedCalendarId);
-      localStorage.removeItem('google_oauth_code');
-      localStorage.removeItem('google_calendar_id');
+      localStorage.removeItem(`google_oauth_code`);
+      localStorage.removeItem(`google_calendar_id`);
     }
   }, []);  // Only runs on component mount
 
@@ -72,10 +74,10 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       setLoading(true);
 
       // Save calendarId to localStorage before redirecting
-      localStorage.setItem('temp_calendar_id', calendarId);
+      localStorage.setItem(`temp_calendar_id`, calendarId);
 
       // Save current path for return
-      localStorage.setItem('google_oauth_return_path', window.location.pathname);
+      localStorage.setItem(`google_oauth_return_path`, window.location.pathname);
 
       // Get Google auth URL
       const response = await axios.get(`/google-calendar/auth-url?employeeId=${employeeId}`);
@@ -108,7 +110,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       await axios.post(`/google-calendar/auth-callback`, {
         code,
         employeeId: numericEmployeeId,
-        calendarId: idToUse
+        calendarId: idToUse,
       });
 
       // Update status after successful integration
@@ -133,8 +135,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       await axios.delete(`/google-calendar/${employeeId}/google-calendar`);
       await fetchStatus();
     } catch (error) {
-      console.error('Error removing Google Calendar integration:', error);
-      setError('Failed to remove Google Calendar integration');
+      console.error(`Error removing Google Calendar integration:`, error);
+      setError(`Failed to remove Google Calendar integration`);
     } finally {
       setLoading(false);
     }
@@ -151,7 +153,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       // Show success message with results
       setSyncResult({
         success: true,
-        message: `Synchronization complete: ${response.data.results.synced} entries added to calendar, ${response.data.results.failed} failed to add.`
+        message: `Synchronization complete: ${response.data.results.synced} entries added to calendar, ${response.data.results.failed} failed to add.`,
       });
 
       // Refresh status
@@ -160,7 +162,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       console.error(`Error syncing appointments:`, error);
       setSyncResult({
         success: false,
-        message: `Synchronization error: ${error.response?.data?.error || error.message}`
+        message: `Synchronization error: ${error.response?.data?.error || error.message}`,
       });
     } finally {
       setSyncLoading(false);
@@ -190,7 +192,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
 
       {syncResult && (
         <Alert
-          severity={syncResult.success ? "success" : "error"}
+          severity={syncResult.success ? `success` : `error`}
           sx={{ mb: 2 }}
           onClose={() => setSyncResult(null)}
         >
@@ -209,11 +211,13 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
                 label="Active"
                 color="success"
                 size="small"
-                sx={{ ml: 'auto' }}
+                sx={{ ml: `auto` }}
               />
             </Stack>
 
-            <Box sx={{ mb: 2, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+            <Box sx={{
+              mb: 2, p: 2, bgcolor: `background.paper`, borderRadius: 1, 
+            }}>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <CalendarMonth fontSize="small" color="action" />
                 <Typography variant="body2" color="text.secondary">
@@ -257,7 +261,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
                 disabled={syncLoading}
                 startIcon={<Sync />}
               >
-                {syncLoading ? 'Synchronizing...' : 'Sync Missed Appointments'}
+                {syncLoading ? `Synchronizing...` : `Sync Missed Appointments`}
               </Button>
             </Stack>
           </CardContent>
@@ -291,11 +295,13 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
               disabled={!calendarId || loading}
               startIcon={<Google />}
             >
-              {status.tokenExpired ? 'Reconnect Calendar' : 'Connect to Google Calendar'}
+              {status.tokenExpired ? `Reconnect Calendar` : `Connect to Google Calendar`}
             </Button>
           </Box>
 
-          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 2 }}>
+          <Typography variant="body2" sx={{
+            color: `text.secondary`, mt: 2, 
+          }}>
             You will be redirected to Google to authorize access to the calendar.
           </Typography>
         </Box>

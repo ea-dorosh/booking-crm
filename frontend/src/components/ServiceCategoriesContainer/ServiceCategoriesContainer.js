@@ -10,12 +10,12 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import ListItemText from '@/components/ListItemText/ListItemText';
 
-export default function ServiceCategoriesContainer({
-  categories,
-}) {
+export default function ServiceCategoriesContainer({ categories }) {
   if (!categories || categories.length === 0) {
     return (
-      <Box sx={{ p: 2, textAlign: 'center' }}>
+      <Box sx={{
+        p: 2, textAlign: `center`, 
+      }}>
         <Typography variant="body1" color="text.secondary">
           No categories found
         </Typography>
@@ -38,7 +38,9 @@ export default function ServiceCategoriesContainer({
         >
           <RouterLink
             to={`/categories/${category.id}`}
-            style={{ textDecoration: `none`, color: `inherit`, flex: 1 }}
+            style={{
+              textDecoration: `none`, color: `inherit`, flex: 1, 
+            }}
           >
             <ListItemText
               primary={category.name}

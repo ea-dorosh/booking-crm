@@ -49,7 +49,7 @@ const OAuthCallbackPage = () => {
       sx={{
         minHeight: `100vh`,
         textAlign: `center`,
-        p: 3
+        p: 3,
       }}
     >
       <CircularProgress size={60} sx={{ mb: 4 }} />

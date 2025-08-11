@@ -22,7 +22,9 @@ export default function AppointmentsPage() {
   const dispatch = useDispatch();
 
   const appointments = useSelector(selectSortedAppointments);
-  const { startDate, isPending } = useSelector((state) => state.appointments);
+  const {
+    startDate, isPending, 
+  } = useSelector((state) => state.appointments);
 
   useEffect(() => {
     if (!startDate) {

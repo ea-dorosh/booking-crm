@@ -16,20 +16,24 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import AddButton from '@/components/common/AddButton';
 
-export default function EmployeesContainer({
-  employees,
-}) {
+export default function EmployeesContainer({ employees }) {
   return (
-    <Box sx={{ padding: { xs: 0, md: 0 } }}>
+    <Box sx={{
+      padding: {
+        xs: 0, md: 0, 
+      }, 
+    }}>
       {/* Header */}
       <Box sx={{ marginBottom: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, marginBottom: 1 }}>
+        <Typography variant="h4" sx={{
+          fontWeight: 700, marginBottom: 1, 
+        }}>
           Team Members
         </Typography>
         <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: `flex`,
+          justifyContent: `space-between`,
+          alignItems: `center`,
         }}>
           <Typography variant="body1" color="text.secondary">
             Manage your employees and their information
@@ -50,19 +54,19 @@ export default function EmployeesContainer({
           <Grid item xs={12} sm={6} md={4} key={employee.employeeId}>
             <Card
               sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+                height: `100%`,
+                display: `flex`,
+                flexDirection: `column`,
               }}
             >
               {/* Card Content */}
               <CardContent sx={{
                 padding: 3,
                 flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
+                display: `flex`,
+                flexDirection: `column`,
+                alignItems: `center`,
+                textAlign: `center`,
               }}>
                 {/* Avatar */}
                 <Avatar
@@ -71,8 +75,8 @@ export default function EmployeesContainer({
                     width: 80,
                     height: 80,
                     marginBottom: 2,
-                    border: '4px solid',
-                    borderColor: 'primary.50',
+                    border: `4px solid`,
+                    borderColor: `primary.50`,
                   }}
                 >
                   <Person sx={{ fontSize: 40 }} />
@@ -84,7 +88,7 @@ export default function EmployeesContainer({
                   sx={{
                     fontWeight: 600,
                     marginBottom: 0.5,
-                    color: 'text.primary'
+                    color: `text.primary`,
                   }}
                 >
                   {`${employee.firstName} ${employee.lastName}`}
@@ -92,11 +96,11 @@ export default function EmployeesContainer({
 
                 {/* Email */}
                 <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
+                  display: `flex`,
+                  alignItems: `center`,
                   gap: 0.5,
                   marginBottom: 2,
-                  color: 'text.secondary'
+                  color: `text.secondary`,
                 }}>
                   <Email sx={{ fontSize: 16 }} />
                   <Typography variant="body2">
@@ -111,12 +115,12 @@ export default function EmployeesContainer({
                   size="small"
                   sx={{
                     fontWeight: 500,
-                    marginBottom: 2
+                    marginBottom: 2,
                   }}
                 />
 
                 {/* Action Button */}
-                <Box sx={{ marginTop: 'auto' }}>
+                <Box sx={{ marginTop: `auto` }}>
                   <Button
                     component={RouterLink}
                     to={`/employees/${employee.employeeId}`}
@@ -124,12 +128,12 @@ export default function EmployeesContainer({
                     size="small"
                     sx={{
                       borderRadius: 2,
-                      borderColor: 'primary.200',
-                      color: 'primary.600',
+                      borderColor: `primary.200`,
+                      color: `primary.600`,
                       '&:hover': {
-                        borderColor: 'primary.400',
-                        backgroundColor: 'primary.50',
-                      }
+                        borderColor: `primary.400`,
+                        backgroundColor: `primary.50`,
+                      },
                     }}
                   >
                     Details
@@ -146,13 +150,15 @@ export default function EmployeesContainer({
         <Paper
           sx={{
             padding: 6,
-            textAlign: 'center',
-            backgroundColor: 'grey.50',
-            border: '2px dashed',
-            borderColor: 'grey.300',
+            textAlign: `center`,
+            backgroundColor: `grey.50`,
+            border: `2px dashed`,
+            borderColor: `grey.300`,
           }}
         >
-          <Person sx={{ fontSize: 60, color: 'grey.400', marginBottom: 2 }} />
+          <Person sx={{
+            fontSize: 60, color: `grey.400`, marginBottom: 2, 
+          }} />
           <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
             No employees found
           </Typography>

@@ -15,7 +15,7 @@ const getServiceSubCategories = async (statuses) => {
   try {
     const params = {};
     if (Array.isArray(statuses) && statuses.length) {
-      params.status = statuses.join(',');
+      params.status = statuses.join(`,`);
     }
     const response = await axios.get(`/services/sub-categories`, { params });
 
@@ -30,7 +30,7 @@ const getServiceCategories = async (statuses) => {
     const params = {};
     if (Array.isArray(statuses) && statuses.length) {
       // send as comma-separated string to avoid status[] format
-      params.status = statuses.join(',');
+      params.status = statuses.join(`,`);
     }
 
     const response = await axios.get(`/services/categories`, { params });

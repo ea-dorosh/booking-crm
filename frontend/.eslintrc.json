@@ -10,6 +10,14 @@
     "node": true,
     "es2021": true
   },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "ignorePatterns": [
+    "build/**"
+  ],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
@@ -19,6 +27,23 @@
         "order": "asc",
         "caseInsensitive": true
       }
-    }]
+    }],
+    "quotes": ["error", "backtick", {
+      "avoidEscape": true,
+      "allowTemplateLiterals": true
+    }],
+    "object-curly-newline": ["error", {
+      "ObjectExpression": {
+        "multiline": true,
+        "minProperties": 2,
+        "consistent": true
+      },
+      "ObjectPattern": {
+        "multiline": true,
+        "minProperties": 2
+      }
+    }],
+    "comma-dangle": ["error", "always-multiline"],
+    "object-curly-spacing": ["error", "always"]
   }
 }

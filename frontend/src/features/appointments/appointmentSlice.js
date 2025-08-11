@@ -13,7 +13,7 @@ export const fetchAppointment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const cancelAppointment = createAsyncThunk(
@@ -25,7 +25,7 @@ export const cancelAppointment = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 const appointmentSlice = createSlice({
@@ -53,7 +53,7 @@ const appointmentSlice = createSlice({
         state.isPending = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 export const { clearAppointment } = appointmentSlice.actions;

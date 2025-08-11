@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 
 const FormField = ({
-  type = "text",
+  type = `text`,
   name,
   label,
   value,
@@ -40,13 +40,13 @@ const FormField = ({
 
   const renderField = () => {
     switch (type) {
-    case "select":
+    case `select`:
       return (
         <Select
           {...commonProps}
           size="small"
           displayEmpty
-          sx={{ width: '100%' }}
+          sx={{ width: `100%` }}
         >
           {options.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -56,7 +56,7 @@ const FormField = ({
         </Select>
       );
 
-    case "radio":
+    case `radio`:
       return (
         <Box sx={{
           display: `flex`,
@@ -89,7 +89,7 @@ const FormField = ({
         </Box>
       );
 
-    case "textarea":
+    case `textarea`:
       return (
         <TextField
           {...commonProps}
@@ -97,7 +97,7 @@ const FormField = ({
           multiline
           rows={rows}
           size="small"
-          sx={{ width: '100%' }}
+          sx={{ width: `100%` }}
         />
       );
 
@@ -108,7 +108,7 @@ const FormField = ({
           variant="outlined"
           type={type}
           size="small"
-          sx={{ width: '100%' }}
+          sx={{ width: `100%` }}
         />
       );
     }
@@ -117,17 +117,19 @@ const FormField = ({
   return (
     <Box sx={{ width: `100%` }}>
       {/* Label above field (except for radio which has its own label) */}
-      {type !== "radio" && (
+      {type !== `radio` && (
         <Typography
           variant="body2"
           sx={{
             mb: 0.5,
             fontWeight: 500,
-            color: error ? 'error.main' : 'text.primary'
+            color: error ? `error.main` : `text.primary`,
           }}
         >
           {label}
-          {required && <span style={{ color: 'red', marginLeft: 2 }}>*</span>}
+          {required && <span style={{
+            color: `red`, marginLeft: 2, 
+          }}>*</span>}
         </Typography>
       )}
 
@@ -135,7 +137,9 @@ const FormField = ({
         {renderField()}
 
         {error && (
-          <FormHelperText sx={{ color: 'error.main', mt: 0.5 }}>
+          <FormHelperText sx={{
+            color: `error.main`, mt: 0.5, 
+          }}>
             {error}
           </FormHelperText>
         )}

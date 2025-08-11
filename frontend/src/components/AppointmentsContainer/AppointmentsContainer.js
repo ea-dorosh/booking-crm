@@ -13,9 +13,7 @@ import {
   formatTimeToString,
 } from '@/utils/formatters';
 
-export default function AppointmentsContainer({
-  appointments,
-}) {
+export default function AppointmentsContainer({ appointments }) {
   return (
     <Box>
       <Box

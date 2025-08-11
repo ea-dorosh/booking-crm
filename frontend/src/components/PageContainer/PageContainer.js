@@ -1,6 +1,6 @@
 import {
   ChevronLeft,
-  Menu
+  Menu,
 } from '@mui/icons-material';
 import {
   AppBar as MuiAppBar,
@@ -10,7 +10,7 @@ import {
   IconButton,
   List,
   Toolbar,
-  Typography
+  Typography,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import * as React from 'react';
@@ -25,25 +25,25 @@ const AppBar = styled(MuiAppBar)(({ theme }) => ({
 
 const CollapsedDrawer = styled(MuiDrawer)(({ theme }) => ({
   '& .MuiDrawer-paper': {
-    position: 'relative',
-    whiteSpace: 'nowrap',
+    position: `relative`,
+    whiteSpace: `nowrap`,
     width: 52,
-    transition: theme.transitions.create('width', {
+    transition: theme.transitions.create(`width`, {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    boxSizing: 'border-box',
-    overflowX: 'hidden',
+    boxSizing: `border-box`,
+    overflowX: `hidden`,
     '& .MuiListItemText-root': {
       opacity: 0,
     },
     '& .MuiListItemButton-root': {
       paddingLeft: 20,
       paddingRight: 20,
-      justifyContent: 'center',
+      justifyContent: `center`,
     },
     '& .MuiListItemIcon-root': {
-      minWidth: 'auto',
+      minWidth: `auto`,
       marginRight: 0,
     },
   },
@@ -52,7 +52,7 @@ const CollapsedDrawer = styled(MuiDrawer)(({ theme }) => ({
 const ExpandedDrawer = styled(MuiDrawer)(() => ({
   '& .MuiDrawer-paper': {
     width: drawerWidth,
-    boxSizing: 'border-box',
+    boxSizing: `border-box`,
   },
 }));
 
@@ -69,11 +69,11 @@ export default function PageContainer({
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: `flex` }}>
       <AppBar position="absolute">
         <Toolbar
           sx={{
-            pr: '24px', // keep right padding when drawer closed
+            pr: `24px`, // keep right padding when drawer closed
           }}
         >
           <IconButton
@@ -81,11 +81,11 @@ export default function PageContainer({
             color="inherit"
             onClick={toggleDrawer}
             sx={{
-              marginRight: '36px',
-              ml: '-9px',
+              marginRight: `36px`,
+              ml: `-9px`,
 
               '&:hover': {
-                backgroundColor: 'transparent',
+                backgroundColor: `transparent`,
               },
             }}
           >
@@ -128,9 +128,9 @@ export default function PageContainer({
       >
         <Toolbar
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
+            display: `flex`,
+            alignItems: `center`,
+            justifyContent: `flex-end`,
             px: [1],
           }}
         >
@@ -141,7 +141,7 @@ export default function PageContainer({
 
         <Divider />
 
-        <List component="nav" sx={{ px: 1, }}>
+        <List component="nav" sx={{ px: 1 }}>
           <MainListItems location={location} />
           <Divider sx={{ my: 1 }} />
           <SecondaryListItems location={location} />
@@ -152,7 +152,7 @@ export default function PageContainer({
         component="main"
         sx={{
           backgroundColor: (theme) =>
-            theme.palette.mode === 'light'
+            theme.palette.mode === `light`
               ? theme.palette.grey[100]
               : theme.palette.grey[900],
           flexGrow: 1,
@@ -161,8 +161,8 @@ export default function PageContainer({
         <Toolbar />
 
         <Box sx={{
-          padding: '24px',
-          minHeight: 'calc(100vh - 64px)',
+          padding: `24px`,
+          minHeight: `calc(100vh - 64px)`,
         }}>
           {children}
         </Box>

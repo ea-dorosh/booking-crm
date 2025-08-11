@@ -45,7 +45,9 @@ export default function AppointmentDetailPage() {
 
   const { appointmentId } = useParams();
 
-  const {data: appointment, isPending} = useSelector(state => state.appointment);
+  const {
+    data: appointment, isPending,
+  } = useSelector(state => state.appointment);
 
   useEffect(() => {
     dispatch(fetchAppointment(appointmentId));
@@ -81,8 +83,12 @@ export default function AppointmentDetailPage() {
       {isPending && <LinearProgress />}
 
       {appointment && (
-        <Box sx={{ mt: 3, mb: 5 }}>
-          <Card elevation={3} sx={{ mb: 4, overflow: `visible` }}>
+        <Box sx={{
+          mt: 3, mb: 5, 
+        }}>
+          <Card elevation={3} sx={{
+            mb: 4, overflow: `visible`, 
+          }}>
             <Box
               sx={{
                 p: 2,
@@ -95,8 +101,8 @@ export default function AppointmentDetailPage() {
                 {appointment.serviceName}
               </Typography>
               <Chip
-                label={appointment.status === appointmentStatusEnum.active ? "Active" : "Canceled"}
-                color={appointment.status === appointmentStatusEnum.active ? "success" : "error"}
+                label={appointment.status === appointmentStatusEnum.active ? `Active` : `Canceled`}
+                color={appointment.status === appointmentStatusEnum.active ? `success` : `error`}
                 sx={{
                   position: `absolute`,
                   top: 16,
@@ -109,22 +115,34 @@ export default function AppointmentDetailPage() {
             <CardContent sx={{ p: 3 }}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ display: `flex`, alignItems: `center`, mb: 2 }}>
-                    <CalendarIcon sx={{ mr: 1, color: `primary.main` }} />
+                  <Box sx={{
+                    display: `flex`, alignItems: `center`, mb: 2, 
+                  }}>
+                    <CalendarIcon sx={{
+                      mr: 1, color: `primary.main`, 
+                    }} />
                     <Typography variant="body1">
                       <strong>Date:</strong> {formatIsoDate(appointment.date)}
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: `flex`, alignItems: `center`, mb: 2 }}>
-                    <TimeIcon sx={{ mr: 1, color: `primary.main` }} />
+                  <Box sx={{
+                    display: `flex`, alignItems: `center`, mb: 2, 
+                  }}>
+                    <TimeIcon sx={{
+                      mr: 1, color: `primary.main`, 
+                    }} />
                     <Typography variant="body1">
                       <strong>Time:</strong> {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: `flex`, alignItems: `center`, mb: 2 }}>
-                    <ScheduleIcon sx={{ mr: 1, color: `primary.main` }} />
+                  <Box sx={{
+                    display: `flex`, alignItems: `center`, mb: 2, 
+                  }}>
+                    <ScheduleIcon sx={{
+                      mr: 1, color: `primary.main`, 
+                    }} />
                     <Typography variant="body1">
                       <strong>Duration:</strong> {formatTimeToString(appointment.serviceDuration)}
                     </Typography>
@@ -132,7 +150,9 @@ export default function AppointmentDetailPage() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <Paper elevation={1} sx={{ p: 2, bgcolor: `grey.50` }}>
+                  <Paper elevation={1} sx={{
+                    p: 2, bgcolor: `grey.50`, 
+                  }}>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                       APPOINTMENT CREATED
                     </Typography>
@@ -150,8 +170,12 @@ export default function AppointmentDetailPage() {
 
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ display: `flex`, alignItems: `center` }}>
-                    <PersonIcon sx={{ mr: 1, color: `primary.main` }} />
+                  <Box sx={{
+                    display: `flex`, alignItems: `center`, 
+                  }}>
+                    <PersonIcon sx={{
+                      mr: 1, color: `primary.main`, 
+                    }} />
                     <Typography variant="body1" sx={{ mr: 1 }}>
                       <strong>Client:</strong>
                     </Typography>
@@ -164,7 +188,7 @@ export default function AppointmentDetailPage() {
                         fontWeight: `medium`,
                         '&:hover': {
                           textDecoration: `underline`,
-                        }
+                        },
                       }}
                     >
                       {appointment.customer.lastName} {appointment.customer.firstName}
@@ -182,8 +206,12 @@ export default function AppointmentDetailPage() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ display: `flex`, alignItems: `center` }}>
-                    <BadgeIcon sx={{ mr: 1, color: `primary.main` }} />
+                  <Box sx={{
+                    display: `flex`, alignItems: `center`, 
+                  }}>
+                    <BadgeIcon sx={{
+                      mr: 1, color: `primary.main`, 
+                    }} />
                     <Typography variant="body1" sx={{ mr: 1 }}>
                       <strong>Master:</strong>
                     </Typography>
@@ -196,7 +224,7 @@ export default function AppointmentDetailPage() {
                         fontWeight: `medium`,
                         '&:hover': {
                           textDecoration: `underline`,
-                        }
+                        },
                       }}
                     >
                       {appointment.employee.lastName} {appointment.employee.firstName}
@@ -207,7 +235,9 @@ export default function AppointmentDetailPage() {
             </CardContent>
           </Card>
 
-          <Stack direction={{ xs: `column`, sm: `row` }} spacing={2}>
+          <Stack direction={{
+            xs: `column`, sm: `row`, 
+          }} spacing={2}>
             {appointment.status === appointmentStatusEnum.active && (
               <Button
                 variant="outlined"

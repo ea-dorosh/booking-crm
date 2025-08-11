@@ -28,9 +28,9 @@ export default function ServicesPage() {
       promises.push(dispatch(fetchServiceSubCategories()));
     }
     if (!serviceCategories) {
-      const storedStatus = sessionStorage.getItem('categoriesStatusFilter');
+      const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
 
-      const statuses = storedStatus === 'all'
+      const statuses = storedStatus === `all`
         ? [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]
         : storedStatus ? [storedStatus] : [categoryStatusEnum.active];
       promises.push(dispatch(fetchServiceCategories(statuses)));

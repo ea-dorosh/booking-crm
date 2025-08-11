@@ -33,7 +33,7 @@ const createInvoice = async (invoice) => {
 const downloadInvoicePdf = async (invoiceId) => {
   try {
     const response = await axios.get(`/invoices/${invoiceId}/pdf`, {
-      responseType: 'blob',
+      responseType: `blob`,
     });
 
     return response.data;

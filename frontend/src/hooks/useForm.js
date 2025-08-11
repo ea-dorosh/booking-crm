@@ -22,7 +22,9 @@ const useForm = (initialData = {}, options = {}) => {
   // }, [cleanErrors]);
 
   const handleChange = useCallback((event) => {
-    const { name, value } = event.target;
+    const {
+      name, value, 
+    } = event.target;
 
     // Only clear error when user starts typing (not on focus)
     if (formErrors && formErrors[name] && cleanError && value.length > 0) {

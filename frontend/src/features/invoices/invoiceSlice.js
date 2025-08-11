@@ -2,7 +2,7 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
-import {unset} from 'lodash';
+import { unset } from 'lodash';
 import invoicesService from "@/services/invoices.service";
 
 export const fetchInvoice = createAsyncThunk(
@@ -15,7 +15,7 @@ export const fetchInvoice = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateInvoice = createAsyncThunk(
@@ -32,7 +32,7 @@ export const updateInvoice = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const downloadInvoicePdf = createAsyncThunk(
@@ -44,7 +44,7 @@ export const downloadInvoicePdf = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const invoiceSlice = createSlice({
@@ -79,7 +79,7 @@ const invoiceSlice = createSlice({
         }
 
         state.updateFormErrors.validationErrors = removeEmptyRecursivelyKeepArray(
-          state.updateFormErrors.validationErrors
+          state.updateFormErrors.validationErrors,
         );
       }
     },
@@ -127,14 +127,14 @@ const invoiceSlice = createSlice({
         state.downloadInvoicePdfPending = false;
         state.downloadInvoicePdfError = action.payload;
       })
-  }
+  },
 });
 
 export const {
   cleanError,
   cleanErrors,
   removeServiceErrorIndex,
-  resetInvoiceData
+  resetInvoiceData,
 } = invoiceSlice.actions;
 
 function removeEmptyRecursivelyKeepArray(data) {
@@ -152,7 +152,7 @@ function removeEmptyRecursivelyKeepArray(data) {
     }
 
     return hasNonEmptyItem ? data : null;
-  } else if (typeof data === "object" && data !== null) {
+  } else if (typeof data === `object` && data !== null) {
     Object.keys(data).forEach((key) => {
       const value = (data)[key];
       (data)[key] = removeEmptyRecursivelyKeepArray(value);
@@ -171,7 +171,7 @@ function removeEmptyRecursivelyKeepArray(data) {
 function isEmpty(value) {
   if (value === null || value === undefined) return true;
   if (Array.isArray(value) && value.length === 0) return true;
-  if (typeof value === "object") {
+  if (typeof value === `object`) {
     return Object.keys(value).length === 0;
   }
   return false;

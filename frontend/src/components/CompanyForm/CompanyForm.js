@@ -18,27 +18,27 @@ export default function CompanyForm({
   // Define form fields configuration
   const formFields = [
     {
-      name: "name",
-      label: "Name",
-      type: "text",
+      name: `name`,
+      label: `Name`,
+      type: `text`,
       required: true,
     },
     ...ADDRESS_FIELDS,
     ...CONTACT_FIELDS,
     {
-      name: "website",
-      label: "Website",
-      type: "url",
+      name: `website`,
+      label: `Website`,
+      type: `url`,
     },
     {
-      name: "taxNumber",
-      label: "Tax Number",
-      type: "text",
+      name: `taxNumber`,
+      label: `Tax Number`,
+      type: `text`,
     },
     {
-      name: "bankAccount",
-      label: "IBAN",
-      type: "text",
+      name: `bankAccount`,
+      label: `IBAN`,
+      type: `text`,
     },
   ];
 

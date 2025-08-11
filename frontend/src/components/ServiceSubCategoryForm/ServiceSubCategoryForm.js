@@ -30,8 +30,8 @@ export default function ServiceSubCategoryForm({
       required: true,
       options: serviceCategories.map(category => ({
         value: category.id,
-        label: category.name
-      }))
+        label: category.name,
+      })),
     },
   ];
 

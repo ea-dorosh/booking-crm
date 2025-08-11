@@ -33,7 +33,9 @@ export default function CompanyDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const {data: company, isPending, updateFormPending, error } = useSelector(state => state.company);
+  const {
+    data: company, isPending, updateFormPending, error, 
+  } = useSelector(state => state.company);
 
   const formErrors = useSelector(state => state.company.updateFormErrors);
 
@@ -102,13 +104,13 @@ export default function CompanyDetailPage() {
         }}
       >
         <Typography variant="button"
-          sx={{color: `#fff`}}
+          sx={{ color: `#fff` }}
         >
           add company
         </Typography>
 
         <IconButton
-          sx={{color: `#fff`}}
+          sx={{ color: `#fff` }}
         >
           <AddCircle />
         </IconButton>
@@ -124,7 +126,7 @@ export default function CompanyDetailPage() {
           isPending={updateFormPending}
         />
 
-        <Box mt={2} sx={{width:`100%`}}>
+        <Box mt={2} sx={{ width:`100%` }}>
           {<Button
             variant="outlined"
             onClick={() => {
@@ -137,7 +139,7 @@ export default function CompanyDetailPage() {
               }
             }
             }
-            sx={{width:`100%`}}
+            sx={{ width:`100%` }}
             disabled={updateFormPending}
           >
             Cancel

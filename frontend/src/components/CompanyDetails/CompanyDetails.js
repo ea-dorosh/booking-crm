@@ -5,7 +5,9 @@ import {
 } from "@mui/material";
 import ListItemText from "@/components/ListItemText/ListItemText";
 
-export default function CompanyDetails({ company, onChangeCompanyClick }) {
+export default function CompanyDetails({
+  company, onChangeCompanyClick, 
+}) {
   return (
     <List>
       <ListItemText

@@ -3,19 +3,19 @@ import trackingService from '@/services/tracking.service';
 
 // Async thunk for fetching QR scan stats
 export const fetchQrScanStats = createAsyncThunk(
-  'tracking/fetchQrScanStats',
+  `tracking/fetchQrScanStats`,
   async (days = 90, { rejectWithValue }) => {
     try {
       const response = await trackingService.getQrScanStats(days);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to fetch QR scan stats');
+      return rejectWithValue(error.message || `Failed to fetch QR scan stats`);
     }
-  }
+  },
 );
 
 const trackingSlice = createSlice({
-  name: 'tracking',
+  name: `tracking`,
   initialState: {
     stats: null,
     loading: false,
@@ -47,5 +47,7 @@ const trackingSlice = createSlice({
   },
 });
 
-export const { clearTrackingError, clearTrackingStats } = trackingSlice.actions;
+export const {
+  clearTrackingError, clearTrackingStats, 
+} = trackingSlice.actions;
 export default trackingSlice.reducer;

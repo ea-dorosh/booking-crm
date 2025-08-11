@@ -16,7 +16,9 @@ import { fetchCompany } from "@/features/company/companySlice";
 
 export default function CompanyBranchesContainer({ branches }) {
   const dispatch = useDispatch();
-  const { updateFormPending, updateFormErrors } = useSelector(state => state.companyBranch);
+  const {
+    updateFormPending, updateFormErrors, 
+  } = useSelector(state => state.companyBranch);
 
   const [isAddMode, setIsAddMode] = useState(false);
   const [hasAddButton, setHasAddButton] = useState(true);

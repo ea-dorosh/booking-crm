@@ -13,7 +13,9 @@ import {
 import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
-export default function ServicesList({ services, employees, categories }) {
+export default function ServicesList({
+  services, employees, categories, 
+}) {
   const groupedServices = useMemo(() => {
     if (!services || !categories) return {};
 
@@ -26,14 +28,14 @@ export default function ServicesList({ services, employees, categories }) {
       if (!grouped[service.categoryId]) {
         grouped[service.categoryId] = {
           categoryName,
-          subCategories: {}
+          subCategories: {},
         };
       }
 
       if (!grouped[service.categoryId].subCategories[service.subCategoryId]) {
         grouped[service.categoryId].subCategories[service.subCategoryId] = {
           subCategoryName: service.subCategoryName,
-          services: []
+          services: [],
         };
       }
 
@@ -44,13 +46,13 @@ export default function ServicesList({ services, employees, categories }) {
   }, [services, categories]);
 
   const getEmployeeName = (employeeId) => {
-    if (!employees) return '';
+    if (!employees) return ``;
     const employee = employees.find(emp => emp.employeeId === employeeId);
-    return employee ? `${employee.firstName} ${employee.lastName}` : '';
+    return employee ? `${employee.firstName} ${employee.lastName}` : ``;
   };
 
   const getPriceRange = (employeePrices) => {
-    if (!employeePrices || employeePrices.length === 0) return '';
+    if (!employeePrices || employeePrices.length === 0) return ``;
 
     const prices = employeePrices.map(ep => ep.price);
     const minPrice = Math.min(...prices);
@@ -67,13 +69,15 @@ export default function ServicesList({ services, employees, categories }) {
       <Paper
         sx={{
           padding: 6,
-          textAlign: 'center',
-          backgroundColor: 'grey.50',
-          border: '2px dashed',
-          borderColor: 'grey.300',
+          textAlign: `center`,
+          backgroundColor: `grey.50`,
+          border: `2px dashed`,
+          borderColor: `grey.300`,
         }}
       >
-        <Business sx={{ fontSize: 60, color: 'grey.400', marginBottom: 2 }} />
+        <Business sx={{
+          fontSize: 60, color: `grey.400`, marginBottom: 2, 
+        }} />
         <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
           No services found
         </Typography>
@@ -93,12 +97,18 @@ export default function ServicesList({ services, employees, categories }) {
   }
 
   return (
-    <Box sx={{ padding: { xs: 0, md: 0 } }}>
+    <Box sx={{
+      padding: {
+        xs: 0, md: 0, 
+      }, 
+    }}>
       {Object.entries(groupedServices).map(([categoryId, categoryData]) => (
         <Box key={categoryId} sx={{ marginBottom: 4 }}>
           {/* Category Header */}
           <Box sx={{ marginBottom: 2 }}>
-            <Typography variant="h5" sx={{ fontWeight: 600, marginBottom: 1 }}>
+            <Typography variant="h5" sx={{
+              fontWeight: 600, marginBottom: 1, 
+            }}>
               {categoryData.categoryName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -111,7 +121,9 @@ export default function ServicesList({ services, employees, categories }) {
             <Box key={subCategoryId} sx={{ marginBottom: 3 }}>
               {/* Sub Category Header */}
               <Box sx={{ marginBottom: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 500, color: `text.secondary`, 
+                }}>
                   {subCategoryData.subCategoryName}
                 </Typography>
               </Box>
@@ -122,26 +134,26 @@ export default function ServicesList({ services, employees, categories }) {
                   <Grid item xs={12} sm={6} md={4} key={service.id}>
                     <Card
                       sx={{
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        transition: 'all 0.2s ease-in-out',
+                        height: `100%`,
+                        display: `flex`,
+                        flexDirection: `column`,
+                        transition: `all 0.2s ease-in-out`,
                         '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        }
+                          transform: `translateY(-2px)`,
+                          boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
+                        },
                       }}
                     >
                       <CardActionArea
                         component={RouterLink}
                         to={`/services/${service.id}`}
-                        sx={{ height: '100%' }}
+                        sx={{ height: `100%` }}
                       >
                         <CardContent sx={{
                           padding: 2.5,
                           flexGrow: 1,
-                          display: 'flex',
-                          flexDirection: 'column',
+                          display: `flex`,
+                          flexDirection: `column`,
                         }}>
                           {/* Service Name */}
                           <Typography
@@ -149,8 +161,8 @@ export default function ServicesList({ services, employees, categories }) {
                             sx={{
                               fontWeight: 600,
                               marginBottom: 1,
-                              color: 'text.primary',
-                              fontSize: '1.1rem'
+                              color: `text.primary`,
+                              fontSize: `1.1rem`,
                             }}
                           >
                             {service.name}
@@ -158,27 +170,31 @@ export default function ServicesList({ services, employees, categories }) {
 
                           {/* Price and Duration */}
                           <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: `flex`,
+                            alignItems: `center`,
                             gap: 1,
                             marginBottom: 1.5,
                           }}>
-                            <Euro sx={{ fontSize: 16, color: 'primary.main' }} />
+                            <Euro sx={{
+                              fontSize: 16, color: `primary.main`, 
+                            }} />
                             <Typography
                               variant="body1"
                               color="primary"
-                              sx={{ fontWeight: 600, fontSize: '1rem' }}
+                              sx={{
+                                fontWeight: 600, fontSize: `1rem`, 
+                              }}
                             >
                               {getPriceRange(service.employeePrices)}
                             </Typography>
                           </Box>
 
                           <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: `flex`,
+                            alignItems: `center`,
                             gap: 1,
                             marginBottom: 2,
-                            color: 'text.secondary'
+                            color: `text.secondary`,
                           }}>
                             <AccessTime sx={{ fontSize: 16 }} />
                             <Typography variant="body2">
@@ -189,11 +205,11 @@ export default function ServicesList({ services, employees, categories }) {
                           {/* Employee Chips */}
                           {service.employeePrices && service.employeePrices.length > 0 && (
                             <Box sx={{
-                              display: 'flex',
-                              flexWrap: 'wrap',
+                              display: `flex`,
+                              flexWrap: `wrap`,
                               gap: 0.5,
                               marginBottom: 2,
-                              flexGrow: 1
+                              flexGrow: 1,
                             }}>
                               {service.employeePrices.slice(0, 3).map((empPrice) => (
                                 <Chip
@@ -202,11 +218,11 @@ export default function ServicesList({ services, employees, categories }) {
                                   size="small"
                                   variant="outlined"
                                   sx={{
-                                    fontSize: '0.75rem',
-                                    height: '24px',
-                                    borderColor: 'primary.200',
-                                    color: 'primary.600',
-                                    backgroundColor: 'primary.50'
+                                    fontSize: `0.75rem`,
+                                    height: `24px`,
+                                    borderColor: `primary.200`,
+                                    color: `primary.600`,
+                                    backgroundColor: `primary.50`,
                                   }}
                                 />
                               ))}
@@ -216,10 +232,10 @@ export default function ServicesList({ services, employees, categories }) {
                                   size="small"
                                   variant="outlined"
                                   sx={{
-                                    fontSize: '0.75rem',
-                                    height: '24px',
-                                    borderColor: 'grey.300',
-                                    color: 'text.secondary'
+                                    fontSize: `0.75rem`,
+                                    height: `24px`,
+                                    borderColor: `grey.300`,
+                                    color: `text.secondary`,
                                   }}
                                 />
                               )}

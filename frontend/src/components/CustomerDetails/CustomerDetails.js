@@ -7,7 +7,9 @@ import {
 import ListItemText from "@/components/ListItemText/ListItemText";
 
 
-export default function CustomerDetails({ customer, onChangeCustomerClick }) {
+export default function CustomerDetails({
+  customer, onChangeCustomerClick, 
+}) {
   return (
     <List>
       <ListItemText

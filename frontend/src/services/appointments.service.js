@@ -12,7 +12,7 @@ const getAppointments = async (startDate, status) => {
 
     const data = transformIsoDates(
       response.data,
-      [`date`, `timeStart`, `timeEnd`, `createdDate`]
+      [`date`, `timeStart`, `timeEnd`, `createdDate`],
     );
 
     return data;
@@ -27,7 +27,7 @@ const getAppointment = async (id) => {
 
     const data = transformIsoDates(
       response.data,
-      [`date`, `timeStart`, `timeEnd`, `createdDate`]
+      [`date`, `timeStart`, `timeEnd`, `createdDate`],
     );
 
     return data;
@@ -53,7 +53,7 @@ const createAppointment = async (appointment) => {
 
     return transformIsoDates(
       response.data,
-      [`date`, `timeStart`, `timeEnd`, `createdDate`]
+      [`date`, `timeStart`, `timeEnd`, `createdDate`],
     );
   } catch (error) {
     handleAxiosError(error);

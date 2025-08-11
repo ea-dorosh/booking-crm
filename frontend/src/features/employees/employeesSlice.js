@@ -14,12 +14,14 @@ export const fetchEmployees = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const fetchEmployeeAppointments = createAsyncThunk(
   `customer/fetchEmployeeLastAppointments`,
-  async ({ id, filters = {} }, thunkAPI) => {
+  async ({
+    id, filters = {}, 
+  }, thunkAPI) => {
     try {
       const data = await employeesService.getEmployeeAppointments(id, filters);
 
@@ -27,7 +29,7 @@ export const fetchEmployeeAppointments = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateEmployee = createAsyncThunk(
@@ -57,7 +59,7 @@ export const updateEmployee = createAsyncThunk(
         return thunkAPI.rejectWithValue({ general: error.message });
       }
     }
-  }
+  },
 );
 
 const employeesSlice = createSlice({
@@ -124,7 +126,7 @@ const employeesSlice = createSlice({
         state.isLastAppointmentsPending = false;
         state.lastAppointmentsError = action.payload;
       })
-  }
+  },
 });
 
 export const {

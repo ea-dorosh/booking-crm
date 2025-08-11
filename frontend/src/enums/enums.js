@@ -15,15 +15,15 @@ const appointmentStatusEnum = {
 };
 
 const categoryStatusEnum = {
-  active: 'active',
-  archived: 'archived',
-  disabled: 'disabled',
+  active: `active`,
+  archived: `archived`,
+  disabled: `disabled`,
 };
 
 const subCategoryStatusEnum = {
-  active: 'active',
-  archived: 'archived',
-  disabled: 'disabled',
+  active: `active`,
+  archived: `archived`,
+  disabled: `disabled`,
 };
 
 export {

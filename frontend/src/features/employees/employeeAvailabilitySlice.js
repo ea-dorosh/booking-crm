@@ -15,7 +15,7 @@ export const fetchEmployeeAvailability = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const applyEmployeeAvailability = createAsyncThunk(
@@ -26,7 +26,7 @@ export const applyEmployeeAvailability = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const deleteEmployeeAvailability = createAsyncThunk(
@@ -37,7 +37,7 @@ export const deleteEmployeeAvailability = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 const employeesSlice = createSlice({
@@ -91,7 +91,7 @@ const employeesSlice = createSlice({
         state.applyEmployeeAvailabilityStatus = `failed`;
         state.applyEmployeeAvailabilityError = action.payload;
       })
-  }
+  },
 });
 
 export const { cleanEmployeeAvailability } = employeesSlice.actions;

@@ -39,7 +39,7 @@ export default function BasicDatePicker({
           }
         }}
         onAccept={() => {          
-          const formattedDate = localDate.format('YYYY-MM-DD');
+          const formattedDate = localDate.format(`YYYY-MM-DD`);
           onStartDateChange(formattedDate)
         }}
         onClose={() => {

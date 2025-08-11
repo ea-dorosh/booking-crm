@@ -19,10 +19,12 @@ import {
   toggleEmployeeFilter,
   toggleCategoryFilter,
   toggleSubCategoryFilter,
-  clearServicesFilters
+  clearServicesFilters,
 } from '@/features/services/servicesSlice';
 
-export default function FilterButton({ employees, categories, subCategories, sx }) {
+export default function FilterButton({
+  employees, categories, subCategories, sx, 
+}) {
   const dispatch = useDispatch();
   const selectedEmployees = useSelector(state => state.services.selectedEmployees);
   const selectedCategories = useSelector(state => state.services.selectedCategories || []);
@@ -72,15 +74,15 @@ export default function FilterButton({ employees, categories, subCategories, sx 
         onClick={handleFilterClick}
         sx={{
           borderRadius: 2,
-          textTransform: 'none',
+          textTransform: `none`,
           fontWeight: 500,
-          padding: '8px 16px',
-          fontSize: '0.875rem',
-          borderColor: totalSelected > 0 ? 'primary.main' : 'grey.300',
-          color: totalSelected > 0 ? 'primary.main' : 'text.secondary',
+          padding: `8px 16px`,
+          fontSize: `0.875rem`,
+          borderColor: totalSelected > 0 ? `primary.main` : `grey.300`,
+          color: totalSelected > 0 ? `primary.main` : `text.secondary`,
           '&:hover': {
-            borderColor: 'primary.main',
-            backgroundColor: 'primary.50',
+            borderColor: `primary.main`,
+            backgroundColor: `primary.50`,
           },
           ...sx,
         }}
@@ -93,45 +95,59 @@ export default function FilterButton({ employees, categories, subCategories, sx 
         anchorEl={anchorEl}
         onClose={handleFilterClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
+          vertical: `bottom`,
+          horizontal: `center`,
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: `top`,
+          horizontal: `center`,
         }}
         slotProps={{
           paper: {
             sx: {
-              width: { xs: '90vw', sm: '90vw', md: '600px' },
-              maxWidth: '600px',
-              maxHeight: { xs: '70vh', sm: '75vh', md: '80vh' },
-              overflow: 'hidden',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              borderRadius: { xs: 2, sm: 2 },
-              margin: { xs: '8px auto', sm: 'auto' },
-              left: { xs: '5vw !important', sm: 'auto' },
-              right: { xs: '5vw !important', sm: 'auto' },
-            }
-          }
+              width: {
+                xs: `90vw`, sm: `90vw`, md: `600px`, 
+              },
+              maxWidth: `600px`,
+              maxHeight: {
+                xs: `70vh`, sm: `75vh`, md: `80vh`, 
+              },
+              overflow: `hidden`,
+              boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
+              borderRadius: {
+                xs: 2, sm: 2, 
+              },
+              margin: {
+                xs: `8px auto`, sm: `auto`, 
+              },
+              left: {
+                xs: `5vw !important`, sm: `auto`, 
+              },
+              right: {
+                xs: `5vw !important`, sm: `auto`, 
+              },
+            },
+          },
         }}
       >
         <Box sx={{
-          padding: '12px',
-          maxHeight: { xs: '70vh', sm: '75vh', md: '80vh' },
-          overflow: 'auto'
+          padding: `12px`,
+          maxHeight: {
+            xs: `70vh`, sm: `75vh`, md: `80vh`, 
+          },
+          overflow: `auto`,
         }}>
           <Box sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            marginBottom: '12px'
+            display: `flex`,
+            justifyContent: `flex-end`,
+            alignItems: `center`,
+            marginBottom: `12px`,
           }}>
             {totalSelected > 0 && (
               <Button
                 size="small"
                 onClick={handleClearFilter}
-                sx={{ fontSize: '0.75rem' }}
+                sx={{ fontSize: `0.75rem` }}
               >
                 Clear All
               </Button>
@@ -139,8 +155,10 @@ export default function FilterButton({ employees, categories, subCategories, sx 
           </Box>
 
           {/* Employees */}
-          <Box sx={{ marginBottom: '16px' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '8px' }}>
+          <Box sx={{ marginBottom: `16px` }}>
+            <Typography variant="subtitle2" sx={{
+              fontWeight: 600, marginBottom: `8px`, 
+            }}>
               Employees
             </Typography>
             <Grid container spacing={0.5}>
@@ -155,20 +173,20 @@ export default function FilterButton({ employees, categories, subCategories, sx 
                       />
                     }
                     label={
-                      <Typography sx={{ fontSize: '0.85rem' }}>
+                      <Typography sx={{ fontSize: `0.85rem` }}>
                         {`${employee.firstName} ${employee.lastName}`}
                       </Typography>
                     }
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      width: '100%',
-                      margin: '0',
-                      padding: '0',
-                      borderRadius: '4px',
+                      display: `flex`,
+                      alignItems: `center`,
+                      width: `100%`,
+                      margin: `0`,
+                      padding: `0`,
+                      borderRadius: `4px`,
                       '&:hover': {
-                        backgroundColor: '#f5f5f5'
-                      }
+                        backgroundColor: `#f5f5f5`,
+                      },
                     }}
                   />
                 </Grid>
@@ -178,8 +196,10 @@ export default function FilterButton({ employees, categories, subCategories, sx 
 
           {/* Categories */}
           {categories && categories.length > 0 && (
-            <Box sx={{ marginBottom: '16px' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '8px' }}>
+            <Box sx={{ marginBottom: `16px` }}>
+              <Typography variant="subtitle2" sx={{
+                fontWeight: 600, marginBottom: `8px`, 
+              }}>
                 Categories
               </Typography>
               <Grid container spacing={0.5}>
@@ -194,20 +214,20 @@ export default function FilterButton({ employees, categories, subCategories, sx 
                         />
                       }
                       label={
-                        <Typography sx={{ fontSize: '0.85rem' }}>
+                        <Typography sx={{ fontSize: `0.85rem` }}>
                           {category.name}
                         </Typography>
                       }
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        width: '100%',
-                        margin: '0',
-                        padding: '0',
-                        borderRadius: '4px',
+                        display: `flex`,
+                        alignItems: `center`,
+                        width: `100%`,
+                        margin: `0`,
+                        padding: `0`,
+                        borderRadius: `4px`,
                         '&:hover': {
-                          backgroundColor: '#f5f5f5'
-                        }
+                          backgroundColor: `#f5f5f5`,
+                        },
                       }}
                     />
                   </Grid>
@@ -219,39 +239,43 @@ export default function FilterButton({ employees, categories, subCategories, sx 
           {/* Sub-Categories */}
           {subCategories && subCategories.length > 0 && (
             <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, marginBottom: '8px' }}>
+              <Typography variant="subtitle2" sx={{
+                fontWeight: 600, marginBottom: `8px`, 
+              }}>
                 Sub-Categories
               </Typography>
 
               {/* Group subcategories by category */}
               {categories && categories.map((category) => {
                 const categorySubCategories = subCategories.filter(
-                  subCat => subCat.categoryId === category.id
+                  subCat => subCat.categoryId === category.id,
                 );
 
                 if (categorySubCategories.length === 0) return null;
 
                 return (
                   <Accordion key={category.id} sx={{
-                    boxShadow: 'none',
-                    border: '1px solid #e0e0e0',
-                    marginBottom: '6px',
-                    '&:before': { display: 'none' }
+                    boxShadow: `none`,
+                    border: `1px solid #e0e0e0`,
+                    marginBottom: `6px`,
+                    '&:before': { display: `none` },
                   }}>
                     <AccordionSummary
                       expandIcon={<ExpandMore />}
                       sx={{
-                        minHeight: '36px',
+                        minHeight: `36px`,
                         '& .MuiAccordionSummary-content': {
-                          margin: '8px 0'
-                        }
+                          margin: `8px 0`,
+                        },
                       }}
                     >
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                      <Typography variant="body2" sx={{
+                        fontWeight: 500, color: `text.secondary`, 
+                      }}>
                         {category.name}
                       </Typography>
                     </AccordionSummary>
-                    <AccordionDetails sx={{ padding: '8px 12px' }}>
+                    <AccordionDetails sx={{ padding: `8px 12px` }}>
                       <Grid container spacing={0.5}>
                         {categorySubCategories.map((subCategory) => (
                           <Grid item xs={12} sm={6} key={subCategory.id}>
@@ -264,20 +288,20 @@ export default function FilterButton({ employees, categories, subCategories, sx 
                                 />
                               }
                               label={
-                                <Typography sx={{ fontSize: '0.8rem' }}>
+                                <Typography sx={{ fontSize: `0.8rem` }}>
                                   {subCategory.name}
                                 </Typography>
                               }
                               sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                width: '100%',
-                                margin: '1px 0',
-                                padding: '2px 4px',
-                                borderRadius: '3px',
+                                display: `flex`,
+                                alignItems: `center`,
+                                width: `100%`,
+                                margin: `1px 0`,
+                                padding: `2px 4px`,
+                                borderRadius: `3px`,
                                 '&:hover': {
-                                  backgroundColor: '#f5f5f5'
-                                }
+                                  backgroundColor: `#f5f5f5`,
+                                },
                               }}
                             />
                           </Grid>

@@ -9,5 +9,5 @@ export const selectSortedAppointments = createSelector(
   [data, sortRule, sortDirection],
   (appointments, sortRule, sortDirection) => {
     return orderBy(appointments, [sortRule, `timeStart`], [sortDirection, sortDirection]);
-  }
+  },
 );

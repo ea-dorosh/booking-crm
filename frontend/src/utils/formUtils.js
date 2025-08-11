@@ -136,7 +136,7 @@ export const createServiceSubmitData = (entity, formData) => {
   if (submitData.employeePrices && Array.isArray(submitData.employeePrices)) {
     submitData.employeePrices = submitData.employeePrices.map(emp => ({
       ...emp,
-      price: emp.price === `` || emp.price === null || emp.price === undefined ? null : Number(emp.price)
+      price: emp.price === `` || emp.price === null || emp.price === undefined ? null : Number(emp.price),
     }));
   }
 
@@ -180,7 +180,7 @@ export const createCustomerSubmitData = (entity, formData) => {
   };
 
   // Process salutation - convert to number if it's a string
-  if (typeof submitData.salutation === 'string') {
+  if (typeof submitData.salutation === `string`) {
     submitData.salutation = Number(submitData.salutation);
   }
 

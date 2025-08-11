@@ -14,7 +14,7 @@ export const fetchServices = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateService = createAsyncThunk(
@@ -43,7 +43,7 @@ export const updateService = createAsyncThunk(
         return thunkAPI.rejectWithValue({ general: error.message });
       }
     }
-  }
+  },
 );
 
 export const deleteService = createAsyncThunk(
@@ -66,7 +66,7 @@ export const deleteService = createAsyncThunk(
         return thunkAPI.rejectWithValue({ general: error.message });
       }
     }
-  }
+  },
 );
 
 const servicesSlice = createSlice({
@@ -78,9 +78,9 @@ const servicesSlice = createSlice({
     updateFormData: null,
     isUpdateServiceRequestPending: false,
     updateFormErrors: null,
-    selectedEmployees: JSON.parse(sessionStorage.getItem('services-employee-filter') || '[]'),
-    selectedCategories: JSON.parse(sessionStorage.getItem('services-category-filter') || '[]'),
-    selectedSubCategories: JSON.parse(sessionStorage.getItem('services-subcategory-filter') || '[]'),
+    selectedEmployees: JSON.parse(sessionStorage.getItem(`services-employee-filter`) || `[]`),
+    selectedCategories: JSON.parse(sessionStorage.getItem(`services-category-filter`) || `[]`),
+    selectedSubCategories: JSON.parse(sessionStorage.getItem(`services-subcategory-filter`) || `[]`),
   },
   reducers: {
     cleanError: (state, action) => {
@@ -95,7 +95,7 @@ const servicesSlice = createSlice({
     },
     setSelectedEmployees: (state, action) => {
       state.selectedEmployees = action.payload;
-      sessionStorage.setItem('services-employee-filter', JSON.stringify(action.payload));
+      sessionStorage.setItem(`services-employee-filter`, JSON.stringify(action.payload));
     },
     toggleEmployeeFilter: (state, action) => {
       const employeeId = action.payload;
@@ -107,11 +107,11 @@ const servicesSlice = createSlice({
         state.selectedEmployees = [...currentSelection, employeeId];
       }
 
-      sessionStorage.setItem('services-employee-filter', JSON.stringify(state.selectedEmployees));
+      sessionStorage.setItem(`services-employee-filter`, JSON.stringify(state.selectedEmployees));
     },
     clearEmployeeFilter: (state) => {
       state.selectedEmployees = [];
-      sessionStorage.removeItem('services-employee-filter');
+      sessionStorage.removeItem(`services-employee-filter`);
     },
     toggleCategoryFilter: (state, action) => {
       const categoryId = action.payload;
@@ -123,7 +123,7 @@ const servicesSlice = createSlice({
         state.selectedCategories = [...currentSelection, categoryId];
       }
 
-      sessionStorage.setItem('services-category-filter', JSON.stringify(state.selectedCategories));
+      sessionStorage.setItem(`services-category-filter`, JSON.stringify(state.selectedCategories));
     },
     toggleSubCategoryFilter: (state, action) => {
       const subCategoryId = action.payload;
@@ -135,15 +135,15 @@ const servicesSlice = createSlice({
         state.selectedSubCategories = [...currentSelection, subCategoryId];
       }
 
-      sessionStorage.setItem('services-subcategory-filter', JSON.stringify(state.selectedSubCategories));
+      sessionStorage.setItem(`services-subcategory-filter`, JSON.stringify(state.selectedSubCategories));
     },
     clearServicesFilters: (state) => {
       state.selectedEmployees = [];
       state.selectedCategories = [];
       state.selectedSubCategories = [];
-      sessionStorage.removeItem('services-employee-filter');
-      sessionStorage.removeItem('services-category-filter');
-      sessionStorage.removeItem('services-subcategory-filter');
+      sessionStorage.removeItem(`services-employee-filter`);
+      sessionStorage.removeItem(`services-category-filter`);
+      sessionStorage.removeItem(`services-subcategory-filter`);
     },
   },
   extraReducers: (builder) => {
@@ -181,7 +181,7 @@ const servicesSlice = createSlice({
       .addCase(deleteService.rejected, (state) => {
         state.isUpdateServiceRequestPending = false;
       })
-  }
+  },
 });
 
 export const {

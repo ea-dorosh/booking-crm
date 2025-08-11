@@ -14,7 +14,7 @@ export default function CustomersPage() {
   const dispatch = useDispatch();
 
   const invoices = useSelector(state => state.invoices.data);
-  const { isPending} = useSelector(state => state.invoices);
+  const { isPending } = useSelector(state => state.invoices);
 
   useEffect(() => {
     if (!invoices) {

@@ -29,40 +29,48 @@ const ImageUpload = ({
   const handleRemoveImage = () => {
     setTemporaryImage(null);
     // Create fake event to clear the image
-    onChange({ target: { files: [], name } });
+    onChange({
+      target: {
+        files: [], name, 
+      }, 
+    });
   };
 
   const displayImage = temporaryImage || currentImage;
 
   return (
-    <Box sx={{ width: `100%`, ...sx }}>
+    <Box sx={{
+      width: `100%`, ...sx, 
+    }}>
       <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 2
+        display: `flex`,
+        flexDirection: `column`,
+        alignItems: `center`,
+        gap: 2,
       }}>
         {/* Image Preview */}
         {displayImage ? (
           <Box sx={{
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 1
+            position: `relative`,
+            display: `flex`,
+            flexDirection: `column`,
+            alignItems: `center`,
+            gap: 1,
           }}>
             <Avatar
               src={displayImage}
               sx={{
                 width: 120,
                 height: 120,
-                border: '3px solid',
-                borderColor: 'primary.light',
+                border: `3px solid`,
+                borderColor: `primary.light`,
                 boxShadow: 2,
               }}
             />
 
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{
+              display: `flex`, gap: 1, 
+            }}>
               {/* Change Image Button */}
               <Button
                 component="label"
@@ -72,8 +80,8 @@ const ImageUpload = ({
                 disabled={disabled}
                 sx={{
                   borderRadius: 2,
-                  textTransform: 'none',
-                  fontSize: '0.875rem'
+                  textTransform: `none`,
+                  fontSize: `0.875rem`,
                 }}
               >
                 Change
@@ -93,11 +101,11 @@ const ImageUpload = ({
                 disabled={disabled}
                 size="small"
                 sx={{
-                  color: 'error.main',
+                  color: `error.main`,
                   '&:hover': {
-                    backgroundColor: 'error.light',
-                    color: 'white'
-                  }
+                    backgroundColor: `error.light`,
+                    color: `white`,
+                  },
                 }}
               >
                 <Delete fontSize="small" />
@@ -107,23 +115,25 @@ const ImageUpload = ({
         ) : (
           /* Upload Button */
           <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: `flex`,
+            flexDirection: `column`,
+            alignItems: `center`,
             gap: 1,
             py: 4,
             px: 3,
-            border: '2px dashed',
-            borderColor: 'divider',
+            border: `2px dashed`,
+            borderColor: `divider`,
             borderRadius: 2,
-            backgroundColor: 'grey.50',
+            backgroundColor: `grey.50`,
             minWidth: 200,
             '&:hover': {
-              borderColor: 'primary.main',
-              backgroundColor: 'primary.50',
-            }
+              borderColor: `primary.main`,
+              backgroundColor: `primary.50`,
+            },
           }}>
-            <CloudUpload sx={{ fontSize: 48, color: 'text.secondary' }} />
+            <CloudUpload sx={{
+              fontSize: 48, color: `text.secondary`, 
+            }} />
 
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Upload profile image
@@ -136,8 +146,8 @@ const ImageUpload = ({
               disabled={disabled}
               sx={{
                 borderRadius: 2,
-                textTransform: 'none',
-                mt: 1
+                textTransform: `none`,
+                mt: 1,
               }}
             >
               Choose File

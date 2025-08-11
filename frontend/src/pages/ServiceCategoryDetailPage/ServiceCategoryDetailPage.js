@@ -44,8 +44,8 @@ export default function ServiceCategoryDetailPage() {
 
   useEffect(() => {
     if (!serviceCategory && !shouldShowCategoryForm) {
-      const storedStatus = sessionStorage.getItem('categoriesStatusFilter');
-      const statuses = storedStatus === 'all'
+      const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
+      const statuses = storedStatus === `all`
         ? [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]
         : storedStatus ? [storedStatus] : [categoryStatusEnum.active];
 
@@ -104,8 +104,10 @@ export default function ServiceCategoryDetailPage() {
     if (!serviceCategory) return;
     const isArchived = String(serviceCategory.status).toLowerCase() === categoryStatusEnum.archived;
     const nextStatus = isArchived ? categoryStatusEnum.active : categoryStatusEnum.archived;
-    console.log('[ServiceCategoryDetailPage] toggle archive category:', serviceCategory.id, '->', nextStatus);
-    await dispatch(updateCategory({ id: serviceCategory.id, status: nextStatus }));
+    console.log(`[ServiceCategoryDetailPage] toggle archive category:`, serviceCategory.id, `->`, nextStatus);
+    await dispatch(updateCategory({
+      id: serviceCategory.id, status: nextStatus, 
+    }));
     await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
   };
 
@@ -113,14 +115,20 @@ export default function ServiceCategoryDetailPage() {
     if (!serviceCategory) return;
     const isDisabled = String(serviceCategory.status).toLowerCase() === categoryStatusEnum.disabled;
     const nextStatus = isDisabled ? categoryStatusEnum.active : categoryStatusEnum.disabled;
-    console.log('[ServiceCategoryDetailPage] toggle deactivate category:', serviceCategory.id, '->', nextStatus);
-    await dispatch(updateCategory({ id: serviceCategory.id, status: nextStatus }));
+    console.log(`[ServiceCategoryDetailPage] toggle deactivate category:`, serviceCategory.id, `->`, nextStatus);
+    await dispatch(updateCategory({
+      id: serviceCategory.id, status: nextStatus, 
+    }));
     await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
   };
 
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{ padding: { xs: 0, md: 0 } }}>
+      <Box sx={{
+        padding: {
+          xs: 0, md: 0, 
+        }, 
+      }}>
         {!isEditMode && <GoBackNavigation />}
 
         {(isUpdateCategoryRequestPending || areCategoriesFetching) && (

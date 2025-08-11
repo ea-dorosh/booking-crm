@@ -19,9 +19,9 @@ export default function CompanyBranchForm({
   // Define form fields configuration
   const formFields = [
     {
-      name: "name",
-      label: "Name",
-      type: "text",
+      name: `name`,
+      label: `Name`,
+      type: `text`,
       required: true,
     },
     ...ADDRESS_FIELDS,

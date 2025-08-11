@@ -10,9 +10,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import CustomersSorting from "@/components/CustomersSorting/CustomersSorting";
 import { formatFromDateTimeToStringDate } from "@/utils/formatters";
 
-export default function CustomersContainer({ 
-  customers,
-}) {
+export default function CustomersContainer({ customers }) {
   return (
     <Box>
       <Box
@@ -28,14 +26,14 @@ export default function CustomersContainer({
         }}
       >
         <Typography variant="button"
-          sx={{color: `#fff`}}
+          sx={{ color: `#fff` }}
         >
           add customer
         </Typography>
 
         <RouterLink to={`/customers/create-customer`}>
           <IconButton
-            sx={{color: `#fff`}}
+            sx={{ color: `#fff` }}
           >
             <AddCircle />
           </IconButton>

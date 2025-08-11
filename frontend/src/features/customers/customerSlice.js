@@ -14,7 +14,7 @@ export const fetchCustomer = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const fetchCustomerAppointments = createAsyncThunk(
@@ -27,7 +27,7 @@ export const fetchCustomerAppointments = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateCustomer = createAsyncThunk(
@@ -44,7 +44,7 @@ export const updateCustomer = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const customerSlice = createSlice({
@@ -115,12 +115,12 @@ const customerSlice = createSlice({
         state.isSavedAppointmentsPending = false;
         state.savedAppointmentsError = action.payload;
       })
-  }
+  },
 });
 
 export const {
   cleanError,
   cleanErrors,
-  resetCustomerData
+  resetCustomerData,
 } = customerSlice.actions;
 export default customerSlice.reducer;

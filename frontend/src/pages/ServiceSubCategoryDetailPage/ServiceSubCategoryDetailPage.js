@@ -56,8 +56,8 @@ export default function ServiceSubCategoryDetailPage() {
     }
 
     if (!serviceSubCategory && !shouldShowSubCategoryForm) {
-      const storedStatus = sessionStorage.getItem('subCategoriesStatusFilter');
-      const statuses = storedStatus === 'all'
+      const storedStatus = sessionStorage.getItem(`subCategoriesStatusFilter`);
+      const statuses = storedStatus === `all`
         ? [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]
         : storedStatus ? [storedStatus] : [subCategoryStatusEnum.active];
       promises.push(dispatch(fetchServiceSubCategories(statuses)));
@@ -117,7 +117,9 @@ export default function ServiceSubCategoryDetailPage() {
     if (!serviceSubCategory) return;
     const isArchived = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.archived;
     const nextStatus = isArchived ? subCategoryStatusEnum.active : subCategoryStatusEnum.archived;
-    await dispatch(updateSubCategory({ id: serviceSubCategory.id, status: nextStatus }));
+    await dispatch(updateSubCategory({
+      id: serviceSubCategory.id, status: nextStatus, 
+    }));
     await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
   };
 
@@ -125,13 +127,19 @@ export default function ServiceSubCategoryDetailPage() {
     if (!serviceSubCategory) return;
     const isDisabled = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.disabled;
     const nextStatus = isDisabled ? subCategoryStatusEnum.active : subCategoryStatusEnum.disabled;
-    await dispatch(updateSubCategory({ id: serviceSubCategory.id, status: nextStatus }));
+    await dispatch(updateSubCategory({
+      id: serviceSubCategory.id, status: nextStatus, 
+    }));
     await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
   };
 
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{ padding: { xs: 0, md: 0, maxWidth: `768px` } }}>
+      <Box sx={{
+        padding: {
+          xs: 0, md: 0, maxWidth: `768px`, 
+        }, 
+      }}>
         {!isEditMode && <GoBackNavigation />}
 
         {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && (

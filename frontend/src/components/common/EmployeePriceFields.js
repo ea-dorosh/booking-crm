@@ -39,7 +39,7 @@ const EmployeePriceFields = ({
                     onCheckboxChange(event, employee.employeeId);
                     // Clear employee prices error when user changes selection
                     if (cleanError && formErrors?.employeePrices) {
-                      cleanError('employeePrices');
+                      cleanError(`employeePrices`);
                     }
                   }}
                   value={employee.employeeId}
@@ -51,9 +51,11 @@ const EmployeePriceFields = ({
           </FormControl>
 
           {employeePrices.some(employeePrice => employeePrice.employeeId === employee.employeeId) && (
-            <FormControl error={Boolean(formErrors?.employeeIds)} sx={{ mt: 1, width: '100%' }}>
+            <FormControl error={Boolean(formErrors?.employeeIds)} sx={{
+              mt: 1, width: `100%`, 
+            }}>
               <TextField
-                value={employeePrices.find(employeePrice => employeePrice.employeeId === employee.employeeId)?.price || ''}
+                value={employeePrices.find(employeePrice => employeePrice.employeeId === employee.employeeId)?.price || ``}
                 label="Service Price"
                 variant="outlined"
                 name="employeePrice"
@@ -61,13 +63,15 @@ const EmployeePriceFields = ({
                   onPriceChange(event, employee.employeeId);
                   // Clear employee prices error when user starts typing
                   if (cleanError && formErrors?.employeePrices) {
-                    cleanError('employeePrices');
+                    cleanError(`employeePrices`);
                   }
                 }}
                 size="small"
                 disabled={disabled}
                 type="number"
-                inputProps={{ min: 0, step: 0.01 }}
+                inputProps={{
+                  min: 0, step: 0.01, 
+                }}
               />
             </FormControl>
           )}
@@ -75,7 +79,7 @@ const EmployeePriceFields = ({
       ))}
 
       {formErrors?.employeePrices && (
-        <FormHelperText sx={{ color: 'error.main' }}>
+        <FormHelperText sx={{ color: `error.main` }}>
           {formErrors.employeePrices}
         </FormHelperText>
       )}

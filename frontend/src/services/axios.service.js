@@ -12,11 +12,11 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (config.method !== 'get' && config.method !== 'head') {
+    if (config.method !== `get` && config.method !== `head`) {
       if (config.data instanceof FormData) {
-        config.headers['Content-Type'] = 'multipart/form-data';
+        config.headers[`Content-Type`] = `multipart/form-data`;
       } else {
-        config.headers['Content-Type'] = 'application/json';
+        config.headers[`Content-Type`] = `application/json`;
       }
     }
 
@@ -24,7 +24,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 export const handleAxiosError = (error) => {

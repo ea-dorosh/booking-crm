@@ -16,8 +16,10 @@ import { Link as RouterLink } from 'react-router-dom';
 const defaultTheme = createTheme();
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState({ type: '', message: '' });
+  const [email, setEmail] = useState(``);
+  const [status, setStatus] = useState({
+    type: ``, message: ``, 
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event) => {
@@ -25,20 +27,22 @@ export default function ForgotPasswordPage() {
 
     if (!email) {
       setStatus({
-        type: 'error',
-        message: 'Please enter your email address'
+        type: `error`,
+        message: `Please enter your email address`,
       });
       return;
     }
 
     setIsSubmitting(true);
-    setStatus({ type: '', message: '' });
+    setStatus({
+      type: ``, message: ``, 
+    });
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}auth/forgot-password`, {
-        method: 'POST',
+        method: `POST`,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': `application/json`,
         },
         body: JSON.stringify({ email }),
       });
@@ -47,21 +51,21 @@ export default function ForgotPasswordPage() {
 
       if (response.ok) {
         setStatus({
-          type: 'success',
-          message: data.message || 'Password reset instructions have been sent to your email'
+          type: `success`,
+          message: data.message || `Password reset instructions have been sent to your email`,
         });
-        setEmail('');
+        setEmail(``);
       } else {
         setStatus({
-          type: 'error',
-          message: data.message || 'An error occurred. Please try again.'
+          type: `error`,
+          message: data.message || `An error occurred. Please try again.`,
         });
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error(`Error:`, error);
       setStatus({
-        type: 'error',
-        message: 'A network error occurred. Please try again later.'
+        type: `error`,
+        message: `A network error occurred. Please try again later.`,
       });
     } finally {
       setIsSubmitting(false);
@@ -75,12 +79,14 @@ export default function ForgotPasswordPage() {
         <Box
           sx={{
             marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: `flex`,
+            flexDirection: `column`,
+            alignItems: `center`,
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <Avatar sx={{
+            m: 1, bgcolor: `secondary.main`, 
+          }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -90,13 +96,17 @@ export default function ForgotPasswordPage() {
           {status.message && (
             <Alert
               severity={status.type}
-              sx={{ mt: 2, width: '100%' }}
+              sx={{
+                mt: 2, width: `100%`, 
+              }}
             >
               {status.message}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{
+            mt: 1, width: `100%`, 
+          }}>
             <TextField
               margin="normal"
               required
@@ -115,10 +125,12 @@ export default function ForgotPasswordPage() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{
+                mt: 3, mb: 2, 
+              }}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+              {isSubmitting ? `Sending...` : `Send Reset Link`}
             </Button>
 
             <Grid container justifyContent="center">
@@ -132,10 +144,10 @@ export default function ForgotPasswordPage() {
         </Box>
 
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 8 }}>
-          {'Copyright © '}
+          {`Copyright © `}
           <Link color="inherit" href="#">
             Booking CRM
-          </Link>{' '}
+          </Link>{` `}
           {new Date().getFullYear()}
         </Typography>
       </Container>

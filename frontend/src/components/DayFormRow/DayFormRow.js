@@ -19,32 +19,84 @@ import { useState, useEffect, useMemo } from "react";
 import { formattedTime } from '@/utils/formatters';
 
 const timeSlots = [
-  { startTime: '08:00:00', endTime: '08:30:00' },
-  { startTime: '08:30:00', endTime: '09:00:00' },
-  { startTime: '09:00:00', endTime: '09:30:00' },
-  { startTime: '09:30:00', endTime: '10:00:00' },
-  { startTime: '10:00:00', endTime: '10:30:00' },
-  { startTime: '10:30:00', endTime: '11:00:00' },
-  { startTime: '11:00:00', endTime: '11:30:00' },
-  { startTime: '11:30:00', endTime: '12:00:00' },
-  { startTime: '12:00:00', endTime: '12:30:00' },
-  { startTime: '12:30:00', endTime: '13:00:00' },
-  { startTime: '13:00:00', endTime: '13:30:00' },
-  { startTime: '13:30:00', endTime: '14:00:00' },
-  { startTime: '14:00:00', endTime: '14:30:00' },
-  { startTime: '14:30:00', endTime: '15:00:00' },
-  { startTime: '15:00:00', endTime: '15:30:00' },
-  { startTime: '15:30:00', endTime: '16:00:00' },
-  { startTime: '16:00:00', endTime: '16:30:00' },
-  { startTime: '16:30:00', endTime: '17:00:00' },
-  { startTime: '17:00:00', endTime: '17:30:00' },
-  { startTime: '17:30:00', endTime: '18:00:00' },
-  { startTime: '18:00:00', endTime: '18:30:00' },
-  { startTime: '18:30:00', endTime: '19:00:00' },
-  { startTime: '19:00:00', endTime: '19:30:00' },
-  { startTime: '19:30:00', endTime: '20:00:00' },
-  { startTime: '20:00:00', endTime: '20:30:00' },
-  { startTime: '20:30:00', endTime: '21:00:00' },
+  {
+    startTime: `08:00:00`, endTime: `08:30:00`, 
+  },
+  {
+    startTime: `08:30:00`, endTime: `09:00:00`, 
+  },
+  {
+    startTime: `09:00:00`, endTime: `09:30:00`, 
+  },
+  {
+    startTime: `09:30:00`, endTime: `10:00:00`, 
+  },
+  {
+    startTime: `10:00:00`, endTime: `10:30:00`, 
+  },
+  {
+    startTime: `10:30:00`, endTime: `11:00:00`, 
+  },
+  {
+    startTime: `11:00:00`, endTime: `11:30:00`, 
+  },
+  {
+    startTime: `11:30:00`, endTime: `12:00:00`, 
+  },
+  {
+    startTime: `12:00:00`, endTime: `12:30:00`, 
+  },
+  {
+    startTime: `12:30:00`, endTime: `13:00:00`, 
+  },
+  {
+    startTime: `13:00:00`, endTime: `13:30:00`, 
+  },
+  {
+    startTime: `13:30:00`, endTime: `14:00:00`, 
+  },
+  {
+    startTime: `14:00:00`, endTime: `14:30:00`, 
+  },
+  {
+    startTime: `14:30:00`, endTime: `15:00:00`, 
+  },
+  {
+    startTime: `15:00:00`, endTime: `15:30:00`, 
+  },
+  {
+    startTime: `15:30:00`, endTime: `16:00:00`, 
+  },
+  {
+    startTime: `16:00:00`, endTime: `16:30:00`, 
+  },
+  {
+    startTime: `16:30:00`, endTime: `17:00:00`, 
+  },
+  {
+    startTime: `17:00:00`, endTime: `17:30:00`, 
+  },
+  {
+    startTime: `17:30:00`, endTime: `18:00:00`, 
+  },
+  {
+    startTime: `18:00:00`, endTime: `18:30:00`, 
+  },
+  {
+    startTime: `18:30:00`, endTime: `19:00:00`, 
+  },
+  {
+    startTime: `19:00:00`, endTime: `19:30:00`, 
+  },
+  {
+    startTime: `19:30:00`, endTime: `20:00:00`, 
+  },
+  {
+    startTime: `20:00:00`, endTime: `20:30:00`, 
+  },
+  {
+    startTime: `20:30:00`, endTime: `21:00:00`, 
+  },
 ];
 
 export default function DayFormRow({
@@ -54,15 +106,15 @@ export default function DayFormRow({
   deleteEmployeeAvailability,
 }) {
   const [startTime, setStartTime] = useState(
-    employeeAvailability?.startTime || ''
+    employeeAvailability?.startTime || ``,
   );
-  const [endTime, setEndTime] = useState(employeeAvailability?.endTime || '');
+  const [endTime, setEndTime] = useState(employeeAvailability?.endTime || ``);
   const [isTimeChanged, setIsTimeChanged] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
-    setStartTime(employeeAvailability?.startTime || '');
-    setEndTime(employeeAvailability?.endTime || '');
+    setStartTime(employeeAvailability?.startTime || ``);
+    setEndTime(employeeAvailability?.endTime || ``);
     setIsTimeChanged(false);
   }, [employeeAvailability]);
 
@@ -106,12 +158,14 @@ export default function DayFormRow({
         sx={{
           padding: 2,
           marginBottom: 1.5,
-          backgroundColor: 'primary.50',
-          border: '1px solid',
-          borderColor: 'primary.200'
+          backgroundColor: `primary.50`,
+          border: `1px solid`,
+          borderColor: `primary.200`,
         }}
       >
-        <Typography variant="body2" sx={{ fontWeight: 600, marginBottom: 1.5 }}>
+        <Typography variant="body2" sx={{
+          fontWeight: 600, marginBottom: 1.5, 
+        }}>
           {day.name}
         </Typography>
 
@@ -175,24 +229,26 @@ export default function DayFormRow({
   return (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
+        display: `flex`,
+        alignItems: `center`,
+        justifyContent: `space-between`,
         padding: 1.5,
         marginBottom: 1,
-        backgroundColor: 'grey.50',
+        backgroundColor: `grey.50`,
         borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'grey.200',
+        border: `1px solid`,
+        borderColor: `grey.200`,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+      <Box sx={{
+        display: `flex`, alignItems: `center`, flex: 1, 
+      }}>
         <Typography
           variant="body2"
           sx={{
             minWidth: 80,
             fontWeight: 500,
-            color: 'text.primary'
+            color: `text.primary`,
           }}
         >
           {day.name}
@@ -202,12 +258,12 @@ export default function DayFormRow({
           variant="body2"
           sx={{
             marginLeft: 2,
-            color: employeeAvailability ? 'text.primary' : 'text.secondary'
+            color: employeeAvailability ? `text.primary` : `text.secondary`,
           }}
         >
           {employeeAvailability
             ? `${formattedTime(employeeAvailability.startTime)} - ${formattedTime(employeeAvailability.endTime)}`
-            : 'Not working'
+            : `Not working`
           }
         </Typography>
       </Box>
@@ -220,9 +276,9 @@ export default function DayFormRow({
               variant="outlined"
               onClick={() => setIsEditMode(true)}
               sx={{
-                minWidth: 'auto',
-                padding: '4px 8px',
-                fontSize: '0.75rem'
+                minWidth: `auto`,
+                padding: `4px 8px`,
+                fontSize: `0.75rem`,
               }}
             >
               Change
@@ -231,7 +287,7 @@ export default function DayFormRow({
               size="small"
               onClick={onDeleteEmployeeAvailability}
               color="error"
-              sx={{ padding: '4px' }}
+              sx={{ padding: `4px` }}
             >
               <Delete sx={{ fontSize: 16 }} />
             </IconButton>
@@ -243,9 +299,9 @@ export default function DayFormRow({
             startIcon={<Add sx={{ fontSize: 16 }} />}
             onClick={() => setIsEditMode(true)}
             sx={{
-              minWidth: 'auto',
-              padding: '4px 8px',
-              fontSize: '0.75rem'
+              minWidth: `auto`,
+              padding: `4px 8px`,
+              fontSize: `0.75rem`,
             }}
           >
             Add

@@ -26,27 +26,27 @@ export default function Tabs({
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: `100%` }}>
       <Box sx={{
         borderBottom: 1,
-        borderColor: 'divider',
-        backgroundColor: 'background.paper',
+        borderColor: `divider`,
+        backgroundColor: `background.paper`,
         borderRadius: 2,
-        overflow: 'hidden',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        overflow: `hidden`,
+        boxShadow: `0 1px 3px rgba(0,0,0,0.1)`,
       }}>
         <MuiTabs
           value={value}
           onChange={handleChange}
           sx={{
-            minHeight: '48px',
+            minHeight: `48px`,
             '& .MuiTabs-indicator': {
-              backgroundColor: 'primary.main',
+              backgroundColor: `primary.main`,
               height: 3,
             },
             '& .MuiTabs-flexContainer': {
               gap: 0,
-            }
+            },
           }}
         >
           {tabs.map((tab) => (
@@ -56,27 +56,27 @@ export default function Tabs({
               value={tab.value}
               sx={{
                 flex: 1,
-                minHeight: '48px',
-                padding: '8px 12px',
-                fontSize: '0.875rem',
+                minHeight: `48px`,
+                padding: `8px 12px`,
+                fontSize: `0.875rem`,
                 fontWeight: 500,
-                textTransform: 'none',
-                color: 'text.secondary',
-                borderBottom: '2px solid transparent',
-                transition: 'all 0.2s ease-in-out',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
+                textTransform: `none`,
+                color: `text.secondary`,
+                borderBottom: `2px solid transparent`,
+                transition: `all 0.2s ease-in-out`,
+                wordBreak: `break-word`,
+                whiteSpace: `normal`,
                 lineHeight: 1.2,
                 '&.Mui-selected': {
-                  color: 'primary.main',
+                  color: `primary.main`,
                 },
                 '&:hover': {
-                  backgroundColor: 'action.hover',
-                  color: 'primary.main',
+                  backgroundColor: `action.hover`,
+                  color: `primary.main`,
                 },
                 '&.Mui-focusVisible': {
-                  backgroundColor: 'action.focus',
-                }
+                  backgroundColor: `action.focus`,
+                },
               }}
             />
           ))}

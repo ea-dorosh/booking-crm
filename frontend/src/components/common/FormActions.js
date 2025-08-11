@@ -7,8 +7,8 @@ import {
 const FormActions = ({
   onSubmit,
   onCancel,
-  submitText = "Save",
-  cancelText = "Cancel",
+  submitText = `Save`,
+  cancelText = `Cancel`,
   isPending = false,
   disabled = false,
   showCancel = true,
@@ -21,11 +21,11 @@ const FormActions = ({
     <Box
       sx={{
         display: `flex`,
-        flexDirection: 'row',
+        flexDirection: `row`,
         gap: 2,
         mt: 2.5,
-        justifyContent: 'flex-start',
-        width: '100%',
+        justifyContent: `flex-start`,
+        width: `100%`,
         ...sx,
       }}
     >
@@ -37,7 +37,7 @@ const FormActions = ({
           disabled={isPending}
           sx={{
             flex: 1,
-            minWidth: 120
+            minWidth: 120,
           }}
         >
           {cancelText}
@@ -52,9 +52,9 @@ const FormActions = ({
         disabled={hasErrors}
         endIcon={isPending && <CircularProgress size={16} />}
         sx={{
-          flex: hasTwoButtons ? 1 : 'none',
-          width: hasTwoButtons ? 'auto' : '100%',
-          minWidth: hasTwoButtons ? 120 : 'auto'
+          flex: hasTwoButtons ? 1 : `none`,
+          width: hasTwoButtons ? `auto` : `100%`,
+          minWidth: hasTwoButtons ? 120 : `auto`,
         }}
       >
         {submitText}

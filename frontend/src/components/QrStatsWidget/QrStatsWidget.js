@@ -16,7 +16,9 @@ import { fetchQrScanStats } from '@/features/tracking/trackingSlice';
 
 export default function QrStatsWidget() {
   const dispatch = useDispatch();
-  const { stats, loading, error } = useSelector((state) => state.tracking);
+  const {
+    stats, loading, error, 
+  } = useSelector((state) => state.tracking);
 
   useEffect(() => {
     dispatch(fetchQrScanStats(90)); // Last 3 months
@@ -90,9 +92,9 @@ export default function QrStatsWidget() {
               {stats.scansByDay.slice(-7).map((day) => (
                 <Box key={day.date} textAlign="center" flex={1}>
                   <Typography variant="caption" color="text.secondary">
-                    {new Date(day.date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric'
+                    {new Date(day.date).toLocaleDateString(`en-US`, {
+                      month: `short`,
+                      day: `numeric`,
                     })}
                   </Typography>
                   <Typography variant="body2" fontWeight="bold">

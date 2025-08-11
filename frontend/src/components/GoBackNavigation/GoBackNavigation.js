@@ -14,25 +14,25 @@ export default function GoBackNavigation() {
     <Box sx={{ marginBottom: 2 }}>
       <Button
         onClick={() => navigate(-1)}
-        startIcon={<ArrowBack sx={{ fontSize: '18px' }} />}
+        startIcon={<ArrowBack sx={{ fontSize: `18px` }} />}
         variant="outlined"
         size="small"
         sx={{
           borderRadius: 2,
-          padding: '6px 12px',
-          fontSize: '0.85rem',
+          padding: `6px 12px`,
+          fontSize: `0.85rem`,
           fontWeight: 500,
-          textTransform: 'none',
-          color: 'text.primary',
-          borderColor: 'grey.300',
-          backgroundColor: 'white',
+          textTransform: `none`,
+          color: `text.primary`,
+          borderColor: `grey.300`,
+          backgroundColor: `white`,
           '&:hover': {
-            backgroundColor: 'grey.50',
-            borderColor: 'grey.400',
-            transform: 'translateX(-2px)',
+            backgroundColor: `grey.50`,
+            borderColor: `grey.400`,
+            transform: `translateX(-2px)`,
           },
-          transition: 'all 0.2s ease-in-out',
-          minWidth: 'auto',
+          transition: `all 0.2s ease-in-out`,
+          minWidth: `auto`,
         }}
       >
         Go back

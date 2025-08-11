@@ -14,7 +14,7 @@ export const fetchServiceSubCategories = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateSubCategory = createAsyncThunk(
@@ -45,7 +45,7 @@ export const updateSubCategory = createAsyncThunk(
         return thunkAPI.rejectWithValue({ general: error.message });
       }
     }
-  }
+  },
 );
 
 export const deleteService = createAsyncThunk(
@@ -70,7 +70,7 @@ export const deleteService = createAsyncThunk(
         return thunkAPI.rejectWithValue({ general: error.message });
       }
     }
-  }
+  },
 );
 
 const serviceSubCategoriesSlice = createSlice({
@@ -119,7 +119,7 @@ const serviceSubCategoriesSlice = createSlice({
         state.isUpdateSubCategoryRequestPending = false;
         state.updateFormErrors = action.payload;
       })
-  }
+  },
 });
 
 export const {

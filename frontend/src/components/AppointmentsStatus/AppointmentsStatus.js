@@ -55,7 +55,7 @@ export default function AppointmentsStatus() {
         sx={{
           '& .MuiList-root': {
             padding: 0,
-          }
+          },
         }}
       >
         <MenuItem 

@@ -58,20 +58,20 @@ export default function ServicesContainer({
   const lastRequestedSubStatusKeyRef = useRef(null);
 
   const requestedStatuses = useMemo(() => {
-    if (categoryStatusFilter === 'all') return [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled];
+    if (categoryStatusFilter === `all`) return [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled];
     return [categoryStatusFilter];
   }, [categoryStatusFilter]);
 
   // Get active tab from URL query parameter
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const tabFromUrl = urlParams.get('tab');
+    const tabFromUrl = urlParams.get(`tab`);
 
     if (tabFromUrl && TABS[tabFromUrl]) {
       setActiveTab(tabFromUrl);
     }
     // restore categories status filter from session storage
-    const storedStatus = sessionStorage.getItem('categoriesStatusFilter');
+    const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
     if (storedStatus) {
       setCategoryStatusFilter(storedStatus);
     }
@@ -82,21 +82,21 @@ export default function ServicesContainer({
 
     // Update URL with new tab
     const urlParams = new URLSearchParams(location.search);
-    urlParams.set('tab', newValue);
+    urlParams.set(`tab`, newValue);
 
     navigate(`${location.pathname}?${urlParams.toString()}`, { replace: true });
   };
 
   // persist categories status filter
   useEffect(() => {
-    sessionStorage.setItem('categoriesStatusFilter', categoryStatusFilter);
+    sessionStorage.setItem(`categoriesStatusFilter`, categoryStatusFilter);
   }, [categoryStatusFilter]);
 
   // fetch categories when status filter changes on Categories tab
   useEffect(() => {
     if (activeTab !== TABS[CATEGORIES].value) return;
 
-    const statusKey = requestedStatuses.join(',');
+    const statusKey = requestedStatuses.join(`,`);
     if (lastRequestedStatusKeyRef.current === statusKey && categories && categories.length) {
       return;
     }
@@ -109,21 +109,21 @@ export default function ServicesContainer({
 
     lastRequestedStatusKeyRef.current = statusKey;
     dispatch(fetchServiceCategories(requestedStatuses));
-  }, [activeTab, requestedStatuses.join(','), categories ? categories.length : 0]);
+  }, [activeTab, requestedStatuses.join(`,`), categories ? categories.length : 0]);
 
   const requestedSubStatuses = useMemo(() => {
-    if (subCategoryStatusFilter === 'all') return [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled];
+    if (subCategoryStatusFilter === `all`) return [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled];
     return [subCategoryStatusFilter];
   }, [subCategoryStatusFilter]);
 
   useEffect(() => {
-    sessionStorage.setItem('subCategoriesStatusFilter', subCategoryStatusFilter);
+    sessionStorage.setItem(`subCategoriesStatusFilter`, subCategoryStatusFilter);
   }, [subCategoryStatusFilter]);
 
   useEffect(() => {
     if (activeTab !== TABS[SUB_CATEGORIES].value) return;
 
-    const statusKey = requestedSubStatuses.join(',');
+    const statusKey = requestedSubStatuses.join(`,`);
     if (lastRequestedSubStatusKeyRef.current === statusKey && subCategories && subCategories.length) {
       return;
     }
@@ -135,7 +135,7 @@ export default function ServicesContainer({
 
     lastRequestedSubStatusKeyRef.current = statusKey;
     dispatch(fetchServiceSubCategories(requestedSubStatuses));
-  }, [activeTab, requestedSubStatuses.join(','), subCategories ? subCategories.length : 0]);
+  }, [activeTab, requestedSubStatuses.join(`,`), subCategories ? subCategories.length : 0]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -170,21 +170,31 @@ export default function ServicesContainer({
   const getTabDescription = () => {
     switch (activeTab) {
     case TABS[SERVICES].value:
-      return "Manage your services and their pricing";
+      return `Manage your services and their pricing`;
     case TABS[SUB_CATEGORIES].value:
-      return "Organize services into sub-categories";
+      return `Organize services into sub-categories`;
     case TABS[CATEGORIES].value:
-      return "Manage service categories";
+      return `Manage service categories`;
     default:
-      return "Manage your services and their pricing";
+      return `Manage your services and their pricing`;
     }
   };
 
   return (
-    <Box sx={{ padding: { xs: 0, md: 3 } }}>
+    <Box sx={{
+      padding: {
+        xs: 0, md: 3, 
+      }, 
+    }}>
       {/* Header */}
-      <Box sx={{ marginBottom: 3, padding: { xs: 0, md: 0 } }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, marginBottom: 1 }}>
+      <Box sx={{
+        marginBottom: 3, padding: {
+          xs: 0, md: 0, 
+        }, 
+      }}>
+        <Typography variant="h4" sx={{
+          fontWeight: 700, marginBottom: 1, 
+        }}>
           {TABS[activeTab].label}
         </Typography>
 
@@ -193,7 +203,9 @@ export default function ServicesContainer({
         </Typography>
 
         {/* Action Buttons */}
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+        <Box sx={{
+          display: `flex`, gap: 2, justifyContent: `flex-end`, 
+        }}>
           {activeTab === TABS[SERVICES].value && (
             <FilterButton employees={employees} categories={categories} subCategories={subCategories} sx={{ mr: `auto` }} />
           )}
@@ -203,7 +215,11 @@ export default function ServicesContainer({
       </Box>
 
       {/* Tabs */}
-      <Box sx={{ marginBottom: 3, padding: { xs: 0, md: 0 } }}>
+      <Box sx={{
+        marginBottom: 3, padding: {
+          xs: 0, md: 0, 
+        }, 
+      }}>
         <Tabs
           tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
           onChange={handleTabChange}
@@ -216,7 +232,9 @@ export default function ServicesContainer({
             exclusive
             onChange={(_e, value) => value && setCategoryStatusFilter(value)}
             size="small"
-            sx={{ mr: 'auto', mt: 2 }}
+            sx={{
+              mr: `auto`, mt: 2, 
+            }}
           >
             <ToggleButton value="all">all</ToggleButton>
             <ToggleButton value={categoryStatusEnum.active}>active</ToggleButton>
@@ -231,7 +249,9 @@ export default function ServicesContainer({
             exclusive
             onChange={(_e, value) => value && setSubCategoryStatusFilter(value)}
             size="small"
-            sx={{ mr: 'auto', mt: 2 }}
+            sx={{
+              mr: `auto`, mt: 2, 
+            }}
           >
             <ToggleButton value="all">all</ToggleButton>
             <ToggleButton value={subCategoryStatusEnum.active}>active</ToggleButton>

@@ -114,9 +114,9 @@ export default function ServicesDetailPage() {
       return service ? `Edit ${service.name}` : `New Service`;
     }
     if (!service && !shouldShowServiceForm) {
-      return "Service Not Found";
+      return `Service Not Found`;
     }
-    return service ? service.name : "New Service";
+    return service ? service.name : `New Service`;
   };
 
   // Determine content to render
@@ -142,7 +142,7 @@ export default function ServicesDetailPage() {
 
     // Show not found
     if (!service && !shouldShowServiceForm) {
-      return <ServiceNotFound onBackToServices={() => navigate('/services')} />;
+      return <ServiceNotFound onBackToServices={() => navigate(`/services`)} />;
     }
 
     // Show service details
@@ -164,7 +164,11 @@ export default function ServicesDetailPage() {
 
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{ padding: { xs: 0, md: 0 } }}>
+      <Box sx={{
+        padding: {
+          xs: 0, md: 0, 
+        }, 
+      }}>
         {!isEditMode && <GoBackNavigation />}
 
         {isServicesRequestPending && (

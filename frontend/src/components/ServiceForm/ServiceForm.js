@@ -9,7 +9,7 @@ import {
   FormControlLabel,
   TextField,
   Avatar,
-  FormHelperText
+  FormHelperText,
 } from "@mui/material";
 import FormActions from "@/components/common/FormActions";
 import FormField from "@/components/common/FormField";
@@ -33,9 +33,9 @@ export default function ServiceForm({
   // Define form fields configuration
   const formFields = [
     {
-      name: "name",
-      label: "Service Name",
-      type: "text",
+      name: `name`,
+      label: `Service Name`,
+      type: `text`,
       required: true,
     },
   ];
@@ -70,11 +70,11 @@ export default function ServiceForm({
 
   // Check if all selected employees have valid prices
   const hasValidEmployeePrices = formData.employeePrices.every(emp =>
-    emp.price !== null && emp.price !== undefined && emp.price !== '' && Number(emp.price) >= 0
+    emp.price !== null && emp.price !== undefined && emp.price !== `` && Number(emp.price) >= 0,
   );
 
   // Check if category is selected
-  const hasValidCategory = formData.categoryId && formData.categoryId !== '';
+  const hasValidCategory = formData.categoryId && formData.categoryId !== ``;
 
 
 
@@ -88,7 +88,9 @@ export default function ServiceForm({
 
     updateFormData({
       employeePrices: checked
-        ? [...formData.employeePrices, { employeeId, price: '' }]
+        ? [...formData.employeePrices, {
+          employeeId, price: ``, 
+        }]
         : formData.employeePrices.filter(price => price.employeeId !== employeeId),
     });
   };
@@ -98,36 +100,40 @@ export default function ServiceForm({
 
     updateFormData({
       employeePrices: formData.employeePrices.map(employeePrice =>
-        employeePrice.employeeId === employeeId ? { ...employeePrice, price: value } : employeePrice
+        employeePrice.employeeId === employeeId ? {
+          ...employeePrice, price: value, 
+        } : employeePrice,
       ),
     });
   };
 
   const handleCategoryChange = (event) => {
-    const { name, value } = event.target;
+    const {
+      name, value, 
+    } = event.target;
     handleChange(event);
 
     // Clear sub category when category changes
-    if (name === 'categoryId') {
-      updateFormData({ subCategoryId: '' });
+    if (name === `categoryId`) {
+      updateFormData({ subCategoryId: `` });
     }
   };
 
   const handleSubCategoryChange = (event) => {
     handleChange(event);
     if (cleanError) {
-      cleanError('subCategoryId');
+      cleanError(`subCategoryId`);
     }
   };
 
   const getEmployeeName = (employeeId) => {
     const employee = employees.find(emp => emp.employeeId === employeeId);
-    return employee ? `${employee.firstName} ${employee.lastName}` : '';
+    return employee ? `${employee.firstName} ${employee.lastName}` : ``;
   };
 
   const getEmployeePrice = (employeeId) => {
     const employeePrice = formData.employeePrices.find(ep => ep.employeeId === employeeId);
-    return employeePrice ? employeePrice.price : '';
+    return employeePrice ? employeePrice.price : ``;
   };
 
   const isEmployeeSelected = (employeeId) => {
@@ -137,9 +143,13 @@ export default function ServiceForm({
   return (
     <Box sx={{ padding: 0 }}>
       {/* Basic Information */}
-      <Card sx={{ marginBottom: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+      <Card sx={{
+        marginBottom: 2, borderRadius: 2, boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+      }}>
         <CardContent sx={{ padding: 2.5 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 2, color: 'text.primary' }}>
+          <Typography variant="h6" sx={{
+            fontWeight: 700, marginBottom: 2, color: `text.primary`, 
+          }}>
             Basic Information
           </Typography>
 
@@ -167,7 +177,7 @@ export default function ServiceForm({
                 required={true}
                 options={(serviceCategories || []).map(category => ({
                   value: category.id,
-                  label: category.name
+                  label: category.name,
                 }))}
               />
             </Grid>
@@ -183,11 +193,13 @@ export default function ServiceForm({
                 required={false}
                 disabled={!hasValidCategory}
                 options={[
-                  { value: '', label: 'Clear' },
+                  {
+                    value: ``, label: `Clear`, 
+                  },
                   ...filteredSubCategories.map(subCategory => ({
                     value: subCategory.id,
-                    label: subCategory.name
-                  }))
+                    label: subCategory.name,
+                  })),
                 ]}
               />
             </Grid>
@@ -233,9 +245,13 @@ export default function ServiceForm({
       </Card>
 
       {/* Service Providers & Pricing */}
-      <Card sx={{ marginBottom: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+      <Card sx={{
+        marginBottom: 2, borderRadius: 2, boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+      }}>
         <CardContent sx={{ padding: 2.5 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: 1.5, color: 'text.primary' }}>
+          <Typography variant="h6" sx={{
+            fontWeight: 700, marginBottom: 1.5, color: `text.primary`, 
+          }}>
             Service Providers & Pricing
           </Typography>
 
@@ -243,7 +259,9 @@ export default function ServiceForm({
             Select employees and set their prices for this service
           </Typography>
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{
+            display: `flex`, flexDirection: `column`, gap: 1, 
+          }}>
             {employees.map((employee) => {
               const isSelected = isEmployeeSelected(employee.employeeId);
               const price = getEmployeePrice(employee.employeeId);
@@ -252,13 +270,13 @@ export default function ServiceForm({
                 <Box
                   key={employee.employeeId}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: `flex`,
+                    alignItems: `center`,
                     padding: 2,
-                    backgroundColor: isSelected ? 'primary.50' : 'grey.50',
+                    backgroundColor: isSelected ? `primary.50` : `grey.50`,
                     borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: isSelected ? 'primary.200' : 'grey.200',
+                    border: `1px solid`,
+                    borderColor: isSelected ? `primary.200` : `grey.200`,
                     // Removed hover styles to prevent jumping
                   }}
                 >
@@ -268,15 +286,17 @@ export default function ServiceForm({
                         checked={isSelected}
                         onChange={(e) => handleCheckboxChange(e, employee.employeeId)}
                         sx={{
-                          color: 'primary.main',
+                          color: `primary.main`,
                           '&.Mui-checked': {
-                            color: 'primary.main',
-                          }
+                            color: `primary.main`,
+                          },
                         }}
                       />
                     }
                     label=""
-                    sx={{ margin: 0, marginRight: 1.5 }}
+                    sx={{
+                      margin: 0, marginRight: 1.5, 
+                    }}
                   />
 
                   <Avatar
@@ -285,24 +305,28 @@ export default function ServiceForm({
                       width: 40,
                       height: 40,
                       marginRight: 1.5,
-                      backgroundColor: 'primary.main',
-                      fontSize: '1rem',
+                      backgroundColor: `primary.main`,
+                      fontSize: `1rem`,
                       fontWeight: 600,
-                      border: '2px solid',
-                      borderColor: 'primary.100'
+                      border: `2px solid`,
+                      borderColor: `primary.100`,
                     }}
                   >
                     {`${employee.firstName[0]}${employee.lastName[0]}`}
                   </Avatar>
 
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    <Typography variant="body1" sx={{
+                      fontWeight: 600, color: `text.primary`, 
+                    }}>
                       {`${employee.firstName} ${employee.lastName}`}
                     </Typography>
                   </Box>
 
                   {isSelected && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{
+                      display: `flex`, alignItems: `center`, gap: 1, 
+                    }}>
                       <TextField
                         type="number"
                         value={price}
@@ -313,11 +337,11 @@ export default function ServiceForm({
                           width: 80,
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 1.5,
-                            backgroundColor: 'white',
-                          }
+                            backgroundColor: `white`,
+                          },
                         }}
                         InputProps={{
-                          endAdornment: <Typography variant="caption" color="text.secondary">€</Typography>
+                          endAdornment: <Typography variant="caption" color="text.secondary">€</Typography>,
                         }}
                         error={formErrors?.employeePrices?.some(ep => ep.employeeId === employee.employeeId)}
                         helperText={formErrors?.employeePrices?.find(ep => ep.employeeId === employee.employeeId)?.price}
@@ -345,9 +369,9 @@ export default function ServiceForm({
             onCancel={onCancel}
             disabled={(formErrors && Object.keys(formErrors).length > 0) || !hasValidEmployeePrices || !hasValidCategory}
             isPending={false}
-            submitText={isEditMode ? "Update Service" : "Create Service"}
+            submitText={isEditMode ? `Update Service` : `Create Service`}
             cancelText="Cancel"
-            sx={{mt: 0}}
+            sx={{ mt: 0 }}
           />
         </CardContent>
       </Card>

@@ -14,7 +14,7 @@ export const fetchServiceCategories = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const updateCategory = createAsyncThunk(
@@ -45,7 +45,7 @@ export const updateCategory = createAsyncThunk(
         return thunkAPI.rejectWithValue({ general: error.message });
       }
     }
-  }
+  },
 );
 
 const serviceCategoriesSlice = createSlice({
@@ -94,7 +94,7 @@ const serviceCategoriesSlice = createSlice({
         state.isUpdateCategoryRequestPending = false;
         state.updateFormErrors = action.payload;
       })
-  }
+  },
 });
 
 export const {

@@ -18,7 +18,7 @@ export const fetchInvoices = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 const invoicesSlice = createSlice({
@@ -55,7 +55,7 @@ const invoicesSlice = createSlice({
         state.isPending = false;
         state.error = action.payload;
       })
-  }
+  },
 });
 
 export const { 

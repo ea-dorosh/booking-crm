@@ -27,7 +27,9 @@ export default function AppointmentsPage() {
   const [menuEl, setMenuEl] = useState(null);
   const isSortMenuOpen = Boolean(menuEl);
 
-  const { sortRule, sortDirection } = useSelector((state) => state.appointments);
+  const {
+    sortRule, sortDirection, 
+  } = useSelector((state) => state.appointments);
 
   const handleMenuClick = (event) => {
     setMenuEl(event.currentTarget);
@@ -65,7 +67,7 @@ export default function AppointmentsPage() {
         sx={{
           '& .MuiList-root': {
             padding: 0,
-          }
+          },
         }}
       >
         <MenuItem 

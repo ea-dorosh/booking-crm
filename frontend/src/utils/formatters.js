@@ -37,7 +37,9 @@ export const formattedDateToTime = (date) => {
  */
 export const formatIsoDate = (dateString) => {
   const date = new Date(dateString);
-  const options = { month: `short`, year: `2-digit`, day: `2-digit`, timeZone: 'Europe/Berlin' };
+  const options = {
+    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+  };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
 
@@ -51,7 +53,9 @@ export const formatIsoDate = (dateString) => {
  */
 export const getDay = (dateString) => {
   const date = new Date(dateString);
-  const options = { month: `short`, year: `2-digit`, day: `2-digit`, timeZone: 'Europe/Berlin' };
+  const options = {
+    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+  };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
 
@@ -65,7 +69,9 @@ export const getDay = (dateString) => {
  */
 export const getDayOfWeek = (dateString) => {
   const date = new Date(dateString);
-  const options = { weekday: `short`, timeZone: 'Europe/Berlin' };
+  const options = {
+    weekday: `short`, timeZone: `Europe/Berlin`, 
+  };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
 
   return formattedDate;
@@ -78,7 +84,9 @@ export const getDayOfWeek = (dateString) => {
  */
 export const getMonth = (dateString) => {
   const date = new Date(dateString);
-  const options = { month: `short`, year: `2-digit`, day: `2-digit`, timeZone: 'Europe/Berlin' };
+  const options = {
+    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+  };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
 
@@ -90,7 +98,7 @@ export const formatCreatedDate = (createdDate) => {
   const now = dayjs();
 
   if (!date.isValid()) {
-    return "Invalid date";
+    return `Invalid date`;
   }
 
   const hoursDifference = now.diff(date, `hours`);
@@ -121,7 +129,7 @@ export const formatTimeToString = (timeStr) => {
   }
 
   if (minutes > 0) {
-    if (formattedTime) formattedTime += ' ';
+    if (formattedTime) formattedTime += ` `;
     formattedTime += `${minutes} Min.`;
   }
 
@@ -139,7 +147,9 @@ export const formatTimeToString = (timeStr) => {
  */
 export const formatFromDateTimeToStringDate = (dateString) => {
   const date = new Date(dateString);
-  const options = { month: `short`, year: `2-digit`, day: `2-digit`, timeZone: 'Europe/Berlin' };
+  const options = {
+    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+  };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
 

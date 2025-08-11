@@ -4,19 +4,23 @@ import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { subCategoryStatusEnum } from '@/enums/enums';
 
-export default function SubCategoriesList({ subCategories, categories }) {
+export default function SubCategoriesList({
+  subCategories, categories, 
+}) {
   if (!subCategories || subCategories.length === 0) {
     return (
       <Paper
         sx={{
           padding: 6,
-          textAlign: 'center',
-          backgroundColor: 'grey.50',
-          border: '2px dashed',
-          borderColor: 'grey.300',
+          textAlign: `center`,
+          backgroundColor: `grey.50`,
+          border: `2px dashed`,
+          borderColor: `grey.300`,
         }}
       >
-        <Category sx={{ fontSize: 60, color: 'grey.400', marginBottom: 2 }} />
+        <Category sx={{
+          fontSize: 60, color: `grey.400`, marginBottom: 2, 
+        }} />
         <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
           No sub-categories found
         </Typography>
@@ -31,8 +35,8 @@ export default function SubCategoriesList({ subCategories, categories }) {
               px: 2,
               py: 1,
               borderRadius: 1,
-              backgroundColor: 'primary.main',
-              color: 'primary.contrastText',
+              backgroundColor: `primary.main`,
+              color: `primary.contrastText`,
               fontSize: 14,
               fontWeight: 600,
             }}
@@ -63,11 +67,17 @@ export default function SubCategoriesList({ subCategories, categories }) {
   }, [subCategories, categories]);
 
   return (
-    <Box sx={{ padding: { xs: 0, md: 0 } }}>
+    <Box sx={{
+      padding: {
+        xs: 0, md: 0, 
+      }, 
+    }}>
       {Object.entries(groupedSubCategories).map(([categoryId, categoryData]) => (
         <Box key={categoryId} sx={{ mb: 4 }}>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
+            <Typography variant="h5" sx={{
+              fontWeight: 600, mb: 0.5, 
+            }}>
               {categoryData.categoryName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -75,61 +85,71 @@ export default function SubCategoriesList({ subCategories, categories }) {
             </Typography>
           </Box>
 
-          <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ px: { xs: 1, sm: 0 } }}>
+          <Grid container spacing={{
+            xs: 2, sm: 3, 
+          }} sx={{
+            px: {
+              xs: 1, sm: 0, 
+            }, 
+          }}>
             {categoryData.items.map((subCategory) => (
               <Grid item xs={12} sm={6} md={4} key={subCategory.id}>
                 <Card
                   sx={{
-                    height: '100%',
-                    width: '100%',
+                    height: `100%`,
+                    width: `100%`,
                     minWidth: 0,
-                    display: 'flex',
-                    transition: 'all 0.2s ease-in-out',
+                    display: `flex`,
+                    transition: `all 0.2s ease-in-out`,
                     '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    }
+                      transform: `translateY(-2px)`,
+                      boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
+                    },
                   }}
                 >
                   <CardActionArea
                     component={RouterLink}
                     to={`/sub-categories/${subCategory.id}`}
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: `flex`,
+                      alignItems: `center`,
                       gap: 2,
                       p: 2,
-                      width: '100%',
+                      width: `100%`,
                       minWidth: 0,
                     }}
                   >
                     <Box
                       sx={{
-                        width: 'clamp(44px, 18vw, 72px)',
-                        height: 'clamp(44px, 18vw, 72px)',
+                        width: `clamp(44px, 18vw, 72px)`,
+                        height: `clamp(44px, 18vw, 72px)`,
                         borderRadius: 2,
-                        overflow: 'hidden',
-                        border: '3px solid',
-                        borderColor: 'primary.50',
+                        overflow: `hidden`,
+                        border: `3px solid`,
+                        borderColor: `primary.50`,
                         flexShrink: 0,
                       }}
                     >
                       <img
                         src={subCategory.image}
                         alt={subCategory.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{
+                          width: `100%`, height: `100%`, objectFit: `cover`, 
+                        }}
                       />
                     </Box>
 
-                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <Box sx={{
+                      flex: 1, minWidth: 0, display: `flex`, flexDirection: `column`, alignItems: `flex-start`, 
+                    }}>
                       <Typography
                         variant="h6"
                         sx={{
                           fontWeight: 600,
-                          color: 'text.primary',
-                          whiteSpace: 'normal',
-                          overflowWrap: 'anywhere',
-                          wordBreak: 'break-word',
+                          color: `text.primary`,
+                          whiteSpace: `normal`,
+                          overflowWrap: `anywhere`,
+                          wordBreak: `break-word`,
                         }}
                       >
                         {subCategory.name}
@@ -138,14 +158,16 @@ export default function SubCategoriesList({ subCategories, categories }) {
                         <Chip
                           label={subCategory.status}
                           size="small"
-                          color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? 'success' : undefined}
-                          variant={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? 'filled' : 'outlined'}
+                          color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? `success` : undefined}
+                          variant={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? `filled` : `outlined`}
                           sx={{ mt: 0.75 }}
                         />
                       )}
                     </Box>
 
-                    <ChevronRight sx={{ color: 'grey.500', flexShrink: 0 }} />
+                    <ChevronRight sx={{
+                      color: `grey.500`, flexShrink: 0, 
+                    }} />
                   </CardActionArea>
                 </Card>
               </Grid>

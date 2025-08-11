@@ -50,20 +50,20 @@ const getEmployeeAppointments = async (id, filters = {}) => {
     const params = new URLSearchParams();
 
     // Add filter parameters if they exist
-    if (filters.startDate) params.append('startDate', filters.startDate);
-    if (filters.endDate) params.append('endDate', filters.endDate);
+    if (filters.startDate) params.append(`startDate`, filters.startDate);
+    if (filters.endDate) params.append(`endDate`, filters.endDate);
 
     // Handle status parameter - pass null as string 'null' for "All Status"
     if (filters.status !== undefined) {
-      const statusValue = filters.status === null ? 'null' : filters.status.toString();
-      params.append('status', statusValue);
+      const statusValue = filters.status === null ? `null` : filters.status.toString();
+      params.append(`status`, statusValue);
     }
 
-    if (filters.sortBy) params.append('sortBy', filters.sortBy);
-    if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
+    if (filters.sortBy) params.append(`sortBy`, filters.sortBy);
+    if (filters.sortOrder) params.append(`sortOrder`, filters.sortOrder);
 
     const queryString = params.toString();
-    const url = `/employees/${id}/appointments${queryString ? `?${queryString}` : ''}`;
+    const url = `/employees/${id}/appointments${queryString ? `?${queryString}` : ``}`;
 
     const response = await axios.get(url);
 

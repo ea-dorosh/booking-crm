@@ -8,9 +8,7 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 
-export default function InvoicesContainer({
-  invoices,
-}) {
+export default function InvoicesContainer({ invoices }) {
   return (
     <Box>
       <Box
@@ -26,14 +24,14 @@ export default function InvoicesContainer({
         }}
       >
         <Typography variant="button"
-          sx={{color: `#fff`}}
+          sx={{ color: `#fff` }}
         >
           add invoice
         </Typography>
 
         <RouterLink to={`/invoices/create-invoice`}>
           <IconButton
-            sx={{color: `#fff`}}
+            sx={{ color: `#fff` }}
           >
             <AddCircle />
           </IconButton>

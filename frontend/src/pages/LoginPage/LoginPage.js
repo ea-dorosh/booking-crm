@@ -34,7 +34,7 @@ const defaultTheme = createTheme();
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [error, setError] = React.useState(''); // State to store login error messages
+  const [error, setError] = React.useState(``); // State to store login error messages
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -49,7 +49,7 @@ export default function LoginPage() {
       const response = await fetch(`${process.env.REACT_APP_API_URL}auth/login`, {
         method: `POST`,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': `application/json`,
         },
         body: JSON.stringify(loginDetails),
       });
@@ -59,7 +59,7 @@ export default function LoginPage() {
         // Store the token, for example in localStorage (consider more secure storage options for production)
         localStorage.setItem(`token`, responseBody.token);
         // Redirect the user to a protected route/dashboard
-        navigate('/');
+        navigate(`/`);
       } else {
         // Handle errors, such as displaying a message to the user
         setError(responseBody.message || `An error occurred. Please try again.`);
@@ -87,7 +87,9 @@ export default function LoginPage() {
             alignItems: `center`,
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: `secondary.main` }}>
+          <Avatar sx={{
+            m: 1, bgcolor: `secondary.main`, 
+          }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -122,7 +124,9 @@ export default function LoginPage() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{
+                mt: 3, mb: 2, 
+              }}
             >
               Sign In
             </Button>
@@ -134,7 +138,7 @@ export default function LoginPage() {
               </Grid>
               <Grid item>
                 <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                  {`Don't have an account? Sign Up`}
                 </Link>
               </Grid>
             </Grid>
@@ -143,7 +147,9 @@ export default function LoginPage() {
 
         {error && <Typography color="error">{error}</Typography>}
 
-        <Copyright sx={{ mt: 8, mb: 4 }} />
+        <Copyright sx={{
+          mt: 8, mb: 4, 
+        }} />
       </Container>
     </ThemeProvider>
   );

@@ -28,21 +28,25 @@ export default function EmployeeDetails({
   return (
     <>
       {/* Employee Info Card */}
-      <Card sx={{ marginTop: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+      <Card sx={{
+        marginTop: 2, borderRadius: 2, boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+      }}>
         <CardContent sx={{ padding: 2.5 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
+          <Box sx={{
+            display: `flex`, justifyContent: `flex-end`, marginBottom: 2, 
+          }}>
             <Button
               variant="contained"
               size="small"
-              startIcon={<Edit sx={{ fontSize: '16px' }} />}
+              startIcon={<Edit sx={{ fontSize: `16px` }} />}
               onClick={handleEditClick}
               sx={{
                 borderRadius: 1.5,
-                padding: '6px 12px',
-                fontSize: '0.8rem',
+                padding: `6px 12px`,
+                fontSize: `0.8rem`,
                 fontWeight: 500,
-                textTransform: 'none',
-                minWidth: 'auto'
+                textTransform: `none`,
+                minWidth: `auto`,
               }}
             >
               Edit
@@ -53,10 +57,10 @@ export default function EmployeeDetails({
             {/* Employee Avatar & Status */}
             <Grid item xs={12} md={4}>
               <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
+                display: `flex`,
+                flexDirection: `column`,
+                alignItems: `center`,
+                textAlign: `center`,
               }}>
                 <Avatar
                   src={employee.image}
@@ -64,14 +68,16 @@ export default function EmployeeDetails({
                     width: 100,
                     height: 100,
                     marginBottom: 1.5,
-                    border: '3px solid',
-                    borderColor: 'primary.50',
+                    border: `3px solid`,
+                    borderColor: `primary.50`,
                   }}
                 >
                   <Person sx={{ fontSize: 50 }} />
                 </Avatar>
 
-                <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1 }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600, marginBottom: 1, 
+                }}>
                   {`${employee.firstName} ${employee.lastName}`}
                 </Typography>
 
@@ -88,28 +94,44 @@ export default function EmployeeDetails({
             <Grid item xs={12} md={8}>
               <Stack spacing={2}>
                 <Box>
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ marginBottom: 0.5, fontWeight: 600 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{
+                    marginBottom: 0.5, fontWeight: 600, 
+                  }}>
                     Contact Information
                   </Typography>
                   <Stack spacing={1}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Email sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Box sx={{
+                      display: `flex`, alignItems: `center`, gap: 1, 
+                    }}>
+                      <Email sx={{
+                        fontSize: 16, color: `text.secondary`, 
+                      }} />
                       <Typography variant="body2">{employee.email}</Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Phone sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Box sx={{
+                      display: `flex`, alignItems: `center`, gap: 1, 
+                    }}>
+                      <Phone sx={{
+                        fontSize: 16, color: `text.secondary`, 
+                      }} />
                       <Typography variant="body2">{employee.phone}</Typography>
                     </Box>
                   </Stack>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ marginBottom: 0.5, fontWeight: 600 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{
+                    marginBottom: 0.5, fontWeight: 600, 
+                  }}>
                     Work Information
                   </Typography>
                   <Stack spacing={1}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CalendarMonth sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Box sx={{
+                      display: `flex`, alignItems: `center`, gap: 1, 
+                    }}>
+                      <CalendarMonth sx={{
+                        fontSize: 16, color: `text.secondary`, 
+                      }} />
                       <Typography variant="body2">
                         Joined: {new Date(employee.createdAt).toLocaleDateString()}
                       </Typography>
@@ -123,9 +145,13 @@ export default function EmployeeDetails({
       </Card>
 
       {/* Google Calendar Integration */}
-      <Card sx={{ marginTop: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+      <Card sx={{
+        marginTop: 2, borderRadius: 2, boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+      }}>
         <CardContent sx={{ padding: 2.5 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1.5, fontSize: '1.1rem' }}>
+          <Typography variant="h6" sx={{
+            fontWeight: 600, marginBottom: 1.5, fontSize: `1.1rem`, 
+          }}>
             Calendar Integration
           </Typography>
           <GoogleCalendarIntegration employeeId={employee.employeeId} />
@@ -133,9 +159,13 @@ export default function EmployeeDetails({
       </Card>
 
       {/* Employee Availability */}
-      <Card sx={{ marginTop: 2, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+      <Card sx={{
+        marginTop: 2, borderRadius: 2, boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+      }}>
         <CardContent sx={{ padding: 2.5 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 1.5, fontSize: '1.1rem' }}>
+          <Typography variant="h6" sx={{
+            fontWeight: 600, marginBottom: 1.5, fontSize: `1.1rem`, 
+          }}>
             Work Schedule
           </Typography>
           <EmployeeAvailability employeeId={employee.employeeId} />
@@ -143,7 +173,9 @@ export default function EmployeeDetails({
       </Card>
 
       {/* Recent Appointments with Filters */}
-      <Box sx={{ marginTop: 2, position: 'relative' }}>
+      <Box sx={{
+        marginTop: 2, position: `relative`, 
+      }}>
         <AppointmentFilters
           filters={appointmentFilters}
           onFiltersChange={handleFiltersChange}
@@ -152,7 +184,7 @@ export default function EmployeeDetails({
         />
 
         {/* Appointments Container with Overlay */}
-        <Box sx={{ position: 'relative' }}>
+        <Box sx={{ position: `relative` }}>
           {/* Appointments Content */}
           {lastAppointments && lastAppointments.length > 0 && (
             <EmployeeAppointments appointments={lastAppointments} onAppointmentClick={handleAppointmentClick} />
@@ -161,12 +193,12 @@ export default function EmployeeDetails({
           {/* Show message when no appointments */}
           {((lastAppointments && lastAppointments.length === 0) || (!lastAppointments && !isLastAppointmentsPending)) && (
             <Box sx={{
-              textAlign: 'center',
+              textAlign: `center`,
               py: 4,
-              color: 'text.secondary'
+              color: `text.secondary`,
             }}>
               <Typography variant="body2">
-                {lastAppointments ? 'No appointments found with current filters' : 'No appointments yet'}
+                {lastAppointments ? `No appointments found with current filters` : `No appointments yet`}
               </Typography>
             </Box>
           )}
@@ -175,26 +207,26 @@ export default function EmployeeDetails({
           {isLastAppointmentsPending && (
             <Box
               sx={{
-                position: 'absolute',
+                position: `absolute`,
                 top: 0,
                 left: 0,
                 right: 0,
-                bottom: lastAppointments && lastAppointments.length > 0 ? 0 : 'auto',
-                minHeight: lastAppointments && lastAppointments.length === 0 ? '200px' : 'auto',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(2px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                bottom: lastAppointments && lastAppointments.length > 0 ? 0 : `auto`,
+                minHeight: lastAppointments && lastAppointments.length === 0 ? `200px` : `auto`,
+                backgroundColor: `rgba(255, 255, 255, 0.8)`,
+                backdropFilter: `blur(2px)`,
+                display: `flex`,
+                alignItems: `center`,
+                justifyContent: `center`,
                 zIndex: 10,
                 borderRadius: 1,
               }}
             >
               <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 1
+                display: `flex`,
+                flexDirection: `column`,
+                alignItems: `center`,
+                gap: 1,
               }}>
                 <Typography variant="body2" color="text.secondary">
                   Loading appointments...

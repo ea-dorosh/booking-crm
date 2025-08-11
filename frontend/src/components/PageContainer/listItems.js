@@ -16,16 +16,16 @@ import {
 import { Link } from "react-router-dom";
 
 const isActiveRoute = (currentPath, targetPath) => {
-  if (targetPath === '/') {
-    return currentPath === '/';
+  if (targetPath === `/`) {
+    return currentPath === `/`;
   }
   return currentPath.startsWith(targetPath);
 };
 
-export const MainListItems = ({location}) => (
+export const MainListItems = ({ location }) => (
   <>
     <Link to={`/`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/`)}>
         <ListItemIcon>
           <HomeRounded />
         </ListItemIcon>
@@ -34,7 +34,7 @@ export const MainListItems = ({location}) => (
     </Link>
 
     <Link to={`/appointments`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/appointments')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/appointments`)}>
         <ListItemIcon>
           <CalendarMonthRounded />
         </ListItemIcon>
@@ -43,7 +43,7 @@ export const MainListItems = ({location}) => (
     </Link>
 
     <Link to={`/services`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/services')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/services`)}>
         <ListItemIcon>
           <MiscellaneousServicesRounded />
         </ListItemIcon>
@@ -52,7 +52,7 @@ export const MainListItems = ({location}) => (
     </Link>
 
     <Link to={`/employees`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/employees')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/employees`)}>
         <ListItemIcon>
           <GroupsRounded />
         </ListItemIcon>
@@ -61,7 +61,7 @@ export const MainListItems = ({location}) => (
     </Link>
 
     <Link to={`/customers`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/customers')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/customers`)}>
         <ListItemIcon>
           <PersonSearchRounded />
         </ListItemIcon>
@@ -70,7 +70,7 @@ export const MainListItems = ({location}) => (
     </Link>
 
     <Link to={`/invoices`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/invoices')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/invoices`)}>
         <ListItemIcon>
           <ReceiptLongRounded />
         </ListItemIcon>
@@ -80,10 +80,10 @@ export const MainListItems = ({location}) => (
   </>
 );
 
-export const SecondaryListItems = ({location}) => (
+export const SecondaryListItems = ({ location }) => (
   <>
     <Link to={`/company`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/company')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/company`)}>
         <ListItemIcon>
           <CorporateFareRounded />
         </ListItemIcon>
@@ -92,7 +92,7 @@ export const SecondaryListItems = ({location}) => (
     </Link>
 
     <Link to={`/account`} style={{ textDecoration: `none` }}>
-      <ListItemButton selected={isActiveRoute(location?.pathname, '/account')}>
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/account`)}>
         <ListItemIcon>
           <AccountBoxRounded />
         </ListItemIcon>

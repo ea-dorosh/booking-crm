@@ -41,7 +41,7 @@ export default function CustomerForm({
 
   // Render different field types
   const renderField = (field) => {
-    if (field.type === 'radio') {
+    if (field.type === `radio`) {
       return (
         <RadioField
           key={field.name}
@@ -79,11 +79,11 @@ export default function CustomerForm({
 
     CUSTOMER_FIELDS.forEach((field) => {
       // Add section header for address fields
-      if (field.name === 'addressStreet' && currentSection !== 'address') {
+      if (field.name === `addressStreet` && currentSection !== `address`) {
         fields.push(
-          <SectionHeader key="address-header" title="Address" />
+          <SectionHeader key="address-header" title="Address" />,
         );
-        currentSection = 'address';
+        currentSection = `address`;
       }
 
       fields.push(renderField(field));
@@ -103,7 +103,9 @@ export default function CustomerForm({
       {renderFields()}
 
       {errorMessage && (
-        <Box sx={{ color: 'error.main', fontSize: '16px', mt: 1 }}>
+        <Box sx={{
+          color: `error.main`, fontSize: `16px`, mt: 1, 
+        }}>
           {errorMessage}
         </Box>
       )}

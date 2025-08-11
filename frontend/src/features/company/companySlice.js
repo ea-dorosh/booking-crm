@@ -16,7 +16,7 @@ export const fetchCompany = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateCompany = createAsyncThunk(
@@ -33,7 +33,7 @@ export const updateCompany = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const companySlice = createSlice({
@@ -95,7 +95,7 @@ const companySlice = createSlice({
         state.updateFormPending = false;
         state.updateFormErrors = action.payload;
       })
-  }
+  },
 });
 
 export const {

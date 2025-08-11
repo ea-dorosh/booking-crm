@@ -5,7 +5,9 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-export default function Loader({ isOpen, message = `Loading...` }) {
+export default function Loader({
+  isOpen, message = `Loading...`, 
+}) {
   if (!isOpen) return null;
 
   return (

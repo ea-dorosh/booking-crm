@@ -18,7 +18,7 @@ export const fetchCustomers = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 const customersSlice = createSlice({
@@ -52,7 +52,7 @@ const customersSlice = createSlice({
         state.isPending = false;
         state.error = action.payload;
       })
-  }
+  },
 });
 
 export const { 

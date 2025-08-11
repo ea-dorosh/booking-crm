@@ -9,12 +9,12 @@ import { router } from '@/router';
 import store from '@/store/store';
 import theme from '@/theme/theme';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById(`root`));
 root.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <RouterProvider router={router} />
     </ThemeProvider>
-  </Provider>
+  </Provider>,
 );

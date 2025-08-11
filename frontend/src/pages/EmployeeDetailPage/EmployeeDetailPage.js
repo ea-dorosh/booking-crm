@@ -18,12 +18,12 @@ import {
 import { getDefaultAppointmentFilters } from '@/utils/appointmentFilters';
 
 // SessionStorage keys
-const APPOINTMENT_FILTERS_KEY = 'employeeAppointmentFilters';
-const SCROLL_POSITION_KEY = 'employeeDetailScrollPosition';
+const APPOINTMENT_FILTERS_KEY = `employeeAppointmentFilters`;
+const SCROLL_POSITION_KEY = `employeeDetailScrollPosition`;
 
 // Get filters from sessionStorage or defaults
 const getInitialFilters = (employeeId) => {
-  if (!employeeId || employeeId === 'create-employee') {
+  if (!employeeId || employeeId === `create-employee`) {
     return getDefaultAppointmentFilters();
   }
 
@@ -35,7 +35,7 @@ const getInitialFilters = (employeeId) => {
       const parsedFilters = JSON.parse(savedFilters);
       return parsedFilters;
     } catch (error) {
-      console.warn('Failed to parse saved appointment filters:', error);
+      console.warn(`Failed to parse saved appointment filters:`, error);
     }
   }
 
@@ -51,7 +51,9 @@ export default function EmployeeDetailPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const employee = useSelector(state => state.employees.data.find(employee => employee.employeeId === Number(employeeId)));
-  const { isCustomersDataRequestPending, lastAppointments, isLastAppointmentsPending } = useSelector(state => state.employees);
+  const {
+    isCustomersDataRequestPending, lastAppointments, isLastAppointmentsPending, 
+  } = useSelector(state => state.employees);
 
   const newEmployeeId = useSelector(state => state.employees.updateFormData);
   const formErrors = useSelector(state => state.employees.updateFormErrors);
@@ -70,7 +72,9 @@ export default function EmployeeDetailPage() {
       if (appointmentFilters.sortBy) filters.sortBy = appointmentFilters.sortBy;
       if (appointmentFilters.sortOrder) filters.sortOrder = appointmentFilters.sortOrder;
 
-      dispatch(fetchEmployeeAppointments({ id: employeeId, filters }));
+      dispatch(fetchEmployeeAppointments({
+        id: employeeId, filters, 
+      }));
     }
   };
 
@@ -150,7 +154,7 @@ export default function EmployeeDetailPage() {
     setAppointmentFilters(newFilters);
 
     // Save filters to sessionStorage
-    if (employeeId && employeeId !== 'create-employee') {
+    if (employeeId && employeeId !== `create-employee`) {
       const key = `${APPOINTMENT_FILTERS_KEY}_${employeeId}`;
       sessionStorage.setItem(key, JSON.stringify(newFilters));
     }
@@ -162,7 +166,7 @@ export default function EmployeeDetailPage() {
     setAppointmentFilters(defaultFilters);
 
     // Clear filters from sessionStorage
-    if (employeeId && employeeId !== 'create-employee') {
+    if (employeeId && employeeId !== `create-employee`) {
       sessionStorage.removeItem(`${APPOINTMENT_FILTERS_KEY}_${employeeId}`);
     }
   };
@@ -177,9 +181,9 @@ export default function EmployeeDetailPage() {
       return employee ? `Edit ${employee.firstName} ${employee.lastName}` : `New Employee`;
     }
     if (!employee && !shouldShowCreateEmployeeForm) {
-      return "Employee Not Found";
+      return `Employee Not Found`;
     }
-    return employee ? `${employee.firstName} ${employee.lastName}` : "Employee Details";
+    return employee ? `${employee.firstName} ${employee.lastName}` : `Employee Details`;
   };
 
   // Determine content to render
@@ -226,7 +230,11 @@ export default function EmployeeDetailPage() {
 
   return (
     <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{ padding: { xs: 1, md: 2 } }}>
+      <Box sx={{
+        padding: {
+          xs: 1, md: 2, 
+        }, 
+      }}>
         {!isEditMode && <GoBackNavigation />}
 
         {(isCustomersDataRequestPending || isLastAppointmentsPending) && (

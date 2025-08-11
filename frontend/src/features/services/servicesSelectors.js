@@ -16,7 +16,7 @@ export const selectFilteredServices = createSelector(
       // Filter by employees
       if (selectedEmployees.length > 0) {
         const hasSelectedEmployee = service.employeePrices?.some(empPrice =>
-          selectedEmployees.includes(empPrice.employeeId)
+          selectedEmployees.includes(empPrice.employeeId),
         );
         if (!hasSelectedEmployee) return false;
       }
@@ -37,5 +37,5 @@ export const selectFilteredServices = createSelector(
 
       return true;
     });
-  }
+  },
 );

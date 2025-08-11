@@ -17,12 +17,14 @@ import { Link as RouterLink } from 'react-router-dom';
 const defaultTheme = createTheme();
 
 export default function ResetPasswordPage() {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [token, setToken] = useState('');
-  const [status, setStatus] = useState({ type: '', message: '' });
+  const [password, setPassword] = useState(``);
+  const [confirmPassword, setConfirmPassword] = useState(``);
+  const [token, setToken] = useState(``);
+  const [status, setStatus] = useState({
+    type: ``, message: ``, 
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
+  const [passwordError, setPasswordError] = useState(``);
   const [formValid, setFormValid] = useState(false);
 
   const location = useLocation();
@@ -31,14 +33,14 @@ export default function ResetPasswordPage() {
   // Extract token from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const tokenParam = params.get('token');
+    const tokenParam = params.get(`token`);
 
     if (tokenParam) {
       setToken(tokenParam);
     } else {
       setStatus({
-        type: 'error',
-        message: 'Reset token is missing. Please use the link from your email.'
+        type: `error`,
+        message: `Reset token is missing. Please use the link from your email.`,
       });
     }
   }, [location]);
@@ -47,19 +49,19 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     // Check password length
     if (password && password.length < 8) {
-      setPasswordError('Password must be at least 8 characters long');
+      setPasswordError(`Password must be at least 8 characters long`);
       setFormValid(false);
       return;
     }
 
     // Check if passwords match
     if (password && confirmPassword && password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError(`Passwords do not match`);
       setFormValid(false);
       return;
     }
 
-    setPasswordError('');
+    setPasswordError(``);
     setFormValid(password && confirmPassword && token);
   }, [password, confirmPassword, token]);
 
@@ -69,17 +71,19 @@ export default function ResetPasswordPage() {
     if (!formValid) return;
 
     setIsSubmitting(true);
-    setStatus({ type: '', message: '' });
+    setStatus({
+      type: ``, message: ``, 
+    });
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}auth/reset-password`, {
-        method: 'POST',
+        method: `POST`,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': `application/json`,
         },
         body: JSON.stringify({
           token,
-          newPassword: password
+          newPassword: password,
         }),
       });
 
@@ -87,29 +91,29 @@ export default function ResetPasswordPage() {
 
       if (response.ok) {
         setStatus({
-          type: 'success',
-          message: data.message || 'Your password has been reset successfully'
+          type: `success`,
+          message: data.message || `Your password has been reset successfully`,
         });
 
         // Clear form
-        setPassword('');
-        setConfirmPassword('');
+        setPassword(``);
+        setConfirmPassword(``);
 
         // Redirect to login after 3 seconds
         setTimeout(() => {
-          navigate('/login');
+          navigate(`/login`);
         }, 3000);
       } else {
         setStatus({
-          type: 'error',
-          message: data.message || 'An error occurred. Please try again.'
+          type: `error`,
+          message: data.message || `An error occurred. Please try again.`,
         });
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error(`Error:`, error);
       setStatus({
-        type: 'error',
-        message: 'A network error occurred. Please try again later.'
+        type: `error`,
+        message: `A network error occurred. Please try again later.`,
       });
     } finally {
       setIsSubmitting(false);
@@ -123,12 +127,14 @@ export default function ResetPasswordPage() {
         <Box
           sx={{
             marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: `flex`,
+            flexDirection: `column`,
+            alignItems: `center`,
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <Avatar sx={{
+            m: 1, bgcolor: `secondary.main`, 
+          }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -138,13 +144,17 @@ export default function ResetPasswordPage() {
           {status.message && (
             <Alert
               severity={status.type}
-              sx={{ mt: 2, width: '100%' }}
+              sx={{
+                mt: 2, width: `100%`, 
+              }}
             >
               {status.message}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{
+            mt: 1, width: `100%`, 
+          }}>
             <TextField
               margin="normal"
               required
@@ -173,18 +183,20 @@ export default function ResetPasswordPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isSubmitting || !token}
-              error={password !== confirmPassword && confirmPassword !== ''}
-              helperText={password !== confirmPassword && confirmPassword !== '' ? 'Passwords do not match' : ''}
+              error={password !== confirmPassword && confirmPassword !== ``}
+              helperText={password !== confirmPassword && confirmPassword !== `` ? `Passwords do not match` : ``}
             />
 
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{
+                mt: 3, mb: 2, 
+              }}
               disabled={isSubmitting || !formValid}
             >
-              {isSubmitting ? 'Resetting...' : 'Reset Password'}
+              {isSubmitting ? `Resetting...` : `Reset Password`}
             </Button>
 
             <Grid container justifyContent="center">
@@ -198,10 +210,10 @@ export default function ResetPasswordPage() {
         </Box>
 
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 8 }}>
-          {'Copyright © '}
+          {`Copyright © `}
           <Link color="inherit" href="#">
             Booking CRM
-          </Link>{' '}
+          </Link>{` `}
           {new Date().getFullYear()}
         </Typography>
       </Container>

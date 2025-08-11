@@ -42,8 +42,10 @@ export default function CustomerDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const {data: invoice, isPending, updateFormPending } = useSelector(state => state.invoice);
-  const { isPending: isCustomersRequestPending} = useSelector(state => state.customers);
+  const {
+    data: invoice, isPending, updateFormPending, 
+  } = useSelector(state => state.invoice);
+  const { isPending: isCustomersRequestPending } = useSelector(state => state.customers);
 
   const customers = useSelector(sortedByLastActivityDateCustomers);
   const services = useSelector(state => state.services.data);
@@ -54,7 +56,7 @@ export default function CustomerDetailPage() {
     // Check if device is mobile
     const checkMobile = () => {
       const userAgent =
-        typeof window.navigator === "undefined" ? "" : navigator.userAgent;
+        typeof window.navigator === `undefined` ? `` : navigator.userAgent;
       setIsMobileDevice(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent));
     };
 
@@ -124,10 +126,10 @@ export default function CustomerDetailPage() {
       const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
 
       const fileURL = URL.createObjectURL(
-        new Blob([blobResponse], { type: 'application/pdf' })
+        new Blob([blobResponse], { type: `application/pdf` }),
       );
 
-      const link = document.createElement('a');
+      const link = document.createElement(`a`);
       link.href = fileURL;
       link.target = `_blank`;
       link.download = `invoice-${invoiceId}.pdf`;
@@ -153,7 +155,7 @@ export default function CustomerDetailPage() {
       }
 
       // Create a blob with the correct MIME type
-      const blob = new Blob([blobResponse], { type: 'application/pdf' });
+      const blob = new Blob([blobResponse], { type: `application/pdf` });
       const fileURL = URL.createObjectURL(blob);
 
       if (isMobileDevice) {
@@ -208,7 +210,7 @@ export default function CustomerDetailPage() {
           isPending={updateFormPending}
         />
 
-        <Box mt={2} sx={{width:`100%`}}>
+        <Box mt={2} sx={{ width:`100%` }}>
           {<Button
             variant="outlined"
             onClick={() => {
@@ -219,7 +221,7 @@ export default function CustomerDetailPage() {
               }
             }
             }
-            sx={{width:`100%`}}
+            sx={{ width:`100%` }}
             disabled={updateFormPending}
           >
             Cancel
@@ -249,14 +251,14 @@ export default function CustomerDetailPage() {
             display: `flex`,
             flexDirection: `column`,
             alignItems: `center`,
-            padding: 2
+            padding: 2,
           }}
         >
           <Box sx={{
             display: `flex`,
             justifyContent: `flex-end`,
             width: `100%`,
-            marginBottom: 1
+            marginBottom: 1,
           }}>
             <Button
               variant="contained"
@@ -270,7 +272,7 @@ export default function CustomerDetailPage() {
             width: `100%`,
             height: `calc(100% - 50px)`,
             backgroundColor: `white`,
-            overflow: `hidden`
+            overflow: `hidden`,
           }}>
             {pdfViewerUrl && (
               <iframe

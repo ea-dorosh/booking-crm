@@ -24,7 +24,9 @@ export default function CustomersSorting() {
   const [menuEl, setMenuEl] = useState(null);
   const isSortMenuOpen = Boolean(menuEl);
 
-  const { sortRule, sortDirection } = useSelector((state) => state.customers);
+  const {
+    sortRule, sortDirection, 
+  } = useSelector((state) => state.customers);
 
   const handleMenuClick = (event) => {
     setMenuEl(event.currentTarget);
@@ -62,7 +64,7 @@ export default function CustomersSorting() {
         sx={{
           '& .MuiList-root': {
             padding: 0,
-          }
+          },
         }}
       >
         <MenuItem 

@@ -36,7 +36,9 @@ export default function CustomerDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const {data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending } = useSelector(state => state.customer);
+  const {
+    data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending, 
+  } = useSelector(state => state.customer);
 
   const formErrors = useSelector(state => state.customer.updateFormErrors);
 
@@ -102,7 +104,7 @@ export default function CustomerDetailPage() {
           errorMessage={formErrors && typeof formErrors === `string` && formErrors}
         />
 
-        <Box mt={2} sx={{width:`100%`}}>
+        <Box mt={2} sx={{ width:`100%` }}>
           {<Button
             variant="outlined"
             onClick={() => {
@@ -114,7 +116,7 @@ export default function CustomerDetailPage() {
               }
             }
             }
-            sx={{width:`100%`}}
+            sx={{ width:`100%` }}
             disabled={updateFormPending}
           >
             Cancel

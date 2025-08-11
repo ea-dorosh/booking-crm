@@ -49,10 +49,14 @@ export default function EmployeeForm({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{
+      display: `flex`, flexDirection: `column`, gap: 2, 
+    }}>
       {/* Personal Information */}
       <Box>
-        <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 2, fontSize: '1.1rem' }}>
+        <Typography variant="h6" sx={{
+          fontWeight: 600, marginBottom: 2, fontSize: `1.1rem`, 
+        }}>
           Personal Information
         </Typography>
 
@@ -75,7 +79,9 @@ export default function EmployeeForm({
 
       {/* Profile Image */}
       <Box>
-        <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: 2, fontSize: '1.1rem' }}>
+        <Typography variant="h6" sx={{
+          fontWeight: 600, marginBottom: 2, fontSize: `1.1rem`, 
+        }}>
           Profile Image
         </Typography>
 
