@@ -140,13 +140,30 @@ export default function ServicesContainer({
   const renderContent = () => {
     switch (activeTab) {
     case TABS[SERVICES].value:
-      return <ServicesList services={filteredServices} employees={employees} categories={categories} />;
+      return <ServicesList
+        services={filteredServices}
+        employees={employees}
+        categories={categories}
+        statusFilter={categoryStatusFilter}
+      />;
     case TABS[SUB_CATEGORIES].value:
-      return <SubCategoriesList subCategories={subCategories} categories={categories} />;
+      return <SubCategoriesList
+        subCategories={subCategories}
+        categories={categories}
+        statusFilter={subCategoryStatusFilter}
+      />;
     case TABS[CATEGORIES].value:
-      return <CategoriesList categories={categories} />;
+      return <CategoriesList
+        categories={categories}
+        statusFilter={categoryStatusFilter}
+      />;
     default:
-      return <ServicesList services={filteredServices} employees={employees} categories={categories} />;
+      return <ServicesList
+        services={filteredServices}
+        employees={employees}
+        categories={categories}
+        statusFilter={categoryStatusFilter}
+      />;
     }
   };
 
@@ -170,6 +187,7 @@ export default function ServicesContainer({
         <Typography variant="h4" sx={{ fontWeight: 700, marginBottom: 1 }}>
           {TABS[activeTab].label}
         </Typography>
+
         <Typography variant="body1" color="text.secondary" sx={{ marginBottom: 2 }}>
           {getTabDescription()}
         </Typography>
@@ -206,6 +224,7 @@ export default function ServicesContainer({
             <ToggleButton value={categoryStatusEnum.archived}>deleted</ToggleButton>
           </ToggleButtonGroup>
         )}
+
         {activeTab === TABS[SUB_CATEGORIES].value && (
           <ToggleButtonGroup
             value={subCategoryStatusFilter}
@@ -223,11 +242,8 @@ export default function ServicesContainer({
       </Box>
 
       {/* Content */}
-      {activeTab === TABS[CATEGORIES].value ? (
-        <CategoriesList categories={categories} statusFilter={categoryStatusFilter} />
-      ) : (
-        renderContent()
-      )}
+      {renderContent()}
+
     </Box>
   );
 }

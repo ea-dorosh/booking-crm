@@ -46,6 +46,7 @@ const port = parseInt(process.env.PORT || `3500`, 10);
 const allowedOrigins = [
   `http://localhost:3000`,
   `http://localhost:3001`,
+  `http://localhost:3003`,
   `http://127.0.0.1:3000`,
   `http://192.168.178.40:3000`,
   process.env.PRODUCTION_CLIENT_URL,
