@@ -81,7 +81,9 @@ export default function CustomerForm({
       // Add section header for address fields
       if (field.name === `addressStreet` && currentSection !== `address`) {
         fields.push(
-          <SectionHeader key="address-header" title="Address" />,
+          <SectionHeader
+            key="address-header"
+            title="Address" />,
         );
         currentSection = `address`;
       }
@@ -103,9 +105,12 @@ export default function CustomerForm({
       {renderFields()}
 
       {errorMessage && (
-        <Box sx={{
-          color: `error.main`, fontSize: `16px`, mt: 1, 
-        }}>
+        <Box
+          sx={{
+            color: `error.main`,
+            fontSize: `16px`,
+            mt: 1, 
+          }}>
           {errorMessage}
         </Box>
       )}

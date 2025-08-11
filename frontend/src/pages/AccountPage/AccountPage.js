@@ -35,11 +35,15 @@ const PasswordChangeForm = ({
 
   return (
     <div>
-      <Typography variant="h5" mb={2} mt={2}>
+      <Typography
+        variant="h5"
+        mb={2}
+        mt={2}>
         Change Password
       </Typography>
 
-      <FormControl fullWidth>
+      <FormControl
+        fullWidth>
         <InputLabel>Current Password</InputLabel>
         <OutlinedInput
           type="password"
@@ -49,7 +53,9 @@ const PasswordChangeForm = ({
         />
       </FormControl>
 
-      <FormControl fullWidth sx={{ marginTop: `20px` }}>
+      <FormControl
+        fullWidth
+        sx={{ marginTop: `20px` }}>
         <InputLabel>New Password</InputLabel>
         <OutlinedInput
           type="password"
@@ -71,7 +77,8 @@ const PasswordChangeForm = ({
       {errorMessage && <Typography
         variant="body1"
         sx={{
-          marginTop: `20px`, color: `red`, 
+          marginTop: `20px`,
+          color: `red`, 
         }}
       >
         {errorMessage}
@@ -112,9 +119,12 @@ export default function AccountPage() {
   };
 
   return (
-    <PageContainer pageTitle="Account">
+    <PageContainer
+      pageTitle="Account">
       {userData && (
-        <Typography variant="body1" sx={{ marginTop: `20px` }}>
+        <Typography
+          variant="body1"
+          sx={{ marginTop: `20px` }}>
           Logged in as:
 
           <br />
@@ -122,7 +132,8 @@ export default function AccountPage() {
           <Typography
             variant="span"
             sx={{
-              fontWeight: `bold`, color: `blue`, 
+              fontWeight: `bold`,
+              color: `blue`, 
             }}
           >
             {userData.email}
@@ -151,7 +162,8 @@ export default function AccountPage() {
       {message && <Typography
         variant="body1"
         sx={{
-          marginTop: `20px`, color: `green`, 
+          marginTop: `20px`,
+          color: `green`, 
         }}
       >
         {message}
@@ -159,7 +171,8 @@ export default function AccountPage() {
 
       {!showPasswordChange && <Button
         sx={{
-          marginTop: `20px`, display: `block`, 
+          marginTop: `20px`,
+          display: `block`, 
         }}
         variant="contained"
         color="primary"

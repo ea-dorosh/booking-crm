@@ -16,24 +16,33 @@ export default function CategoryDetails({
   onDeactivateToggle,
 }) {
   return (
-    <Card sx={{
-      marginTop: 1, borderRadius: 2, boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
-    }}>
-      <CardContent sx={{ padding: 2.5 }}>
+    <Card
+      sx={{
+        marginTop: 1,
+        borderRadius: 2,
+        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+      }}>
+      <CardContent
+        sx={{ padding: 2.5 }}>
         {/* Header with Edit Button */}
-        <Box sx={{
-          display: `flex`,
-          justifyContent: `space-between`,
-          alignItems: `flex-start`,
-          marginBottom: 2,
-          paddingBottom: 1.5,
-          borderBottom: `1px solid`,
-          borderColor: `grey.100`,
-        }}>
+        <Box
+          sx={{
+            display: `flex`,
+            justifyContent: `space-between`,
+            alignItems: `flex-start`,
+            marginBottom: 2,
+            paddingBottom: 1.5,
+            borderBottom: `1px solid`,
+            borderColor: `grey.100`,
+          }}>
           <Box>
-            <Typography variant="h4" sx={{
-              fontWeight: 700, marginBottom: 0.5, color: `text.primary`, 
-            }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                marginBottom: 0.5,
+                color: `text.primary`, 
+              }}>
               {category.name}
             </Typography>
             {category.status && (
@@ -48,18 +57,22 @@ export default function CategoryDetails({
                   backgroundColor: `grey.100`,
                   color: `text.secondary`,
                 } : {
-                  fontWeight: 700, height: 24, 
+                  fontWeight: 700,
+                  height: 24, 
                 }}
               />
             )}
           </Box>
 
-          <Box sx={{
-            display: `flex`, gap: 1, 
-          }}>
+          <Box
+            sx={{
+              display: `flex`,
+              gap: 1, 
+            }}>
             <Button
               variant="contained"
-              startIcon={<Edit sx={{ fontSize: `16px` }} />}
+              startIcon={<Edit
+                sx={{ fontSize: `16px` }} />}
               onClick={onEditClick}
               sx={{
                 borderRadius: 1.5,
@@ -79,9 +92,14 @@ export default function CategoryDetails({
           </Box>
         </Box>
 
-        <Box sx={{
-          display: `flex`, gap: 2, alignItems: `center`, mt: 2, justifyContent: `space-between`, 
-        }}>
+        <Box
+          sx={{
+            display: `flex`,
+            gap: 2,
+            alignItems: `center`,
+            mt: 2,
+            justifyContent: `space-between`, 
+          }}>
           <Button
             variant="outlined"
             color={String(category.status).toLowerCase() === `disabled` ? `success` : `warning`}
@@ -100,7 +118,8 @@ export default function CategoryDetails({
 
           <Button
             variant="outlined"
-            startIcon={<DeleteOutline sx={{ fontSize: `16px` }} />}
+            startIcon={<DeleteOutline
+              sx={{ fontSize: `16px` }} />}
             color={String(category.status).toLowerCase() === `archived` ? `success` : `error`}
             onClick={onArchiveToggle}
             sx={{
@@ -117,10 +136,14 @@ export default function CategoryDetails({
         </Box>
 
         {/* Details Grid */}
-        <Grid container spacing={1.5}>
+        <Grid
+          container
+          spacing={1.5}>
           {/* Image Preview */}
           {category.image && (
-            <Grid item xs={12}>
+            <Grid
+              item
+              xs={12}>
               <Box
                 sx={{
                   width: `100%`,
@@ -137,7 +160,9 @@ export default function CategoryDetails({
                   src={category.image}
                   alt={category.name}
                   style={{
-                    width: `100%`, height: `auto`, display: `block`, 
+                    width: `100%`,
+                    height: `auto`,
+                    display: `block`, 
                   }}
                 />
               </Box>

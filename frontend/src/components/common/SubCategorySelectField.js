@@ -32,7 +32,8 @@ const SubCategorySelectField = ({
         sx={{ flexGrow: 1 }}
         error={Boolean(error)}
       >
-        <InputLabel id={`${name}-select-label`}>Service Sub Category</InputLabel>
+        <InputLabel
+          id={`${name}-select-label`}>Service Sub Category</InputLabel>
 
         <Select
           name={name}
@@ -49,7 +50,9 @@ const SubCategorySelectField = ({
           disabled={disabled}
         >
           {serviceSubCategories.map((subCategory) => (
-            <MenuItem key={subCategory.id} value={subCategory.id}>
+            <MenuItem
+              key={subCategory.id}
+              value={subCategory.id}>
               {subCategory.name}
             </MenuItem>
           ))}
@@ -63,7 +66,8 @@ const SubCategorySelectField = ({
       </FormControl>
 
       {value && (
-        <RouterLink to={`/categories/${value}`}>
+        <RouterLink
+          to={`/categories/${value}`}>
           <Button
             variant="outlined"
             color="primary"

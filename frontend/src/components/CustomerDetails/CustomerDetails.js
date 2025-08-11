@@ -32,7 +32,9 @@ export default function CustomerDetails({
         label="Added"
       />
 
-      <Typography variant="h6" color="text.secondary">
+      <Typography
+        variant="h6"
+        color="text.secondary">
         Address
       </Typography>
 

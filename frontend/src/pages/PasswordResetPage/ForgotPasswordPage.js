@@ -18,7 +18,8 @@ const defaultTheme = createTheme();
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState(``);
   const [status, setStatus] = useState({
-    type: ``, message: ``, 
+    type: ``,
+    message: ``, 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,7 +36,8 @@ export default function ForgotPasswordPage() {
 
     setIsSubmitting(true);
     setStatus({
-      type: ``, message: ``, 
+      type: ``,
+      message: ``, 
     });
 
     try {
@@ -73,8 +75,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs">
+    <ThemeProvider
+      theme={defaultTheme}>
+      <Container
+        component="main"
+        maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
@@ -84,12 +89,16 @@ export default function ForgotPasswordPage() {
             alignItems: `center`,
           }}
         >
-          <Avatar sx={{
-            m: 1, bgcolor: `secondary.main`, 
-          }}>
+          <Avatar
+            sx={{
+              m: 1,
+              bgcolor: `secondary.main`, 
+            }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
+          <Typography
+            component="h1"
+            variant="h5">
             Forgot Password
           </Typography>
 
@@ -97,16 +106,22 @@ export default function ForgotPasswordPage() {
             <Alert
               severity={status.type}
               sx={{
-                mt: 2, width: `100%`, 
+                mt: 2,
+                width: `100%`, 
               }}
             >
               {status.message}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{
-            mt: 1, width: `100%`, 
-          }}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{
+              mt: 1,
+              width: `100%`, 
+            }}>
             <TextField
               margin="normal"
               required
@@ -126,16 +141,23 @@ export default function ForgotPasswordPage() {
               fullWidth
               variant="contained"
               sx={{
-                mt: 3, mb: 2, 
+                mt: 3,
+                mb: 2, 
               }}
               disabled={isSubmitting}
             >
               {isSubmitting ? `Sending...` : `Send Reset Link`}
             </Button>
 
-            <Grid container justifyContent="center">
-              <Grid item>
-                <Link component={RouterLink} to="/login" variant="body2">
+            <Grid
+              container
+              justifyContent="center">
+              <Grid
+                item>
+                <Link
+                  component={RouterLink}
+                  to="/login"
+                  variant="body2">
                   Back to Login
                 </Link>
               </Grid>
@@ -143,9 +165,15 @@ export default function ForgotPasswordPage() {
           </Box>
         </Box>
 
-        <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 8 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          align="center"
+          sx={{ mt: 8 }}>
           {`Copyright © `}
-          <Link color="inherit" href="#">
+          <Link
+            color="inherit"
+            href="#">
             Booking CRM
           </Link>{` `}
           {new Date().getFullYear()}

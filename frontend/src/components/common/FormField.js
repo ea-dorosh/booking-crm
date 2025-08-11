@@ -49,7 +49,9 @@ const FormField = ({
           sx={{ width: `100%` }}
         >
           {options.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
+            <MenuItem
+              key={option.value}
+              value={option.value}>
               {option.label}
             </MenuItem>
           ))}
@@ -58,12 +60,13 @@ const FormField = ({
 
     case `radio`:
       return (
-        <Box sx={{
-          display: `flex`,
-          flexDirection: `row`,
-          alignItems: `center`,
-          gap: 3,
-        }}>
+        <Box
+          sx={{
+            display: `flex`,
+            flexDirection: `row`,
+            alignItems: `center`,
+            gap: 3,
+          }}>
           <FormLabel
             id={`${name}-group-label`}
             sx={{ mr: 4 }}
@@ -81,7 +84,9 @@ const FormField = ({
               <FormControlLabel
                 key={option.value}
                 value={option.value}
-                control={<Radio color="info" disabled={disabled} />}
+                control={<Radio
+                  color="info"
+                  disabled={disabled} />}
                 label={option.label}
               />
             ))}
@@ -115,7 +120,8 @@ const FormField = ({
   };
 
   return (
-    <Box sx={{ width: `100%` }}>
+    <Box
+      sx={{ width: `100%` }}>
       {/* Label above field (except for radio which has its own label) */}
       {type !== `radio` && (
         <Typography
@@ -127,19 +133,25 @@ const FormField = ({
           }}
         >
           {label}
-          {required && <span style={{
-            color: `red`, marginLeft: 2, 
-          }}>*</span>}
+          {required && <span
+            style={{
+              color: `red`,
+              marginLeft: 2, 
+            }}>*</span>}
         </Typography>
       )}
 
-      <FormControl error={Boolean(error)} sx={{ width: `100%` }}>
+      <FormControl
+        error={Boolean(error)}
+        sx={{ width: `100%` }}>
         {renderField()}
 
         {error && (
-          <FormHelperText sx={{
-            color: `error.main`, mt: 0.5, 
-          }}>
+          <FormHelperText
+            sx={{
+              color: `error.main`,
+              mt: 0.5, 
+            }}>
             {error}
           </FormHelperText>
         )}

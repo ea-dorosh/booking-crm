@@ -13,10 +13,14 @@ import ListItemText from '@/components/ListItemText/ListItemText';
 export default function ServiceCategoriesContainer({ categories }) {
   if (!categories || categories.length === 0) {
     return (
-      <Box sx={{
-        p: 2, textAlign: `center`, 
-      }}>
-        <Typography variant="body1" color="text.secondary">
+      <Box
+        sx={{
+          p: 2,
+          textAlign: `center`, 
+        }}>
+        <Typography
+          variant="body1"
+          color="text.secondary">
           No categories found
         </Typography>
       </Box>
@@ -39,7 +43,9 @@ export default function ServiceCategoriesContainer({ categories }) {
           <RouterLink
             to={`/categories/${category.id}`}
             style={{
-              textDecoration: `none`, color: `inherit`, flex: 1, 
+              textDecoration: `none`,
+              color: `inherit`,
+              flex: 1, 
             }}
           >
             <ListItemText

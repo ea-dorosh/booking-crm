@@ -89,11 +89,13 @@ export default function CustomerDetailPage() {
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {(isPending || isSavedAppointmentsPending) && <Box mt={2}>
+      {(isPending || isSavedAppointmentsPending) && <Box
+        mt={2}>
         <LinearProgress />
       </Box>}
 
-      {isEditMode && <Box mt={3}>
+      {isEditMode && <Box
+        mt={3}>
         <CustomerForm
           customer={customer}
           submitForm={updateHandler}
@@ -104,7 +106,9 @@ export default function CustomerDetailPage() {
           errorMessage={formErrors && typeof formErrors === `string` && formErrors}
         />
 
-        <Box mt={2} sx={{ width:`100%` }}>
+        <Box
+          mt={2}
+          sx={{ width:`100%` }}>
           {<Button
             variant="outlined"
             onClick={() => {
@@ -124,14 +128,16 @@ export default function CustomerDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && customer && <Box mt={3}>
+      {!isEditMode && customer && <Box
+        mt={3}>
         <CustomerDetails
           customer={customer}
           onChangeCustomerClick={() => setIsEditMode(true)}
         />
       </Box>}
 
-      {!isEditMode && savedAppointments && <Box mt={3}>
+      {!isEditMode && savedAppointments && <Box
+        mt={3}>
         <CustomerSavedAppointments
           appointments={savedAppointments}
         />

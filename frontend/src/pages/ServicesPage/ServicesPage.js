@@ -40,7 +40,8 @@ export default function ServicesPage() {
   }, []);
 
   return (
-    <PageContainer pageTitle="Services">
+    <PageContainer
+      pageTitle="Services">
       {services && employees && serviceSubCategories && serviceCategories && (
         <ServicesContainer
           employees={employees}

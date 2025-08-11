@@ -75,13 +75,22 @@ export default function ServicesList({
           borderColor: `grey.300`,
         }}
       >
-        <Business sx={{
-          fontSize: 60, color: `grey.400`, marginBottom: 2, 
-        }} />
-        <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+        <Business
+          sx={{
+            fontSize: 60,
+            color: `grey.400`,
+            marginBottom: 2, 
+          }} />
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{ marginBottom: 1 }}>
           No services found
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ marginBottom: 3 }}>
           Get started by adding your first service
         </Typography>
         <Button
@@ -97,41 +106,64 @@ export default function ServicesList({
   }
 
   return (
-    <Box sx={{
-      padding: {
-        xs: 0, md: 0, 
-      }, 
-    }}>
+    <Box
+      sx={{
+        padding: {
+          xs: 0,
+          md: 0, 
+        }, 
+      }}>
       {Object.entries(groupedServices).map(([categoryId, categoryData]) => (
-        <Box key={categoryId} sx={{ marginBottom: 4 }}>
+        <Box
+          key={categoryId}
+          sx={{ marginBottom: 4 }}>
           {/* Category Header */}
-          <Box sx={{ marginBottom: 2 }}>
-            <Typography variant="h5" sx={{
-              fontWeight: 600, marginBottom: 1, 
-            }}>
+          <Box
+            sx={{ marginBottom: 2 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                marginBottom: 1, 
+              }}>
               {categoryData.categoryName}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary">
               {Object.values(categoryData.subCategories).reduce((total, subCat) => total + subCat.services.length, 0)} services
             </Typography>
           </Box>
 
           {/* Sub Categories */}
           {Object.entries(categoryData.subCategories).map(([subCategoryId, subCategoryData]) => (
-            <Box key={subCategoryId} sx={{ marginBottom: 3 }}>
+            <Box
+              key={subCategoryId}
+              sx={{ marginBottom: 3 }}>
               {/* Sub Category Header */}
-              <Box sx={{ marginBottom: 2 }}>
-                <Typography variant="h6" sx={{
-                  fontWeight: 500, color: `text.secondary`, 
-                }}>
+              <Box
+                sx={{ marginBottom: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 500,
+                    color: `text.secondary`, 
+                  }}>
                   {subCategoryData.subCategoryName}
                 </Typography>
               </Box>
 
               {/* Services Grid */}
-              <Grid container spacing={2}>
+              <Grid
+                container
+                spacing={2}>
                 {subCategoryData.services.map((service) => (
-                  <Grid item xs={12} sm={6} md={4} key={service.id}>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    key={service.id}>
                     <Card
                       sx={{
                         height: `100%`,
@@ -149,12 +181,13 @@ export default function ServicesList({
                         to={`/services/${service.id}`}
                         sx={{ height: `100%` }}
                       >
-                        <CardContent sx={{
-                          padding: 2.5,
-                          flexGrow: 1,
-                          display: `flex`,
-                          flexDirection: `column`,
-                        }}>
+                        <CardContent
+                          sx={{
+                            padding: 2.5,
+                            flexGrow: 1,
+                            display: `flex`,
+                            flexDirection: `column`,
+                          }}>
                           {/* Service Name */}
                           <Typography
                             variant="h6"
@@ -169,48 +202,56 @@ export default function ServicesList({
                           </Typography>
 
                           {/* Price and Duration */}
-                          <Box sx={{
-                            display: `flex`,
-                            alignItems: `center`,
-                            gap: 1,
-                            marginBottom: 1.5,
-                          }}>
-                            <Euro sx={{
-                              fontSize: 16, color: `primary.main`, 
-                            }} />
+                          <Box
+                            sx={{
+                              display: `flex`,
+                              alignItems: `center`,
+                              gap: 1,
+                              marginBottom: 1.5,
+                            }}>
+                            <Euro
+                              sx={{
+                                fontSize: 16,
+                                color: `primary.main`, 
+                              }} />
                             <Typography
                               variant="body1"
                               color="primary"
                               sx={{
-                                fontWeight: 600, fontSize: `1rem`, 
+                                fontWeight: 600,
+                                fontSize: `1rem`, 
                               }}
                             >
                               {getPriceRange(service.employeePrices)}
                             </Typography>
                           </Box>
 
-                          <Box sx={{
-                            display: `flex`,
-                            alignItems: `center`,
-                            gap: 1,
-                            marginBottom: 2,
-                            color: `text.secondary`,
-                          }}>
-                            <AccessTime sx={{ fontSize: 16 }} />
-                            <Typography variant="body2">
+                          <Box
+                            sx={{
+                              display: `flex`,
+                              alignItems: `center`,
+                              gap: 1,
+                              marginBottom: 2,
+                              color: `text.secondary`,
+                            }}>
+                            <AccessTime
+                              sx={{ fontSize: 16 }} />
+                            <Typography
+                              variant="body2">
                               {service.durationTime}
                             </Typography>
                           </Box>
 
                           {/* Employee Chips */}
                           {service.employeePrices && service.employeePrices.length > 0 && (
-                            <Box sx={{
-                              display: `flex`,
-                              flexWrap: `wrap`,
-                              gap: 0.5,
-                              marginBottom: 2,
-                              flexGrow: 1,
-                            }}>
+                            <Box
+                              sx={{
+                                display: `flex`,
+                                flexWrap: `wrap`,
+                                gap: 0.5,
+                                marginBottom: 2,
+                                flexGrow: 1,
+                              }}>
                               {service.employeePrices.slice(0, 3).map((empPrice) => (
                                 <Chip
                                   key={empPrice.employeeId}

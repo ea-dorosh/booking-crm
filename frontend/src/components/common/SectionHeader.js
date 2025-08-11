@@ -8,7 +8,9 @@ const SectionHeader = ({
       variant="h6"
       color="text.secondary"
       sx={{
-        mt: 2, mb: 1, ...sx, 
+        mt: 2,
+        mb: 1,
+        ...sx, 
       }}
     >
       {title}

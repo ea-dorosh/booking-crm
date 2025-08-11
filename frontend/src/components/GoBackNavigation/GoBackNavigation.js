@@ -11,10 +11,12 @@ export default function GoBackNavigation() {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ marginBottom: 2 }}>
+    <Box
+      sx={{ marginBottom: 2 }}>
       <Button
         onClick={() => navigate(-1)}
-        startIcon={<ArrowBack sx={{ fontSize: `18px` }} />}
+        startIcon={<ArrowBack
+          sx={{ fontSize: `18px` }} />}
         variant="outlined"
         size="small"
         sx={{

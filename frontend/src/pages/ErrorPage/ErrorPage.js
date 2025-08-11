@@ -6,7 +6,8 @@ export default function ErrorPage() {
   console.error(error);
 
   return (
-    <PageContainer pageTitle="Error">
+    <PageContainer
+      pageTitle="Error">
       <h1>Oops!</h1>
       <p>Sorry, an unexpected error has occurred.</p>
       <p>

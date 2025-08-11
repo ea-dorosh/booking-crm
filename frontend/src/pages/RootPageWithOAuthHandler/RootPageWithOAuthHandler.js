@@ -75,13 +75,19 @@ const RootPageWithOAuthHandler = () => {
           p: 3,
         }}
       >
-        <CircularProgress size={60} sx={{ mb: 4 }} />
+        <CircularProgress
+          size={60}
+          sx={{ mb: 4 }} />
 
-        <Typography variant="h5" gutterBottom>
+        <Typography
+          variant="h5"
+          gutterBottom>
           Processing Google Authorization...
         </Typography>
 
-        <Typography variant="body1" color="text.secondary">
+        <Typography
+          variant="body1"
+          color="text.secondary">
           Please wait, you will be redirected automatically.
         </Typography>
       </Box>

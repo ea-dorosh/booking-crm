@@ -73,7 +73,8 @@ export default function EmployeeDetailPage() {
       if (appointmentFilters.sortOrder) filters.sortOrder = appointmentFilters.sortOrder;
 
       dispatch(fetchEmployeeAppointments({
-        id: employeeId, filters, 
+        id: employeeId,
+        filters, 
       }));
     }
   };
@@ -229,16 +230,21 @@ export default function EmployeeDetailPage() {
   };
 
   return (
-    <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{
-        padding: {
-          xs: 1, md: 2, 
-        }, 
-      }}>
+    <PageContainer
+      pageTitle={getPageTitle()}
+      hideSideNav>
+      <Box
+        sx={{
+          padding: {
+            xs: 1,
+            md: 2, 
+          }, 
+        }}>
         {!isEditMode && <GoBackNavigation />}
 
         {(isCustomersDataRequestPending || isLastAppointmentsPending) && (
-          <Box sx={{ marginTop: 1 }}>
+          <Box
+            sx={{ marginTop: 1 }}>
             <LinearProgress />
           </Box>
         )}

@@ -53,7 +53,8 @@ export default function EmployeeAvailability({ employeeId }) {
   };
 
   return (
-    <Box sx={{ marginTop: 1 }}>
+    <Box
+      sx={{ marginTop: 1 }}>
       {daysOfWeek.map((day) => (
         <DayFormRow
           key={day.id}

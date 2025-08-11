@@ -181,45 +181,68 @@ export default function ServicesContainer({
   };
 
   return (
-    <Box sx={{
-      padding: {
-        xs: 0, md: 3, 
-      }, 
-    }}>
-      {/* Header */}
-      <Box sx={{
-        marginBottom: 3, padding: {
-          xs: 0, md: 0, 
+    <Box
+      sx={{
+        padding: {
+          xs: 0,
+          md: 3, 
         }, 
       }}>
-        <Typography variant="h4" sx={{
-          fontWeight: 700, marginBottom: 1, 
+      {/* Header */}
+      <Box
+        sx={{
+          marginBottom: 3,
+          padding: {
+            xs: 0,
+            md: 0, 
+          }, 
         }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            marginBottom: 1, 
+          }}>
           {TABS[activeTab].label}
         </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ marginBottom: 2 }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ marginBottom: 2 }}>
           {getTabDescription()}
         </Typography>
 
         {/* Action Buttons */}
-        <Box sx={{
-          display: `flex`, gap: 2, justifyContent: `flex-end`, 
-        }}>
+        <Box
+          sx={{
+            display: `flex`,
+            gap: 2,
+            justifyContent: `flex-end`, 
+          }}>
           {activeTab === TABS[SERVICES].value && (
-            <FilterButton employees={employees} categories={categories} subCategories={subCategories} sx={{ mr: `auto` }} />
+            <FilterButton
+              employees={employees}
+              categories={categories}
+              subCategories={subCategories}
+              sx={{ mr: `auto` }} />
           )}
 
-          <AddButton activeTab={activeTab} tabs={TABS} />
+          <AddButton
+            activeTab={activeTab}
+            tabs={TABS} />
         </Box>
       </Box>
 
       {/* Tabs */}
-      <Box sx={{
-        marginBottom: 3, padding: {
-          xs: 0, md: 0, 
-        }, 
-      }}>
+      <Box
+        sx={{
+          marginBottom: 3,
+          padding: {
+            xs: 0,
+            md: 0, 
+          }, 
+        }}>
         <Tabs
           tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
           onChange={handleTabChange}
@@ -233,13 +256,18 @@ export default function ServicesContainer({
             onChange={(_e, value) => value && setCategoryStatusFilter(value)}
             size="small"
             sx={{
-              mr: `auto`, mt: 2, 
+              mr: `auto`,
+              mt: 2, 
             }}
           >
-            <ToggleButton value="all">all</ToggleButton>
-            <ToggleButton value={categoryStatusEnum.active}>active</ToggleButton>
-            <ToggleButton value={categoryStatusEnum.disabled}>not active</ToggleButton>
-            <ToggleButton value={categoryStatusEnum.archived}>deleted</ToggleButton>
+            <ToggleButton
+              value="all">all</ToggleButton>
+            <ToggleButton
+              value={categoryStatusEnum.active}>active</ToggleButton>
+            <ToggleButton
+              value={categoryStatusEnum.disabled}>not active</ToggleButton>
+            <ToggleButton
+              value={categoryStatusEnum.archived}>deleted</ToggleButton>
           </ToggleButtonGroup>
         )}
 
@@ -250,13 +278,18 @@ export default function ServicesContainer({
             onChange={(_e, value) => value && setSubCategoryStatusFilter(value)}
             size="small"
             sx={{
-              mr: `auto`, mt: 2, 
+              mr: `auto`,
+              mt: 2, 
             }}
           >
-            <ToggleButton value="all">all</ToggleButton>
-            <ToggleButton value={subCategoryStatusEnum.active}>active</ToggleButton>
-            <ToggleButton value={subCategoryStatusEnum.disabled}>not active</ToggleButton>
-            <ToggleButton value={subCategoryStatusEnum.archived}>deleted</ToggleButton>
+            <ToggleButton
+              value="all">all</ToggleButton>
+            <ToggleButton
+              value={subCategoryStatusEnum.active}>active</ToggleButton>
+            <ToggleButton
+              value={subCategoryStatusEnum.disabled}>not active</ToggleButton>
+            <ToggleButton
+              value={subCategoryStatusEnum.archived}>deleted</ToggleButton>
           </ToggleButtonGroup>
         )}
       </Box>

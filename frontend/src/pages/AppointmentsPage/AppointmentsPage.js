@@ -47,12 +47,13 @@ export default function AppointmentsPage() {
       hideSideNav
     >
 
-      <Box sx={{
-        display: `flex`,
-        alignItems: `flex-start`,
-        mt: 1.5,
-        gap: 2,
-      }}>
+      <Box
+        sx={{
+          display: `flex`,
+          alignItems: `flex-start`,
+          mt: 1.5,
+          gap: 2,
+        }}>
         {startDate && <AppointmentsStartDate
           startDate={startDate}
           onStartDateChange={onStartDateChange}
@@ -60,12 +61,14 @@ export default function AppointmentsPage() {
 
         <AppointmentsStatus />
 
-        <Box ml="auto">
+        <Box
+          ml="auto">
           <AppointmentsSorting />
         </Box>
       </Box>
 
-      {isPending && <Box mt={2}>
+      {isPending && <Box
+        mt={2}>
         <LinearProgress />
       </Box>}
 

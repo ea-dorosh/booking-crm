@@ -39,25 +39,32 @@ const filter = createFilterOptions();
 
 const daysToPay = [
   {
-    value: 0, name: `Today`, 
+    value: 0,
+    name: `Today`, 
   },
   {
-    value: 1, name: `1`, 
+    value: 1,
+    name: `1`, 
   },
   {
-    value: 7, name: `7`, 
+    value: 7,
+    name: `7`, 
   },
   {
-    value: 14, name: `14`, 
+    value: 14,
+    name: `14`, 
   },
   {
-    value: 30, name: `30`, 
+    value: 30,
+    name: `30`, 
   },
   {
-    value: 60, name: `60`, 
+    value: 60,
+    name: `60`, 
   },
   {
-    value: 90, name: `90`, 
+    value: 90,
+    name: `90`, 
   },
 ];
 
@@ -117,7 +124,8 @@ export default function InvoiceForm({
      */
     if (urlCustomerId) {
       handleCustomerChange(null, {
-        id: urlCustomerId, isCreateNew: false,
+        id: urlCustomerId,
+        isCreateNew: false,
       });
     }
 
@@ -342,12 +350,19 @@ export default function InvoiceForm({
               );
             }
             return (
-              <li {...otherProps} key={key} style={{
-                display: `flex`, flexDirection: `column`, alignItems: `flex-start`,
-              }}>
+              <li
+                {...otherProps}
+                key={key}
+                style={{
+                  display: `flex`,
+                  flexDirection: `column`,
+                  alignItems: `flex-start`,
+                }}>
                 {option.lastName} {option.firstName}
 
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  color="text.secondary">
                   {option.email}
                 </Typography>
               </li>
@@ -372,9 +387,12 @@ export default function InvoiceForm({
       </FormControl>}
 
       {formErrors?.customerId &&
-        <FormHelperText sx={{
-          width: `100%`, color: `#d32f2f`, mt: `-.8rem`,
-        }} >
+        <FormHelperText
+          sx={{
+            width: `100%`,
+            color: `#d32f2f`,
+            mt: `-.8rem`,
+          }} >
           {formErrors.customerId}
         </FormHelperText>
       }
@@ -397,13 +415,15 @@ export default function InvoiceForm({
             mt: 2,
           }}
         >
-          <FormControl error={Boolean(formErrors?.salutation)}>
-            <Box sx={{
-              display: `flex`,
-              flexDirection: `row`,
-              alignItems: `center`,
-              gap: 3,
-            }}>
+          <FormControl
+            error={Boolean(formErrors?.salutation)}>
+            <Box
+              sx={{
+                display: `flex`,
+                flexDirection: `row`,
+                alignItems: `center`,
+                gap: 3,
+              }}>
               <FormLabel
                 id="salutation-group-label"
                 sx={{ mr: 4 }}
@@ -417,13 +437,23 @@ export default function InvoiceForm({
                 value={formData.salutation}
                 onChange={handleChange}
               >
-                <FormControlLabel value={1} control={
-                  <Radio color="info" disabled={isPending} />
-                } label="Miss"  />
+                <FormControlLabel
+                  value={1}
+                  control={
+                    <Radio
+                      color="info"
+                      disabled={isPending} />
+                  }
+                  label="Miss"  />
 
-                <FormControlLabel value={0} control={
-                  <Radio color="info" disabled={isPending} />
-                } label="Mister" />
+                <FormControlLabel
+                  value={0}
+                  control={
+                    <Radio
+                      color="info"
+                      disabled={isPending} />
+                  }
+                  label="Mister" />
               </RadioGroup>
             </Box>
 
@@ -434,7 +464,8 @@ export default function InvoiceForm({
             }
           </FormControl>
 
-          <FormControl error={Boolean(formErrors?.lastName)}>
+          <FormControl
+            error={Boolean(formErrors?.lastName)}>
             <TextField
               value={formData.lastName}
               label="Last Name"
@@ -451,7 +482,8 @@ export default function InvoiceForm({
             }
           </FormControl>
 
-          <FormControl error={Boolean(formErrors?.firstName)}>
+          <FormControl
+            error={Boolean(formErrors?.firstName)}>
             <TextField
               value={formData.firstName}
               label="First Name"
@@ -468,7 +500,8 @@ export default function InvoiceForm({
             }
           </FormControl>
 
-          <FormControl error={Boolean(formErrors?.email)}>
+          <FormControl
+            error={Boolean(formErrors?.email)}>
             <TextField
               value={formData.email}
               label="Email"
@@ -485,7 +518,8 @@ export default function InvoiceForm({
             }
           </FormControl>
 
-          <FormControl error={Boolean(formErrors?.phone)}>
+          <FormControl
+            error={Boolean(formErrors?.phone)}>
             <TextField
               value={formData.phone}
               label="Phone"
@@ -510,22 +544,30 @@ export default function InvoiceForm({
         Date
       </Typography>
 
-      <Box sx={{
-        display: `flex`, gap: `1rem`, 
-      }}>
-        <FormControl error={Boolean(formErrors?.dateIssued)}>
-          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="de">
+      <Box
+        sx={{
+          display: `flex`,
+          gap: `1rem`, 
+        }}>
+        <FormControl
+          error={Boolean(formErrors?.dateIssued)}>
+          <LocalizationProvider
+            dateAdapter={AdapterDayjs}
+            adapterLocale="de">
             <DatePicker
               label="Invoice Date"
               value={formData.dateIssued}
               onChange={handleDateChange}
-              renderInput={(params) => <TextField {...params} />}
+              renderInput={(params) => <TextField
+                {...params} />}
             />
           </LocalizationProvider>
         </FormControl>
 
-        <FormControl sx={{ flexGrow: 1 }}>
-          <InputLabel id="due-date-select-label">Days to pay:</InputLabel>
+        <FormControl
+          sx={{ flexGrow: 1 }}>
+          <InputLabel
+            id="due-date-select-label">Days to pay:</InputLabel>
 
           <Select
             labelId="due-date-select-label"
@@ -541,7 +583,9 @@ export default function InvoiceForm({
             }}
           >
             {daysToPay.map((day) => (
-              <MenuItem key={day.value} value={day.value}>
+              <MenuItem
+                key={day.value}
+                value={day.value}>
                 {day.name}
               </MenuItem>
             ))}
@@ -576,9 +620,11 @@ export default function InvoiceForm({
               },
             }}
           >
-            <Box sx={{
-              display: `flex`, gap: `.5rem`, 
-            }}>
+            <Box
+              sx={{
+                display: `flex`,
+                gap: `.5rem`, 
+              }}>
               <IconButton
                 color="error"
                 onClick={() => handleRemoveService(index)}
@@ -636,7 +682,9 @@ export default function InvoiceForm({
                     } = props;
 
                     return (
-                      <li {...otherProps} key={key}>
+                      <li
+                        {...otherProps}
+                        key={key}>
                         {option.name}
                       </li>
                     );
@@ -658,16 +706,18 @@ export default function InvoiceForm({
               </FormControl>
             </Box>
 
-            <Box sx={{
-              display: `flex`,
-              gap: `1rem`,
-              mt: `2rem`,
-              alignItems: `flex-start`,
-            }}>
+            <Box
+              sx={{
+                display: `flex`,
+                gap: `1rem`,
+                mt: `2rem`,
+                alignItems: `flex-start`,
+              }}>
               <FormControl
                 error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity)}
                 sx={{
-                  position: `relative`, flexGrow: 1,
+                  position: `relative`,
+                  flexGrow: 1,
                 }}
               >
                 <TextField
@@ -692,7 +742,10 @@ export default function InvoiceForm({
                   color="primary"
                   onClick={() => handleServiceFieldChange(index, `quantity`, Number(service.quantity) + 1)}
                   sx={{
-                    position: `absolute`, right: `15px`, top: `-13px`, transform: `rotate(90deg)`,
+                    position: `absolute`,
+                    right: `15px`,
+                    top: `-13px`,
+                    transform: `rotate(90deg)`,
                     height: `55px`,
                     width: `27px`,
                     border: `none`,
@@ -711,7 +764,10 @@ export default function InvoiceForm({
                   color="primary"
                   onClick={() => handleServiceFieldChange(index, `quantity`, Number(service.quantity) > 1 ? Number(service.quantity) - 1 : 1)}
                   sx={{
-                    position: `absolute`, right: `15px`, bottom: `-13px`, transform: `rotate(-90deg)`,
+                    position: `absolute`,
+                    right: `15px`,
+                    bottom: `-13px`,
+                    transform: `rotate(-90deg)`,
                     height: `55px`,
                     width: `27px`,
                     border: `none`,
@@ -727,14 +783,18 @@ export default function InvoiceForm({
                 </IconButton>
               </FormControl>
 
-              <FormControl error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.price)} sx={{ flexGrow: 1 }}>
-                <InputLabel htmlFor="outlined-adornment-password">Price</InputLabel>
+              <FormControl
+                error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.price)}
+                sx={{ flexGrow: 1 }}>
+                <InputLabel
+                  htmlFor="outlined-adornment-password">Price</InputLabel>
 
                 <OutlinedInput
                   value={service.price}
                   label="Price"
                   name="subtotal"
-                  endAdornment={<InputAdornment position="end"> € </InputAdornment>}
+                  endAdornment={<InputAdornment
+                    position="end"> € </InputAdornment>}
                   onChange={(event) => handleServiceFieldChange(index, `price`, event.target.value)}
                   disabled={isPending}
                   type="text"
@@ -751,13 +811,17 @@ export default function InvoiceForm({
                 }
               </FormControl>
 
-              <FormControl error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate)} sx={{ flexGrow: 1 }}>
-                <InputLabel htmlFor="outlined-adornment-password">Tax MwSt.</InputLabel>
+              <FormControl
+                error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate)}
+                sx={{ flexGrow: 1 }}>
+                <InputLabel
+                  htmlFor="outlined-adornment-password">Tax MwSt.</InputLabel>
 
                 <OutlinedInput
                   value={service.taxRate}
                   label="Tax MwSt."
-                  endAdornment={<InputAdornment position="end"> % </InputAdornment>}
+                  endAdornment={<InputAdornment
+                    position="end"> % </InputAdornment>}
                   name="taxRate"
                   type="text"
                   inputProps={{
@@ -776,9 +840,11 @@ export default function InvoiceForm({
               </FormControl>
             </Box>
 
-            <Box sx={{
-              display: `flex`,justifyContent: `flex-end`,
-            }}>
+            <Box
+              sx={{
+                display: `flex`,
+                justifyContent: `flex-end`,
+              }}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -801,7 +867,8 @@ export default function InvoiceForm({
         variant="text"
         color="secondary"
         size="large"
-        endIcon={<AddCircle size={30} />}
+        endIcon={<AddCircle
+          size={30} />}
         sx={{
           alignSelf: `flex-end`,
           padding: 0,
@@ -817,7 +884,8 @@ export default function InvoiceForm({
         onClick={handleSubmit}
         sx={{ mt: `20px` }}
         disabled={isPending}
-        endIcon={isPending && <CircularProgress size={16} />}
+        endIcon={isPending && <CircularProgress
+          size={16} />}
       >
         Save
       </Button>

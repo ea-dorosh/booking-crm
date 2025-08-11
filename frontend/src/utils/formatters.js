@@ -38,7 +38,10 @@ export const formattedDateToTime = (date) => {
 export const formatIsoDate = (dateString) => {
   const date = new Date(dateString);
   const options = {
-    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+    month: `short`,
+    year: `2-digit`,
+    day: `2-digit`,
+    timeZone: `Europe/Berlin`, 
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
@@ -54,7 +57,10 @@ export const formatIsoDate = (dateString) => {
 export const getDay = (dateString) => {
   const date = new Date(dateString);
   const options = {
-    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+    month: `short`,
+    year: `2-digit`,
+    day: `2-digit`,
+    timeZone: `Europe/Berlin`, 
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
@@ -70,7 +76,8 @@ export const getDay = (dateString) => {
 export const getDayOfWeek = (dateString) => {
   const date = new Date(dateString);
   const options = {
-    weekday: `short`, timeZone: `Europe/Berlin`, 
+    weekday: `short`,
+    timeZone: `Europe/Berlin`, 
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
 
@@ -85,7 +92,10 @@ export const getDayOfWeek = (dateString) => {
 export const getMonth = (dateString) => {
   const date = new Date(dateString);
   const options = {
-    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+    month: `short`,
+    year: `2-digit`,
+    day: `2-digit`,
+    timeZone: `Europe/Berlin`, 
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
@@ -148,7 +158,10 @@ export const formatTimeToString = (timeStr) => {
 export const formatFromDateTimeToStringDate = (dateString) => {
   const date = new Date(dateString);
   const options = {
-    month: `short`, year: `2-digit`, day: `2-digit`, timeZone: `Europe/Berlin`, 
+    month: `short`,
+    year: `2-digit`,
+    day: `2-digit`,
+    timeZone: `Europe/Berlin`, 
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);

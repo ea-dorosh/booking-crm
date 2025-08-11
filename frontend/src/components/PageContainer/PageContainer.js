@@ -69,8 +69,10 @@ export default function PageContainer({
   };
 
   return (
-    <Box sx={{ display: `flex` }}>
-      <AppBar position="absolute">
+    <Box
+      sx={{ display: `flex` }}>
+      <AppBar
+        position="absolute">
         <Toolbar
           sx={{
             pr: `24px`, // keep right padding when drawer closed
@@ -106,13 +108,19 @@ export default function PageContainer({
 
       {!hideSideNav && (
         /* Collapsed menu - always visible on normal pages */
-        <CollapsedDrawer variant="permanent">
+        <CollapsedDrawer
+          variant="permanent">
           <Toolbar />
           <Divider />
-          <List component="nav" sx={{ px: .5 }}>
-            <MainListItems location={location} />
-            <Divider sx={{ my: 1 }} />
-            <SecondaryListItems location={location} />
+          <List
+            component="nav"
+            sx={{ px: .5 }}>
+            <MainListItems
+              location={location} />
+            <Divider
+              sx={{ my: 1 }} />
+            <SecondaryListItems
+              location={location} />
           </List>
         </CollapsedDrawer>
       )}
@@ -134,17 +142,23 @@ export default function PageContainer({
             px: [1],
           }}
         >
-          <IconButton onClick={toggleDrawer}>
+          <IconButton
+            onClick={toggleDrawer}>
             <ChevronLeft />
           </IconButton>
         </Toolbar>
 
         <Divider />
 
-        <List component="nav" sx={{ px: 1 }}>
-          <MainListItems location={location} />
-          <Divider sx={{ my: 1 }} />
-          <SecondaryListItems location={location} />
+        <List
+          component="nav"
+          sx={{ px: 1 }}>
+          <MainListItems
+            location={location} />
+          <Divider
+            sx={{ my: 1 }} />
+          <SecondaryListItems
+            location={location} />
         </List>
       </ExpandedDrawer>
 
@@ -160,10 +174,11 @@ export default function PageContainer({
       >
         <Toolbar />
 
-        <Box sx={{
-          padding: `24px`,
-          minHeight: `calc(100vh - 64px)`,
-        }}>
+        <Box
+          sx={{
+            padding: `24px`,
+            minHeight: `calc(100vh - 64px)`,
+          }}>
           {children}
         </Box>
       </Box>

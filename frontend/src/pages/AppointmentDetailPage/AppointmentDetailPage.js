@@ -83,12 +83,17 @@ export default function AppointmentDetailPage() {
       {isPending && <LinearProgress />}
 
       {appointment && (
-        <Box sx={{
-          mt: 3, mb: 5, 
-        }}>
-          <Card elevation={3} sx={{
-            mb: 4, overflow: `visible`, 
+        <Box
+          sx={{
+            mt: 3,
+            mb: 5, 
           }}>
+          <Card
+            elevation={3}
+            sx={{
+              mb: 4,
+              overflow: `visible`, 
+            }}>
             <Box
               sx={{
                 p: 2,
@@ -97,7 +102,9 @@ export default function AppointmentDetailPage() {
                 position: `relative`,
               }}
             >
-              <Typography variant="h5" fontWeight="bold">
+              <Typography
+                variant="h5"
+                fontWeight="bold">
                 {appointment.serviceName}
               </Typography>
               <Chip
@@ -112,71 +119,121 @@ export default function AppointmentDetailPage() {
               />
             </Box>
 
-            <CardContent sx={{ p: 3 }}>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Box sx={{
-                    display: `flex`, alignItems: `center`, mb: 2, 
-                  }}>
-                    <CalendarIcon sx={{
-                      mr: 1, color: `primary.main`, 
-                    }} />
-                    <Typography variant="body1">
+            <CardContent
+              sx={{ p: 3 }}>
+              <Grid
+                container
+                spacing={3}>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}>
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `center`,
+                      mb: 2, 
+                    }}>
+                    <CalendarIcon
+                      sx={{
+                        mr: 1,
+                        color: `primary.main`, 
+                      }} />
+                    <Typography
+                      variant="body1">
                       <strong>Date:</strong> {formatIsoDate(appointment.date)}
                     </Typography>
                   </Box>
 
-                  <Box sx={{
-                    display: `flex`, alignItems: `center`, mb: 2, 
-                  }}>
-                    <TimeIcon sx={{
-                      mr: 1, color: `primary.main`, 
-                    }} />
-                    <Typography variant="body1">
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `center`,
+                      mb: 2, 
+                    }}>
+                    <TimeIcon
+                      sx={{
+                        mr: 1,
+                        color: `primary.main`, 
+                      }} />
+                    <Typography
+                      variant="body1">
                       <strong>Time:</strong> {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
                     </Typography>
                   </Box>
 
-                  <Box sx={{
-                    display: `flex`, alignItems: `center`, mb: 2, 
-                  }}>
-                    <ScheduleIcon sx={{
-                      mr: 1, color: `primary.main`, 
-                    }} />
-                    <Typography variant="body1">
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `center`,
+                      mb: 2, 
+                    }}>
+                    <ScheduleIcon
+                      sx={{
+                        mr: 1,
+                        color: `primary.main`, 
+                      }} />
+                    <Typography
+                      variant="body1">
                       <strong>Duration:</strong> {formatTimeToString(appointment.serviceDuration)}
                     </Typography>
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Paper elevation={1} sx={{
-                    p: 2, bgcolor: `grey.50`, 
-                  }}>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}>
+                  <Paper
+                    elevation={1}
+                    sx={{
+                      p: 2,
+                      bgcolor: `grey.50`, 
+                    }}>
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      gutterBottom>
                       APPOINTMENT CREATED
                     </Typography>
-                    <Typography variant="body1" fontWeight="medium" color="primary.main">
+                    <Typography
+                      variant="body1"
+                      fontWeight="medium"
+                      color="primary.main">
                       {formatCreatedDate(appointment.createdDate)}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary">
                       {appointment.createdDate}
                     </Typography>
                   </Paper>
                 </Grid>
               </Grid>
 
-              <Divider sx={{ my: 3 }} />
+              <Divider
+                sx={{ my: 3 }} />
 
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <Box sx={{
-                    display: `flex`, alignItems: `center`, 
-                  }}>
-                    <PersonIcon sx={{
-                      mr: 1, color: `primary.main`, 
-                    }} />
-                    <Typography variant="body1" sx={{ mr: 1 }}>
+              <Grid
+                container
+                spacing={3}>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}>
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `center`, 
+                    }}>
+                    <PersonIcon
+                      sx={{
+                        mr: 1,
+                        color: `primary.main`, 
+                      }} />
+                    <Typography
+                      variant="body1"
+                      sx={{ mr: 1 }}>
                       <strong>Client:</strong>
                     </Typography>
                     <Typography
@@ -205,14 +262,23 @@ export default function AppointmentDetailPage() {
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
-                  <Box sx={{
-                    display: `flex`, alignItems: `center`, 
-                  }}>
-                    <BadgeIcon sx={{
-                      mr: 1, color: `primary.main`, 
-                    }} />
-                    <Typography variant="body1" sx={{ mr: 1 }}>
+                <Grid
+                  item
+                  xs={12}
+                  md={6}>
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `center`, 
+                    }}>
+                    <BadgeIcon
+                      sx={{
+                        mr: 1,
+                        color: `primary.main`, 
+                      }} />
+                    <Typography
+                      variant="body1"
+                      sx={{ mr: 1 }}>
                       <strong>Master:</strong>
                     </Typography>
                     <Typography
@@ -235,9 +301,12 @@ export default function AppointmentDetailPage() {
             </CardContent>
           </Card>
 
-          <Stack direction={{
-            xs: `column`, sm: `row`, 
-          }} spacing={2}>
+          <Stack
+            direction={{
+              xs: `column`,
+              sm: `row`, 
+            }}
+            spacing={2}>
             {appointment.status === appointmentStatusEnum.active && (
               <Button
                 variant="outlined"

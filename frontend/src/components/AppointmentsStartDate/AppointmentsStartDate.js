@@ -17,7 +17,9 @@ export default function BasicDatePicker({
   }, []);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="de">
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      adapterLocale="de">
       <DatePicker
         label="Start date"
         value={localDate}

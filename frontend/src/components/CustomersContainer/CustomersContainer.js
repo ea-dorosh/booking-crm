@@ -25,13 +25,15 @@ export default function CustomersContainer({ customers }) {
           borderRadius: `50px`,
         }}
       >
-        <Typography variant="button"
+        <Typography
+          variant="button"
           sx={{ color: `#fff` }}
         >
           add customer
         </Typography>
 
-        <RouterLink to={`/customers/create-customer`}>
+        <RouterLink
+          to={`/customers/create-customer`}>
           <IconButton
             sx={{ color: `#fff` }}
           >
@@ -40,11 +42,12 @@ export default function CustomersContainer({ customers }) {
         </RouterLink>
       </Box>
 
-      <Box sx={{
-        display: `flex`,
-        justifyContent: `flex-end`,
-        mt: `1rem`,
-      }}>
+      <Box
+        sx={{
+          display: `flex`,
+          justifyContent: `flex-end`,
+          mt: `1rem`,
+        }}>
         <CustomersSorting />
       </Box>
   
@@ -89,16 +92,18 @@ export default function CustomersContainer({ customers }) {
               Added: {formatFromDateTimeToStringDate(customer.addedDate)}
             </Typography>
 
-            <Typography sx={{
-              fontSize: `1rem`,
-              fontWeight: `bold`,
-            }}>
+            <Typography
+              sx={{
+                fontSize: `1rem`,
+                fontWeight: `bold`,
+              }}>
               {customer.lastName} {customer.firstName}
             </Typography>
 
-            <Typography sx={{
-              fontSize: `.8rem`,
-            }}>
+            <Typography
+              sx={{
+                fontSize: `.8rem`,
+              }}>
               {customer.email}
             </Typography>
           </Box>

@@ -23,13 +23,15 @@ export default function InvoicesContainer({ invoices }) {
           borderRadius: `50px`,
         }}
       >
-        <Typography variant="button"
+        <Typography
+          variant="button"
           sx={{ color: `#fff` }}
         >
           add invoice
         </Typography>
 
-        <RouterLink to={`/invoices/create-invoice`}>
+        <RouterLink
+          to={`/invoices/create-invoice`}>
           <IconButton
             sx={{ color: `#fff` }}
           >
@@ -38,11 +40,12 @@ export default function InvoicesContainer({ invoices }) {
         </RouterLink>
       </Box>
 
-      <Box sx={{
-        display: `flex`,
-        justifyContent: `flex-end`,
-        mt: `1rem`,
-      }}>
+      <Box
+        sx={{
+          display: `flex`,
+          justifyContent: `flex-end`,
+          mt: `1rem`,
+        }}>
         {/* <CustomersSorting /> */}
       </Box>
 
@@ -75,24 +78,28 @@ export default function InvoicesContainer({ invoices }) {
             }}
           >
             <Box>
-              <Typography sx={{
-                fontSize: `1.1rem`,
-                fontWeight: `bold`,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: `1.1rem`,
+                  fontWeight: `bold`,
+                }}>
                 {invoice.customer.lastName} {invoice.customer.firstName}
               </Typography>
 
-              <Typography sx={{
-                fontSize: `1rem`,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: `1rem`,
+                }}>
                 #{invoice.invoiceNumber}
               </Typography>
             </Box>
 
-            <Box textAlign="right">
-              <Typography sx={{
-                fontSize: `1.1rem`,
-              }}>
+            <Box
+              textAlign="right">
+              <Typography
+                sx={{
+                  fontSize: `1.1rem`,
+                }}>
                 {invoice.totalAmount}€
               </Typography>
 

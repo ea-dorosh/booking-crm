@@ -9,12 +9,15 @@ import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 
 export default function ServiceNotFound({ onBackToServices }) {
   return (
-    <Box sx={{
-      padding: {
-        xs: 2, md: 3, 
-      }, 
-    }}>
+    <Box
+      sx={{
+        padding: {
+          xs: 2,
+          md: 3,
+        },
+      }}>
       <GoBackNavigation />
+
       <Paper
         sx={{
           padding: 6,
@@ -25,15 +28,27 @@ export default function ServiceNotFound({ onBackToServices }) {
           marginTop: 2,
         }}
       >
-        <Business sx={{
-          fontSize: 60, color: `grey.400`, marginBottom: 2, 
-        }} />
-        <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+        <Business
+          sx={{
+            fontSize: 60,
+            color: `grey.400`,
+            marginBottom: 2,
+          }} />
+
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{ marginBottom: 1 }}>
           Service not found
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ marginBottom: 3 }}>
           The service you&apos;re looking for doesn&apos;t exist
         </Typography>
+
         <Button
           variant="contained"
           onClick={onBackToServices}

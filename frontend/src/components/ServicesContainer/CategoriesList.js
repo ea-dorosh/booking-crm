@@ -16,16 +16,27 @@ export default function CategoriesList({ categories }) {
           borderColor: `grey.300`,
         }}
       >
-        <Business sx={{
-          fontSize: 60, color: `grey.400`, marginBottom: 2, 
-        }} />
-        <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+        <Business
+          sx={{
+            fontSize: 60,
+            color: `grey.400`,
+            marginBottom: 2, 
+          }} />
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{ marginBottom: 1 }}>
           No categories found
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ marginBottom: 3 }}>
           Get started by adding your first category
         </Typography>
-        <RouterLink to="/categories/create-category" style={{ textDecoration: `none` }}>
+        <RouterLink
+          to="/categories/create-category"
+          style={{ textDecoration: `none` }}>
           <Box
             component="span"
             sx={{
@@ -50,16 +61,23 @@ export default function CategoriesList({ categories }) {
     <Grid
       container
       spacing={{
-        xs: 2, sm: 3, 
+        xs: 2,
+        sm: 3, 
       }}
       sx={{
         px: {
-          xs: 1, sm: 0, 
+          xs: 1,
+          sm: 0, 
         }, 
       }}
     >
       {categories.map((category) => (
-        <Grid item xs={12} sm={6} md={4} key={category.id}>
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={4}
+          key={category.id}>
           <Card
             sx={{
               height: `100%`,
@@ -100,14 +118,18 @@ export default function CategoriesList({ categories }) {
                   src={category.image}
                   alt={category.name}
                   style={{
-                    width: `100%`, height: `100%`, objectFit: `cover`, 
+                    width: `100%`,
+                    height: `100%`,
+                    objectFit: `cover`, 
                   }}
                 />
               </Box>
 
-              <Box sx={{
-                flex: 1, minWidth: 0, 
-              }}>
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0, 
+                }}>
                 <Typography
                   variant="h6"
                   sx={{
@@ -134,15 +156,19 @@ export default function CategoriesList({ categories }) {
                       backgroundColor: `grey.100`,
                       color: `text.secondary`,
                     } : {
-                      mt: 0.75, fontWeight: 700, height: 22, 
+                      mt: 0.75,
+                      fontWeight: 700,
+                      height: 22, 
                     }}
                   />
                 )}
               </Box>
 
-              <ChevronRight sx={{
-                color: `grey.500`, flexShrink: 0, 
-              }} />
+              <ChevronRight
+                sx={{
+                  color: `grey.500`,
+                  flexShrink: 0, 
+                }} />
 
             </CardActionArea>
           </Card>

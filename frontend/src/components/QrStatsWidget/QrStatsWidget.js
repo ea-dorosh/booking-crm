@@ -28,7 +28,11 @@ export default function QrStatsWidget() {
     return (
       <Card>
         <CardContent>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight={200}>
             <CircularProgress />
           </Box>
         </CardContent>
@@ -40,7 +44,8 @@ export default function QrStatsWidget() {
     return (
       <Card>
         <CardContent>
-          <Alert severity="error">{error}</Alert>
+          <Alert
+            severity="error">{error}</Alert>
         </CardContent>
       </Card>
     );
@@ -53,30 +58,55 @@ export default function QrStatsWidget() {
   return (
     <Card>
       <CardContent>
-        <Box display="flex" alignItems="center" mb={2}>
-          <QrIcon color="primary" sx={{ mr: 1 }} />
-          <Typography variant="h6" component="h2">
+        <Box
+          display="flex"
+          alignItems="center"
+          mb={2}>
+          <QrIcon
+            color="primary"
+            sx={{ mr: 1 }} />
+          <Typography
+            variant="h6"
+            component="h2">
             QR Code Statistics
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <Box textAlign="center">
-              <Typography variant="h4" color="primary" fontWeight="bold">
+        <Grid
+          container
+          spacing={3}>
+          <Grid
+            item
+            xs={6}>
+            <Box
+              textAlign="center">
+              <Typography
+                variant="h4"
+                color="primary"
+                fontWeight="bold">
                 {stats.totalScans}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary">
                 Total Scans
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={6}>
-            <Box textAlign="center">
-              <Typography variant="h4" color="secondary" fontWeight="bold">
+          <Grid
+            item
+            xs={6}>
+            <Box
+              textAlign="center">
+              <Typography
+                variant="h4"
+                color="secondary"
+                fontWeight="bold">
                 {stats.uniqueScans}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary">
                 Unique Visitors
               </Typography>
             </Box>
@@ -84,20 +114,34 @@ export default function QrStatsWidget() {
         </Grid>
 
         {stats.scansByDay && stats.scansByDay.length > 0 && (
-          <Box mt={3}>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+          <Box
+            mt={3}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom>
               Recent Activity (Last 7 days)
             </Typography>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center">
               {stats.scansByDay.slice(-7).map((day) => (
-                <Box key={day.date} textAlign="center" flex={1}>
-                  <Typography variant="caption" color="text.secondary">
+                <Box
+                  key={day.date}
+                  textAlign="center"
+                  flex={1}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary">
                     {new Date(day.date).toLocaleDateString(`en-US`, {
                       month: `short`,
                       day: `numeric`,
                     })}
                   </Typography>
-                  <Typography variant="body2" fontWeight="bold">
+                  <Typography
+                    variant="body2"
+                    fontWeight="bold">
                     {day.count}
                   </Typography>
                 </Box>

@@ -31,7 +31,8 @@ const ImageUpload = ({
     // Create fake event to clear the image
     onChange({
       target: {
-        files: [], name, 
+        files: [],
+        name, 
       }, 
     });
   };
@@ -39,24 +40,28 @@ const ImageUpload = ({
   const displayImage = temporaryImage || currentImage;
 
   return (
-    <Box sx={{
-      width: `100%`, ...sx, 
-    }}>
-      <Box sx={{
-        display: `flex`,
-        flexDirection: `column`,
-        alignItems: `center`,
-        gap: 2,
+    <Box
+      sx={{
+        width: `100%`,
+        ...sx, 
       }}>
+      <Box
+        sx={{
+          display: `flex`,
+          flexDirection: `column`,
+          alignItems: `center`,
+          gap: 2,
+        }}>
         {/* Image Preview */}
         {displayImage ? (
-          <Box sx={{
-            position: `relative`,
-            display: `flex`,
-            flexDirection: `column`,
-            alignItems: `center`,
-            gap: 1,
-          }}>
+          <Box
+            sx={{
+              position: `relative`,
+              display: `flex`,
+              flexDirection: `column`,
+              alignItems: `center`,
+              gap: 1,
+            }}>
             <Avatar
               src={displayImage}
               sx={{
@@ -68,9 +73,11 @@ const ImageUpload = ({
               }}
             />
 
-            <Box sx={{
-              display: `flex`, gap: 1, 
-            }}>
+            <Box
+              sx={{
+                display: `flex`,
+                gap: 1, 
+              }}>
               {/* Change Image Button */}
               <Button
                 component="label"
@@ -108,34 +115,41 @@ const ImageUpload = ({
                   },
                 }}
               >
-                <Delete fontSize="small" />
+                <Delete
+                  fontSize="small" />
               </IconButton>
             </Box>
           </Box>
         ) : (
           /* Upload Button */
-          <Box sx={{
-            display: `flex`,
-            flexDirection: `column`,
-            alignItems: `center`,
-            gap: 1,
-            py: 4,
-            px: 3,
-            border: `2px dashed`,
-            borderColor: `divider`,
-            borderRadius: 2,
-            backgroundColor: `grey.50`,
-            minWidth: 200,
-            '&:hover': {
-              borderColor: `primary.main`,
-              backgroundColor: `primary.50`,
-            },
-          }}>
-            <CloudUpload sx={{
-              fontSize: 48, color: `text.secondary`, 
-            }} />
+          <Box
+            sx={{
+              display: `flex`,
+              flexDirection: `column`,
+              alignItems: `center`,
+              gap: 1,
+              py: 4,
+              px: 3,
+              border: `2px dashed`,
+              borderColor: `divider`,
+              borderRadius: 2,
+              backgroundColor: `grey.50`,
+              minWidth: 200,
+              '&:hover': {
+                borderColor: `primary.main`,
+                backgroundColor: `primary.50`,
+              },
+            }}>
+            <CloudUpload
+              sx={{
+                fontSize: 48,
+                color: `text.secondary`, 
+              }} />
 
-            <Typography variant="body2" color="text.secondary" textAlign="center">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              textAlign="center">
               Upload profile image
             </Typography>
 

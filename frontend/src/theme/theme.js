@@ -321,7 +321,8 @@ const theme = createTheme({
       variants: [
         {
           props: {
-            color: `success`, variant: `filled`, 
+            color: `success`,
+            variant: `filled`, 
           },
           style: {
             backgroundColor: colors.success[500],
@@ -333,7 +334,8 @@ const theme = createTheme({
         },
         {
           props: {
-            color: `success`, variant: `outlined`, 
+            color: `success`,
+            variant: `outlined`, 
           },
           style: {
             borderColor: colors.success[300],

@@ -20,82 +20,108 @@ import { formattedTime } from '@/utils/formatters';
 
 const timeSlots = [
   {
-    startTime: `08:00:00`, endTime: `08:30:00`, 
+    startTime: `08:00:00`,
+    endTime: `08:30:00`, 
   },
   {
-    startTime: `08:30:00`, endTime: `09:00:00`, 
+    startTime: `08:30:00`,
+    endTime: `09:00:00`, 
   },
   {
-    startTime: `09:00:00`, endTime: `09:30:00`, 
+    startTime: `09:00:00`,
+    endTime: `09:30:00`, 
   },
   {
-    startTime: `09:30:00`, endTime: `10:00:00`, 
+    startTime: `09:30:00`,
+    endTime: `10:00:00`, 
   },
   {
-    startTime: `10:00:00`, endTime: `10:30:00`, 
+    startTime: `10:00:00`,
+    endTime: `10:30:00`, 
   },
   {
-    startTime: `10:30:00`, endTime: `11:00:00`, 
+    startTime: `10:30:00`,
+    endTime: `11:00:00`, 
   },
   {
-    startTime: `11:00:00`, endTime: `11:30:00`, 
+    startTime: `11:00:00`,
+    endTime: `11:30:00`, 
   },
   {
-    startTime: `11:30:00`, endTime: `12:00:00`, 
+    startTime: `11:30:00`,
+    endTime: `12:00:00`, 
   },
   {
-    startTime: `12:00:00`, endTime: `12:30:00`, 
+    startTime: `12:00:00`,
+    endTime: `12:30:00`, 
   },
   {
-    startTime: `12:30:00`, endTime: `13:00:00`, 
+    startTime: `12:30:00`,
+    endTime: `13:00:00`, 
   },
   {
-    startTime: `13:00:00`, endTime: `13:30:00`, 
+    startTime: `13:00:00`,
+    endTime: `13:30:00`, 
   },
   {
-    startTime: `13:30:00`, endTime: `14:00:00`, 
+    startTime: `13:30:00`,
+    endTime: `14:00:00`, 
   },
   {
-    startTime: `14:00:00`, endTime: `14:30:00`, 
+    startTime: `14:00:00`,
+    endTime: `14:30:00`, 
   },
   {
-    startTime: `14:30:00`, endTime: `15:00:00`, 
+    startTime: `14:30:00`,
+    endTime: `15:00:00`, 
   },
   {
-    startTime: `15:00:00`, endTime: `15:30:00`, 
+    startTime: `15:00:00`,
+    endTime: `15:30:00`, 
   },
   {
-    startTime: `15:30:00`, endTime: `16:00:00`, 
+    startTime: `15:30:00`,
+    endTime: `16:00:00`, 
   },
   {
-    startTime: `16:00:00`, endTime: `16:30:00`, 
+    startTime: `16:00:00`,
+    endTime: `16:30:00`, 
   },
   {
-    startTime: `16:30:00`, endTime: `17:00:00`, 
+    startTime: `16:30:00`,
+    endTime: `17:00:00`, 
   },
   {
-    startTime: `17:00:00`, endTime: `17:30:00`, 
+    startTime: `17:00:00`,
+    endTime: `17:30:00`, 
   },
   {
-    startTime: `17:30:00`, endTime: `18:00:00`, 
+    startTime: `17:30:00`,
+    endTime: `18:00:00`, 
   },
   {
-    startTime: `18:00:00`, endTime: `18:30:00`, 
+    startTime: `18:00:00`,
+    endTime: `18:30:00`, 
   },
   {
-    startTime: `18:30:00`, endTime: `19:00:00`, 
+    startTime: `18:30:00`,
+    endTime: `19:00:00`, 
   },
   {
-    startTime: `19:00:00`, endTime: `19:30:00`, 
+    startTime: `19:00:00`,
+    endTime: `19:30:00`, 
   },
   {
-    startTime: `19:30:00`, endTime: `20:00:00`, 
+    startTime: `19:30:00`,
+    endTime: `20:00:00`, 
   },
   {
-    startTime: `20:00:00`, endTime: `20:30:00`, 
+    startTime: `20:00:00`,
+    endTime: `20:30:00`, 
   },
   {
-    startTime: `20:30:00`, endTime: `21:00:00`, 
+    startTime: `20:30:00`,
+    endTime: `21:00:00`, 
   },
 ];
 
@@ -163,14 +189,22 @@ export default function DayFormRow({
           borderColor: `primary.200`,
         }}
       >
-        <Typography variant="body2" sx={{
-          fontWeight: 600, marginBottom: 1.5, 
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            marginBottom: 1.5, 
+          }}>
           {day.name}
         </Typography>
 
-        <Stack direction="row" spacing={1} sx={{ marginBottom: 1.5 }}>
-          <FormControl size="small" sx={{ minWidth: 80 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ marginBottom: 1.5 }}>
+          <FormControl
+            size="small"
+            sx={{ minWidth: 80 }}>
             <InputLabel>From</InputLabel>
             <Select
               value={startTime}
@@ -179,14 +213,18 @@ export default function DayFormRow({
               MenuProps={{ style: { maxHeight: 300 } }}
             >
               {timeSlots.map((timeSlot) => (
-                <MenuItem key={timeSlot.startTime} value={timeSlot.startTime}>
+                <MenuItem
+                  key={timeSlot.startTime}
+                  value={timeSlot.startTime}>
                   {formattedTime(timeSlot.startTime)}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <FormControl size="small" sx={{ minWidth: 80 }}>
+          <FormControl
+            size="small"
+            sx={{ minWidth: 80 }}>
             <InputLabel>To</InputLabel>
             <Select
               value={endTime}
@@ -195,7 +233,9 @@ export default function DayFormRow({
               MenuProps={{ style: { maxHeight: 300 } }}
             >
               {timeSlots.map((timeSlot) => (
-                <MenuItem key={timeSlot.endTime} value={timeSlot.endTime}>
+                <MenuItem
+                  key={timeSlot.endTime}
+                  value={timeSlot.endTime}>
                   {formattedTime(timeSlot.endTime)}
                 </MenuItem>
               ))}
@@ -203,7 +243,9 @@ export default function DayFormRow({
           </FormControl>
         </Stack>
 
-        <Stack direction="row" spacing={1}>
+        <Stack
+          direction="row"
+          spacing={1}>
           <Button
             size="small"
             variant="contained"
@@ -240,9 +282,12 @@ export default function DayFormRow({
         borderColor: `grey.200`,
       }}
     >
-      <Box sx={{
-        display: `flex`, alignItems: `center`, flex: 1, 
-      }}>
+      <Box
+        sx={{
+          display: `flex`,
+          alignItems: `center`,
+          flex: 1, 
+        }}>
         <Typography
           variant="body2"
           sx={{
@@ -268,7 +313,9 @@ export default function DayFormRow({
         </Typography>
       </Box>
 
-      <Stack direction="row" spacing={0.5}>
+      <Stack
+        direction="row"
+        spacing={0.5}>
         {employeeAvailability ? (
           <>
             <Button
@@ -289,14 +336,16 @@ export default function DayFormRow({
               color="error"
               sx={{ padding: `4px` }}
             >
-              <Delete sx={{ fontSize: 16 }} />
+              <Delete
+                sx={{ fontSize: 16 }} />
             </IconButton>
           </>
         ) : (
           <Button
             size="small"
             variant="contained"
-            startIcon={<Add sx={{ fontSize: 16 }} />}
+            startIcon={<Add
+              sx={{ fontSize: 16 }} />}
             onClick={() => setIsEditMode(true)}
             sx={{
               minWidth: `auto`,

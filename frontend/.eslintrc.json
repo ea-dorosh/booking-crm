@@ -44,6 +44,9 @@
       }
     }],
     "comma-dangle": ["error", "always-multiline"],
-    "object-curly-spacing": ["error", "always"]
+    "object-curly-spacing": ["error", "always"],
+    "react/jsx-first-prop-new-line": ["error", "always"],
+    "react/jsx-max-props-per-line": ["error", { "maximum": 1 }],
+    "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": false }]
   }
 }

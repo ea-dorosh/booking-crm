@@ -50,7 +50,8 @@ const FormActions = ({
         color="primary"
         onClick={onSubmit}
         disabled={hasErrors}
-        endIcon={isPending && <CircularProgress size={16} />}
+        endIcon={isPending && <CircularProgress
+          size={16} />}
         sx={{
           flex: hasTwoButtons ? 1 : `none`,
           width: hasTwoButtons ? `auto` : `100%`,

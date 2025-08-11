@@ -23,9 +23,11 @@ export default function CustomersPage() {
   }, []);
 
   return (
-    <PageContainer pageTitle="Invoices">
+    <PageContainer
+      pageTitle="Invoices">
 
-      {isPending && <Box mt={2}>
+      {isPending && <Box
+        mt={2}>
         <LinearProgress />
       </Box>}
 

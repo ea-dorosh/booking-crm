@@ -118,7 +118,8 @@ export default function ServiceSubCategoryDetailPage() {
     const isArchived = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.archived;
     const nextStatus = isArchived ? subCategoryStatusEnum.active : subCategoryStatusEnum.archived;
     await dispatch(updateSubCategory({
-      id: serviceSubCategory.id, status: nextStatus, 
+      id: serviceSubCategory.id,
+      status: nextStatus, 
     }));
     await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
   };
@@ -128,28 +129,36 @@ export default function ServiceSubCategoryDetailPage() {
     const isDisabled = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.disabled;
     const nextStatus = isDisabled ? subCategoryStatusEnum.active : subCategoryStatusEnum.disabled;
     await dispatch(updateSubCategory({
-      id: serviceSubCategory.id, status: nextStatus, 
+      id: serviceSubCategory.id,
+      status: nextStatus, 
     }));
     await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
   };
 
   return (
-    <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{
-        padding: {
-          xs: 0, md: 0, maxWidth: `768px`, 
-        }, 
-      }}>
+    <PageContainer
+      pageTitle={getPageTitle()}
+      hideSideNav>
+      <Box
+        sx={{
+          padding: {
+            xs: 0,
+            md: 0,
+            maxWidth: `768px`, 
+          }, 
+        }}>
         {!isEditMode && <GoBackNavigation />}
 
         {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && (
-          <Box mt={2}>
+          <Box
+            mt={2}>
             <LinearProgress />
           </Box>
         )}
 
         {isEditMode && serviceCategories && (
-          <Box mt={3}>
+          <Box
+            mt={3}>
             <ServiceSubCategoryForm
               subCategory={serviceSubCategory}
               submitForm={subCategoryHandler}
@@ -159,7 +168,9 @@ export default function ServiceSubCategoryDetailPage() {
               serviceCategories={serviceCategories}
             />
 
-            <Box mt={2} sx={{ width: `100%` }}>
+            <Box
+              mt={2}
+              sx={{ width: `100%` }}>
               {!shouldShowSubCategoryForm && (
                 <Button
                   variant="outlined"
@@ -174,7 +185,8 @@ export default function ServiceSubCategoryDetailPage() {
         )}
 
         {!isEditMode && serviceSubCategory && serviceCategories && (
-          <Box mt={3}>
+          <Box
+            mt={3}>
             <SubCategoryDetails
               subCategory={serviceSubCategory}
               serviceCategories={serviceCategories}

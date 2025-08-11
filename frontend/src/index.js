@@ -11,10 +11,13 @@ import theme from '@/theme/theme';
 
 const root = ReactDOM.createRoot(document.getElementById(`root`));
 root.render(
-  <Provider store={store}>
-    <ThemeProvider theme={theme}>
+  <Provider
+    store={store}>
+    <ThemeProvider
+      theme={theme}>
       <CssBaseline />
-      <RouterProvider router={router} />
+      <RouterProvider
+        router={router} />
     </ThemeProvider>
   </Provider>,
 );

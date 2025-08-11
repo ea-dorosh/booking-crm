@@ -13,7 +13,8 @@ import {
 export default function CustomerSavedAppointments({ appointments }) {
 
   return (<>
-    <Typography variant="h5">
+    <Typography
+      variant="h5">
       Appointments
     </Typography>
 
@@ -51,16 +52,17 @@ export default function CustomerSavedAppointments({ appointments }) {
             position: `relative`,
           }}
         >
-          {appointment.status === appointmentStatusEnum.canceled && <Box sx={{
-            fontSize: `.5rem`,
-            bgcolor: `red`,
-            color: `#fff`,
-            marginLeft: `auto`,
-            position: `absolute`,
-            padding: `1px 4px`,
-            left: `0`,
-            top: `-2px`,
-          }}>
+          {appointment.status === appointmentStatusEnum.canceled && <Box
+            sx={{
+              fontSize: `.5rem`,
+              bgcolor: `red`,
+              color: `#fff`,
+              marginLeft: `auto`,
+              position: `absolute`,
+              padding: `1px 4px`,
+              left: `0`,
+              top: `-2px`,
+            }}>
             canceled
           </Box>}
 
@@ -77,10 +79,11 @@ export default function CustomerSavedAppointments({ appointments }) {
             Added: {formatFromDateTimeToStringDate(appointment.createdDate)}
           </Typography>
     
-          <Typography sx={{
-            fontSize: `1rem`,
-            fontWeight: `bold`,
-          }}>
+          <Typography
+            sx={{
+              fontSize: `1rem`,
+              fontWeight: `bold`,
+            }}>
             {formatFromDateTimeToStringDate(appointment.date)} 
             <Typography 
               component="span"
@@ -92,15 +95,17 @@ export default function CustomerSavedAppointments({ appointments }) {
             </Typography>
           </Typography>
     
-          <Typography sx={{
-            fontSize: `.8rem`,
-          }}>
+          <Typography
+            sx={{
+              fontSize: `.8rem`,
+            }}>
             {appointment.service.name} - <b>{formatTimeToString(appointment.service.duration)}</b>
           </Typography>
 
-          <Typography sx={{
-            fontSize: `.8rem`,
-          }}>
+          <Typography
+            sx={{
+              fontSize: `.8rem`,
+            }}>
             {appointment.employee.firstName} {appointment.employee.lastName}
           </Typography>
         </Box>

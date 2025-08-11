@@ -67,7 +67,9 @@ export default function FilterButton({
       <Button
         variant="outlined"
         startIcon={
-          <Badge badgeContent={totalSelected} color="primary">
+          <Badge
+            badgeContent={totalSelected}
+            color="primary">
             <FilterListIcon />
           </Badge>
         }
@@ -106,43 +108,55 @@ export default function FilterButton({
           paper: {
             sx: {
               width: {
-                xs: `90vw`, sm: `90vw`, md: `600px`, 
+                xs: `90vw`,
+                sm: `90vw`,
+                md: `600px`, 
               },
               maxWidth: `600px`,
               maxHeight: {
-                xs: `70vh`, sm: `75vh`, md: `80vh`, 
+                xs: `70vh`,
+                sm: `75vh`,
+                md: `80vh`, 
               },
               overflow: `hidden`,
               boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
               borderRadius: {
-                xs: 2, sm: 2, 
+                xs: 2,
+                sm: 2, 
               },
               margin: {
-                xs: `8px auto`, sm: `auto`, 
+                xs: `8px auto`,
+                sm: `auto`, 
               },
               left: {
-                xs: `5vw !important`, sm: `auto`, 
+                xs: `5vw !important`,
+                sm: `auto`, 
               },
               right: {
-                xs: `5vw !important`, sm: `auto`, 
+                xs: `5vw !important`,
+                sm: `auto`, 
               },
             },
           },
         }}
       >
-        <Box sx={{
-          padding: `12px`,
-          maxHeight: {
-            xs: `70vh`, sm: `75vh`, md: `80vh`, 
-          },
-          overflow: `auto`,
-        }}>
-          <Box sx={{
-            display: `flex`,
-            justifyContent: `flex-end`,
-            alignItems: `center`,
-            marginBottom: `12px`,
+        <Box
+          sx={{
+            padding: `12px`,
+            maxHeight: {
+              xs: `70vh`,
+              sm: `75vh`,
+              md: `80vh`, 
+            },
+            overflow: `auto`,
           }}>
+          <Box
+            sx={{
+              display: `flex`,
+              justifyContent: `flex-end`,
+              alignItems: `center`,
+              marginBottom: `12px`,
+            }}>
             {totalSelected > 0 && (
               <Button
                 size="small"
@@ -155,15 +169,25 @@ export default function FilterButton({
           </Box>
 
           {/* Employees */}
-          <Box sx={{ marginBottom: `16px` }}>
-            <Typography variant="subtitle2" sx={{
-              fontWeight: 600, marginBottom: `8px`, 
-            }}>
+          <Box
+            sx={{ marginBottom: `16px` }}>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: 600,
+                marginBottom: `8px`, 
+              }}>
               Employees
             </Typography>
-            <Grid container spacing={0.5}>
+            <Grid
+              container
+              spacing={0.5}>
               {employees.map((employee) => (
-                <Grid item xs={12} sm={6} key={employee.employeeId}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  key={employee.employeeId}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -173,7 +197,8 @@ export default function FilterButton({
                       />
                     }
                     label={
-                      <Typography sx={{ fontSize: `0.85rem` }}>
+                      <Typography
+                        sx={{ fontSize: `0.85rem` }}>
                         {`${employee.firstName} ${employee.lastName}`}
                       </Typography>
                     }
@@ -196,15 +221,25 @@ export default function FilterButton({
 
           {/* Categories */}
           {categories && categories.length > 0 && (
-            <Box sx={{ marginBottom: `16px` }}>
-              <Typography variant="subtitle2" sx={{
-                fontWeight: 600, marginBottom: `8px`, 
-              }}>
+            <Box
+              sx={{ marginBottom: `16px` }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  marginBottom: `8px`, 
+                }}>
                 Categories
               </Typography>
-              <Grid container spacing={0.5}>
+              <Grid
+                container
+                spacing={0.5}>
                 {categories.map((category) => (
-                  <Grid item xs={12} sm={6} key={category.id}>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    key={category.id}>
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -214,7 +249,8 @@ export default function FilterButton({
                         />
                       }
                       label={
-                        <Typography sx={{ fontSize: `0.85rem` }}>
+                        <Typography
+                          sx={{ fontSize: `0.85rem` }}>
                           {category.name}
                         </Typography>
                       }
@@ -239,9 +275,12 @@ export default function FilterButton({
           {/* Sub-Categories */}
           {subCategories && subCategories.length > 0 && (
             <Box>
-              <Typography variant="subtitle2" sx={{
-                fontWeight: 600, marginBottom: `8px`, 
-              }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  marginBottom: `8px`, 
+                }}>
                 Sub-Categories
               </Typography>
 
@@ -254,12 +293,14 @@ export default function FilterButton({
                 if (categorySubCategories.length === 0) return null;
 
                 return (
-                  <Accordion key={category.id} sx={{
-                    boxShadow: `none`,
-                    border: `1px solid #e0e0e0`,
-                    marginBottom: `6px`,
-                    '&:before': { display: `none` },
-                  }}>
+                  <Accordion
+                    key={category.id}
+                    sx={{
+                      boxShadow: `none`,
+                      border: `1px solid #e0e0e0`,
+                      marginBottom: `6px`,
+                      '&:before': { display: `none` },
+                    }}>
                     <AccordionSummary
                       expandIcon={<ExpandMore />}
                       sx={{
@@ -269,16 +310,26 @@ export default function FilterButton({
                         },
                       }}
                     >
-                      <Typography variant="body2" sx={{
-                        fontWeight: 500, color: `text.secondary`, 
-                      }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          color: `text.secondary`, 
+                        }}>
                         {category.name}
                       </Typography>
                     </AccordionSummary>
-                    <AccordionDetails sx={{ padding: `8px 12px` }}>
-                      <Grid container spacing={0.5}>
+                    <AccordionDetails
+                      sx={{ padding: `8px 12px` }}>
+                      <Grid
+                        container
+                        spacing={0.5}>
                         {categorySubCategories.map((subCategory) => (
-                          <Grid item xs={12} sm={6} key={subCategory.id}>
+                          <Grid
+                            item
+                            xs={12}
+                            sm={6}
+                            key={subCategory.id}>
                             <FormControlLabel
                               control={
                                 <Checkbox
@@ -288,7 +339,8 @@ export default function FilterButton({
                                 />
                               }
                               label={
-                                <Typography sx={{ fontSize: `0.8rem` }}>
+                                <Typography
+                                  sx={{ fontSize: `0.8rem` }}>
                                   {subCategory.name}
                                 </Typography>
                               }

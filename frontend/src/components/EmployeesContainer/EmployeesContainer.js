@@ -18,24 +18,33 @@ import AddButton from '@/components/common/AddButton';
 
 export default function EmployeesContainer({ employees }) {
   return (
-    <Box sx={{
-      padding: {
-        xs: 0, md: 0, 
-      }, 
-    }}>
+    <Box
+      sx={{
+        padding: {
+          xs: 0,
+          md: 0, 
+        }, 
+      }}>
       {/* Header */}
-      <Box sx={{ marginBottom: 3 }}>
-        <Typography variant="h4" sx={{
-          fontWeight: 700, marginBottom: 1, 
-        }}>
+      <Box
+        sx={{ marginBottom: 3 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            marginBottom: 1, 
+          }}>
           Team Members
         </Typography>
-        <Box sx={{
-          display: `flex`,
-          justifyContent: `space-between`,
-          alignItems: `center`,
-        }}>
-          <Typography variant="body1" color="text.secondary">
+        <Box
+          sx={{
+            display: `flex`,
+            justifyContent: `space-between`,
+            alignItems: `center`,
+          }}>
+          <Typography
+            variant="body1"
+            color="text.secondary">
             Manage your employees and their information
           </Typography>
 
@@ -49,9 +58,16 @@ export default function EmployeesContainer({ employees }) {
       </Box>
 
       {/* Employees Grid */}
-      <Grid container spacing={3}>
+      <Grid
+        container
+        spacing={3}>
         {employees.map((employee) => (
-          <Grid item xs={12} sm={6} md={4} key={employee.employeeId}>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            key={employee.employeeId}>
             <Card
               sx={{
                 height: `100%`,
@@ -60,14 +76,15 @@ export default function EmployeesContainer({ employees }) {
               }}
             >
               {/* Card Content */}
-              <CardContent sx={{
-                padding: 3,
-                flexGrow: 1,
-                display: `flex`,
-                flexDirection: `column`,
-                alignItems: `center`,
-                textAlign: `center`,
-              }}>
+              <CardContent
+                sx={{
+                  padding: 3,
+                  flexGrow: 1,
+                  display: `flex`,
+                  flexDirection: `column`,
+                  alignItems: `center`,
+                  textAlign: `center`,
+                }}>
                 {/* Avatar */}
                 <Avatar
                   src={employee.image}
@@ -79,7 +96,8 @@ export default function EmployeesContainer({ employees }) {
                     borderColor: `primary.50`,
                   }}
                 >
-                  <Person sx={{ fontSize: 40 }} />
+                  <Person
+                    sx={{ fontSize: 40 }} />
                 </Avatar>
 
                 {/* Name */}
@@ -95,15 +113,18 @@ export default function EmployeesContainer({ employees }) {
                 </Typography>
 
                 {/* Email */}
-                <Box sx={{
-                  display: `flex`,
-                  alignItems: `center`,
-                  gap: 0.5,
-                  marginBottom: 2,
-                  color: `text.secondary`,
-                }}>
-                  <Email sx={{ fontSize: 16 }} />
-                  <Typography variant="body2">
+                <Box
+                  sx={{
+                    display: `flex`,
+                    alignItems: `center`,
+                    gap: 0.5,
+                    marginBottom: 2,
+                    color: `text.secondary`,
+                  }}>
+                  <Email
+                    sx={{ fontSize: 16 }} />
+                  <Typography
+                    variant="body2">
                     {employee.email}
                   </Typography>
                 </Box>
@@ -120,7 +141,8 @@ export default function EmployeesContainer({ employees }) {
                 />
 
                 {/* Action Button */}
-                <Box sx={{ marginTop: `auto` }}>
+                <Box
+                  sx={{ marginTop: `auto` }}>
                   <Button
                     component={RouterLink}
                     to={`/employees/${employee.employeeId}`}
@@ -156,16 +178,26 @@ export default function EmployeesContainer({ employees }) {
             borderColor: `grey.300`,
           }}
         >
-          <Person sx={{
-            fontSize: 60, color: `grey.400`, marginBottom: 2, 
-          }} />
-          <Typography variant="h6" color="text.secondary" sx={{ marginBottom: 1 }}>
+          <Person
+            sx={{
+              fontSize: 60,
+              color: `grey.400`,
+              marginBottom: 2, 
+            }} />
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ marginBottom: 1 }}>
             No employees found
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ marginBottom: 3 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ marginBottom: 3 }}>
             Get started by adding your first team member
           </Typography>
-          <AddButton to="/employees/create-employee">
+          <AddButton
+            to="/employees/create-employee">
             Add First Employee
           </AddButton>
         </Paper>

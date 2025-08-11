@@ -19,7 +19,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState({
-    enabled: false, calendarId: null, 
+    enabled: false,
+    calendarId: null, 
   });
   const [calendarId, setCalendarId] = useState(``);
   const [syncLoading, setSyncLoading] = useState(false);
@@ -171,21 +172,30 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" my={3}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        my={3}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box mt={3}>
-      <Typography variant="h6" gutterBottom>
+    <Box
+      mt={3}>
+      <Typography
+        variant="h6"
+        gutterBottom>
         Google Calendar Integration
       </Typography>
-      <Divider sx={{ mb: 2 }} />
+      <Divider
+        sx={{ mb: 2 }} />
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
@@ -201,11 +211,19 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       )}
 
       {status.enabled ? (
-        <Card variant="outlined" sx={{ mb: 3 }}>
+        <Card
+          variant="outlined"
+          sx={{ mb: 3 }}>
           <CardContent>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-              <Google color="primary" />
-              <Typography variant="h6">Google Calendar Connected</Typography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 2 }}>
+              <Google
+                color="primary" />
+              <Typography
+                variant="h6">Google Calendar Connected</Typography>
               <Chip
                 icon={<Check />}
                 label="Active"
@@ -215,35 +233,62 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
               />
             </Stack>
 
-            <Box sx={{
-              mb: 2, p: 2, bgcolor: `background.paper`, borderRadius: 1, 
-            }}>
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-                <CalendarMonth fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">
+            <Box
+              sx={{
+                mb: 2,
+                p: 2,
+                bgcolor: `background.paper`,
+                borderRadius: 1, 
+              }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{ mb: 1 }}>
+                <CalendarMonth
+                  fontSize="small"
+                  color="action" />
+                <Typography
+                  variant="body2"
+                  color="text.secondary">
                   Calendar ID:
                 </Typography>
-                <Typography variant="body1">
+                <Typography
+                  variant="body1">
                   {status.calendarId}
                 </Typography>
               </Stack>
 
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Link fontSize="small" color="action" />
-                <Typography variant="body2" color="text.secondary">
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}>
+                <Link
+                  fontSize="small"
+                  color="action" />
+                <Typography
+                  variant="body2"
+                  color="text.secondary">
                   Status:
                 </Typography>
-                <Typography variant="body1" color="success.main">
+                <Typography
+                  variant="body1"
+                  color="success.main">
                   Synchronizing appointments
                 </Typography>
               </Stack>
             </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2 }}>
               Appointments will be automatically synced with this Google Calendar.
             </Typography>
 
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="row"
+              spacing={2}>
               <Button
                 variant="outlined"
                 color="error"
@@ -269,11 +314,15 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       ) : (
         <Box>
           {status.tokenExpired ? (
-            <Alert severity="warning" sx={{ mb: 2 }}>
+            <Alert
+              severity="warning"
+              sx={{ mb: 2 }}>
               Google Calendar access has expired. You need to reauthorize.
             </Alert>
           ) : (
-            <Typography variant="body1" sx={{ mb: 2 }}>
+            <Typography
+              variant="body1"
+              sx={{ mb: 2 }}>
               Connect this employee to their Google Calendar to synchronize appointments.
             </Typography>
           )}
@@ -288,7 +337,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             sx={{ mb: 2 }}
           />
 
-          <Box sx={{ mb: 2 }}>
+          <Box
+            sx={{ mb: 2 }}>
             <Button
               variant="contained"
               onClick={handleConnect}
@@ -299,9 +349,12 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             </Button>
           </Box>
 
-          <Typography variant="body2" sx={{
-            color: `text.secondary`, mt: 2, 
-          }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: `text.secondary`,
+              mt: 2, 
+            }}>
             You will be redirected to Google to authorize access to the calendar.
           </Typography>
         </Box>

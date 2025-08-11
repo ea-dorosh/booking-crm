@@ -19,16 +19,21 @@ const EmployeePriceFields = ({
 }) => {
   return (
     <Box>
-      <Typography variant="subtitle1" mt={2}>
+      <Typography
+        variant="subtitle1"
+        mt={2}>
         Employees for this service:
       </Typography>
 
       {employees?.map(employee => (
-        <Box key={employee.employeeId} mt={2} sx={{
-          border: `1px solid #ccc`,
-          borderRadius: `3px`,
-          padding: `10px`,
-        }}>
+        <Box
+          key={employee.employeeId}
+          mt={2}
+          sx={{
+            border: `1px solid #ccc`,
+            borderRadius: `3px`,
+            padding: `10px`,
+          }}>
           <FormControl>
             <FormControlLabel
               control={
@@ -51,9 +56,12 @@ const EmployeePriceFields = ({
           </FormControl>
 
           {employeePrices.some(employeePrice => employeePrice.employeeId === employee.employeeId) && (
-            <FormControl error={Boolean(formErrors?.employeeIds)} sx={{
-              mt: 1, width: `100%`, 
-            }}>
+            <FormControl
+              error={Boolean(formErrors?.employeeIds)}
+              sx={{
+                mt: 1,
+                width: `100%`, 
+              }}>
               <TextField
                 value={employeePrices.find(employeePrice => employeePrice.employeeId === employee.employeeId)?.price || ``}
                 label="Service Price"
@@ -70,7 +78,8 @@ const EmployeePriceFields = ({
                 disabled={disabled}
                 type="number"
                 inputProps={{
-                  min: 0, step: 0.01, 
+                  min: 0,
+                  step: 0.01, 
                 }}
               />
             </FormControl>
@@ -79,7 +88,8 @@ const EmployeePriceFields = ({
       ))}
 
       {formErrors?.employeePrices && (
-        <FormHelperText sx={{ color: `error.main` }}>
+        <FormHelperText
+          sx={{ color: `error.main` }}>
           {formErrors.employeePrices}
         </FormHelperText>
       )}

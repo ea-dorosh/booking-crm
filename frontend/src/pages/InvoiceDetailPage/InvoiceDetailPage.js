@@ -43,7 +43,7 @@ export default function CustomerDetailPage() {
   const navigate = useNavigate();
 
   const {
-    data: invoice, isPending, updateFormPending, 
+    data: invoice, isPending, updateFormPending,
   } = useSelector(state => state.invoice);
   const { isPending: isCustomersRequestPending } = useSelector(state => state.customers);
 
@@ -185,19 +185,24 @@ export default function CustomerDetailPage() {
   return (
     <PageContainer
       pageTitle={invoice ?
-        `Invoice: ${invoice.invoiceNumber}`: `New invoice`
+        `Invoice: ${invoice.invoiceNumber}` :
+        `New invoice`
       }
       hideSideNav
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {(isPending || isCustomersRequestPending) && <Box mt={2}>
+      {(isPending || isCustomersRequestPending) && <Box
+        mt={2}>
         <LinearProgress />
       </Box>}
 
-      <Loader isOpen={isPdfLoading} message={`Processing PDF...`} />
+      <Loader
+        isOpen={isPdfLoading}
+        message={`Processing PDF...`} />
 
-      {isEditMode && customers?.length > 0 && services?.length > 0 && <Box mt={3}>
+      {isEditMode && customers?.length > 0 && services?.length > 0 && <Box
+        mt={3}>
         <InvoiceForm
           invoice={invoice}
           customers={customers}
@@ -210,7 +215,9 @@ export default function CustomerDetailPage() {
           isPending={updateFormPending}
         />
 
-        <Box mt={2} sx={{ width:`100%` }}>
+        <Box
+          mt={2}
+          sx={{ width:`100%` }}>
           {<Button
             variant="outlined"
             onClick={() => {
@@ -229,7 +236,8 @@ export default function CustomerDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && invoice && <Box mt={3}>
+      {!isEditMode && invoice && <Box
+        mt={3}>
         <InvoiceDetails
           invoice={invoice}
           onChangeInvoiceClick={changeInvoiceHandler}
@@ -254,12 +262,13 @@ export default function CustomerDetailPage() {
             padding: 2,
           }}
         >
-          <Box sx={{
-            display: `flex`,
-            justifyContent: `flex-end`,
-            width: `100%`,
-            marginBottom: 1,
-          }}>
+          <Box
+            sx={{
+              display: `flex`,
+              justifyContent: `flex-end`,
+              width: `100%`,
+              marginBottom: 1,
+            }}>
             <Button
               variant="contained"
               color="primary"
@@ -268,12 +277,13 @@ export default function CustomerDetailPage() {
               Close
             </Button>
           </Box>
-          <Box sx={{
-            width: `100%`,
-            height: `calc(100% - 50px)`,
-            backgroundColor: `white`,
-            overflow: `hidden`,
-          }}>
+          <Box
+            sx={{
+              width: `100%`,
+              height: `calc(100% - 50px)`,
+              backgroundColor: `white`,
+              overflow: `hidden`,
+            }}>
             {pdfViewerUrl && (
               <iframe
                 ref={iframeRef}

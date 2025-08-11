@@ -16,10 +16,16 @@ import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      align="center"
+      {...props}>
       Copyright ©
 
-      <Link color="inherit" href="https://mui.com/">
+      <Link
+        color="inherit"
+        href="https://mui.com/">
         Your Website
       </Link>{` `}
 
@@ -76,8 +82,11 @@ export default function LoginPage() {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs">
+    <ThemeProvider
+      theme={defaultTheme}>
+      <Container
+        component="main"
+        maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
@@ -87,15 +96,23 @@ export default function LoginPage() {
             alignItems: `center`,
           }}
         >
-          <Avatar sx={{
-            m: 1, bgcolor: `secondary.main`, 
-          }}>
+          <Avatar
+            sx={{
+              m: 1,
+              bgcolor: `secondary.main`, 
+            }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
+          <Typography
+            component="h1"
+            variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
@@ -117,7 +134,9 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={<Checkbox
+                value="remember"
+                color="primary" />}
               label="Remember me"
             />
             <Button
@@ -125,19 +144,29 @@ export default function LoginPage() {
               fullWidth
               variant="contained"
               sx={{
-                mt: 3, mb: 2, 
+                mt: 3,
+                mb: 2, 
               }}
             >
               Sign In
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2" onClick={handleResetPassword}>
+            <Grid
+              container>
+              <Grid
+                item
+                xs>
+                <Link
+                  href="#"
+                  variant="body2"
+                  onClick={handleResetPassword}>
                   Forgot password?
                 </Link>
               </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
+              <Grid
+                item>
+                <Link
+                  href="#"
+                  variant="body2">
                   {`Don't have an account? Sign Up`}
                 </Link>
               </Grid>
@@ -145,11 +174,14 @@ export default function LoginPage() {
           </Box>
         </Box>
 
-        {error && <Typography color="error">{error}</Typography>}
+        {error && <Typography
+          color="error">{error}</Typography>}
 
-        <Copyright sx={{
-          mt: 8, mb: 4, 
-        }} />
+        <Copyright
+          sx={{
+            mt: 8,
+            mb: 4, 
+          }} />
       </Container>
     </ThemeProvider>
   );

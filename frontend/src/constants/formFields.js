@@ -55,92 +55,117 @@ export const PERSON_FIELDS = [
 
 export const SALUTATION_OPTIONS = [
   {
-    value: 1, label: `Frau`, 
+    value: 1,
+    label: `Frau`, 
   },
   {
-    value: 0, label: `Herr`, 
+    value: 0,
+    label: `Herr`, 
   },
 ];
 
 export const TIME_DURATIONS = [
   {
-    value: `00:15:00`, label: `15 min`, 
+    value: `00:15:00`,
+    label: `15 min`, 
   },
   {
-    value: `00:30:00`, label: `30 min`, 
+    value: `00:30:00`,
+    label: `30 min`, 
   },
   {
-    value: `00:45:00`, label: `45 min`, 
+    value: `00:45:00`,
+    label: `45 min`, 
   },
   {
-    value: `01:00:00`, label: `1 hour`, 
+    value: `01:00:00`,
+    label: `1 hour`, 
   },
   {
-    value: `01:15:00`, label: `1 hour 15 min`, 
+    value: `01:15:00`,
+    label: `1 hour 15 min`, 
   },
   {
-    value: `01:30:00`, label: `1 hour 30 min`, 
+    value: `01:30:00`,
+    label: `1 hour 30 min`, 
   },
   {
-    value: `01:45:00`, label: `1 hour 45 min`, 
+    value: `01:45:00`,
+    label: `1 hour 45 min`, 
   },
   {
-    value: `02:00:00`, label: `2 hours`, 
+    value: `02:00:00`,
+    label: `2 hours`, 
   },
   {
-    value: `02:30:00`, label: `2 hours 30 min`, 
+    value: `02:30:00`,
+    label: `2 hours 30 min`, 
   },
   {
-    value: `03:00:00`, label: `3 hours`, 
+    value: `03:00:00`,
+    label: `3 hours`, 
   },
   {
-    value: `03:30:00`, label: `3 hours 30 min`, 
+    value: `03:30:00`,
+    label: `3 hours 30 min`, 
   },
   {
-    value: `04:00:00`, label: `4 hours`, 
+    value: `04:00:00`,
+    label: `4 hours`, 
   },
 ];
 
 export const BUFFER_TIME_OPTIONS = [
   {
-    value: ``, label: `Clear`, 
+    value: ``,
+    label: `Clear`, 
   },
   ...TIME_DURATIONS,
 ];
 
 export const DAYS_TO_PAY = [
   {
-    value: 0, label: `Today`, 
+    value: 0,
+    label: `Today`, 
   },
   {
-    value: 1, label: `1`, 
+    value: 1,
+    label: `1`, 
   },
   {
-    value: 7, label: `7`, 
+    value: 7,
+    label: `7`, 
   },
   {
-    value: 14, label: `14`, 
+    value: 14,
+    label: `14`, 
   },
   {
-    value: 30, label: `30`, 
+    value: 30,
+    label: `30`, 
   },
   {
-    value: 60, label: `60`, 
+    value: 60,
+    label: `60`, 
   },
   {
-    value: 90, label: `90`, 
+    value: 90,
+    label: `90`, 
   },
 ];
 
 export const TAX_RATES = [
   {
-    value: `0`, label: `0%`, 
+    value: `0`,
+    label: `0%`, 
   },
   {
-    value: `7`, label: `7%`, 
+    value: `7`,
+    label: `7%`, 
   },
   {
-    value: `19`, label: `19%`, 
+    value: `19`,
+    label: `19%`, 
   },
 ];
 

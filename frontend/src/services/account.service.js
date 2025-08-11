@@ -3,7 +3,9 @@ import axios, { handleAxiosError } from '@/services/axios.service';
 const changePassword = async (email, currentPassword, newPassword) => {
   try {
     const response = await axios.post(`/user/change-password`, {
-      email, currentPassword, newPassword, 
+      email,
+      currentPassword,
+      newPassword, 
     });
 
     return response;

@@ -13,7 +13,8 @@ export default function AddButton({
       component={RouterLink}
       to={to}
       variant="contained"
-      startIcon={<Icon sx={{ fontSize: `16px` }} />}
+      startIcon={<Icon
+        sx={{ fontSize: `16px` }} />}
       size="small"
       sx={{
         borderRadius: 1,

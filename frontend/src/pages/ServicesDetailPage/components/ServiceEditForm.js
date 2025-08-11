@@ -29,9 +29,12 @@ export default function ServiceEditForm({
       />
 
       {!shouldShowServiceForm && (
-        <Box sx={{
-          padding: 2, borderTop: `1px solid`, borderColor: `grey.100`, 
-        }}>
+        <Box
+          sx={{
+            padding: 2,
+            borderTop: `1px solid`,
+            borderColor: `grey.100`, 
+          }}>
           <Button
             variant="outlined"
             color="info"

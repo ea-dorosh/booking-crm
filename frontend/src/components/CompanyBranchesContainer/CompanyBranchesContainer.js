@@ -46,7 +46,8 @@ export default function CompanyBranchesContainer({ branches }) {
   };
 
   return (
-    <Box mt={3}>
+    <Box
+      mt={3}>
       {hasAddButton && <Box>
         <Button
           onClick={() => {

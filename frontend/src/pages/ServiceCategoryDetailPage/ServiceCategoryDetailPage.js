@@ -106,7 +106,8 @@ export default function ServiceCategoryDetailPage() {
     const nextStatus = isArchived ? categoryStatusEnum.active : categoryStatusEnum.archived;
     console.log(`[ServiceCategoryDetailPage] toggle archive category:`, serviceCategory.id, `->`, nextStatus);
     await dispatch(updateCategory({
-      id: serviceCategory.id, status: nextStatus, 
+      id: serviceCategory.id,
+      status: nextStatus, 
     }));
     await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
   };
@@ -117,28 +118,35 @@ export default function ServiceCategoryDetailPage() {
     const nextStatus = isDisabled ? categoryStatusEnum.active : categoryStatusEnum.disabled;
     console.log(`[ServiceCategoryDetailPage] toggle deactivate category:`, serviceCategory.id, `->`, nextStatus);
     await dispatch(updateCategory({
-      id: serviceCategory.id, status: nextStatus, 
+      id: serviceCategory.id,
+      status: nextStatus, 
     }));
     await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
   };
 
   return (
-    <PageContainer pageTitle={getPageTitle()} hideSideNav>
-      <Box sx={{
-        padding: {
-          xs: 0, md: 0, 
-        }, 
-      }}>
+    <PageContainer
+      pageTitle={getPageTitle()}
+      hideSideNav>
+      <Box
+        sx={{
+          padding: {
+            xs: 0,
+            md: 0, 
+          }, 
+        }}>
         {!isEditMode && <GoBackNavigation />}
 
         {(isUpdateCategoryRequestPending || areCategoriesFetching) && (
-          <Box mt={2}>
+          <Box
+            mt={2}>
             <LinearProgress />
           </Box>
         )}
 
         {isEditMode && (
-          <Box mt={3}>
+          <Box
+            mt={3}>
             <ServiceCategoryForm
               category={serviceCategory}
               submitForm={categoryHandler}
@@ -147,7 +155,9 @@ export default function ServiceCategoryDetailPage() {
               cleanErrors={handleCleanErrors}
             />
 
-            <Box mt={2} sx={{ width: `100%` }}>
+            <Box
+              mt={2}
+              sx={{ width: `100%` }}>
               {!shouldShowCategoryForm && (
                 <Button
                   variant="outlined"
@@ -162,7 +172,8 @@ export default function ServiceCategoryDetailPage() {
         )}
 
         {!isEditMode && serviceCategory && (
-          <Box mt={3}>
+          <Box
+            mt={3}>
             <CategoryDetails
               category={serviceCategory}
               onEditClick={handleEditClick}

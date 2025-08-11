@@ -21,7 +21,8 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState(``);
   const [token, setToken] = useState(``);
   const [status, setStatus] = useState({
-    type: ``, message: ``, 
+    type: ``,
+    message: ``, 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordError, setPasswordError] = useState(``);
@@ -72,7 +73,8 @@ export default function ResetPasswordPage() {
 
     setIsSubmitting(true);
     setStatus({
-      type: ``, message: ``, 
+      type: ``,
+      message: ``, 
     });
 
     try {
@@ -121,8 +123,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs">
+    <ThemeProvider
+      theme={defaultTheme}>
+      <Container
+        component="main"
+        maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
@@ -132,12 +137,16 @@ export default function ResetPasswordPage() {
             alignItems: `center`,
           }}
         >
-          <Avatar sx={{
-            m: 1, bgcolor: `secondary.main`, 
-          }}>
+          <Avatar
+            sx={{
+              m: 1,
+              bgcolor: `secondary.main`, 
+            }}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
+          <Typography
+            component="h1"
+            variant="h5">
             Reset Password
           </Typography>
 
@@ -145,16 +154,22 @@ export default function ResetPasswordPage() {
             <Alert
               severity={status.type}
               sx={{
-                mt: 2, width: `100%`, 
+                mt: 2,
+                width: `100%`, 
               }}
             >
               {status.message}
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{
-            mt: 1, width: `100%`, 
-          }}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{
+              mt: 1,
+              width: `100%`, 
+            }}>
             <TextField
               margin="normal"
               required
@@ -192,16 +207,23 @@ export default function ResetPasswordPage() {
               fullWidth
               variant="contained"
               sx={{
-                mt: 3, mb: 2, 
+                mt: 3,
+                mb: 2, 
               }}
               disabled={isSubmitting || !formValid}
             >
               {isSubmitting ? `Resetting...` : `Reset Password`}
             </Button>
 
-            <Grid container justifyContent="center">
-              <Grid item>
-                <Link component={RouterLink} to="/login" variant="body2">
+            <Grid
+              container
+              justifyContent="center">
+              <Grid
+                item>
+                <Link
+                  component={RouterLink}
+                  to="/login"
+                  variant="body2">
                   Back to Login
                 </Link>
               </Grid>
@@ -209,9 +231,15 @@ export default function ResetPasswordPage() {
           </Box>
         </Box>
 
-        <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 8 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          align="center"
+          sx={{ mt: 8 }}>
           {`Copyright © `}
-          <Link color="inherit" href="#">
+          <Link
+            color="inherit"
+            href="#">
             Booking CRM
           </Link>{` `}
           {new Date().getFullYear()}

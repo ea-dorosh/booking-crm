@@ -83,7 +83,8 @@ export default function CompanyDetailPage() {
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {isPending && <Box mt={2}>
+      {isPending && <Box
+        mt={2}>
         <LinearProgress />
       </Box>}
 
@@ -103,7 +104,8 @@ export default function CompanyDetailPage() {
           borderRadius: `50px`,
         }}
       >
-        <Typography variant="button"
+        <Typography
+          variant="button"
           sx={{ color: `#fff` }}
         >
           add company
@@ -116,7 +118,8 @@ export default function CompanyDetailPage() {
         </IconButton>
       </Box>}
 
-      {isEditMode && <Box mt={3}>
+      {isEditMode && <Box
+        mt={3}>
         <CompanyForm
           company={company}
           submitForm={updateHandler}
@@ -126,7 +129,9 @@ export default function CompanyDetailPage() {
           isPending={updateFormPending}
         />
 
-        <Box mt={2} sx={{ width:`100%` }}>
+        <Box
+          mt={2}
+          sx={{ width:`100%` }}>
           {<Button
             variant="outlined"
             onClick={() => {
@@ -147,7 +152,8 @@ export default function CompanyDetailPage() {
         </Box>
       </Box>}
 
-      {!isEditMode && company && <Box mt={3}>
+      {!isEditMode && company && <Box
+        mt={3}>
         <CompanyDetails
           company={company}
           onChangeCompanyClick={() => {

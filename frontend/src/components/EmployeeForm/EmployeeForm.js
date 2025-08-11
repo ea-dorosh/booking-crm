@@ -49,20 +49,33 @@ export default function EmployeeForm({
   };
 
   return (
-    <Box sx={{
-      display: `flex`, flexDirection: `column`, gap: 2, 
-    }}>
+    <Box
+      sx={{
+        display: `flex`,
+        flexDirection: `column`,
+        gap: 2, 
+      }}>
       {/* Personal Information */}
       <Box>
-        <Typography variant="h6" sx={{
-          fontWeight: 600, marginBottom: 2, fontSize: `1.1rem`, 
-        }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            marginBottom: 2,
+            fontSize: `1.1rem`, 
+          }}>
           Personal Information
         </Typography>
 
-        <Grid container spacing={2}>
+        <Grid
+          container
+          spacing={2}>
           {EMPLOYEE_FIELDS.map((field) => (
-            <Grid item xs={12} sm={6} key={field.name}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              key={field.name}>
               <FormField
                 type={field.type}
                 name={field.name}
@@ -79,9 +92,13 @@ export default function EmployeeForm({
 
       {/* Profile Image */}
       <Box>
-        <Typography variant="h6" sx={{
-          fontWeight: 600, marginBottom: 2, fontSize: `1.1rem`, 
-        }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            marginBottom: 2,
+            fontSize: `1.1rem`, 
+          }}>
           Profile Image
         </Typography>
 

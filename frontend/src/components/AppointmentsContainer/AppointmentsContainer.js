@@ -50,41 +50,46 @@ export default function AppointmentsContainer({ appointments }) {
               color: `#333`,
             }}
           >
-            <Box sx={{
-              flex: `0 0 40px`,
-              display: `flex`,
-              flexDirection: `column`,
-              alignItems: `center`,
-            }}>
-              <Typography sx={{
-                fontSize: `1.2rem`,
+            <Box
+              sx={{
+                flex: `0 0 40px`,
+                display: `flex`,
+                flexDirection: `column`,
+                alignItems: `center`,
               }}>
+              <Typography
+                sx={{
+                  fontSize: `1.2rem`,
+                }}>
                 {getDay(appointment.date)}
               </Typography>
 
-              <Typography sx={{
-                fontSize: `.8rem`,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: `.8rem`,
+                }}>
                 {getMonth(appointment.date)}
               </Typography>
             </Box>
 
-            <Box sx={{
-              flex: `1`,
-              display: `flex`,
-              flexDirection: `column`,
-              position: `relative`,
-            }}>
-              {appointment.status === appointmentStatusEnum.canceled && <Box sx={{
-                fontSize: `.5rem`,
-                bgcolor: `red`,
-                color: `#fff`,
-                marginLeft: `auto`,
-                position: `absolute`,
-                padding: `1px 4px`,
-                left: `0`,
-                top: `-12px`,
+            <Box
+              sx={{
+                flex: `1`,
+                display: `flex`,
+                flexDirection: `column`,
+                position: `relative`,
               }}>
+              {appointment.status === appointmentStatusEnum.canceled && <Box
+                sx={{
+                  fontSize: `.5rem`,
+                  bgcolor: `red`,
+                  color: `#fff`,
+                  marginLeft: `auto`,
+                  position: `absolute`,
+                  padding: `1px 4px`,
+                  left: `0`,
+                  top: `-12px`,
+                }}>
                 canceled
               </Box>}
 
@@ -101,22 +106,25 @@ export default function AppointmentsContainer({ appointments }) {
                 {formatCreatedDate(appointment.createdDate)}
               </Typography>
 
-              <Typography sx={{
-                fontSize: `1rem`,
-                fontWeight: `bold`,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: `1rem`,
+                  fontWeight: `bold`,
+                }}>
                 {appointment.serviceName}
               </Typography>
 
-              <Typography sx={{
-                fontSize: `.8rem`,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: `.8rem`,
+                }}>
                 {getDayOfWeek(appointment.date)}, {formattedDateToTime(appointment.timeStart)} ({formatTimeToString(appointment.serviceDuration)})
               </Typography>
 
-              <Typography sx={{
-                fontSize: `1rem`,
-              }}>
+              <Typography
+                sx={{
+                  fontSize: `1rem`,
+                }}>
                 {appointment.customerLastName} {appointment.customerFirstName}
               </Typography>
             </Box>

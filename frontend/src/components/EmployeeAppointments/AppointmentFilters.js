@@ -21,31 +21,38 @@ import { getDefaultAppointmentFilters } from '@/utils/appointmentFilters';
 
 const statusOptions = [
   {
-    value: null, label: `All Status`, 
+    value: null,
+    label: `All Status`, 
   },
   {
-    value: appointmentStatusEnum.active, label: `Active`, 
+    value: appointmentStatusEnum.active,
+    label: `Active`, 
   },
   {
-    value: appointmentStatusEnum.canceled, label: `Canceled`, 
+    value: appointmentStatusEnum.canceled,
+    label: `Canceled`, 
   },
 ];
 
 const sortOptions = [
   {
-    value: APPOINTMENTS_SORT_RULE.DATE, label: `Appointment Date`, 
+    value: APPOINTMENTS_SORT_RULE.DATE,
+    label: `Appointment Date`, 
   },
   {
-    value: APPOINTMENTS_SORT_RULE.CREATED_DATE, label: `Created Date`, 
+    value: APPOINTMENTS_SORT_RULE.CREATED_DATE,
+    label: `Created Date`, 
   },
 ];
 
 const sortOrderOptions = [
   {
-    value: SORT_DIRECTION.DESC, label: `Newest First`, 
+    value: SORT_DIRECTION.DESC,
+    label: `Newest First`, 
   },
   {
-    value: SORT_DIRECTION.ASC, label: `Oldest First`, 
+    value: SORT_DIRECTION.ASC,
+    label: `Oldest First`, 
   },
 ];
 
@@ -100,20 +107,30 @@ export default function AppointmentFilters({
       }}
     >
       {/* Header */}
-      <Box sx={{
-        display: `flex`,
-        justifyContent: `space-between`,
-        alignItems: `flex-start`,
-        marginBottom: isExpanded ? 2 : 0,
-        flexWrap: `wrap`,
-        gap: 1,
-      }}>
-        <Box sx={{
-          display: `flex`, alignItems: `center`, gap: 1, flex: 1, minWidth: 0, 
+      <Box
+        sx={{
+          display: `flex`,
+          justifyContent: `space-between`,
+          alignItems: `flex-start`,
+          marginBottom: isExpanded ? 2 : 0,
+          flexWrap: `wrap`,
+          gap: 1,
         }}>
-          <Typography variant="h6" sx={{
-            fontSize: `1.1rem`, fontWeight: 600, mr: `auto`, 
+        <Box
+          sx={{
+            display: `flex`,
+            alignItems: `center`,
+            gap: 1,
+            flex: 1,
+            minWidth: 0, 
           }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: `1.1rem`,
+              fontWeight: 600,
+              mr: `auto`, 
+            }}>
             Recent Appointments
           </Typography>
 
@@ -127,16 +144,19 @@ export default function AppointmentFilters({
 
         <Stack
           direction={{
-            xs: `column`, sm: `row`, 
+            xs: `column`,
+            sm: `row`, 
           }}
           spacing={1}
           sx={{
             flexShrink: 0,
             alignItems: {
-              xs: `stretch`, sm: `center`, 
+              xs: `stretch`,
+              sm: `center`, 
             },
             width: {
-              xs: `100%`, sm: `auto`, 
+              xs: `100%`,
+              sm: `auto`, 
             },
           }}
         >
@@ -149,7 +169,8 @@ export default function AppointmentFilters({
               deleteIcon={<Clear />}
               sx={{
                 alignSelf: {
-                  xs: `flex-end`, sm: `auto`, 
+                  xs: `flex-end`,
+                  sm: `auto`, 
                 }, 
               }}
             />
@@ -163,7 +184,8 @@ export default function AppointmentFilters({
               minWidth: `auto`,
               fontSize: `0.8rem`,
               width: {
-                xs: `100%`, sm: `auto`, 
+                xs: `100%`,
+                sm: `auto`, 
               },
             }}
           >
@@ -174,30 +196,44 @@ export default function AppointmentFilters({
 
       {/* Filters */}
       {isExpanded && (
-        <Stack spacing={2}>
+        <Stack
+          spacing={2}>
           {/* Date Range */}
           <Box>
-            <Typography variant="subtitle2" sx={{
-              marginBottom: 1, fontWeight: 600, color: `text.secondary`, 
-            }}>
-              <CalendarToday sx={{
-                fontSize: 16, verticalAlign: `middle`, marginRight: 0.5, 
-              }} />
+            <Typography
+              variant="subtitle2"
+              sx={{
+                marginBottom: 1,
+                fontWeight: 600,
+                color: `text.secondary`, 
+              }}>
+              <CalendarToday
+                sx={{
+                  fontSize: 16,
+                  verticalAlign: `middle`,
+                  marginRight: 0.5, 
+                }} />
               Date Range
             </Typography>
             <Stack
               direction={{
-                xs: `column`, sm: `row`, 
+                xs: `column`,
+                sm: `row`, 
               }}
               spacing={1}
               sx={{ width: `100%` }}
             >
-              <Box sx={{
-                flex: 1, minWidth: 0, 
-              }}>
-                <Typography variant="body2" sx={{
-                  mb: 0.5, fontWeight: 500, 
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0, 
                 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mb: 0.5,
+                    fontWeight: 500, 
+                  }}>
                   Start Date
                 </Typography>
                 <TextField
@@ -208,12 +244,17 @@ export default function AppointmentFilters({
                   sx={{ width: `100%` }}
                 />
               </Box>
-              <Box sx={{
-                flex: 1, minWidth: 0, 
-              }}>
-                <Typography variant="body2" sx={{
-                  mb: 0.5, fontWeight: 500, 
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0, 
                 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    mb: 0.5,
+                    fontWeight: 500, 
+                  }}>
                   End Date
                 </Typography>
                 <TextField
@@ -230,17 +271,23 @@ export default function AppointmentFilters({
           {/* Status & Sort */}
           <Stack
             direction={{
-              xs: `column`, sm: `row`, 
+              xs: `column`,
+              sm: `row`, 
             }}
             spacing={1}
             sx={{ width: `100%` }}
           >
-            <Box sx={{
-              flex: 1, minWidth: 100, 
-            }}>
-              <Typography variant="body2" sx={{
-                mb: 0.5, fontWeight: 500, 
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 100, 
               }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 0.5,
+                  fontWeight: 500, 
+                }}>
                 Status
               </Typography>
               <Select
@@ -278,12 +325,17 @@ export default function AppointmentFilters({
               </Select>
             </Box>
 
-            <Box sx={{
-              flex: 1, minWidth: 100, 
-            }}>
-              <Typography variant="body2" sx={{
-                mb: 0.5, fontWeight: 500, 
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 100, 
               }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 0.5,
+                  fontWeight: 500, 
+                }}>
                 Sort By
               </Typography>
               <Select
@@ -293,19 +345,26 @@ export default function AppointmentFilters({
                 sx={{ width: `100%` }}
               >
                 {sortOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}>
                     {option.label}
                   </MenuItem>
                 ))}
               </Select>
             </Box>
 
-            <Box sx={{
-              flex: 1, minWidth: 100, 
-            }}>
-              <Typography variant="body2" sx={{
-                mb: 0.5, fontWeight: 500, 
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 100, 
               }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 0.5,
+                  fontWeight: 500, 
+                }}>
                 Order
               </Typography>
               <Select
@@ -315,7 +374,9 @@ export default function AppointmentFilters({
                 sx={{ width: `100%` }}
               >
                 {sortOrderOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}>
                     {option.label}
                   </MenuItem>
                 ))}
@@ -325,9 +386,11 @@ export default function AppointmentFilters({
 
           {/* Action Buttons */}
           {hasActiveFilters() && (
-            <Box sx={{
-              display: `flex`, justifyContent: `flex-end`, 
-            }}>
+            <Box
+              sx={{
+                display: `flex`,
+                justifyContent: `flex-end`, 
+              }}>
               <Button
                 size="small"
                 variant="outlined"
