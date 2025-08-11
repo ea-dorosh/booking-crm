@@ -22,8 +22,8 @@ export default function EmployeesContainer({ employees }) {
       sx={{
         padding: {
           xs: 0,
-          md: 0, 
-        }, 
+          md: 0,
+        },
       }}>
       {/* Header */}
       <Box
@@ -32,7 +32,7 @@ export default function EmployeesContainer({ employees }) {
           variant="h4"
           sx={{
             fontWeight: 700,
-            marginBottom: 1, 
+            marginBottom: 1,
           }}>
           Team Members
         </Typography>
@@ -148,15 +148,6 @@ export default function EmployeesContainer({ employees }) {
                     to={`/employees/${employee.employeeId}`}
                     variant="outlined"
                     size="small"
-                    sx={{
-                      borderRadius: 2,
-                      borderColor: `primary.200`,
-                      color: `primary.600`,
-                      '&:hover': {
-                        borderColor: `primary.400`,
-                        backgroundColor: `primary.50`,
-                      },
-                    }}
                   >
                     Details
                   </Button>
@@ -182,7 +173,7 @@ export default function EmployeesContainer({ employees }) {
             sx={{
               fontSize: 60,
               color: `grey.400`,
-              marginBottom: 2, 
+              marginBottom: 2,
             }} />
           <Typography
             variant="h6"

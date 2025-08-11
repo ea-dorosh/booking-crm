@@ -1,6 +1,6 @@
 import { Business, Category, List } from "@mui/icons-material";
 import { Box, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
@@ -52,15 +52,8 @@ export default function ServicesContainer({
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
   const [categoryStatusFilter, setCategoryStatusFilter] = useState(categoryStatusEnum.active);
-  const filteredServices = useSelector(selectFilteredServices);
-  const lastRequestedStatusKeyRef = useRef(null);
   const [subCategoryStatusFilter, setSubCategoryStatusFilter] = useState(subCategoryStatusEnum.active);
-  const lastRequestedSubStatusKeyRef = useRef(null);
-
-  const requestedStatuses = useMemo(() => {
-    if (categoryStatusFilter === `all`) return [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled];
-    return [categoryStatusFilter];
-  }, [categoryStatusFilter]);
+  const filteredServices = useSelector(selectFilteredServices);
 
   // Get active tab from URL query parameter
   useEffect(() => {
@@ -75,6 +68,11 @@ export default function ServicesContainer({
     if (storedStatus) {
       setCategoryStatusFilter(storedStatus);
     }
+    // restore sub-categories status filter from session storage
+    const storedSubStatus = sessionStorage.getItem(`subCategoriesStatusFilter`);
+    if (storedSubStatus) {
+      setSubCategoryStatusFilter(storedSubStatus);
+    }
   }, [location.search]);
 
   const handleTabChange = (newValue) => {
@@ -87,55 +85,28 @@ export default function ServicesContainer({
     navigate(`${location.pathname}?${urlParams.toString()}`, { replace: true });
   };
 
-  // persist categories status filter
-  useEffect(() => {
-    sessionStorage.setItem(`categoriesStatusFilter`, categoryStatusFilter);
-  }, [categoryStatusFilter]);
-
-  // fetch categories when status filter changes on Categories tab
-  useEffect(() => {
-    if (activeTab !== TABS[CATEGORIES].value) return;
-
-    const statusKey = requestedStatuses.join(`,`);
-    if (lastRequestedStatusKeyRef.current === statusKey && categories && categories.length) {
-      return;
+  // Handlers for status filters (persist + fetch)
+  const handleCategoryStatusChange = (value) => {
+    if (!value) return;
+    setCategoryStatusFilter(value);
+    sessionStorage.setItem(`categoriesStatusFilter`, value);
+    if (value === `all`) {
+      dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]));
+    } else {
+      dispatch(fetchServiceCategories([value]));
     }
+  };
 
-    // avoid duplicating the initial fetch that ServicesPage already did
-    if (!lastRequestedStatusKeyRef.current && categories && categories.length) {
-      lastRequestedStatusKeyRef.current = statusKey;
-      return;
+  const handleSubCategoryStatusChange = (value) => {
+    if (!value) return;
+    setSubCategoryStatusFilter(value);
+    sessionStorage.setItem(`subCategoriesStatusFilter`, value);
+    if (value === `all`) {
+      dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
+    } else {
+      dispatch(fetchServiceSubCategories([value]));
     }
-
-    lastRequestedStatusKeyRef.current = statusKey;
-    dispatch(fetchServiceCategories(requestedStatuses));
-  }, [activeTab, requestedStatuses.join(`,`), categories ? categories.length : 0]);
-
-  const requestedSubStatuses = useMemo(() => {
-    if (subCategoryStatusFilter === `all`) return [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled];
-    return [subCategoryStatusFilter];
-  }, [subCategoryStatusFilter]);
-
-  useEffect(() => {
-    sessionStorage.setItem(`subCategoriesStatusFilter`, subCategoryStatusFilter);
-  }, [subCategoryStatusFilter]);
-
-  useEffect(() => {
-    if (activeTab !== TABS[SUB_CATEGORIES].value) return;
-
-    const statusKey = requestedSubStatuses.join(`,`);
-    if (lastRequestedSubStatusKeyRef.current === statusKey && subCategories && subCategories.length) {
-      return;
-    }
-
-    if (!lastRequestedSubStatusKeyRef.current && subCategories && subCategories.length) {
-      lastRequestedSubStatusKeyRef.current = statusKey;
-      return;
-    }
-
-    lastRequestedSubStatusKeyRef.current = statusKey;
-    dispatch(fetchServiceSubCategories(requestedSubStatuses));
-  }, [activeTab, requestedSubStatuses.join(`,`), subCategories ? subCategories.length : 0]);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -185,8 +156,8 @@ export default function ServicesContainer({
       sx={{
         padding: {
           xs: 0,
-          md: 3, 
-        }, 
+          md: 3,
+        },
       }}>
       {/* Header */}
       <Box
@@ -194,14 +165,14 @@ export default function ServicesContainer({
           marginBottom: 3,
           padding: {
             xs: 0,
-            md: 0, 
-          }, 
+            md: 0,
+          },
         }}>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 700,
-            marginBottom: 1, 
+            marginBottom: 1,
           }}>
           {TABS[activeTab].label}
         </Typography>
@@ -218,7 +189,7 @@ export default function ServicesContainer({
           sx={{
             display: `flex`,
             gap: 2,
-            justifyContent: `flex-end`, 
+            justifyContent: `flex-end`,
           }}>
           {activeTab === TABS[SERVICES].value && (
             <FilterButton
@@ -240,8 +211,8 @@ export default function ServicesContainer({
           marginBottom: 3,
           padding: {
             xs: 0,
-            md: 0, 
-          }, 
+            md: 0,
+          },
         }}>
         <Tabs
           tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
@@ -253,11 +224,11 @@ export default function ServicesContainer({
           <ToggleButtonGroup
             value={categoryStatusFilter}
             exclusive
-            onChange={(_e, value) => value && setCategoryStatusFilter(value)}
+            onChange={(_e, value) => handleCategoryStatusChange(value)}
             size="small"
             sx={{
               mr: `auto`,
-              mt: 2, 
+              mt: 2,
             }}
           >
             <ToggleButton
@@ -275,11 +246,11 @@ export default function ServicesContainer({
           <ToggleButtonGroup
             value={subCategoryStatusFilter}
             exclusive
-            onChange={(_e, value) => value && setSubCategoryStatusFilter(value)}
+            onChange={(_e, value) => handleSubCategoryStatusChange(value)}
             size="small"
             sx={{
               mr: `auto`,
-              mt: 2, 
+              mt: 2,
             }}
           >
             <ToggleButton
@@ -296,7 +267,6 @@ export default function ServicesContainer({
 
       {/* Content */}
       {renderContent()}
-
     </Box>
   );
 }

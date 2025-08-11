@@ -8,6 +8,7 @@ import {
   Grid,
   Chip,
 } from "@mui/material";
+import { categoryStatusEnum } from '@/enums/enums';
 
 export default function CategoryDetails({
   category,
@@ -20,7 +21,7 @@ export default function CategoryDetails({
       sx={{
         marginTop: 1,
         borderRadius: 2,
-        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
       }}>
       <CardContent
         sx={{ padding: 2.5 }}>
@@ -41,25 +42,16 @@ export default function CategoryDetails({
               sx={{
                 fontWeight: 700,
                 marginBottom: 0.5,
-                color: `text.primary`, 
+                color: `text.primary`,
               }}>
               {category.name}
             </Typography>
             {category.status && (
               <Chip
-                label={category.status}
+                label={category.status === categoryStatusEnum.disabled ? `not active` : category.status === categoryStatusEnum.archived ? `deleted` : category.status}
                 size="small"
-                color={String(category.status).toLowerCase() === `active` ? `success` : undefined}
-                variant={String(category.status).toLowerCase() === `active` ? `filled` : `outlined`}
-                sx={String(category.status).toLowerCase() !== `active` ? {
-                  fontWeight: 600,
-                  height: 24,
-                  backgroundColor: `grey.100`,
-                  color: `text.secondary`,
-                } : {
-                  fontWeight: 700,
-                  height: 24, 
-                }}
+                color={category.status === categoryStatusEnum.active ? `success` : category.status === categoryStatusEnum.disabled ? `info` : `error`}
+                variant="filled"
               />
             )}
           </Box>
@@ -67,25 +59,15 @@ export default function CategoryDetails({
           <Box
             sx={{
               display: `flex`,
-              gap: 1, 
+              gap: 1,
             }}>
             <Button
               variant="contained"
-              startIcon={<Edit
-                sx={{ fontSize: `16px` }} />}
+              size="small"
+              startIcon={
+                <Edit />
+              }
               onClick={onEditClick}
-              sx={{
-                borderRadius: 1.5,
-                padding: `6px 12px`,
-                fontSize: `0.8rem`,
-                fontWeight: 600,
-                textTransform: `none`,
-                minWidth: `auto`,
-                boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
-                '&:hover': {
-                  boxShadow: `0 4px 12px rgba(0,0,0,0.2)`,
-                },
-              }}
             >
               Edit
             </Button>
@@ -98,40 +80,25 @@ export default function CategoryDetails({
             gap: 2,
             alignItems: `center`,
             mt: 2,
-            justifyContent: `space-between`, 
+            justifyContent: `space-between`,
           }}>
           <Button
             variant="outlined"
-            color={String(category.status).toLowerCase() === `disabled` ? `success` : `warning`}
+            color={category.status === categoryStatusEnum.disabled ? `success` : `warning`}
             onClick={onDeactivateToggle}
-            sx={{
-              borderRadius: 1.5,
-              padding: `6px 12px`,
-              fontSize: `0.8rem`,
-              fontWeight: 600,
-              textTransform: `none`,
-              minWidth: `auto`,
-            }}
+            size="small"
           >
-            {String(category.status).toLowerCase() === `disabled` ? `Activate` : `Deactivate`}
+            {category.status === categoryStatusEnum.disabled ? `Activate` : `Deactivate`}
           </Button>
 
           <Button
             variant="outlined"
-            startIcon={<DeleteOutline
-              sx={{ fontSize: `16px` }} />}
-            color={String(category.status).toLowerCase() === `archived` ? `success` : `error`}
+            startIcon={<DeleteOutline />}
+            color={category.status === categoryStatusEnum.archived ? `success` : `error`}
             onClick={onArchiveToggle}
-            sx={{
-              borderRadius: 1.5,
-              padding: `6px 12px`,
-              fontSize: `0.8rem`,
-              fontWeight: 600,
-              textTransform: `none`,
-              minWidth: `auto`,
-            }}
+            size="small"
           >
-            {String(category.status).toLowerCase() === `archived` ? `Unarchive` : `Archive`}
+            {category.status === categoryStatusEnum.archived ? `Restore` : `Delete`}
           </Button>
         </Box>
 
@@ -162,7 +129,7 @@ export default function CategoryDetails({
                   style={{
                     width: `100%`,
                     height: `auto`,
-                    display: `block`, 
+                    display: `block`,
                   }}
                 />
               </Box>

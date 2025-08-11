@@ -2,6 +2,7 @@ import { Business, ChevronRight } from "@mui/icons-material";
 import { Box, Typography, Card, Grid, Paper, CardActionArea, Chip } from "@mui/material";
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { categoryStatusEnum } from '@/enums/enums';
 
 export default function CategoriesList({ categories }) {
 
@@ -20,7 +21,7 @@ export default function CategoriesList({ categories }) {
           sx={{
             fontSize: 60,
             color: `grey.400`,
-            marginBottom: 2, 
+            marginBottom: 2,
           }} />
         <Typography
           variant="h6"
@@ -62,13 +63,13 @@ export default function CategoriesList({ categories }) {
       container
       spacing={{
         xs: 2,
-        sm: 3, 
+        sm: 3,
       }}
       sx={{
         px: {
           xs: 1,
-          sm: 0, 
-        }, 
+          sm: 0,
+        },
       }}
     >
       {categories.map((category) => (
@@ -120,7 +121,7 @@ export default function CategoriesList({ categories }) {
                   style={{
                     width: `100%`,
                     height: `100%`,
-                    objectFit: `cover`, 
+                    objectFit: `cover`,
                   }}
                 />
               </Box>
@@ -128,7 +129,7 @@ export default function CategoriesList({ categories }) {
               <Box
                 sx={{
                   flex: 1,
-                  minWidth: 0, 
+                  minWidth: 0,
                 }}>
                 <Typography
                   variant="h6"
@@ -145,21 +146,11 @@ export default function CategoriesList({ categories }) {
 
                 {category.status && (
                   <Chip
-                    label={category.status}
+                    label={category.status === categoryStatusEnum.disabled ? `not active` : category.status === categoryStatusEnum.archived ? `deleted` : category.status}
                     size="small"
-                    color={String(category.status).toLowerCase() === `active` ? `success` : undefined}
-                    variant={String(category.status).toLowerCase() === `active` ? `filled` : `outlined`}
-                    sx={String(category.status).toLowerCase() !== `active` ? {
-                      mt: 0.75,
-                      fontWeight: 600,
-                      height: 22,
-                      backgroundColor: `grey.100`,
-                      color: `text.secondary`,
-                    } : {
-                      mt: 0.75,
-                      fontWeight: 700,
-                      height: 22, 
-                    }}
+                    color={category.status === categoryStatusEnum.active ? `success` : category.status === categoryStatusEnum.disabled ? `info` : `error`}
+                    variant="filled"
+                    sx={{ mt: 0.75 }}
                   />
                 )}
               </Box>
@@ -167,7 +158,7 @@ export default function CategoriesList({ categories }) {
               <ChevronRight
                 sx={{
                   color: `grey.500`,
-                  flexShrink: 0, 
+                  flexShrink: 0,
                 }} />
 
             </CardActionArea>

@@ -322,25 +322,40 @@ const theme = createTheme({
         {
           props: {
             color: `success`,
-            variant: `filled`, 
+            variant: `filled`,
           },
           style: {
             backgroundColor: colors.success[500],
             color: `#ffffff`,
             '& .MuiChip-label': {
-              fontWeight: 700,
+              fontWeight: 600,
             },
           },
         },
         {
           props: {
-            color: `success`,
-            variant: `outlined`, 
+            color: `info`,
+            variant: `filled`,
           },
           style: {
-            borderColor: colors.success[300],
-            color: colors.success[700],
-            backgroundColor: colors.success[50],
+            backgroundColor: colors.neutral[400],
+            color: `#ffffff`,
+            '& .MuiChip-label': {
+              fontWeight: 600,
+            },
+          },
+        },
+        {
+          props: {
+            color: `error`,
+            variant: `filled`,
+          },
+          style: {
+            backgroundColor: colors.error[500],
+            color: `#ffffff`,
+            '& .MuiChip-label': {
+              fontWeight: 600,
+            },
           },
         },
       ],
