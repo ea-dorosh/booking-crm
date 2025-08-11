@@ -11,8 +11,8 @@ type Day = `0${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9}` | `${1 | 2}${Digit}` | `3${0 
 type Date_ISO_Type = `${Year}-${Month}-${Day}`;
 
 // Sorting and filtering types
-type SortDirection = 'asc' | 'desc';
-type AppointmentSortField = 'date' | 'created_date';
+type SortDirection = `asc` | `desc`;
+type AppointmentSortField = `date` | `created_date`;
 
 // Query parameter types for appointments filtering
 interface AppointmentQueryParams {

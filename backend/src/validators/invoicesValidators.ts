@@ -117,7 +117,7 @@ function removeEmptyRecursivelyKeepArray<T>(data: T): T | Record<string, never> 
     }
 
     return hasNonEmptyItem ? data : {};
-  } else if (typeof data === "object" && data !== null) {
+  } else if (typeof data === `object` && data !== null) {
     Object.keys(data).forEach((key) => {
       const value = (data as any)[key];
       (data as any)[key] = removeEmptyRecursivelyKeepArray(value);
@@ -136,7 +136,7 @@ function removeEmptyRecursivelyKeepArray<T>(data: T): T | Record<string, never> 
 function isEmpty(value: any): boolean {
   if (value === null || value === undefined) return true;
   if (Array.isArray(value) && value.length === 0) return true;
-  if (typeof value === "object") {
+  if (typeof value === `object`) {
     return Object.keys(value).length === 0;
   }
   return false;

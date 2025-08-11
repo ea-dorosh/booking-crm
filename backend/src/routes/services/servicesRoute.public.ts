@@ -76,15 +76,15 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
           id,
           name,
           categoryId: category_id,
-          categoryName: categoriesData.find(category => category.id === category_id)?.name || '',
+          categoryName: categoriesData.find(category => category.id === category_id)?.name || ``,
           subCategoryId: sub_category_id,
           durationTime: duration_time,
           bufferTime: buffer_time,
           bookingNote: booking_note,
           employees: [],
-          subCategoryName: subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.name || '',
+          subCategoryName: subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.name || ``,
           subCategoryImage: subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.image || null,
-          subCategoryUrl: toKebabCase(subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.name || ''),
+          subCategoryUrl: toKebabCase(subCategoriesData.find(subCategory => subCategory.id === sub_category_id)?.name || ``),
         });
       }
       // Push employee ID and price into the array
@@ -92,10 +92,10 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         servicesMap.get(id).employees.push({
           id: employee_id,
           price,
-          firstName: employeesData.find(employee => employee.employeeId === employee_id)?.firstName || '',
-          lastName: employeesData.find(employee => employee.employeeId === employee_id)?.lastName || '',
-          image: employeesData.find(employee => employee.employeeId === employee_id)?.image || '',
-         });
+          firstName: employeesData.find(employee => employee.employeeId === employee_id)?.firstName || ``,
+          lastName: employeesData.find(employee => employee.employeeId === employee_id)?.lastName || ``,
+          image: employeesData.find(employee => employee.employeeId === employee_id)?.image || ``,
+        });
       }
     });
 
@@ -137,7 +137,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
             subCategoryName: service.subCategoryName,
             subCategoryImage: service.subCategoryImage,
             subCategoryUrl: service.subCategoryUrl,
-            services: []
+            services: [],
           });
         }
 
@@ -156,7 +156,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
     // Filter out categories that have no services
     const filteredData = groupedData.filter(category =>
-      category.hasSubCategories ? category.subCategories.length > 0 : category.services.length > 0
+      category.hasSubCategories ? category.subCategories.length > 0 : category.services.length > 0,
     );
 
     res.json(filteredData);

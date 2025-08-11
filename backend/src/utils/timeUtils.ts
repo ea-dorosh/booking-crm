@@ -16,7 +16,7 @@ function fromDayjsToMySQLDateTime(dayjs: dayjs.Dayjs): string {
  */
 function fromMySQLToISOString(mysqlDateTime: string): string {
   // Parse as UTC by adding 'Z' suffix to indicate UTC time
-  return new Date(mysqlDateTime + 'Z').toISOString();
+  return new Date(mysqlDateTime + `Z`).toISOString();
 }
 
 function getServiceDuration(durationTime: Time_HH_MM_SS_Type, bufferTime?: Time_HH_MM_SS_Type): Time_HH_MM_SS_Type {
@@ -37,12 +37,12 @@ function getServiceDuration(durationTime: Time_HH_MM_SS_Type, bufferTime?: Time_
 
 // form 2024-12-31T13:12:57.865Z create ISO string 2024-12-31
 function toMySQLDate(string: string): string {
-  return dayjs.tz(string, 'Europe/Berlin').format(`YYYY-MM-DD`);
+  return dayjs.tz(string, `Europe/Berlin`).format(`YYYY-MM-DD`);
 }
 
 
 function getDueDate(dateIssued: string, daysToAdd: number): string {
-  const issued = dayjs.tz(dateIssued, 'Europe/Berlin');
+  const issued = dayjs.tz(dateIssued, `Europe/Berlin`);
   const result = issued.add(daysToAdd, `day`);
 
   return result.format(`YYYY-MM-DD`);

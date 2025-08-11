@@ -80,7 +80,9 @@ async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDe
   return employeeData[0];
 }
 
-async function checkEmployeeTimeNotOverlap(dbPool: Pool, { date, employeeId, timeStart, timeEnd }: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
+async function checkEmployeeTimeNotOverlap(dbPool: Pool, {
+  date, employeeId, timeStart, timeEnd, 
+}: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
   const mysqlTimeStart = fromDayjsToMySQLDateTime(timeStart); // in UTC
   const mysqlTimeEnd = fromDayjsToMySQLDateTime(timeEnd); // in UTC
 
@@ -167,32 +169,34 @@ async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[])
   ORDER BY day_id ASC, start_time ASC
 `;
 
-const [results] = await dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeIds]);
+  const [results] = await dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeIds]);
 
-if (!results.length) {
-  return [];
-}
-
-const groupedByDay = results.reduce<Record<number, GroupedAvailabilityDayType>>((acc, row) => {
-  const { employee_id, day_id, start_time, end_time } = row;
-
-  if (!acc[day_id]) {
-    acc[day_id] = {
-      dayId: day_id,
-      employees: []
-    };
+  if (!results.length) {
+    return [];
   }
 
-  acc[day_id].employees.push({
-    id: employee_id,
-    startTime: start_time,
-    endTime: end_time
-  });
+  const groupedByDay = results.reduce<Record<number, GroupedAvailabilityDayType>>((acc, row) => {
+    const {
+      employee_id, day_id, start_time, end_time, 
+    } = row;
 
-  return acc;
-}, {});
+    if (!acc[day_id]) {
+      acc[day_id] = {
+        dayId: day_id,
+        employees: [],
+      };
+    }
 
-return Object.values(groupedByDay).sort((a, b) => a.dayId - b.dayId);
+    acc[day_id].employees.push({
+      id: employee_id,
+      startTime: start_time,
+      endTime: end_time,
+    });
+
+    return acc;
+  }, {});
+
+  return Object.values(groupedByDay).sort((a, b) => a.dayId - b.dayId);
 }
 
 

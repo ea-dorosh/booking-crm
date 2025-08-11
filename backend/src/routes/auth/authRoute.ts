@@ -30,15 +30,17 @@ function createUserDbPool() {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'users_database',
+    database: `users_database`,
   });
 }
 
-router.post('/login', async (request: CustomRequestType, response: CustomResponseType) => {
-  const { email, password } = request.body as { email?: string; password?: string };
+router.post(`/login`, async (request: CustomRequestType, response: CustomResponseType) => {
+  const {
+    email, password, 
+  } = request.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    response.status(400).json({ message: 'Email and password are required.' });
+    response.status(400).json({ message: `Email and password are required.` });
     return;
   }
 
@@ -46,41 +48,45 @@ router.post('/login', async (request: CustomRequestType, response: CustomRespons
 
   try {
     const connection = await pool.getConnection();
-    const [rows] = await connection.query<UserRow[]>('SELECT * FROM Users WHERE email = ?', [email]);
+    const [rows] = await connection.query<UserRow[]>(`SELECT * FROM Users WHERE email = ?`, [email]);
     connection.release();
 
     if (rows.length === 0) {
-      response.status(401).json({ message: 'Invalid credentials' });
+      response.status(401).json({ message: `Invalid credentials` });
       return;
     }
 
     const user = rows[0];
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      response.status(401).json({ message: 'Invalid credentials' });
+      response.status(401).json({ message: `Invalid credentials` });
       return;
     }
 
     if (!process.env.JWT_SECRET) {
-      response.status(500).json({ message: 'JWT_SECRET not defined' });
+      response.status(500).json({ message: `JWT_SECRET not defined` });
       return;
     }
 
-    const token = jwt.sign({ email: user.email, database: user.database_name }, process.env.JWT_SECRET);
+    const token = jwt.sign({
+      email: user.email, database: user.database_name, 
+    }, process.env.JWT_SECRET);
     response.json({ token });
   } catch (error: unknown) {
     console.error(error);
-    response.status(500).json({ message: 'Internal server error' });
+    response.status(500).json({ message: `Internal server error` });
   } finally {
     await pool.end();
   }
 });
 
-router.post('/register', async (request: CustomRequestType, response: CustomResponseType) => {
-  const { email, password } = request.body as { email?: string; password?: string };
+router.post(`/register`, async (request: CustomRequestType, response: CustomResponseType) => {
+  const {
+    email, password, 
+  } = request.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    response.status(400).json({ message: 'Email and password are required.' });
+    response.status(400).json({ message: `Email and password are required.` });
     return;
   }
 
@@ -92,35 +98,35 @@ router.post('/register', async (request: CustomRequestType, response: CustomResp
 
     const connection = await pool.getConnection();
     const [result] = await connection.query<ResultSetHeader>(
-      'INSERT INTO Users (email, password, database_name) VALUES (?, ?, ?)',
-      [email, hashedPassword, 'default_database']
+      `INSERT INTO Users (email, password, database_name) VALUES (?, ?, ?)`,
+      [email, hashedPassword, `default_database`],
     );
     connection.release();
 
     await pool.end();
 
     if (result.affectedRows === 1) {
-      response.status(201).json({ message: 'User registered successfully.' });
+      response.status(201).json({ message: `User registered successfully.` });
     } else {
-      response.status(500).json({ message: 'Failed to register user.' });
+      response.status(500).json({ message: `Failed to register user.` });
     }
   } catch (error: any) {
-    if (error && error.code === 'ER_DUP_ENTRY') {
-      response.status(409).json({ message: 'Email already in use.' });
+    if (error && error.code === `ER_DUP_ENTRY`) {
+      response.status(409).json({ message: `Email already in use.` });
       return;
     }
-    console.error('Error during user registration:', error);
-    response.status(500).json({ message: 'Internal server error' });
+    console.error(`Error during user registration:`, error);
+    response.status(500).json({ message: `Internal server error` });
   }
 });
 
 // Request password reset
-router.post('/forgot-password', async (request: CustomRequestType, response: CustomResponseType) => {
+router.post(`/forgot-password`, async (request: CustomRequestType, response: CustomResponseType) => {
   const { email } = request.body;
 
   if (!email) {
-     response.status(400).json({ message: 'Email is required' });
-     return;
+    response.status(400).json({ message: `Email is required` });
+    return;
   }
 
   const pool = createUserDbPool();
@@ -128,14 +134,14 @@ router.post('/forgot-password', async (request: CustomRequestType, response: Cus
   try {
     // Check if user exists
     const connection = await pool.getConnection();
-    const [users] = await connection.query<UserRow[]>('SELECT * FROM Users WHERE email = ?', [email]);
+    const [users] = await connection.query<UserRow[]>(`SELECT * FROM Users WHERE email = ?`, [email]);
 
     // Always return successful response to avoid email enumeration
     if (users.length === 0) {
       connection.release();
       await pool.end();
-       response.json({
-        message: 'If the email exists in our system, a password reset link has been sent.'
+      response.json({
+        message: `If the email exists in our system, a password reset link has been sent.`,
       });
       return;
     }
@@ -149,14 +155,14 @@ router.post('/forgot-password', async (request: CustomRequestType, response: Cus
 
     // Delete any existing reset tokens for this user
     await connection.query(
-      'DELETE FROM PasswordResetTokens WHERE user_id = ?',
-      [user.id]
+      `DELETE FROM PasswordResetTokens WHERE user_id = ?`,
+      [user.id],
     );
 
     // Insert new reset token
     await connection.query(
-      'INSERT INTO PasswordResetTokens (user_id, token, expires_at) VALUES (?, ?, ?)',
-      [user.id, resetToken, expiresAt]
+      `INSERT INTO PasswordResetTokens (user_id, token, expires_at) VALUES (?, ?, ?)`,
+      [user.id, resetToken, expiresAt],
     );
 
     connection.release();
@@ -165,30 +171,32 @@ router.post('/forgot-password', async (request: CustomRequestType, response: Cus
     await sendPasswordResetEmail(email, resetToken);
 
     response.json({
-      message: 'If the email exists in our system, a password reset link has been sent.'
+      message: `If the email exists in our system, a password reset link has been sent.`,
     });
   } catch (error) {
-    console.error('Error during password reset request:', error);
-    response.status(500).json({ message: 'Internal server error' });
+    console.error(`Error during password reset request:`, error);
+    response.status(500).json({ message: `Internal server error` });
   } finally {
     await pool.end();
   }
 });
 
 // Reset password with token
-router.post('/reset-password', async (request: CustomRequestType, response: CustomResponseType) => {
-  const { token, newPassword } = request.body;
+router.post(`/reset-password`, async (request: CustomRequestType, response: CustomResponseType) => {
+  const {
+    token, newPassword, 
+  } = request.body;
 
   if (!token || !newPassword) {
     response.status(400).json({
-      message: 'Token and new password are required'
+      message: `Token and new password are required`,
     });
     return;
   }
 
   if (newPassword.length < 8) {
     response.status(400).json({
-      message: 'Password must be at least 8 characters long'
+      message: `Password must be at least 8 characters long`,
     });
     return;
   }
@@ -200,14 +208,14 @@ router.post('/reset-password', async (request: CustomRequestType, response: Cust
 
     // Find valid token
     const [tokens] = await connection.query<ResetTokenRow[]>(
-      'SELECT * FROM PasswordResetTokens WHERE token = ? AND expires_at > NOW()',
-      [token]
+      `SELECT * FROM PasswordResetTokens WHERE token = ? AND expires_at > NOW()`,
+      [token],
     );
 
     if (tokens.length === 0) {
       connection.release();
       response.status(400).json({
-        message: 'Invalid or expired token'
+        message: `Invalid or expired token`,
       });
       return;
     }
@@ -220,24 +228,24 @@ router.post('/reset-password', async (request: CustomRequestType, response: Cust
 
     // Update user password
     await connection.query(
-      'UPDATE Users SET password = ? WHERE id = ?',
-      [hashedPassword, resetToken.user_id]
+      `UPDATE Users SET password = ? WHERE id = ?`,
+      [hashedPassword, resetToken.user_id],
     );
 
     // Delete used token
     await connection.query(
-      'DELETE FROM PasswordResetTokens WHERE id = ?',
-      [resetToken.id]
+      `DELETE FROM PasswordResetTokens WHERE id = ?`,
+      [resetToken.id],
     );
 
     connection.release();
 
     response.json({
-      message: 'Password has been reset successfully'
+      message: `Password has been reset successfully`,
     });
   } catch (error) {
-    console.error('Error during password reset:', error);
-    response.status(500).json({ message: 'Internal server error' });
+    console.error(`Error during password reset:`, error);
+    response.status(500).json({ message: `Internal server error` });
   } finally {
     await pool.end();
   }

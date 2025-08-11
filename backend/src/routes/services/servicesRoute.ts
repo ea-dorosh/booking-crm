@@ -58,9 +58,9 @@ router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponse
     let statuses: string[] | undefined = undefined;
     const { status } = req.query as { status?: string | string[] };
     if (Array.isArray(status)) {
-      statuses = status.flatMap(s => s.split(',')).map(s => s.trim());
-    } else if (typeof status === 'string') {
-      statuses = status.split(',').map(s => s.trim());
+      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
+    } else if (typeof status === `string`) {
+      statuses = status.split(`,`).map(s => s.trim());
     }
 
     const subCategories = await getServiceSubCategories(req.dbPool, statuses);
@@ -88,9 +88,9 @@ router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType
     let statuses: string[] | undefined = undefined;
     const { status } = req.query as { status?: string | string[] };
     if (Array.isArray(status)) {
-      statuses = status.flatMap(s => s.split(',')).map(s => s.trim());
-    } else if (typeof status === 'string') {
-      statuses = status.split(',').map(s => s.trim());
+      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
+    } else if (typeof status === `string`) {
+      statuses = status.split(`,`).map(s => s.trim());
     }
 
     const categories = await getServiceCategories(req.dbPool, statuses);
@@ -116,7 +116,9 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
   const service: ServiceDataType = req.body;
 
   try {
-    const { serviceId, validationErrors } = await createService(req.dbPool, service);
+    const {
+      serviceId, validationErrors, 
+    } = await createService(req.dbPool, service);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });
@@ -161,7 +163,9 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
   const service: ServiceDataType = req.body;
 
   try {
-    const { serviceId: updatedServiceId, validationErrors } = await updateService(req.dbPool, serviceId, service);
+    const {
+      serviceId: updatedServiceId, validationErrors, 
+    } = await updateService(req.dbPool, serviceId, service);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });
@@ -206,7 +210,9 @@ router.post(`/sub-category/create`, upload.single(`image`), async (req: CustomRe
   const imgPath = req.file?.filename || null;
 
   try {
-    const { subCategoryId, validationErrors } = await createServiceSubCategory(req.dbPool, subCategory, imgPath);
+    const {
+      subCategoryId, validationErrors, 
+    } = await createServiceSubCategory(req.dbPool, subCategory, imgPath);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });
@@ -253,19 +259,25 @@ router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomR
   const imgPath = req.file?.filename || null;
 
   try {
-    if (typeof status === 'string' && status.length > 0 && !subCategory.name && !imgPath && subCategory.categoryId === undefined) {
-      const { subCategoryId: updatedId, validationErrors } = await updateServiceSubCategoryStatus(req.dbPool, subCategoryId, status);
+    if (typeof status === `string` && status.length > 0 && !subCategory.name && !imgPath && subCategory.categoryId === undefined) {
+      const {
+        subCategoryId: updatedId, validationErrors, 
+      } = await updateServiceSubCategoryStatus(req.dbPool, subCategoryId, status);
       if (validationErrors) {
         res.status(428).json({ errors: validationErrors });
         return;
       }
       if (updatedId) {
-        res.json({ message: `SubCategory status updated successfully`, data: updatedId });
+        res.json({
+          message: `SubCategory status updated successfully`, data: updatedId, 
+        });
         return;
       }
     }
 
-    const { subCategoryId: updatedSubCategoryId, validationErrors } = await updateServiceSubCategory(req.dbPool, subCategoryId, subCategory, imgPath);
+    const {
+      subCategoryId: updatedSubCategoryId, validationErrors, 
+    } = await updateServiceSubCategory(req.dbPool, subCategoryId, subCategory, imgPath);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });
@@ -310,7 +322,9 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
   const imgPath = req.file?.filename || null;
 
   try {
-    const { categoryId, validationErrors } = await createServiceCategory(req.dbPool, name, imgPath);
+    const {
+      categoryId, validationErrors, 
+    } = await createServiceCategory(req.dbPool, name, imgPath);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });
@@ -352,12 +366,16 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
   }
 
   const categoryId = Number(req.params.id);
-  const { name, status } = req.body;
+  const {
+    name, status, 
+  } = req.body;
   const imgPath = req.file?.filename || null;
 
   try {
-    if (typeof status === 'string' && status.length > 0 && !name && !imgPath) {
-      const { categoryId: updatedCategoryId, validationErrors } = await updateServiceCategoryStatus(req.dbPool, categoryId, status);
+    if (typeof status === `string` && status.length > 0 && !name && !imgPath) {
+      const {
+        categoryId: updatedCategoryId, validationErrors, 
+      } = await updateServiceCategoryStatus(req.dbPool, categoryId, status);
 
       if (validationErrors) {
         res.status(428).json({ errors: validationErrors });
@@ -373,7 +391,9 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
       }
     }
 
-    const { categoryId: updatedCategoryId, validationErrors } = await updateServiceCategory(req.dbPool, categoryId, name, imgPath);
+    const {
+      categoryId: updatedCategoryId, validationErrors, 
+    } = await updateServiceCategory(req.dbPool, categoryId, name, imgPath);
 
     if (validationErrors) {
       res.status(428).json({ errors: validationErrors });

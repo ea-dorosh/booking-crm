@@ -10,7 +10,7 @@ dotenv.config();
 let transporter: nodemailer.Transporter;
 
 // Register helper for comparing values
-Handlebars.registerHelper('eq', function(this: unknown, arg1: unknown, arg2: unknown, options: Handlebars.HelperOptions) {
+Handlebars.registerHelper(`eq`, function(this: unknown, arg1: unknown, arg2: unknown, options: Handlebars.HelperOptions) {
   return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
 });
 
@@ -41,7 +41,7 @@ async function createTransporter() {
         pass: testAccount.pass,
       },
     });
-    console.log('Using Ethereal test account for email');
+    console.log(`Using Ethereal test account for email`);
   }
 }
 
@@ -51,14 +51,14 @@ function getSenderInfo() {
   return {
     name: appName,
     email: senderEmail,
-    formatted: `"${appName}" <${senderEmail}>`
+    formatted: `"${appName}" <${senderEmail}>`,
   };
 }
 
 function renderTemplate(templateName: string, context: Record<string, any>): string {
   try {
-    const RESOURCES_PATH = process.env.RESOURCES_PATH || path.join(process.cwd(), 'resources');
-    const templatePath = path.join(RESOURCES_PATH, 'templates', 'emails', `${templateName}.html`);
+    const RESOURCES_PATH = process.env.RESOURCES_PATH || path.join(process.cwd(), `resources`);
+    const templatePath = path.join(RESOURCES_PATH, `templates`, `emails`, `${templateName}.html`);
 
     const source = fs.readFileSync(templatePath, `utf8`);
     const template = Handlebars.compile(source);
@@ -98,10 +98,14 @@ export async function sendPasswordResetEmail(recipientEmail: string, token: stri
       console.log(`Email preview: %s`, previewUrl);
     }
 
-    return { success: true, messageId: info.messageId, previewUrl };
+    return {
+      success: true, messageId: info.messageId, previewUrl, 
+    };
   } catch (error) {
     console.error(`Error sending password reset email:`, error);
-    return { success: false, error };
+    return {
+      success: false, error, 
+    };
   }
 }
 
@@ -133,7 +137,7 @@ export async function sendAppointmentConfirmationEmail({
       specialist: string;
     },
     companyData: CompanyResponseData,
-  }
+  },
 ) {
   if (!transporter) {
     await createTransporter();
@@ -186,7 +190,7 @@ export async function sendAppointmentConfirmationEmail({
       `Kundenangaben\n` +
       `-------------\n` +
       `Name: ${firstName} ${lastName}\n` +
-      `Telefonnummer: ${phone || 'Keine Angabe'}\n` +
+      `Telefonnummer: ${phone || `Keine Angabe`}\n` +
       `Email: ${email}\n\n` +
       `MOOD BEAUTY\n` +
       `${location}\n\n` +
@@ -209,10 +213,14 @@ export async function sendAppointmentConfirmationEmail({
       console.log(`Email preview: %s`, previewUrl);
     }
 
-    return { success: true, messageId: info.messageId, previewUrl };
+    return {
+      success: true, messageId: info.messageId, previewUrl, 
+    };
   } catch (error) {
     console.error(`Error sending appointment confirmation email:`, error);
-    return { success: false, error };
+    return {
+      success: false, error, 
+    };
   }
 }
 
@@ -227,7 +235,7 @@ export async function sendGoogleCalendarReconnectEmail(
       name: string;
       calendarId: string;
     }>;
-  }
+  },
 ) {
   if (!transporter) {
     await createTransporter();
@@ -242,7 +250,7 @@ export async function sendGoogleCalendarReconnectEmail(
     ...userData,
     hasMultipleExpired: userData.expiredEmployees && userData.expiredEmployees.length > 0,
     currentYear,
-    crmLoginUrl
+    crmLoginUrl,
   });
 
   const mailOptions = {
@@ -265,9 +273,13 @@ export async function sendGoogleCalendarReconnectEmail(
       console.log(`Email preview: %s`, previewUrl);
     }
 
-    return { success: true, messageId: info.messageId, previewUrl };
+    return {
+      success: true, messageId: info.messageId, previewUrl, 
+    };
   } catch (error) {
     console.error(`Error sending Google Calendar reconnect email:`, error);
-    return { success: false, error };
+    return {
+      success: false, error, 
+    };
   }
 }

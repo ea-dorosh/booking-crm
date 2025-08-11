@@ -10,7 +10,7 @@ export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
     //   year: 'numeric'
     // });
 
-    return dayjs.tz(dateStr, 'Europe/Berlin').format('DD. MMM YYYY');
+    return dayjs.tz(dateStr, `Europe/Berlin`).format(`DD. MMM YYYY`);
   };
 
   const formattedDateIssued = formatDate(params.dateIssued);
@@ -146,26 +146,26 @@ export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
         <div class="company">
           <div class="section-title">Unternehmen</div>
           <p class="companyName">${params.company.name}</p>
-          <p class="companyInfo">${params.company.address || ''}
+          <p class="companyInfo">${params.company.address || ``}
           <br>
-          Telefonnummer: ${params.company.phone || ''}
+          Telefonnummer: ${params.company.phone || ``}
           <br>
-          E-Mail: ${params.company.email || ''}
+          E-Mail: ${params.company.email || ``}
           <br>
-          Website: ${params.company.website || ''}
+          Website: ${params.company.website || ``}
           <br>
-          Steuernummer: ${params.company.taxNumber || ''}
+          Steuernummer: ${params.company.taxNumber || ``}
           <br>
-          IBAN: ${params.company.bankAccount || ''}
+          IBAN: ${params.company.bankAccount || ``}
           </p>
         </div>
         <div class="customer">
           <div class="section-title">Kunde</div>
           <p class="companyName">${params.customer.firstName} ${params.customer.lastName}</p>
           <p class="companyInfo">
-            ${params.customer.address ? `${params.customer.address}<br>` : ''}
-            ${params.customer.email ? `Email: ${params.customer.email}<br>` : ''}
-            ${params.customer.phone ? `Telefonnummer: ${params.customer.phone}<br>` : ''}
+            ${params.customer.address ? `${params.customer.address}<br>` : ``}
+            ${params.customer.email ? `Email: ${params.customer.email}<br>` : ``}
+            ${params.customer.phone ? `Telefonnummer: ${params.customer.phone}<br>` : ``}
           </p>
         </div>
       </div>
@@ -185,18 +185,18 @@ export function generateInvoiceHtml(params: InvoiceByIdResponseData) {
             <tr key=${item.id} class="table-row">
               <td style="text-align: left;">${item.serviceName}</td>
               <td style="text-align: right;">${item.serviceQuantity}</td>
-              <td style="text-align: right;">${item.servicePrice} ${params.currency === 'EUR' ? '€' : ''}</td>
+              <td style="text-align: right;">${item.servicePrice} ${params.currency === `EUR` ? `€` : ``}</td>
               <td style="text-align: right;">${Number(item.serviceTaxRate).toFixed(0)}%</td>
-              <td style="text-align: right;">${item.serviceTotalAmount} ${params.currency === 'EUR' ? '€' : ''}</td>
+              <td style="text-align: right;">${item.serviceTotalAmount} ${params.currency === `EUR` ? `€` : ``}</td>
             </tr>
-          `).join('')}
+          `).join(``)}
         </tbody>
       </table>
 
       <div class="totals">
-        <p>Zwischensumme: ${params.subtotal} ${params.currency === 'EUR' ? '€' : '' }</p>
-        <p>Steuersumme: ${params.taxes} ${params.currency === 'EUR' ? '€' : ''}</p>
-        <p class="total-amount">Rechnungsbetrag: ${params.totalAmount} ${params.currency === 'EUR' ? '€' : ''}</p>
+        <p>Zwischensumme: ${params.subtotal} ${params.currency === `EUR` ? `€` : `` }</p>
+        <p>Steuersumme: ${params.taxes} ${params.currency === `EUR` ? `€` : ``}</p>
+        <p class="total-amount">Rechnungsbetrag: ${params.totalAmount} ${params.currency === `EUR` ? `€` : ``}</p>
       </div>
     </div>
   </body>

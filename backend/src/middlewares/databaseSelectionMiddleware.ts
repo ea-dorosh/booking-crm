@@ -15,16 +15,16 @@ async function databaseSelectionMiddleware(req: CustomRequest, res: Response, ne
 
   let databaseName: string;
   switch (hostname) {
-    case 'www.barber.com':
-      databaseName = 'barberDatabase';
-      break;
-    case 'www.beauty.com':
-      databaseName = 'beautyDatabase';
-      break;
-    default:
-      // Handle unknown or unspecified hostnames
-      // return res.status(400).json({ message: "Invalid hostname" });
-      databaseName = 'dorosh_studio_database';
+  case `www.barber.com`:
+    databaseName = `barberDatabase`;
+    break;
+  case `www.beauty.com`:
+    databaseName = `beautyDatabase`;
+    break;
+  default:
+    // Handle unknown or unspecified hostnames
+    // return res.status(400).json({ message: "Invalid hostname" });
+    databaseName = `dorosh_studio_database`;
   }
 
   // Check if pool already exists for this database

@@ -31,7 +31,7 @@ import { Pool } from 'mysql2/promise';
 const getGroupedTimeSlots = async (
   dbPool: Pool,
   paramDate: Date_ISO_Type,
-  servicesData: { serviceId: number; employeeIds: number[] }[]
+  servicesData: { serviceId: number; employeeIds: number[] }[],
 ): Promise<PeriodWithGroupedTimeslotsType[]> => {
 
   if (servicesData.length === 0 || servicesData.length > 2) {
@@ -43,7 +43,9 @@ const getGroupedTimeSlots = async (
 
   // Process each service
   for (const [index, serviceData] of servicesData.entries()) {
-    const { serviceId, employeeIds } = serviceData;
+    const {
+      serviceId, employeeIds, 
+    } = serviceData;
 
     // Get service details and employee availability
     const service = await getService(dbPool, serviceId);
@@ -53,7 +55,7 @@ const getGroupedTimeSlots = async (
     // Get period with employee working times
     const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(
       paramDate,
-      groupedEmployeeAvailability
+      groupedEmployeeAvailability,
     );
 
     // Get saved appointments if there are working days
@@ -63,21 +65,21 @@ const getGroupedTimeSlots = async (
         dbPool,
         periodWithDaysAndEmployeeAvailability.map(dayInPeriod => dayInPeriod.day),
         employeeIds,
-        AppointmentStatusEnum.Active
+        AppointmentStatusEnum.Active,
       );
     }
 
     // Get Google Calendar events
     const googleCalendarEvents = await getGoogleCalendarEventsForEmployees(
       dbPool,
-      periodWithDaysAndEmployeeAvailability
+      periodWithDaysAndEmployeeAvailability,
     );
 
     // Normalize all appointments
     const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
     const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(
       googleCalendarEvents,
-      periodWithDaysAndEmployeeAvailability
+      periodWithDaysAndEmployeeAvailability,
     );
 
     const allNormalizedAppointments = [...normalizedSavedAppointments, ...normalizedGoogleEvents];
@@ -119,14 +121,14 @@ const getGroupedTimeSlots = async (
           endTime: slot.endTime.toISOString(),
           employeeIds: [employee.employeeId],
           serviceId: dayData.serviceId,
-        }))
-      )
+        })),
+      ),
     }));
   } else {
     // Combine two services
     filteredTimeSlotsDataForTwoServices = combineAndFilterTimeSlotsDataFromTwoServices(
       timeSlotsDataForFirstService,
-      timeSlotsDataForSecondService
+      timeSlotsDataForSecondService,
     );
   }
 
@@ -139,7 +141,7 @@ const getGroupedTimeSlots = async (
  */
 async function getGoogleCalendarEventsForEmployees(
   dbPool: Pool,
-  periodWithDaysAndEmployeeAvailability: PeriodWithEmployeeWorkingTimeType[]
+  periodWithDaysAndEmployeeAvailability: PeriodWithEmployeeWorkingTimeType[],
 ): Promise<{ start: string; end: string; summary: string }[]> {
   const googleCalendarEvents: { start: string; end: string; summary: string }[] = [];
 
@@ -164,7 +166,7 @@ async function getGoogleCalendarEventsForEmployees(
       const employeeGoogleEvents = await getGoogleCalendarEventsForSpecificDates(
         dbPool,
         employeeId,
-        dates as Date_ISO_Type[]
+        dates as Date_ISO_Type[],
       );
 
       if (employeeGoogleEvents && employeeGoogleEvents.length > 0) {

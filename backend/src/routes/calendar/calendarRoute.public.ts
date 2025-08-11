@@ -26,7 +26,7 @@ router.post(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
     if (typeof paramDate !== `string` || !Array.isArray(servicesData) || servicesData.length === 0) {
       res.status(400).json({
-        error: `Invalid parameters: date must be a string and servicesData must be a non-empty array`
+        error: `Invalid parameters: date must be a string and servicesData must be a non-empty array`,
       });
       return;
     }
@@ -35,12 +35,12 @@ router.post(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     const isValidServicesData = servicesData.every(item =>
       item.serviceId &&
       Array.isArray(item.employeeIds) &&
-      item.employeeIds.length > 0
+      item.employeeIds.length > 0,
     );
 
     if (!isValidServicesData) {
       res.status(400).json({
-        error: `Invalid servicesData format: each item must have serviceId and non-empty employeeIds array`
+        error: `Invalid servicesData format: each item must have serviceId and non-empty employeeIds array`,
       });
       return;
     }

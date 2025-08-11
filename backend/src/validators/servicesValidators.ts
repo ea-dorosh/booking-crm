@@ -29,10 +29,10 @@ const validateServiceData = (service: ServiceDataType): ServiceFormDataValidatio
     errors.durationTime = `Duration time is required`;
   }
 
-    // Validate employee prices
+  // Validate employee prices
   if (service.employeePrices && service.employeePrices.length > 0) {
     const invalidPrices = service.employeePrices.filter(emp =>
-      emp.price === null || emp.price === undefined || emp.price < 0
+      emp.price === null || emp.price === undefined || emp.price < 0,
     );
 
     if (invalidPrices.length > 0) {

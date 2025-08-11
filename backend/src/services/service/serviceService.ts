@@ -16,7 +16,7 @@ import {
   validateSubCategoryData,
   validateCategoryData,
   SubCategoryValidationErrors,
-  CategoryValidationErrors
+  CategoryValidationErrors,
 } from '@/validators/servicesValidators.js';
 import { CategoryStatusEnum } from '@/enums/enums.js';
 
@@ -156,7 +156,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
         name,
         categoryId: category_id,
         subCategoryId: sub_category_id,
-        subCategoryName: subCategory ? subCategory.name : '',
+        subCategoryName: subCategory ? subCategory.name : ``,
         durationTime: duration_time,
         bufferTime: buffer_time,
         bookingNote: booking_note,
@@ -167,7 +167,9 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
     if (employee_id !== null) {
       const service = servicesMap.get(id);
       if (service) {
-        service.employeePrices.push({ employeeId: employee_id, price });
+        service.employeePrices.push({
+          employeeId: employee_id, price, 
+        });
       }
     }
   }
@@ -296,12 +298,12 @@ const saveEmployeePriceForService = async (dbPool: Pool, employeePrice: Employee
     if (existingRows.length === 0 || existingRows[0].price !== employeePrice.price) {
       // If no existing record or price is different, insert a new one or update the price
       const query = existingRows.length === 0 ?
-          `INSERT INTO ServiceEmployeePrice (employee_id, service_id, price) VALUES (?, ?, ?)` :
-          `UPDATE ServiceEmployeePrice SET price = ? WHERE employee_id = ? AND service_id = ?`;
+        `INSERT INTO ServiceEmployeePrice (employee_id, service_id, price) VALUES (?, ?, ?)` :
+        `UPDATE ServiceEmployeePrice SET price = ? WHERE employee_id = ? AND service_id = ?`;
 
       const queryParams = existingRows.length === 0 ?
-          [employeePrice.employeeId, serviceId, employeePrice.price] :
-          [employeePrice.price, employeePrice.employeeId, serviceId];
+        [employeePrice.employeeId, serviceId, employeePrice.price] :
+        [employeePrice.price, employeePrice.employeeId, serviceId];
 
       await dbPool.execute(query, queryParams);
       console.log(existingRows.length === 0 ? `New record inserted successfully` : `Existing record updated successfully`);
@@ -345,13 +347,13 @@ async function createService(dbPool: Pool, service: ServiceDataType): Promise<Cr
   }).join(`,`);
 
   const serviceValues = [
-      employeeIds,
-      service.name,
-      service.subCategoryId,
-      service.categoryId || null,
-      service.durationTime,
-      service.bufferTime,
-      service.bookingNote,
+    employeeIds,
+    service.name,
+    service.subCategoryId,
+    service.categoryId || null,
+    service.durationTime,
+    service.bufferTime,
+    service.bookingNote,
   ];
 
   try {
@@ -371,7 +373,7 @@ async function createService(dbPool: Pool, service: ServiceDataType): Promise<Cr
       validationErrors: null,
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
@@ -437,7 +439,7 @@ async function updateService(dbPool: Pool, serviceId: number, service: ServiceDa
       validationErrors: null,
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
@@ -489,7 +491,7 @@ async function createServiceSubCategory(dbPool: Pool, subCategory: SubCategoryDa
       validationErrors: null,
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
@@ -538,7 +540,7 @@ async function updateServiceSubCategory(dbPool: Pool, subCategoryId: number, sub
       validationErrors: null,
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
@@ -566,7 +568,7 @@ async function updateServiceSubCategoryStatus(dbPool: Pool, subCategoryId: numbe
     return {
       subCategoryId: null,
       // Casting to keep shape similar; consumers only check existence
-      validationErrors: { status: 'Invalid status value' } as unknown as SubCategoryValidationErrors,
+      validationErrors: { status: `Invalid status value` } as unknown as SubCategoryValidationErrors,
     };
   }
 
@@ -615,7 +617,7 @@ async function createServiceCategory(dbPool: Pool, name: string, imgPath: string
       validationErrors: null,
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
@@ -659,7 +661,7 @@ async function updateServiceCategory(dbPool: Pool, categoryId: number, name: str
       validationErrors: null,
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {

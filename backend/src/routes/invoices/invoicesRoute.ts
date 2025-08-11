@@ -72,13 +72,15 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
   const customer = request.body;
 
   try {
-    const { createdInvoiceId, validationErrors } = await createInvoice(request.dbPool, customer);
+    const {
+      createdInvoiceId, validationErrors, 
+    } = await createInvoice(request.dbPool, customer);
 
     if (validationErrors) {
       response.status(428).json({
-          errorMessage: `Validation failed`,
-          validationErrors,
-        });
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
     } else if (createdInvoiceId) {
       response.json({
         message: `Invoice data inserted successfully`,
@@ -86,7 +88,7 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
       });
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
       if (mysqlError.code === `ER_DUP_ENTRY`) {
         response.status(409).json({
@@ -143,24 +145,26 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: process.env.NODE_ENV === `development` ? undefined : '/usr/bin/google-chrome-stable',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      executablePath: process.env.NODE_ENV === `development` ? undefined : `/usr/bin/google-chrome-stable`,
+      args: [`--no-sandbox`, `--disable-setuid-sandbox`, `--disable-dev-shm-usage`],
     });
     const page = await browser.newPage();
 
-    await page.setContent(invoiceHtml, { waitUntil: 'networkidle0' });
+    await page.setContent(invoiceHtml, { waitUntil: `networkidle0` });
 
 
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    const pdfBuffer = await page.pdf({
+      format: `A4`, printBackground: true, 
+    });
 
-    response.setHeader('Content-Type', 'application/pdf');
-    response.setHeader('Content-Disposition', `inline; filename=invoice-${invoiceId}.pdf`);
+    response.setHeader(`Content-Type`, `application/pdf`);
+    response.setHeader(`Content-Disposition`, `inline; filename=invoice-${invoiceId}.pdf`);
     response.end(pdfBuffer);
 
     return;
   } catch (error) {
     response.status(500).json({
-      errorMessage: 'Error generating invoice PDF',
+      errorMessage: `Error generating invoice PDF`,
       message: (error as Error).message,
     });
 

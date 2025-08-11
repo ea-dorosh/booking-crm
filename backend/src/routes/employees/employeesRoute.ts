@@ -82,8 +82,8 @@ router.post(`/create-employee`, upload.single(`image`), async (req: CustomReques
     employeeId = employeeResults.insertId;
 
     res.json({
-        message: `New employee data inserted successfully`,
-        data: employeeId,
+      message: `New employee data inserted successfully`,
+      data: employeeId,
     });
   } catch (error) {
     res.status(500).json(error);
@@ -124,7 +124,7 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
     employee.email,
     formatPhone(employee.phone),
     imgPath,
-    employeeId
+    employeeId,
   ];
 
   try {
@@ -181,7 +181,9 @@ router.post(`/availability`, async (req: CustomRequestType, res: CustomResponseT
   ON DUPLICATE KEY UPDATE start_time = VALUES(start_time), end_time = VALUES(end_time)
 `;
 
-  const values = [availability].map(({ employeeId, dayId, startTime, endTime }) => [
+  const values = [availability].map(({
+    employeeId, dayId, startTime, endTime, 
+  }) => [
     employeeId,
     dayId,
     startTime,
@@ -242,19 +244,19 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
   }
 
   const employeeId = Number(request.params.id);
-  const startDate = ((request.query?.startDate as string) || new Date().toISOString().split('T')[0]) as Date_ISO_Type;
+  const startDate = ((request.query?.startDate as string) || new Date().toISOString().split(`T`)[0]) as Date_ISO_Type;
   const endDate = (request.query?.endDate as string | null) as Date_ISO_Type | null;
 
   let status: number | null = null;
   if (request.query?.status !== undefined) {
-    status = request.query.status === 'null' ? null : Number(request.query.status);
+    status = request.query.status === `null` ? null : Number(request.query.status);
   }
 
   const sortBy = (request.query?.sortBy as AppointmentSortField) || DEFAULT_APPOINTMENT_SORT_FIELD;
   const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
   try {
-    const { getAppointments } = await import('@/services/appointment/appointmentService.js');
+    const { getAppointments } = await import(`@/services/appointment/appointmentService.js`);
 
     const appointmentsData = await getAppointments(request.dbPool, {
       startDate,

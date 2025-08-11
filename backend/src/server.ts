@@ -37,7 +37,7 @@ dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 const app = express();
 
 // Trust reverse proxies so req.ip and X-Forwarded-* are respected
-app.set('trust proxy', true);
+app.set(`trust proxy`, true);
 
 app.use(morgan(`dev`));
 
@@ -60,7 +60,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    if (process.env.NODE_ENV === 'development' || allowedOrigins.some(allowedOrigin => origin.startsWith(String(allowedOrigin)))) {
+    if (process.env.NODE_ENV === `development` || allowedOrigins.some(allowedOrigin => origin.startsWith(String(allowedOrigin)))) {
       return callback(null, true);
     } else {
       console.warn(`CORS blocked request from origin: ${origin}`);
@@ -68,7 +68,7 @@ const corsOptions = {
     }
   },
   methods: [`GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [`Content-Type`, `Authorization`],
   credentials: true,
   maxAge: 86400,
 };
@@ -80,8 +80,8 @@ app.use(express.static(`public`));
 
 app.use(`/images`, express.static(`public/images`, {
   setHeaders: (res) => {
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-  }
+    res.setHeader(`Cross-Origin-Resource-Policy`, `cross-origin`);
+  },
 }));
 
 // Use authentication routes
@@ -126,6 +126,6 @@ app.listen(port, `0.0.0.0`, () => {
     timezoneName: Intl.DateTimeFormat().resolvedOptions().timeZone,
     currentTime: new Date().toISOString(),
     currentLocalTime: new Date().toString(),
-    dayjsTimezone: dayjs.tz.guess()
+    dayjsTimezone: dayjs.tz.guess(),
   });
 });

@@ -151,7 +151,7 @@ const calculateAvailableTimes = (
   startWorkingTime: dayjs.Dayjs,
   endWorkingTime: dayjs.Dayjs,
   blockedTimes: BlockedTime[],
-  serviceDuration: Time_HH_MM_SS_Type
+  serviceDuration: Time_HH_MM_SS_Type,
 ): AvailableTime[] => {
   const availableTimes: AvailableTime[] = [];
 
@@ -161,7 +161,7 @@ const calculateAvailableTimes = (
     if (adjustedEndTime.isAfter(startWorkingTime)) {
       return [{
         minPossibleStartTime: startWorkingTime,
-        maxPossibleStartTime: adjustedEndTime
+        maxPossibleStartTime: adjustedEndTime,
       }];
     }
     return [];
@@ -178,7 +178,7 @@ const calculateAvailableTimes = (
       if (adjustedEndTime.isAfter(currentTime) || adjustedEndTime.isSame(currentTime)) {
         availableTimes.push({
           minPossibleStartTime: currentTime,
-          maxPossibleStartTime: adjustedEndTime
+          maxPossibleStartTime: adjustedEndTime,
         });
       }
     }
@@ -193,7 +193,7 @@ const calculateAvailableTimes = (
     if (adjustedEndTime.isAfter(currentTime) || adjustedEndTime.isSame(currentTime)) {
       availableTimes.push({
         minPossibleStartTime: currentTime,
-        maxPossibleStartTime: adjustedEndTime
+        maxPossibleStartTime: adjustedEndTime,
       });
     }
   }
@@ -225,7 +225,7 @@ function getPeriodWithDaysAndEmployeeAvailability(
   const period: PeriodWithEmployeeWorkingTimeType[] = [];
   let indexDay = firstDayInPeriod;
 
-   while (indexDay.isBefore(lastDayInPeriod) || indexDay.isSame(lastDayInPeriod, `day`)) {
+  while (indexDay.isBefore(lastDayInPeriod) || indexDay.isSame(lastDayInPeriod, `day`)) {
 
     /**
      * for now all services will start from today
@@ -235,7 +235,7 @@ function getPeriodWithDaysAndEmployeeAvailability(
       const dayOfWeek = indexDay.day();
 
       const dayAvailability = groupedEmployeeAvailability.find(
-        availability => availability.dayId === dayOfWeek
+        availability => availability.dayId === dayOfWeek,
       );
 
       if (dayAvailability) {
@@ -251,8 +251,8 @@ function getPeriodWithDaysAndEmployeeAvailability(
              * First we calculate time in german time zone for real calendar date "indexDay"
              * and then convert it to UTC for next calculations
              */
-            startWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.startTime}`, 'Europe/Berlin').utc(),
-            endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, 'Europe/Berlin').utc(),
+            startWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.startTime}`, `Europe/Berlin`).utc(),
+            endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, `Europe/Berlin`).utc(),
           })),
         };
         period.push(dayData);
@@ -270,13 +270,13 @@ function normalizeSavedAppointments(savedAppointments: AppointmentDataType[]): N
     date: appointment.date,
     timeStart: appointment.timeStart,
     timeEnd: appointment.timeEnd,
-    employeeId: appointment.employee.id
+    employeeId: appointment.employee.id,
   }));
 }
 
 function normalizeGoogleCalendarEvents(
   googleEvents: { start: string; end: string; summary: string }[],
-  employeeId: number
+  employeeId: number,
 ): NormalizedAppointmentData[] {
   return googleEvents.map(event => ({
     date: dayjs(event.start).format(DATE_FORMAT),
@@ -291,7 +291,7 @@ function normalizeGoogleCalendarEvents(
  */
 function normalizeGoogleEventsForEmployees(
   googleCalendarEvents: { start: string; end: string; summary: string }[],
-  periodWithDaysAndEmployeeAvailability: any[]
+  periodWithDaysAndEmployeeAvailability: any[],
 ): any[] {
   const normalizedGoogleEvents: any[] = [];
 
@@ -335,12 +335,12 @@ function combinePeriodWithNormalizedAppointments(
 ): PeriodWithClearedDaysType[] {
   return period.map(dayData => {
     const dayAppointments = normalizedAppointments.filter(appointment =>
-      dayjs(appointment.date).format(DATE_FORMAT) === dayData.day
+      dayjs(appointment.date).format(DATE_FORMAT) === dayData.day,
     );
 
     const employeesWithBlockedTimes = dayData.employees.map(employee => {
       const employeeAppointments = dayAppointments.filter(appointment =>
-        appointment.employeeId === employee.employeeId
+        appointment.employeeId === employee.employeeId,
       );
 
       const blockedTimes: BlockedTime[] = employeeAppointments.map(appointment => {
@@ -349,7 +349,7 @@ function combinePeriodWithNormalizedAppointments(
 
         return {
           startBlockedTime: startTime,
-          endBlockedTime: endTime
+          endBlockedTime: endTime,
         };
       });
 
@@ -357,7 +357,7 @@ function combinePeriodWithNormalizedAppointments(
       const today = dayjs().utc().format(DATE_FORMAT);
       if (dayData.day === today) {
         const now = dayjs().utc();
-        const nowPlus30Minutes = now.add(30, 'minute');
+        const nowPlus30Minutes = now.add(30, `minute`);
 
         blockedTimes.push({
           startBlockedTime: employee.startWorkingTime,
@@ -377,7 +377,7 @@ function combinePeriodWithNormalizedAppointments(
       return {
         ...employee,
         blockedTimes,
-        availableTimes
+        availableTimes,
       };
     });
 
@@ -391,7 +391,7 @@ function combinePeriodWithNormalizedAppointments(
 }
 
 function generateTimeSlotsFromAvailableTimes(
-  periodWithClearedDays: PeriodWithClearedDaysType[]
+  periodWithClearedDays: PeriodWithClearedDaysType[],
 ): DayWithTimeSlots[] {
   return periodWithClearedDays.map(dayData => {
     const employeesWithTimeSlots: EmployeeWithTimeSlots[] = dayData.employees.map(employee => {
@@ -409,7 +409,7 @@ function generateTimeSlotsFromAvailableTimes(
 
         // Handle hour overflow if minutes rounded to 60
         if (roundedMinutes >= 60) {
-          currentTime = currentTime.add(1, 'hour').minute(0);
+          currentTime = currentTime.add(1, `hour`).minute(0);
         }
 
         const endTime = availableTime.maxPossibleStartTime;
@@ -426,15 +426,15 @@ function generateTimeSlotsFromAvailableTimes(
               // First slot is 15 minutes (until next :00 or :30)
               slotEndTime = currentMinutes === 15
                 ? currentTime.minute(30).second(0).millisecond(0)  // 15 -> 30
-                : currentTime.add(1, 'hour').minute(0).second(0).millisecond(0);  // 45 -> :00 next hour
+                : currentTime.add(1, `hour`).minute(0).second(0).millisecond(0);  // 45 -> :00 next hour
             } else {
               // First slot is 30 minutes (starts at :00 or :30)
-              slotEndTime = currentTime.add(30, 'minute');
+              slotEndTime = currentTime.add(30, `minute`);
             }
             isFirstSlot = false;
           } else {
             // All subsequent slots are 30 minutes and start at :00 or :30
-            slotEndTime = currentTime.add(30, 'minute');
+            slotEndTime = currentTime.add(30, `minute`);
           }
 
           // Add the slot if currentTime is within available time
@@ -445,7 +445,7 @@ function generateTimeSlotsFromAvailableTimes(
             });
           }
 
-                    // Move to next slot - use the end time of current slot as start of next slot
+          // Move to next slot - use the end time of current slot as start of next slot
           currentTime = slotEndTime;
         }
       });
@@ -467,7 +467,7 @@ function generateTimeSlotsFromAvailableTimes(
 
 function combineAndFilterTimeSlotsDataFromTwoServices(
   timeSlotsDataForFirstService: DayWithTimeSlots[],
-  timeSlotsDataForSecondService: DayWithTimeSlots[]
+  timeSlotsDataForSecondService: DayWithTimeSlots[],
 ): FilteredTimeSlotsDataForTwoServicesType[] {
   const result: FilteredTimeSlotsDataForTwoServicesType[] = [];
 
@@ -475,14 +475,14 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
   timeSlotsDataForFirstService.forEach(firstServiceDay => {
     // Find corresponding day in second service
     const secondServiceDay = timeSlotsDataForSecondService.find(
-      day => day.day === firstServiceDay.day
+      day => day.day === firstServiceDay.day,
     );
 
     if (!secondServiceDay) {
       // If no corresponding day in second service, add empty result
       result.push({
         day: firstServiceDay.day,
-        availableTimeSlots: []
+        availableTimeSlots: [],
       });
       return;
     }
@@ -494,15 +494,15 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
       // For each time slot of first employee
       firstEmployee.availableTimeSlots.forEach(firstTimeSlot => {
         // Calculate when first service will end
-        const durationParts = firstServiceDay.serviceDuration.split(':');
+        const durationParts = firstServiceDay.serviceDuration.split(`:`);
         const hours = parseInt(durationParts[0]);
         const minutes = parseInt(durationParts[1]);
         const seconds = parseInt(durationParts[2]);
 
         const firstServiceEndTime = firstTimeSlot.startTime
-          .add(hours, 'hour')
-          .add(minutes, 'minute')
-          .add(seconds, 'second');
+          .add(hours, `hour`)
+          .add(minutes, `minute`)
+          .add(seconds, `second`);
 
         // Find all employees in second service who can start at this end time
         const availableSecondEmployees: number[] = [];
@@ -511,7 +511,7 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
         secondServiceDay.employees.forEach(secondEmployee => {
           const matchingSlot = secondEmployee.availableTimeSlots.find(
             slot => slot.startTime.isSameOrAfter(firstServiceEndTime) &&
-                   slot.startTime.isSameOrBefore(firstServiceEndTime.add(30, 'minute'))
+                   slot.startTime.isSameOrBefore(firstServiceEndTime.add(30, `minute`)),
           );
 
           if (matchingSlot) {
@@ -526,7 +526,7 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
 
           // Check if this combination already exists
           const existingSlot = combinedTimeSlots.find(
-            slot => slot.startTime === firstTimeSlot.startTime.toISOString()
+            slot => slot.startTime === firstTimeSlot.startTime.toISOString(),
           );
 
           if (existingSlot) {
@@ -546,7 +546,7 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
                 endTime: secondServiceSlot.endTime.toISOString(),
                 employeeIds: [...availableSecondEmployees],
                 serviceId: secondServiceDay.serviceId,
-              }
+              },
             };
             combinedTimeSlots.push(newSlot);
           }
@@ -555,13 +555,13 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
     });
 
     const sortedCombinedTimeSlots = combinedTimeSlots.sort((a, b) =>
-      a.startTime.localeCompare(b.startTime)
+      a.startTime.localeCompare(b.startTime),
     );
     console.log(`sortedCombinedTimeSlots: `, JSON.stringify(sortedCombinedTimeSlots, null, 2));
 
     result.push({
       day: firstServiceDay.day,
-      availableTimeSlots: sortedCombinedTimeSlots
+      availableTimeSlots: sortedCombinedTimeSlots,
     });
   });
 
@@ -569,7 +569,7 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
 }
 
 function generateGroupedTimeSlotsForTwoServices(
-  filteredTimeSlotsData: FilteredTimeSlotsDataForTwoServicesType[]
+  filteredTimeSlotsData: FilteredTimeSlotsDataForTwoServicesType[],
 ): PeriodWithGroupedTimeslotsForTwoServicesType[] {
   return filteredTimeSlotsData.map(dayData => {
     // Create a map to group time slots by their first service start time
@@ -631,7 +631,7 @@ function generateGroupedTimeSlotsForTwoServices(
 
     return {
       day: dayData.day as Date_ISO_Type,
-      availableTimeslots
+      availableTimeslots,
     };
   });
 }

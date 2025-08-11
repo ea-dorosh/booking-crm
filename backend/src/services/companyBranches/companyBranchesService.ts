@@ -62,7 +62,9 @@ async function createCompanyBranch(dbPool: DbPoolType, branchData: CompanyBranch
     branchData.email,
   ];
   const [result] = await dbPool.query<ResultSetHeader>(sql, values);
-  return { newBranchId: result.insertId, validationErrors: null };
+  return {
+    newBranchId: result.insertId, validationErrors: null, 
+  };
 }
 
 async function updateCompanyBranch(dbPool: DbPoolType, branchId: number, branchData: CompanyBranchResponseData): Promise<UpdateCompanyBranchResult> {
@@ -89,7 +91,9 @@ async function updateCompanyBranch(dbPool: DbPoolType, branchId: number, branchD
     branchId,
   ];
   await dbPool.query(sql, values);
-  return { updatedBranchId: branchId, validationErrors: null };
+  return {
+    updatedBranchId: branchId, validationErrors: null, 
+  };
 }
 
 async function getCompanyBranchById(dbPool: DbPoolType, branchId: number): Promise<CompanyBranchResponseData> {

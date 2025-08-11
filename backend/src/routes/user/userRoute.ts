@@ -15,15 +15,15 @@ interface UserRow extends RowDataPacket {
   database_name?: string;
 }
 
-router.get('/', async (req: Request, res: Response) => {
-  const token = req.headers.authorization?.split(' ')[1];
+router.get(`/`, async (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(` `)[1];
   if (!token) {
-    res.status(401).json({ message: 'No token provided' });
+    res.status(401).json({ message: `No token provided` });
     return;
   }
   try {
     if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET not defined');
+      throw new Error(`JWT_SECRET not defined`);
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as { email: string };
@@ -32,15 +32,15 @@ router.get('/', async (req: Request, res: Response) => {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: 'users_database',
+      database: `users_database`,
     });
 
     const connection = await pool.getConnection();
-    const [rows] = await connection.query<UserRow[]>('SELECT id, email, database_name FROM Users WHERE email = ?', [decoded.email]);
+    const [rows] = await connection.query<UserRow[]>(`SELECT id, email, database_name FROM Users WHERE email = ?`, [decoded.email]);
     connection.release();
 
     if (rows.length === 0) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: `User not found` });
       return;
     }
 
@@ -49,16 +49,18 @@ router.get('/', async (req: Request, res: Response) => {
     return;
   } catch (error) {
     console.error(error);
-    res.status(401).json({ message: 'Invalid or expired token' });
+    res.status(401).json({ message: `Invalid or expired token` });
     return;
   }
 });
 
-router.post('/change-password', async (req: Request, res: Response) => {
-  const { email, currentPassword, newPassword } = req.body as { email?: string; currentPassword?: string; newPassword?: string };
+router.post(`/change-password`, async (req: Request, res: Response) => {
+  const {
+    email, currentPassword, newPassword, 
+  } = req.body as { email?: string; currentPassword?: string; newPassword?: string };
 
   if (!email || !currentPassword || !newPassword) {
-    res.status(400).json({ message: 'Email, current password, and new password are required.' });
+    res.status(400).json({ message: `Email, current password, and new password are required.` });
     return;
   }
 
@@ -66,39 +68,39 @@ router.post('/change-password', async (req: Request, res: Response) => {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'users_database',
+    database: `users_database`,
   });
 
   try {
     const connection = await pool.getConnection();
-    const [rows] = await connection.query<UserRow[]>('SELECT * FROM Users WHERE email = ?', [email]);
+    const [rows] = await connection.query<UserRow[]>(`SELECT * FROM Users WHERE email = ?`, [email]);
     connection.release();
 
     if (rows.length === 0) {
-      res.status(401).json({ errorMessage: 'Invalid credentials' });
+      res.status(401).json({ errorMessage: `Invalid credentials` });
       return;
     }
 
     const user = rows[0];
     const passwordMatch = await bcrypt.compare(currentPassword, user.password);
     if (!passwordMatch) {
-      res.status(401).json({ errorMessage: 'Invalid current password' });
+      res.status(401).json({ errorMessage: `Invalid current password` });
       return;
     }
 
     const saltRounds = 10;
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    const [updateResult] = await pool.query<ResultSetHeader>('UPDATE Users SET password = ? WHERE email = ?', [hashedNewPassword, email]);
+    const [updateResult] = await pool.query<ResultSetHeader>(`UPDATE Users SET password = ? WHERE email = ?`, [hashedNewPassword, email]);
 
     if (updateResult.affectedRows === 1) {
-      res.status(200).json({ message: 'Password changed successfully.' });
+      res.status(200).json({ message: `Password changed successfully.` });
     } else {
-      res.status(500).json({ message: 'Failed to change password.' });
+      res.status(500).json({ message: `Failed to change password.` });
     }
   } catch (error: unknown) {
-    console.error('Error during password change:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error(`Error during password change:`, error);
+    res.status(500).json({ message: `Internal server error` });
   }
 });
 

@@ -12,7 +12,7 @@ import {
   combineAndFilterTimeSlotsDataFromTwoServices,
   generateGroupedTimeSlotsForTwoServices,
   DayWithTimeSlots,
-  generateTimeSlotsFromAvailableTimes
+  generateTimeSlotsFromAvailableTimes,
 } from './calendarUtils';
 
 jest.mock(`dayjs`, () => {
@@ -132,8 +132,12 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`) },
-      { startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`) },
+      {
+        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`), 
+      },
+      {
+        startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`), 
+      },
     ];
     const serviceDuration = `01:00:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -151,7 +155,9 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs(), endBlockedTime: dayjs().add(2, `hour`) },
+      {
+        startBlockedTime: dayjs(), endBlockedTime: dayjs().add(2, `hour`), 
+      },
     ];
     const serviceDuration = `01:00:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -164,7 +170,9 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`) },
+      {
+        startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`), 
+      },
     ];
     const serviceDuration = `01:00:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -177,8 +185,12 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(4, `hour`) },
-      { startBlockedTime: dayjs().add(3, `hour`), endBlockedTime: dayjs().add(5, `hour`) },
+      {
+        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(4, `hour`), 
+      },
+      {
+        startBlockedTime: dayjs().add(3, `hour`), endBlockedTime: dayjs().add(5, `hour`), 
+      },
     ];
     const serviceDuration = `01:00:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -193,8 +205,12 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`) },
-      { startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`) },
+      {
+        startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`), 
+      },
+      {
+        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`), 
+      },
     ];
     const serviceDuration = `01:00:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -211,7 +227,9 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(1, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(1, `hour`), endBlockedTime: dayjs().add(2, `hour`) },
+      {
+        startBlockedTime: dayjs().add(1, `hour`), endBlockedTime: dayjs().add(2, `hour`), 
+      },
     ];
     const serviceDuration = `01:00:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -222,9 +240,15 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(10, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(2, `hour`).add(30, `minute`), endBlockedTime: dayjs().add(3, `hour`).add(45, `minute`) },
-      { startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`).add(30, `minute`) },
-      { startBlockedTime: dayjs().add(8, `hour`), endBlockedTime: dayjs().add(9, `hour`).add(15, `minute`) },
+      {
+        startBlockedTime: dayjs().add(2, `hour`).add(30, `minute`), endBlockedTime: dayjs().add(3, `hour`).add(45, `minute`), 
+      },
+      {
+        startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`).add(30, `minute`), 
+      },
+      {
+        startBlockedTime: dayjs().add(8, `hour`), endBlockedTime: dayjs().add(9, `hour`).add(15, `minute`), 
+      },
     ];
     const serviceDuration = `01:30:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -237,8 +261,12 @@ describe(`calculateAvailableTimes`, () => {
     const startWorkingTime = dayjs();
     const endWorkingTime = dayjs().add(8, `hour`);
     const blockedTimes = [
-      { startBlockedTime: dayjs().add(30, `minute`), endBlockedTime: dayjs().add(1, `hour`).add(45, `minute`) },
-      { startBlockedTime: dayjs().add(4, `hour`).add(15, `minute`), endBlockedTime: dayjs().add(5, `hour`).add(20, `minute`) },
+      {
+        startBlockedTime: dayjs().add(30, `minute`), endBlockedTime: dayjs().add(1, `hour`).add(45, `minute`), 
+      },
+      {
+        startBlockedTime: dayjs().add(4, `hour`).add(15, `minute`), endBlockedTime: dayjs().add(5, `hour`).add(20, `minute`), 
+      },
     ];
     const serviceDuration = `00:45:00`;
     const result = calculateAvailableTimes(startWorkingTime, endWorkingTime, blockedTimes, serviceDuration);
@@ -256,12 +284,12 @@ describe(`calculateAvailableTimes`, () => {
     const blockedTimes = [
       {
         startBlockedTime: dayjs.utc(`2025-07-28T10:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T08:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T19:20:37.899Z`)
-      }
+        endBlockedTime: dayjs.utc(`2025-07-28T19:20:37.899Z`),
+      },
     ];
     const serviceDuration = `02:00:00`;
 
@@ -282,20 +310,20 @@ describe(`calculateAvailableTimes`, () => {
     const blockedTimes = [
       {
         startBlockedTime: dayjs.utc(`2025-07-28T10:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T14:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T15:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T15:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T08:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T15:20:37.899Z`)
-      }
+        endBlockedTime: dayjs.utc(`2025-07-28T15:20:37.899Z`),
+      },
     ];
     const serviceDuration = `01:00:00`;
 
@@ -313,20 +341,20 @@ describe(`calculateAvailableTimes`, () => {
     const blockedTimes = [
       {
         startBlockedTime: dayjs.utc(`2025-07-28T10:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T14:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T15:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T15:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T08:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T14:20:37.899Z`)
-      }
+        endBlockedTime: dayjs.utc(`2025-07-28T14:20:37.899Z`),
+      },
     ];
     const serviceDuration = `01:00:00`;
 
@@ -344,20 +372,20 @@ describe(`calculateAvailableTimes`, () => {
     const blockedTimes = [
       {
         startBlockedTime: dayjs.utc(`2025-07-28T10:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T09:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T12:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T09:30:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T11:45:00.000Z`)
-      }
+        endBlockedTime: dayjs.utc(`2025-07-28T11:45:00.000Z`),
+      },
     ];
     const serviceDuration = `01:00:00`;
 
@@ -377,11 +405,11 @@ describe(`calculateAvailableTimes`, () => {
     const blockedTimes = [
       {
         startBlockedTime: dayjs.utc(`2025-07-28T10:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T11:30:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`),
       },
     ];
     const serviceDuration = `00:45:00`;
@@ -402,11 +430,11 @@ describe(`calculateAvailableTimes`, () => {
     const blockedTimes = [
       {
         startBlockedTime: dayjs.utc(`2025-07-28T10:00:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T11:00:00.000Z`),
       },
       {
         startBlockedTime: dayjs.utc(`2025-07-28T11:50:00.000Z`),
-        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`)
+        endBlockedTime: dayjs.utc(`2025-07-28T13:00:00.000Z`),
       },
     ];
     const serviceDuration = `00:45:00`;
@@ -670,41 +698,41 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T06:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T06:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T06:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T06:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T14:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T14:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T14:30:00.000Z`),
               },
-            ]
+            ],
           },
           {
             employeeId: 1,
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:30:00.000Z`),
               },
-            ]
-          }
-        ]
-      }
+            ],
+          },
+        ],
+      },
     ];
 
     const timeSlotsDataForSecondService: DayWithTimeSlots[] = [
@@ -718,71 +746,71 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T06:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T06:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T06:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T06:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
-            ]
+            ],
           },
           {
             employeeId: 1,
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T10:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:30:00.000Z`),
               },
-            ]
+            ],
           },
           {
             employeeId: 3,
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T10:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T16:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T16:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T16:30:00.000Z`),
               },
-            ]
+            ],
           },
-        ]
-      }
+        ],
+      },
     ];
 
     const result = combineAndFilterTimeSlotsDataFromTwoServices(
       timeSlotsDataForFirstService,
-      timeSlotsDataForSecondService
+      timeSlotsDataForSecondService,
     );
 
     expect(result).toHaveLength(1);
@@ -799,7 +827,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T08:30:00.000Z`,
         employeeIds: [14, 1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[1]).toEqual({
@@ -812,7 +840,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T09:00:00.000Z`,
         employeeIds: [1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[2]).toEqual({
@@ -825,7 +853,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T09:30:00.000Z`,
         employeeIds: [1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[3]).toEqual({
@@ -838,7 +866,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T10:30:00.000Z`,
         employeeIds: [1, 3],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[4]).toEqual({
@@ -851,7 +879,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T16:30:00.000Z`,
         employeeIds: [3],
         serviceId: 43,
-      }
+      },
     });
   });
 
@@ -867,16 +895,16 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T06:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T06:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T06:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:30:00.000Z`)
-              }
-            ]
-          }
-        ]
-      }
+                endTime: dayjs(`2025-07-28T07:30:00.000Z`),
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const timeSlotsDataForSecondService: DayWithTimeSlots[] = [
@@ -890,21 +918,21 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T09:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T10:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:30:00.000Z`)
-              }
-            ]
-          }
-        ]
-      }
+                endTime: dayjs(`2025-07-28T10:30:00.000Z`),
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const result = combineAndFilterTimeSlotsDataFromTwoServices(
       timeSlotsDataForFirstService,
-      timeSlotsDataForSecondService
+      timeSlotsDataForSecondService,
     );
 
     expect(result).toHaveLength(1);
@@ -924,81 +952,81 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T06:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T06:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T06:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T06:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T12:30:00.000Z`)
-              }
-            ]
+                endTime: dayjs(`2025-07-28T12:30:00.000Z`),
+              },
+            ],
           },
           {
             employeeId: 1,
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T10:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T10:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T11:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T11:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T11:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T11:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T11:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T11:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T12:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T12:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T12:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T12:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T13:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T13:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T13:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T13:30:00.000Z`)
-              }
-            ]
-          }
-        ]
-      }
+                endTime: dayjs(`2025-07-28T13:30:00.000Z`),
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const timeSlotsDataForSecondService: DayWithTimeSlots[] = [
@@ -1012,110 +1040,110 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T06:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T06:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T06:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T06:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T07:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T07:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T07:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T12:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T12:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T13:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T13:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T13:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T13:30:00.000Z`)
-              }
-            ]
+                endTime: dayjs(`2025-07-28T13:30:00.000Z`),
+              },
+            ],
           },
           {
             employeeId: 1,
             availableTimeSlots: [
               {
                 startTime: dayjs(`2025-07-28T08:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T08:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T08:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T08:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T09:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T09:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T09:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T10:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T10:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T10:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T10:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T11:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T11:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T11:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T11:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T11:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T11:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T12:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T12:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T12:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T12:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T12:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T13:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T13:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T13:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T13:30:00.000Z`)
+                endTime: dayjs(`2025-07-28T13:30:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T13:30:00.000Z`),
-                endTime: dayjs(`2025-07-28T14:00:00.000Z`)
+                endTime: dayjs(`2025-07-28T14:00:00.000Z`),
               },
               {
                 startTime: dayjs(`2025-07-28T14:00:00.000Z`),
-                endTime: dayjs(`2025-07-28T14:30:00.000Z`)
-              }
-            ]
-          }
-        ]
-      }
+                endTime: dayjs(`2025-07-28T14:30:00.000Z`),
+              },
+            ],
+          },
+        ],
+      },
     ];
 
     const result = combineAndFilterTimeSlotsDataFromTwoServices(
       timeSlotsDataForFirstService,
-      timeSlotsDataForSecondService
+      timeSlotsDataForSecondService,
     );
 
     expect(result).toHaveLength(1);
@@ -1132,7 +1160,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T08:30:00.000Z`,
         employeeIds: [14, 1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[1]).toEqual({
@@ -1145,7 +1173,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T09:00:00.000Z`,
         employeeIds: [14, 1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[2]).toEqual({
@@ -1158,7 +1186,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T09:30:00.000Z`,
         employeeIds: [14, 1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[3]).toEqual({
@@ -1171,7 +1199,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T10:00:00.000Z`,
         employeeIds: [1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[4]).toEqual({
@@ -1184,7 +1212,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T10:30:00.000Z`,
         employeeIds: [1],
         serviceId: 43,
-      }
+      },
     });
 
     expect(result[0].availableTimeSlots[12]).toEqual({
@@ -1197,7 +1225,7 @@ describe(`combineAndFilterTimeSlotsDataFromTwoServices`, () => {
         endTime: `2025-07-28T14:30:00.000Z`,
         employeeIds: [1],
         serviceId: 43,
-      }
+      },
     });
 
     for (let i = 1; i < result[0].availableTimeSlots.length; i++) {
@@ -1223,7 +1251,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
               endTime: `2025-07-28T08:30:00.000Z`,
               employeeIds: [14, 1],
               serviceId: 43,
-            }
+            },
           },
           {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time
@@ -1235,7 +1263,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
               endTime: `2025-07-28T08:30:00.000Z`,
               employeeIds: [14, 1],
               serviceId: 43,
-            }
+            },
           },
           {
             startTime: `2025-07-28T06:30:00.000Z`, // 08:30 German time
@@ -1247,10 +1275,10 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
               endTime: `2025-07-28T09:00:00.000Z`,
               employeeIds: [1],
               serviceId: 43,
-            }
-          }
-        ]
-      }
+            },
+          },
+        ],
+      },
     ];
 
     const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
@@ -1276,7 +1304,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
     expect(result[0].availableTimeslots[1].secondService!.employeeIds).toEqual([1]);
   });
 
-    it(`should handle empty input`, () => {
+  it(`should handle empty input`, () => {
     const filteredTimeSlotsData: any[] = [];
 
     const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
@@ -1299,10 +1327,10 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
               endTime: `2025-07-28T08:30:00.000Z`,
               employeeIds: [1],
               serviceId: 43,
-            }
-          }
-        ]
-      }
+            },
+          },
+        ],
+      },
     ];
 
     const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
@@ -1333,7 +1361,7 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
               endTime: `2025-07-28T09:30:00.000Z`,
               employeeIds: [1],
               serviceId: 43,
-            }
+            },
           },
           {
             startTime: `2025-07-28T06:00:00.000Z`, // 08:00 German time
@@ -1345,10 +1373,10 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
               endTime: `2025-07-28T08:30:00.000Z`,
               employeeIds: [14],
               serviceId: 43,
-            }
-          }
-        ]
-      }
+            },
+          },
+        ],
+      },
     ];
 
     const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
@@ -1397,9 +1425,9 @@ describe(`generateGroupedTimeSlotsForTwoServices`, () => {
             endTime: `2025-07-28T07:00:00.000Z`,
             employeeIds: [14],
             serviceId: 1,
-          }
-        ]
-      }
+          },
+        ],
+      },
     ];
 
     const result = generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
@@ -1436,14 +1464,14 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               {
                 // Start time 19:09:18 should be rounded up to 19:15:00
                 minPossibleStartTime: dayjs.utc(`2025-07-29T19:09:18.673Z`),
-                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`)
-              }
-            ]
-          }
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
+              },
+            ],
+          },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
-        serviceId: 1
-      }
+        serviceId: 1,
+      },
     ];
 
     const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
@@ -1483,14 +1511,14 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               {
                 // 19:22:30 should round to 19:30:00
                 minPossibleStartTime: dayjs.utc(`2025-07-29T19:22:30.000Z`),
-                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`)
-              }
-            ]
-          }
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
+              },
+            ],
+          },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
-        serviceId: 1
-      }
+        serviceId: 1,
+      },
     ];
 
     const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
@@ -1520,14 +1548,14 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               {
                 // 19:37:22 should round to 19:45:00
                 minPossibleStartTime: dayjs.utc(`2025-07-29T19:37:22.000Z`),
-                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`)
-              }
-            ]
-          }
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
+              },
+            ],
+          },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
-        serviceId: 1
-      }
+        serviceId: 1,
+      },
     ];
 
     const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
@@ -1541,10 +1569,10 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
     expect(slots[0].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
 
     // Second slot: 20:00-20:30 (standard 30 minutes)
-      expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
-      expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
-      expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
-      expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`21:00:00`);
+    expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+    expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+    expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`21:00:00`);
   });
 
   it(`should handle time already at :00 boundary - standard slots`, () => {
@@ -1561,14 +1589,14 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               {
                 // Already at :00 boundary
                 minPossibleStartTime: dayjs.utc(`2025-07-29T19:00:00.000Z`),
-                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:00:00.000Z`)
-              }
-            ]
-          }
+                maxPossibleStartTime: dayjs.utc(`2025-07-29T20:00:00.000Z`),
+              },
+            ],
+          },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
-        serviceId: 1
-      }
+        serviceId: 1,
+      },
     ];
 
     const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);

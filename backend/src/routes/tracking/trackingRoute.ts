@@ -19,10 +19,10 @@ router.get(`/stats`, async (request: CustomRequestType, response: CustomResponse
 
     response.json({
       message: `QR scan stats retrieved successfully`,
-      data: stats
+      data: stats,
     });
   } catch (error) {
-    console.error('Error getting QR scan stats:', error);
+    console.error(`Error getting QR scan stats:`, error);
     response.status(500).json({ error: `Error getting QR scan stats` });
   }
 });

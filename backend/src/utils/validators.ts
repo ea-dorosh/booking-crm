@@ -20,7 +20,7 @@ const validateEmail = (email: string) => {
  * @returns true if the phone number is valid, false otherwise
  */
 const validatePhone = (phoneNumber: string) => {
-  if (!phone(phoneNumber, {country: `DE`}).isValid) {
+  if (!phone(phoneNumber, { country: `DE` }).isValid) {
     if (!phone(phoneNumber).isValid) {
       return false;
     }

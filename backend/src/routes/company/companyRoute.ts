@@ -3,7 +3,7 @@ import {
   getCompany,
   createCompany,
   updateCompanyData,
- } from '@/services/company/companyService.js';
+} from '@/services/company/companyService.js';
 import {
   createCompanyBranch,
   updateCompanyBranch,
@@ -54,13 +54,15 @@ router.post(`/create-company`, async (request: CustomRequestType, response: Cust
   const company = request.body;
 
   try {
-    const { newCompanyId, validationErrors } = await createCompany(request.dbPool, company);
+    const {
+      newCompanyId, validationErrors, 
+    } = await createCompany(request.dbPool, company);
 
     if (validationErrors) {
       response.status(428).json({
-          errorMessage: `Validation failed`,
-          validationErrors,
-        });
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
     } else if (newCompanyId) {
       response.json({
         message: `Company data inserted successfully`,
@@ -68,9 +70,9 @@ router.post(`/create-company`, async (request: CustomRequestType, response: Cust
       });
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
-      if (mysqlError.code === 'ER_DUP_ENTRY') {
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
         response.status(409).json({
           errorMessage: `Company with this name already exists`,
         });
@@ -116,13 +118,15 @@ router.post(`/create-company-branch`, async (request: CustomRequestType, respons
   const companyBranch = request.body;
 
   try {
-    const { newBranchId, validationErrors } = await createCompanyBranch(request.dbPool, companyBranch);
+    const {
+      newBranchId, validationErrors, 
+    } = await createCompanyBranch(request.dbPool, companyBranch);
 
     if (validationErrors) {
       response.status(428).json({
-          errorMessage: `Validation failed`,
-          validationErrors,
-        });
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
     } else if (newBranchId) {
       response.json({
         message: `Company branch data inserted successfully`,
@@ -130,9 +134,9 @@ router.post(`/create-company-branch`, async (request: CustomRequestType, respons
       });
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
-      if (mysqlError.code === 'ER_DUP_ENTRY') {
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
         response.status(409).json({
           errorMessage: `Company with this name already exists`,
         });
@@ -179,13 +183,15 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
   const company = request.body;
 
   try {
-    const { updatedCompanyId, validationErrors } = await updateCompanyData(request.dbPool, company, companyId);
+    const {
+      updatedCompanyId, validationErrors, 
+    } = await updateCompanyData(request.dbPool, company, companyId);
 
     if (validationErrors) {
       response.status(428).json({
-          errorMessage: `Validation failed`,
-          validationErrors,
-        });
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
     } else if (updatedCompanyId) {
       response.json({
         message: `Company with id: ${updatedCompanyId} has been updated successfully`,
@@ -193,7 +199,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
       });
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {
@@ -243,7 +249,9 @@ router.put(`/edit-company-branch/:id`, async (request: CustomRequestType, respon
   const companyBranch = request.body;
 
   try {
-    const { updatedBranchId, validationErrors } = await updateCompanyBranch(request.dbPool, companyBranchId, companyBranch);
+    const {
+      updatedBranchId, validationErrors, 
+    } = await updateCompanyBranch(request.dbPool, companyBranchId, companyBranch);
 
     if (validationErrors) {
       response.status(428).json({

@@ -71,16 +71,16 @@ async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]>
     if (row.address_country) {
       address += `${row.address_country}`;
     }
-   return {
-    id: row.customer_id,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    email: row.email,
-    phone: row.phone,
-    addedDate: row.added_date,
-    lastActivityDate: row.last_activity_date,
-    address,
-  }});
+    return {
+      id: row.customer_id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      email: row.email,
+      phone: row.phone,
+      addedDate: row.added_date,
+      lastActivityDate: row.last_activity_date,
+      address,
+    }});
 
   return customersResponse;
 }
@@ -245,12 +245,18 @@ async function checkCustomerExists(dbPool: DbPoolType, params: CheckCustomerExis
     const row = customerResults[0] as { customer_id: number };
 
     if (params.customerId && row.customer_id === params.customerId) {
-      return { exists: false, customerId: null };
+      return {
+        exists: false, customerId: null, 
+      };
     }
 
-    return { exists: true, customerId: row.customer_id };
+    return {
+      exists: true, customerId: row.customer_id, 
+    };
   } else {
-    return { exists: false, customerId: null };
+    return {
+      exists: false, customerId: null, 
+    };
   }
 }
 
@@ -259,5 +265,5 @@ export {
   getCustomerById,
   createCustomer,
   updateCustomerData,
-  checkCustomerExists
+  checkCustomerExists,
 };

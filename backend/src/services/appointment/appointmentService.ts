@@ -11,9 +11,9 @@ import {
   CreateAppointmentServiceResponseErrorType,
   CreateAppointmentServiceResponseSuccessType,
   AppointmentFormDataServiceType,
- } from '@/@types/appointmentsTypes.js';
- import { CompanyResponseData } from '@/@types/companyTypes.js';
- import {
+} from '@/@types/appointmentsTypes.js';
+import { CompanyResponseData } from '@/@types/companyTypes.js';
+import {
   AppointmentStatusEnum,
   DEFAULT_APPOINTMENT_SORT_FIELD,
   CustomerNewStatusEnum,
@@ -30,7 +30,7 @@ import {
   fromMySQLToISOString,
   getServiceDuration,
   fromDayjsToMySQLDateTime,
- } from '@/utils/timeUtils.js';
+} from '@/utils/timeUtils.js';
 import {
   createGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
@@ -43,12 +43,12 @@ import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
 import {
   checkCustomerExists,
   createCustomer,
- } from '@/services/customer/customerService.js';
- import { validateCustomerData } from '@/validators/customersValidators.js';
- import { dayjs } from '@/services/dayjs/dayjsService.js';
- import { getAppointmentEndTime } from '../calendar/calendarUtils.js';
- import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
- import {
+} from '@/services/customer/customerService.js';
+import { validateCustomerData } from '@/validators/customersValidators.js';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { getAppointmentEndTime } from '../calendar/calendarUtils.js';
+import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
+import {
   formatName,
   formatPhone,
 } from '@/utils/formatters.js';
@@ -66,55 +66,57 @@ interface GetAppointmentsOptions {
 async function getAppointments(
   dbPool: Pool,
   options: GetAppointmentsOptions | Date_ISO_Type,
-  legacyStatus?: AppointmentStatusEnum | null
+  legacyStatus?: AppointmentStatusEnum | null,
 ): Promise<AppointmentDataType[]> {
 
   // Handle backward compatibility with old function signature
   let finalOptions: GetAppointmentsOptions;
-  if (typeof options === 'string') {
+  if (typeof options === `string`) {
     finalOptions = {
       startDate: options,
       status: legacyStatus || null,
       sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
-      sortOrder: 'asc'
+      sortOrder: `asc`,
     };
   } else {
     finalOptions = {
       sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
-      sortOrder: 'asc',
-      ...options
+      sortOrder: `asc`,
+      ...options,
     };
   }
 
-  const { startDate, endDate, status, employeeId, sortBy, sortOrder } = finalOptions;
+  const {
+    startDate, endDate, status, employeeId, sortBy, sortOrder, 
+  } = finalOptions;
 
   // Build dynamic WHERE clause
-  const whereConditions: string[] = ['date >= ?'];
+  const whereConditions: string[] = [`date >= ?`];
   const queryParams: any[] = [startDate];
 
   if (endDate) {
-    whereConditions.push('date <= ?');
+    whereConditions.push(`date <= ?`);
     queryParams.push(endDate);
   }
 
   if (status !== null && status !== undefined) {
-    whereConditions.push('status = ?');
+    whereConditions.push(`status = ?`);
     queryParams.push(status);
   }
 
-    if (employeeId !== null && employeeId !== undefined) {
-    whereConditions.push('employee_id = ?');
+  if (employeeId !== null && employeeId !== undefined) {
+    whereConditions.push(`employee_id = ?`);
     queryParams.push(employeeId);
   }
 
   // Build ORDER BY clause
-  const orderByColumn = sortBy === 'created_date' ? 'created_date' : 'date';
-  const orderDirection = sortOrder === 'desc' ? 'DESC' : 'ASC';
+  const orderByColumn = sortBy === `created_date` ? `created_date` : `date`;
+  const orderDirection = sortOrder === `desc` ? `DESC` : `ASC`;
 
   const sql = `
     SELECT *
     FROM SavedAppointments
-    WHERE ${whereConditions.join(' AND ')}
+    WHERE ${whereConditions.join(` AND `)}
     ORDER BY ${orderByColumn} ${orderDirection}
   `;
 
@@ -198,19 +200,19 @@ async function getAppointmentsForCalendar(
   dbPool: Pool,
   dates: Date_ISO_Type[],
   employeeIds: number[],
-  status: AppointmentStatusEnum
+  status: AppointmentStatusEnum,
 ): Promise<AppointmentDataType[]> {
   const savedAppointmentsQuery = `
     SELECT * FROM SavedAppointments
-    WHERE date IN (${dates.map(() => '?').join(',')})
-    AND employee_id IN (${employeeIds.map(() => '?').join(',')})
+    WHERE date IN (${dates.map(() => `?`).join(`,`)})
+    AND employee_id IN (${employeeIds.map(() => `?`).join(`,`)})
     AND status = ?
   `;
 
   const [appointmentResults] = await dbPool.query<AppointmentRowType[]>(savedAppointmentsQuery, [
     ...dates,
     ...employeeIds,
-    status
+    status,
   ]);
 
   const appointmentsData: AppointmentDataType[] = appointmentResults.map((row) => {
@@ -332,7 +334,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     company,
   });
 
-  if ('errorMessage' in firstSavedAppointment || !firstSavedAppointment) {
+  if (`errorMessage` in firstSavedAppointment || !firstSavedAppointment) {
     return firstSavedAppointment;
   }
 
@@ -354,7 +356,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     });
   }
 
-  if (secondSavedAppointment !== null && 'errorMessage' in secondSavedAppointment) {
+  if (secondSavedAppointment !== null && `errorMessage` in secondSavedAppointment) {
     return secondSavedAppointment;
   }
 
@@ -370,7 +372,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
         timeStart: firstSavedAppointment.timeStartUTC,
         timeEnd: firstSavedAppointment.timeEndUTC,
         location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
-      }
+      },
     );
 
     if (googleEventId) {
@@ -398,7 +400,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
           timeStart: secondSavedAppointment.timeStartUTC,
           timeEnd: secondSavedAppointment.timeEndUTC,
           location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
-        }
+        },
       );
 
       if (googleEventId) {
@@ -427,8 +429,8 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
         email: appointment.email,
       },
       firstServiceData:{
-        date:  dayjs.tz(`${appointment.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
-        time: dayjs.tz(firstSavedAppointment.timeStartUTC, 'Europe/Berlin').format('HH:mm'),
+        date:  dayjs.tz(`${appointment.date} 12:00:00`, `Europe/Berlin`).format(`DD.MM.YYYY`),
+        time: dayjs.tz(firstSavedAppointment.timeStartUTC, `Europe/Berlin`).format(`HH:mm`),
         service: firstSavedAppointment.serviceName,
         specialist: `${employee.firstName} ${employee.lastName}`,
       },
@@ -437,8 +439,8 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
 
     if (secondSavedAppointment) {
       confirmationEmailPayload.secondServiceData = {
-        date: dayjs.tz(`${appointment.date} 12:00:00`, 'Europe/Berlin').format('DD.MM.YYYY'),
-        time: dayjs.tz(secondSavedAppointment.timeStartUTC, 'Europe/Berlin').format('HH:mm'),
+        date: dayjs.tz(`${appointment.date} 12:00:00`, `Europe/Berlin`).format(`DD.MM.YYYY`),
+        time: dayjs.tz(secondSavedAppointment.timeStartUTC, `Europe/Berlin`).format(`HH:mm`),
         service: secondSavedAppointment.serviceName,
         specialist: `${employee.firstName} ${employee.lastName}`,
       }
@@ -514,7 +516,7 @@ const saveAppointment = async (dbPool: Pool, {
 
     serviceDurationAndBufferTimeInMinutes = getServiceDuration(
       serviceDetails.durationTime,
-      serviceDetails.bufferTime
+      serviceDetails.bufferTime,
     );
   } catch (error) {
     return {
@@ -526,7 +528,7 @@ const saveAppointment = async (dbPool: Pool, {
   const timeStartUTC = dayjs.tz(`${date} ${service.startTime}`, `Europe/Berlin`).utc();
   const timeEndUTC = getAppointmentEndTime(
     timeStartUTC,
-    serviceDurationAndBufferTimeInMinutes
+    serviceDurationAndBufferTimeInMinutes,
   );
 
   console.log(`Appointment times calculated:`, {
@@ -610,7 +612,7 @@ const saveAppointment = async (dbPool: Pool, {
     serviceName,
     serviceDurationAndBufferTimeInMinutes,
     timeStartUTC,
-    timeEndUTC
+    timeEndUTC,
   }
 }
 

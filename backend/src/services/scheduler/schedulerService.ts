@@ -35,12 +35,12 @@ async function getAdminEmailForDatabase(databaseName: string): Promise<string | 
       host: process.env.DB_HOST as string,
       user: process.env.DB_USER as string,
       password: process.env.DB_PASSWORD as string,
-      database: 'users_database',
+      database: `users_database`,
     });
 
     const [rows] = await usersDbPool.query<UserRow[]>(
       `SELECT id, email FROM Users WHERE database_name = ?`,
-      [databaseName]
+      [databaseName],
     );
 
     await usersDbPool.end();
@@ -123,7 +123,7 @@ export const scheduleGoogleCalendarTokenRefresh = (dbPool: Pool): void => {
                 expiredEmployeeData.push({
                   employeeId: employee.employee_id,
                   name: `${employee.first_name} ${employee.last_name}`,
-                  calendarId: integration.calendarId
+                  calendarId: integration.calendarId,
                 });
               }
             } catch (error) {
@@ -143,7 +143,7 @@ export const scheduleGoogleCalendarTokenRefresh = (dbPool: Pool): void => {
           console.log(`Could not find admin email for database: ${databaseName}`);
         }
       } else {
-        console.log('All Google Calendar integrations are valid');
+        console.log(`All Google Calendar integrations are valid`);
       }
     } catch (error) {
       console.error(`Error running Google Calendar tokens refresh task:`, error);

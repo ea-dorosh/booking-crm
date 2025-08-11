@@ -12,7 +12,7 @@ import {
   checkAllGoogleCalendarIntegrations,
   createGoogleCalendarEvent,
   markTokenAsInactive,
-  proactivelyRefreshTokens
+  proactivelyRefreshTokens,
 } from '@/services/googleCalendar/googleCalendarService.js';
 import { RowDataPacket } from 'mysql2';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
@@ -37,10 +37,10 @@ router.get(`/auth-url`, (req: CustomRequestType, res: CustomResponseType) => {
     let finalAuthUrl = authUrl;
 
     // Add device params only in development environment
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== `production`) {
       const deviceParams: Record<string, string> = {
         device_id: `booking_crm_client_${employeeId}_${Date.now()}`,
-        device_name: `Booking CRM Client`
+        device_name: `Booking CRM Client`,
       };
 
       console.log(`Adding device params (development only):`, deviceParams);
@@ -63,15 +63,19 @@ router.post(`/auth-callback`, async (req: CustomRequestType, res: CustomResponse
     return;
   }
 
-  const { code, employeeId, calendarId } = req.body;
+  const {
+    code, employeeId, calendarId, 
+  } = req.body;
   console.log(`Received auth callback with params:`, {
     codeLength: code?.length,
     employeeId,
-    calendarId
+    calendarId,
   });
 
   if (!code || !employeeId || !calendarId) {
-    console.error(`Missing required parameters:`, { code: !!code, employeeId: !!employeeId, calendarId: !!calendarId });
+    console.error(`Missing required parameters:`, {
+      code: !!code, employeeId: !!employeeId, calendarId: !!calendarId, 
+    });
     res.status(400).json({ error: `Missing required parameters` });
     return;
   }
@@ -82,7 +86,7 @@ router.post(`/auth-callback`, async (req: CustomRequestType, res: CustomResponse
     console.log(`Received tokens:`, {
       access_token: !!tokens.access_token,
       refresh_token: !!tokens.refresh_token,
-      expiry_date: tokens.expiry_date
+      expiry_date: tokens.expiry_date,
     });
 
     if (!tokens.refresh_token) {
@@ -96,7 +100,7 @@ router.post(`/auth-callback`, async (req: CustomRequestType, res: CustomResponse
       req.dbPool,
       Number(employeeId),
       tokens.refresh_token,
-      calendarId
+      calendarId,
     );
     console.log(`Successfully saved credentials to database`);
 
@@ -127,7 +131,7 @@ router.get(`/:employeeId/google-calendar-status`, async (req: CustomRequestType,
         lastUsed: credentials.lastUsedAt,
         errorCount: credentials.errorCount,
         lastError: credentials.lastError,
-        needsReconnection: !credentials.isActive || (credentials.errorCount && credentials.errorCount >= 3)
+        needsReconnection: !credentials.isActive || (credentials.errorCount && credentials.errorCount >= 3),
       });
       return;
     }
@@ -136,7 +140,7 @@ router.get(`/:employeeId/google-calendar-status`, async (req: CustomRequestType,
       enabled: false,
       calendarId: null,
       tokenExpired: false,
-      needsReconnection: false
+      needsReconnection: false,
     });
   } catch (error) {
     console.error(`Error checking Google Calendar status:`, error);
@@ -154,7 +158,7 @@ router.delete(`/:employeeId/google-calendar`, async (req: CustomRequestType, res
 
   try {
     // Mark as inactive instead of deleting completely
-    await markTokenAsInactive(req.dbPool, employeeId, 'Manually disconnected by user');
+    await markTokenAsInactive(req.dbPool, employeeId, `Manually disconnected by user`);
     res.json({ success: true });
   } catch (error) {
     console.error(`Error removing Google Calendar integration:`, error);
@@ -175,7 +179,7 @@ router.post(`/proactive-refresh`, async (req: CustomRequestType, res: CustomResp
     res.json({
       success: true,
       message: `Proactive token refresh completed`,
-      result
+      result,
     });
   } catch (error) {
     console.error(`Error running proactive token refresh:`, error);
@@ -212,8 +216,8 @@ router.get(`/integration-stats`, async (req: CustomRequestType, res: CustomRespo
         inactive: Number(stats.inactive),
         problematic: Number(stats.problematic),
         averageErrorCount: Number(stats.avg_error_count || 0).toFixed(2),
-        lastActivity: stats.last_activity
-      }
+        lastActivity: stats.last_activity,
+      },
     });
   } catch (error) {
     console.error(`Error getting integration stats:`, error);
@@ -235,7 +239,7 @@ router.post(`/check-all-integrations`, async (req: CustomRequestType, res: Custo
       success: true,
       message: `Manual check of all Google Calendar integrations completed`,
       expiredCount: expiredIntegrations.length,
-      expiredIntegrations
+      expiredIntegrations,
     });
   } catch (error) {
     console.error(`Error running manual check of Google Calendar integrations:`, error);
@@ -262,7 +266,7 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
     try {
       const oauth2Client = getOAuth2Client();
       oauth2Client.setCredentials({
-        refresh_token: credentials.refreshToken
+        refresh_token: credentials.refreshToken,
       });
 
       await oauth2Client.getAccessToken();
@@ -270,7 +274,7 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
       if (error.message === `invalid_grant` || (error.response?.data?.error === `invalid_grant`)) {
         res.status(400).json({
           error: `Google Calendar token has expired. Please reconnect your Google Calendar.`,
-          tokenExpired: true
+          tokenExpired: true,
         });
         return;
       }
@@ -314,7 +318,7 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
     const results = {
       total: rows.length,
       synced: 0,
-      failed: 0
+      failed: 0,
     };
 
     for (const appointment of rows) {
@@ -328,8 +332,8 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
             customerName: `${appointment.customer_first_name} ${appointment.customer_last_name}`,
             serviceName: appointment.service_name,
             timeStart: dayjs.utc(appointment.time_start),
-            timeEnd: dayjs.utc(appointment.time_end)
-          }
+            timeEnd: dayjs.utc(appointment.time_end),
+          },
         );
 
         if (googleEventId) {
@@ -353,7 +357,7 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
     res.json({
       success: true,
       message: `Sync completed`,
-      results
+      results,
     });
   } catch (error) {
     console.error(`Error syncing appointments to Google Calendar:`, error);

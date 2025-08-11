@@ -8,7 +8,7 @@ import {
   getAppointments,
   getAppointment,
   cancelAppointment,
- } from '@/services/appointment/appointmentService.js';
+} from '@/services/appointment/appointmentService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 
 
@@ -126,13 +126,15 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
       appointmentData.timeStart,
       appointmentData.timeEnd,
       appointmentData.employeeId,
-      appointmentId
+      appointmentId,
     ]);
 
     if (appointment.googleCalendarEventId) {
       try {
         if (appointment.employee.id !== appointmentData.employeeId) {
-          const { deleteGoogleCalendarEvent, createGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
+          const {
+            deleteGoogleCalendarEvent, createGoogleCalendarEvent, 
+          } = await import(`@/services/googleCalendar/googleCalendarService.js`);
 
           await deleteGoogleCalendarEvent(request.dbPool, appointment.employee.id, appointment.googleCalendarEventId);
 
@@ -147,7 +149,7 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
               timeStart: appointmentData.timeStart,
               timeEnd: appointmentData.timeEnd,
               location: appointment.location,
-            }
+            },
           );
 
           if (newGoogleEventId) {
@@ -159,7 +161,7 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
             await request.dbPool.query(updateGoogleEventQuery, [newGoogleEventId, appointmentId]);
           }
         } else {
-          const { updateGoogleCalendarEvent } = await import('@/services/googleCalendar/googleCalendarService.js');
+          const { updateGoogleCalendarEvent } = await import(`@/services/googleCalendar/googleCalendarService.js`);
 
           await updateGoogleCalendarEvent(
             request.dbPool,
@@ -171,8 +173,8 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
               customerName: `${appointment.customer.firstName} ${appointment.customer.lastName}`,
               serviceName: appointment.serviceName,
               timeStart: appointmentData.timeStart,
-              timeEnd: appointmentData.timeEnd
-            }
+              timeEnd: appointmentData.timeEnd,
+            },
           );
         }
       } catch (error) {

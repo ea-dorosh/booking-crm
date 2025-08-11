@@ -26,7 +26,7 @@ dayjs.extend(minMax);
 
 dayjs.locale(`de`);
 dayjs.updateLocale(`de`, {
-  weekStart: 1
+  weekStart: 1,
 });
 
 export { dayjs };

@@ -12,13 +12,13 @@ const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDat
     errors.lastName = `Last name must be at least 2 characters long`;
   }
 
-  if (!employee.email || employee.email.trim() === '') {
+  if (!employee.email || employee.email.trim() === ``) {
     errors.email = `Email is required`;
   } else if (!validateEmail(employee.email)) {
     errors.email = `Invalid email address`;
   }
 
-  if (!employee.phone || employee.phone.trim() === '') {
+  if (!employee.phone || employee.phone.trim() === ``) {
     errors.phone = `Phone is required`;
   } else if (!validatePhone(employee.phone)) {
     errors.phone = `Invalid phone number`;

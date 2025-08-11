@@ -65,7 +65,7 @@ export const getOAuth2Client = () => {
   console.log(`Creating OAuth2 client with:`, {
     clientId: clientId ? `${clientId.substring(0, 10)}...` : null,
     hasSecret: !!clientSecret,
-    redirectUri
+    redirectUri,
   });
 
   if (!clientId || !clientSecret || !redirectUri) {
@@ -75,7 +75,7 @@ export const getOAuth2Client = () => {
   return new google.auth.OAuth2(
     clientId,
     clientSecret,
-    redirectUri
+    redirectUri,
   );
 };
 
@@ -88,7 +88,7 @@ export const getAuthUrl = () => {
     clientId: clientId ? `${clientId.substring(0, 15)}...` : `missing`,
     clientSecret: clientSecret ? `set` : `missing`,
     redirectUri,
-    isDesktopApp: clientId?.includes(`m3i6sqp1clt5`)
+    isDesktopApp: clientId?.includes(`m3i6sqp1clt5`),
   });
 
   if (!clientId || !clientSecret || !redirectUri) {
@@ -102,14 +102,14 @@ export const getAuthUrl = () => {
     `https://www.googleapis.com/auth/calendar.events`,
     `https://www.googleapis.com/auth/calendar.readonly`,
     `https://www.googleapis.com/auth/userinfo.profile`,
-    `https://www.googleapis.com/auth/userinfo.email`
+    `https://www.googleapis.com/auth/userinfo.email`,
   ];
 
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: `offline`,
     scope: scopes,
     prompt: `consent`,
-    include_granted_scopes: true
+    include_granted_scopes: true,
   });
 
   console.log(`Generated auth URL:`, authUrl);
@@ -128,13 +128,13 @@ export const saveEmployeeGoogleCalendarCredentials = async (
   employeeId: number,
   refreshToken: string,
   calendarId: string,
-  googleEmail?: string
+  googleEmail?: string,
 ): Promise<void> => {
   console.log(`Saving Google Calendar credentials:`, {
     employeeId,
     refreshTokenLength: refreshToken.length,
     calendarId,
-    googleEmail
+    googleEmail,
   });
 
   try {
@@ -145,7 +145,9 @@ export const saveEmployeeGoogleCalendarCredentials = async (
         const oauth2Client = getOAuth2Client();
         oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-        const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+        const oauth2 = google.oauth2({
+          version: `v2`, auth: oauth2Client, 
+        });
         const userInfo = await oauth2.userinfo.get();
         userEmail = userInfo.data.email || undefined;
         console.log(`Retrieved user email from Google:`, userEmail);
@@ -182,14 +184,14 @@ export const saveEmployeeGoogleCalendarCredentials = async (
       employeeId,
       refreshTokenTruncated: refreshToken.substring(0, 10) + `...`,
       calendarId,
-      googleEmail: userEmail
+      googleEmail: userEmail,
     });
 
     const result = await dbPool.query(query, [
       employeeId,
       refreshToken,
       calendarId,
-      userEmail
+      userEmail,
     ]);
 
     console.log(`Query executed successfully:`, result);
@@ -201,7 +203,7 @@ export const saveEmployeeGoogleCalendarCredentials = async (
 
 export const getEmployeeGoogleCalendarCredentials = async (
   dbPool: Pool,
-  employeeId: number
+  employeeId: number,
 ): Promise<GoogleCalendarCredentials | null> => {
   const query = `
     SELECT
@@ -234,7 +236,7 @@ export const getEmployeeGoogleCalendarCredentials = async (
     errorCount: row.error_count,
     lastError: row.last_error || undefined,
     googleEmail: row.google_email || undefined,
-    expiresAt: row.expires_at ? new Date(row.expires_at) : undefined
+    expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
   };
 };
 
@@ -242,7 +244,7 @@ export const updateTokenStatus = async (
   dbPool: Pool,
   employeeId: number,
   isSuccess: boolean,
-  error?: string
+  error?: string,
 ): Promise<void> => {
   try {
     if (isSuccess) {
@@ -279,7 +281,7 @@ export const updateTokenStatus = async (
 export const markTokenAsInactive = async (
   dbPool: Pool,
   employeeId: number,
-  reason: string
+  reason: string,
 ): Promise<void> => {
   try {
     const query = `
@@ -300,7 +302,7 @@ export const markTokenAsInactive = async (
 export const getEmployeeCalendarClient = async (
   dbPool: Pool,
   employeeId: number,
-  retryCount: number = 0
+  retryCount: number = 0,
 ): Promise<{
   calendarClient: any;
   calendarId: string;
@@ -319,13 +321,13 @@ export const getEmployeeCalendarClient = async (
     // If too many errors, don't retry
     if (credentials.errorCount && credentials.errorCount >= 5) {
       console.log(`Too many errors for employee ${employeeId}, marking as inactive`);
-      await markTokenAsInactive(dbPool, employeeId, 'Too many consecutive errors');
+      await markTokenAsInactive(dbPool, employeeId, `Too many consecutive errors`);
       return null;
     }
 
     const oauth2Client = getOAuth2Client();
     oauth2Client.setCredentials({
-      refresh_token: credentials.refreshToken
+      refresh_token: credentials.refreshToken,
     });
 
     try {
@@ -336,20 +338,22 @@ export const getEmployeeCalendarClient = async (
       await updateTokenStatus(dbPool, employeeId, true);
 
       return {
-        calendarClient: google.calendar({ version: `v3`, auth: oauth2Client }),
+        calendarClient: google.calendar({
+          version: `v3`, auth: oauth2Client, 
+        }),
         calendarId: credentials.calendarId,
-        credentials
+        credentials,
       };
     } catch (authError: any) {
       console.error(`Error refreshing access token for employee ${employeeId}:`, authError.message);
 
-      const errorMessage = authError.message || 'Unknown error';
+      const errorMessage = authError.message || `Unknown error`;
       const isInvalidGrant = errorMessage === `invalid_grant` ||
                            (authError.response?.data?.error === `invalid_grant`);
 
       if (isInvalidGrant) {
         console.log(`Invalid grant error for employee ${employeeId} - token likely revoked`);
-        await markTokenAsInactive(dbPool, employeeId, 'Token revoked or expired (invalid_grant)');
+        await markTokenAsInactive(dbPool, employeeId, `Token revoked or expired (invalid_grant)`);
         return null;
       }
 
@@ -358,10 +362,10 @@ export const getEmployeeCalendarClient = async (
 
       // Retry once for transient errors
       if (retryCount === 0 && (
-        errorMessage.includes('network') ||
-        errorMessage.includes('timeout') ||
-        errorMessage.includes('503') ||
-        errorMessage.includes('502')
+        errorMessage.includes(`network`) ||
+        errorMessage.includes(`timeout`) ||
+        errorMessage.includes(`503`) ||
+        errorMessage.includes(`502`)
       )) {
         console.log(`Retrying token refresh for employee ${employeeId} due to transient error`);
         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
@@ -374,7 +378,7 @@ export const getEmployeeCalendarClient = async (
     console.error(`Error getting Google Calendar client for employee ID: ${employeeId}`, error);
 
     // Update error status
-    if (error.message !== 'invalid_grant') {
+    if (error.message !== `invalid_grant`) {
       await updateTokenStatus(dbPool, employeeId, false, error.message);
     }
 
@@ -394,7 +398,9 @@ export const checkGoogleCalendarAvailability = async (
     return true;
   }
 
-  const { calendarClient, calendarId } = calendarData;
+  const {
+    calendarClient, calendarId, 
+  } = calendarData;
 
   const startOfDay = startTime.startOf(`day`).toISOString();
   const endOfDay = startTime.endOf(`day`).toISOString();
@@ -408,7 +414,7 @@ export const checkGoogleCalendarAvailability = async (
     expandedSearch: {
       dayStart: startOfDay,
       dayEnd: endOfDay,
-    }
+    },
   });
 
   try {
@@ -438,7 +444,7 @@ export const checkGoogleCalendarAvailability = async (
         console.log(`Checking event:`, {
           summary: event.summary,
           start: eventStart.toISOString(),
-          end: eventEnd.toISOString()
+          end: eventEnd.toISOString(),
         });
 
         const overlaps = (requestStart.isBefore(eventEnd) && requestEnd.isAfter(eventStart));
@@ -462,7 +468,7 @@ export const checkGoogleCalendarAvailability = async (
         status: error.response.status,
         data: error.response.data,
         requestUrl: error.config.url,
-        params: error.config.params
+        params: error.config.params,
       });
     }
 
@@ -501,7 +507,9 @@ export const createGoogleCalendarEvent = async (
     return null;
   }
 
-  const { calendarClient, calendarId } = calendarDataFirstAppointment;
+  const {
+    calendarClient, calendarId, 
+  } = calendarDataFirstAppointment;
 
   console.log(`Creating Google Calendar event:`, {
     calendarId,
@@ -539,7 +547,7 @@ export const createGoogleCalendarEvent = async (
     if (error.response) {
       console.error(`Error details:`, {
         status: error.response.status,
-        data: error.response.data
+        data: error.response.data,
       });
     }
 
@@ -559,7 +567,7 @@ export const updateGoogleCalendarEvent = async (
     timeStart: dayjs.Dayjs;
     timeEnd: dayjs.Dayjs;
     location?: string;
-  }
+  },
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
 
@@ -567,7 +575,9 @@ export const updateGoogleCalendarEvent = async (
     return false;
   }
 
-  const { calendarClient, calendarId } = calendarData;
+  const {
+    calendarClient, calendarId, 
+  } = calendarData;
 
   const startDateTime = appointment.timeStart.toISOString();
   const endDateTime = appointment.timeEnd.toISOString();
@@ -577,7 +587,7 @@ export const updateGoogleCalendarEvent = async (
     eventId,
     summary: `${appointment.serviceName} - ${appointment.customerName}`,
     startTime: startDateTime,
-    endTime: endDateTime
+    endTime: endDateTime,
   });
 
   const event: GoogleEvent = {
@@ -609,7 +619,7 @@ export const updateGoogleCalendarEvent = async (
     if (error.response) {
       console.error(`Error details:`, {
         status: error.response.status,
-        data: error.response.data
+        data: error.response.data,
       });
     }
 
@@ -620,7 +630,7 @@ export const updateGoogleCalendarEvent = async (
 export const deleteGoogleCalendarEvent = async (
   dbPool: Pool,
   employeeId: number,
-  eventId: string
+  eventId: string,
 ): Promise<boolean> => {
   const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
 
@@ -629,11 +639,13 @@ export const deleteGoogleCalendarEvent = async (
     return false;
   }
 
-  const { calendarClient, calendarId } = calendarData;
+  const {
+    calendarClient, calendarId, 
+  } = calendarData;
 
   console.log(`Deleting Google Calendar event:`, {
     calendarId,
-    eventId
+    eventId,
   });
 
   try {
@@ -650,7 +662,7 @@ export const deleteGoogleCalendarEvent = async (
     if (error.response) {
       console.error(`Error details:`, {
         status: error.response.status,
-        data: error.response.data
+        data: error.response.data,
       });
     }
 
@@ -671,7 +683,9 @@ export const getGoogleCalendarEventsForSpecificDates = async (
       return null;
     }
 
-    const { calendarClient, calendarId } = calendarData;
+    const {
+      calendarClient, calendarId, 
+    } = calendarData;
 
     if (dates.length === 0) {
       return [];
@@ -681,8 +695,8 @@ export const getGoogleCalendarEventsForSpecificDates = async (
     const minDate = sortedDates[0];
     const maxDate = sortedDates[sortedDates.length - 1];
 
-    const startDateUtc = dayjs.utc(minDate).startOf('day');
-    const endDateUtc = dayjs.utc(maxDate).endOf('day');
+    const startDateUtc = dayjs.utc(minDate).startOf(`day`);
+    const endDateUtc = dayjs.utc(maxDate).endOf(`day`);
 
     console.log(`Fetching Google Calendar events for employee ${employeeId} for specific dates:`, {
       calendarId,
@@ -725,11 +739,11 @@ export const getGoogleCalendarEventsForSpecificDates = async (
         return {
           start: startDateTime,
           end: endDateTime,
-          summary: event.summary || `Busy`
+          summary: event.summary || `Busy`,
         };
       });
 
-    console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId} on requested dates: ${dates.join(', ')}`);
+    console.log(`Found ${events.length} events in Google Calendar for employee ${employeeId} on requested dates: ${dates.join(`, `)}`);
     return events;
   } catch (error: any) {
     console.error(`Error fetching Google Calendar events for employee ${employeeId}:`, error.message);
@@ -739,7 +753,7 @@ export const getGoogleCalendarEventsForSpecificDates = async (
 
 export const removeEmployeeGoogleCalendarCredentials = async (
   dbPool: Pool,
-  employeeId: number
+  employeeId: number,
 ): Promise<boolean> => {
   try {
     const query = `
@@ -756,7 +770,7 @@ export const removeEmployeeGoogleCalendarCredentials = async (
 };
 
 export const proactivelyRefreshTokens = async (
-  dbPool: Pool
+  dbPool: Pool,
 ): Promise<{ refreshed: number; failed: number; inactive: number }> => {
   try {
     console.log(`Starting proactive token refresh...`);
@@ -799,15 +813,19 @@ export const proactivelyRefreshTokens = async (
 
     console.log(`Proactive refresh completed: ${refreshed} refreshed, ${failed} failed, ${inactive} marked inactive`);
 
-    return { refreshed, failed, inactive };
+    return {
+      refreshed, failed, inactive, 
+    };
   } catch (error: any) {
     console.error(`Error in proactive token refresh:`, error);
-    return { refreshed: 0, failed: 0, inactive: 0 };
+    return {
+      refreshed: 0, failed: 0, inactive: 0, 
+    };
   }
 };
 
 export const checkAllGoogleCalendarIntegrations = async (
-  dbPool: Pool
+  dbPool: Pool,
 ): Promise<{ employeeId: number; calendarId: string }[]> => {
   try {
     const query = `
@@ -825,7 +843,7 @@ export const checkAllGoogleCalendarIntegrations = async (
     for (const row of rows) {
       problematicIntegrations.push({
         employeeId: row.employee_id,
-        calendarId: row.calendar_id
+        calendarId: row.calendar_id,
       });
     }
 

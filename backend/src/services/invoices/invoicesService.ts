@@ -15,7 +15,7 @@ import {
   InvoiceFormDataValidationErrors,
   InvoiceItemsData,
   InvoiceItemsRequestRow,
- } from '@/@types/invoicesTypes.js';
+} from '@/@types/invoicesTypes.js';
 import { validateInvoiceFormData } from '@/validators/invoicesValidators.js';
 import { getDueDate, toMySQLDate } from '@/utils/timeUtils.js';
 import { parseNumberWithComma } from '@/utils/formatters.js';
@@ -43,8 +43,8 @@ async function getInvoices(dbPool: DbPoolType): Promise<InvoiceResponseData[]> {
       lastName: customers.find(customer => customer.id === row.client_id)?.lastName || ``,
     },
     invoiceNumber: row.invoice_number,
-    dateIssued: dayjs.tz(row.date_issued, 'Europe/Berlin').format('YYYY-MM-DD'),
-    dueDate: dayjs.tz(row.due_date, 'Europe/Berlin').format('YYYY-MM-DD'),
+    dateIssued: dayjs.tz(row.date_issued, `Europe/Berlin`).format(`YYYY-MM-DD`),
+    dueDate: dayjs.tz(row.due_date, `Europe/Berlin`).format(`YYYY-MM-DD`),
     status: row.status,
     subtotal: row.subtotal,
     taxes: row.taxes,
@@ -106,8 +106,8 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
       website: row.company_website,
     },
     invoiceNumber: row.invoice_number,
-    dateIssued: dayjs.tz(row.date_issued, 'Europe/Berlin').format(`YYYY-MM-DD`),
-    dueDate: dayjs.tz(row.due_date, 'Europe/Berlin').format(`YYYY-MM-DD`),
+    dateIssued: dayjs.tz(row.date_issued, `Europe/Berlin`).format(`YYYY-MM-DD`),
+    dueDate: dayjs.tz(row.due_date, `Europe/Berlin`).format(`YYYY-MM-DD`),
     status: row.status,
     subtotal: row.subtotal,
     taxes: row.taxes,
@@ -146,7 +146,9 @@ async function geInvoiceById(dbPool: DbPoolType, invoiceId: string): Promise<Inv
 
 async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData): Promise<CreateInvoiceResult> {
   if (invoiceData.isNewCustomer && invoiceData.email) {
-    const checkCustomerResult = await checkCustomerExists(dbPool, {email: invoiceData.email, customerId: null});
+    const checkCustomerResult = await checkCustomerExists(dbPool, {
+      email: invoiceData.email, customerId: null,
+    });
 
     if (checkCustomerResult.exists) {
       return {
@@ -213,7 +215,9 @@ async function createInvoice(dbPool: DbPoolType, invoiceData: InvoiceUpdatedData
       serviceTaxAmountSum: acc.serviceTaxAmountSum + serviceTaxAmount,
       serviceTotalAmountSum: acc.serviceTotalAmountSum + serviceTotalAmount,
     };
-  }, { servicePrice: 0, servicePriceSum: 0, serviceTaxAmountSum: 0, serviceTotalAmountSum: 0 });
+  }, {
+    servicePrice: 0, servicePriceSum: 0, serviceTaxAmountSum: 0, serviceTotalAmountSum: 0, 
+  });
 
   // find the last existing invoice number in DB
   const sqlLastInvoiceNumber = `
@@ -339,7 +343,7 @@ const calculateInvoiceTotals = (invoiceDataService: InvoiceItemsData): InvoiceTo
     servicePrice: netPricePerUnit,
     serviceTaxRate: taxRateNum,
     serviceTaxAmount: taxTotal,
-    serviceTotalAmount: finalTotal
+    serviceTotalAmount: finalTotal,
   };
 }
 

@@ -76,13 +76,15 @@ router.post(`/create-customer`, async (request: CustomRequestType, response: Cus
   const customer = request.body;
 
   try {
-    const { newCustomerId, validationErrors } = await createCustomer(request.dbPool, customer);
+    const {
+      newCustomerId, validationErrors, 
+    } = await createCustomer(request.dbPool, customer);
 
     if (validationErrors) {
       response.status(428).json({
-          errorMessage: `Validation failed`,
-          validationErrors,
-        });
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
     } else if (newCustomerId) {
       response.json({
         message: `Customer data inserted successfully`,
@@ -90,9 +92,9 @@ router.post(`/create-customer`, async (request: CustomRequestType, response: Cus
       });
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
-      if (mysqlError.code === 'ER_DUP_ENTRY') {
+      if (mysqlError.code === `ER_DUP_ENTRY`) {
         response.status(409).json({
           errorMessage: `Customer with this email already exists`,
         });
@@ -139,13 +141,15 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
   const customer = request.body;
 
   try {
-    const { updatedCustomerId, validationErrors } = await updateCustomerData(request.dbPool, customer, customerId);
+    const {
+      updatedCustomerId, validationErrors, 
+    } = await updateCustomerData(request.dbPool, customer, customerId);
 
     if (validationErrors) {
       response.status(428).json({
-          errorMessage: `Validation failed`,
-          validationErrors,
-        });
+        errorMessage: `Validation failed`,
+        validationErrors,
+      });
     } else if (updatedCustomerId) {
       response.json({
         message: `Customer with id: ${updatedCustomerId} has been updated successfully`,
@@ -153,7 +157,7 @@ router.put(`/edit/:id`, async (request: CustomRequestType, response: CustomRespo
       });
     }
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'code' in error) {
+    if (error && typeof error === `object` && `code` in error) {
       const mysqlError = error as { code?: string; message?: string };
 
       if (mysqlError.code === `ER_DUP_ENTRY`) {

@@ -5,11 +5,11 @@ import tsparser from '@typescript-eslint/parser';
 
 export default [
   {
-    files: ['**/*.ts'],
+    files: [`**/*.ts`],
     languageOptions: {
       parser: tsparser,
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: `module`,
     },
     plugins: {
       import: importPlugin,
@@ -18,39 +18,58 @@ export default [
     rules: {
       // Enforce .js extension for relative imports in ES modules
       'import/extensions': [
-        'error',
-        'ignorePackages',
+        `error`,
+        `ignorePackages`,
         {
-          js: 'always',
-          ts: 'never',
-          tsx: 'never',
-          json: 'always'
-        }
+          js: `always`,
+          ts: `never`,
+          tsx: `never`,
+          json: `always`,
+        },
       ],
-      'import/no-unresolved': 'off',
-      'no-unused-vars': 'off',
-      'no-undef': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
+      'import/no-unresolved': `off`,
+      'no-unused-vars': `off`,
+      'no-undef': `off`,
+      '@typescript-eslint/no-unused-vars': [`warn`, {
+        argsIgnorePattern: `^_`,
+        varsIgnorePattern: `^_`,
+        caughtErrorsIgnorePattern: `^_`,
       }],
-      '@typescript-eslint/no-undef': 'off',
+      '@typescript-eslint/no-undef': `off`,
+      // Style rules aligned with frontend
+      indent: [`warn`, 2],
+      quotes: [`error`, `backtick`, {
+        avoidEscape: true,
+        allowTemplateLiterals: true,
+      }],
+      'object-curly-newline': [`error`, {
+        ObjectExpression: {
+          multiline: true,
+          minProperties: 2,
+          consistent: true,
+        },
+        ObjectPattern: {
+          multiline: true,
+          minProperties: 2,
+        },
+      }],
+      'comma-dangle': [`error`, `always-multiline`],
+      'object-curly-spacing': [`error`, `always`],
     },
     settings: {
       'import/resolver': {
         node: {
-          extensions: ['.js', '.ts', '.json']
-        }
-      }
-    }
+          extensions: [`.js`, `.ts`, `.json`],
+        },
+      },
+    },
   },
   {
-    files: ['**/enums/**/*.ts', '**/*.d.ts'],
+    files: [`**/enums/**/*.ts`, `**/*.d.ts`],
     languageOptions: {
       parser: tsparser,
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: `module`,
     },
     plugins: {
       import: importPlugin,
@@ -58,59 +77,97 @@ export default [
     },
     rules: {
       'import/extensions': [
-        'error',
-        'ignorePackages',
+        `error`,
+        `ignorePackages`,
         {
-          js: 'always',
-          ts: 'never',
-          tsx: 'never',
-          json: 'always'
-        }
+          js: `always`,
+          ts: `never`,
+          tsx: `never`,
+          json: `always`,
+        },
       ],
-      'import/no-unresolved': 'off',
-      'no-unused-vars': 'off',
-      'no-undef': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-undef': 'off',
+      'import/no-unresolved': `off`,
+      'no-unused-vars': `off`,
+      'no-undef': `off`,
+      '@typescript-eslint/no-unused-vars': `off`,
+      '@typescript-eslint/no-undef': `off`,
+      // Style rules aligned with frontend
+      indent: [`warn`, 2],
+      quotes: [`error`, `backtick`, {
+        avoidEscape: true,
+        allowTemplateLiterals: true,
+      }],
+      'object-curly-newline': [`error`, {
+        ObjectExpression: {
+          multiline: true,
+          minProperties: 2,
+          consistent: true,
+        },
+        ObjectPattern: {
+          multiline: true,
+          minProperties: 2,
+        },
+      }],
+      'comma-dangle': [`error`, `always-multiline`],
+      'object-curly-spacing': [`error`, `always`],
     },
     settings: {
       'import/resolver': {
         node: {
-          extensions: ['.js', '.ts', '.json']
-        }
-      }
-    }
+          extensions: [`.js`, `.ts`, `.json`],
+        },
+      },
+    },
   },
   {
-    files: ['**/*.js'],
+    files: [`**/*.js`],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: `module`,
     },
     plugins: {
       import: importPlugin,
     },
     rules: {
       'import/extensions': [
-        'error',
-        'ignorePackages',
+        `error`,
+        `ignorePackages`,
         {
-          js: 'always',
-          ts: 'never',
-          tsx: 'never',
-          json: 'always'
-        }
+          js: `always`,
+          ts: `never`,
+          tsx: `never`,
+          json: `always`,
+        },
       ],
-      'import/no-unresolved': 'off',
-      'no-unused-vars': 'off',
-      'no-undef': 'off',
+      'import/no-unresolved': `off`,
+      'no-unused-vars': `off`,
+      'no-undef': `off`,
+      // Style rules aligned with frontend
+      indent: [`warn`, 2],
+      quotes: [`error`, `backtick`, {
+        avoidEscape: true,
+        allowTemplateLiterals: true,
+      }],
+      'object-curly-newline': [`error`, {
+        ObjectExpression: {
+          multiline: true,
+          minProperties: 2,
+          consistent: true,
+        },
+        ObjectPattern: {
+          multiline: true,
+          minProperties: 2,
+        },
+      }],
+      'comma-dangle': [`error`, `always-multiline`],
+      'object-curly-spacing': [`error`, `always`],
     },
     settings: {
       'import/resolver': {
         node: {
-          extensions: ['.js', '.ts', '.json']
-        }
-      }
-    }
-  }
+          extensions: [`.js`, `.ts`, `.json`],
+        },
+      },
+    },
+  },
 ];
