@@ -46,8 +46,6 @@ export default function ServiceSubCategoryDetailPage() {
     updateFormErrors,
   } = useSelector(state => state.serviceSubCategories);
 
-
-
   useEffect(() => {
     const promises = [];
 
@@ -56,11 +54,7 @@ export default function ServiceSubCategoryDetailPage() {
     }
 
     if (!serviceSubCategory && !shouldShowSubCategoryForm) {
-      const storedStatus = sessionStorage.getItem(`subCategoriesStatusFilter`);
-      const statuses = storedStatus === `all`
-        ? [subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]
-        : storedStatus ? [storedStatus] : [subCategoryStatusEnum.active];
-      promises.push(dispatch(fetchServiceSubCategories(statuses)));
+      promises.push(dispatch(fetchUpdatedSubCategories()));
     } else if (shouldShowSubCategoryForm) {
       dispatch(cleanErrors());
       setIsEditMode(true);
@@ -73,6 +67,13 @@ export default function ServiceSubCategoryDetailPage() {
       dispatch(cleanErrors());
     };
   }, []);
+
+  const fetchUpdatedSubCategories = async () => {
+    const storedStatus = sessionStorage.getItem(`subCategoriesStatusFilter`);
+    const statuses = storedStatus ? [storedStatus] : [subCategoryStatusEnum.active];
+
+    await dispatch(fetchServiceSubCategories(statuses));
+  }
 
   const subCategoryHandler = async (subCategory) => {
     try {
@@ -117,22 +118,24 @@ export default function ServiceSubCategoryDetailPage() {
     if (!serviceSubCategory) return;
     const isArchived = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.archived;
     const nextStatus = isArchived ? subCategoryStatusEnum.active : subCategoryStatusEnum.archived;
+
     await dispatch(updateSubCategory({
       id: serviceSubCategory.id,
       status: nextStatus,
     }));
-    await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
+    await dispatch(fetchServiceSubCategories([`all`]));
   };
 
   const handleDeactivateToggle = async () => {
     if (!serviceSubCategory) return;
     const isDisabled = String(serviceSubCategory.status).toLowerCase() === subCategoryStatusEnum.disabled;
     const nextStatus = isDisabled ? subCategoryStatusEnum.active : subCategoryStatusEnum.disabled;
+
     await dispatch(updateSubCategory({
       id: serviceSubCategory.id,
       status: nextStatus,
     }));
-    await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
+    await dispatch(fetchServiceSubCategories([`all`]));
   };
 
   return (
@@ -147,7 +150,8 @@ export default function ServiceSubCategoryDetailPage() {
             maxWidth: `768px`,
           },
         }}>
-        {!isEditMode && <GoBackNavigation />}
+        {!isEditMode && <GoBackNavigation
+          beforeGoBack={fetchUpdatedSubCategories} />}
 
         {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && (
           <Box

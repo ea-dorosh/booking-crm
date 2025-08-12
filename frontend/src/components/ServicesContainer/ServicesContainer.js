@@ -98,11 +98,8 @@ export default function ServicesContainer({
     if (!value) return;
     setSubCategoryStatusFilter(value);
     sessionStorage.setItem(`subCategoriesStatusFilter`, value);
-    if (value === `all`) {
-      dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
-    } else {
-      dispatch(fetchServiceSubCategories([value]));
-    }
+
+    dispatch(fetchServiceSubCategories([value]));
   };
 
   const renderContent = () => {

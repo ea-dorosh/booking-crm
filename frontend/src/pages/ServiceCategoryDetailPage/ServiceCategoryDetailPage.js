@@ -56,6 +56,13 @@ export default function ServiceCategoryDetailPage() {
     };
   }, []);
 
+  const fetchUpdatedCategories = async () => {
+    const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
+    const statuses = storedStatus ? [storedStatus] : [categoryStatusEnum.active];
+
+    await dispatch(fetchServiceCategories(statuses));
+  }
+
   const categoryHandler = async (category) => {
     try {
       const categoryId = await dispatch(updateCategory(category)).unwrap();
@@ -107,13 +114,6 @@ export default function ServiceCategoryDetailPage() {
 
     await dispatch(fetchServiceCategories([`all`]))
   };
-
-  const fetchUpdatedCategories = async () => {
-    const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
-    const statuses = storedStatus ? [storedStatus] : [categoryStatusEnum.active];
-
-    await dispatch(fetchServiceCategories(statuses));
-  }
 
   const handleDeactivateToggle = async () => {
     if (!serviceCategory) return;
