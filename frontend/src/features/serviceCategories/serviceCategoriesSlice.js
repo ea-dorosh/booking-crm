@@ -2,13 +2,23 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
+import { categoryStatusEnum } from '@/enums/enums';
 import servicesService from "@/services/services.service";
 
 export const fetchServiceCategories = createAsyncThunk(
   `serviceCategories/fetchServiceCategories`,
   async (statuses, thunkAPI) => {
+    let statusesToFetch = statuses;
+    if (statuses?.[0] === `all`) {
+      statusesToFetch = [
+        categoryStatusEnum.active,
+        categoryStatusEnum.archived,
+        categoryStatusEnum.disabled,
+      ];
+    }
+
     try {
-      const data = await servicesService.getServiceCategories(statuses);
+      const data = await servicesService.getServiceCategories(statusesToFetch);
 
       return data;
     } catch (error) {

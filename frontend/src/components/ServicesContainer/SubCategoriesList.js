@@ -5,7 +5,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { subCategoryStatusEnum } from '@/enums/enums';
 
 export default function SubCategoriesList({
-  subCategories, categories, 
+  subCategories, categories,
 }) {
   if (!subCategories || subCategories.length === 0) {
     return (
@@ -22,20 +22,23 @@ export default function SubCategoriesList({
           sx={{
             fontSize: 60,
             color: `grey.400`,
-            marginBottom: 2, 
+            marginBottom: 2,
           }} />
+
         <Typography
           variant="h6"
           color="text.secondary"
           sx={{ marginBottom: 1 }}>
           No sub-categories found
         </Typography>
+
         <Typography
           variant="body2"
           color="text.secondary"
           sx={{ marginBottom: 3 }}>
           Get started by adding your first sub-category
         </Typography>
+
         <RouterLink
           to="/sub-categories/create-sub-category"
           style={{ textDecoration: `none` }}>
@@ -82,8 +85,8 @@ export default function SubCategoriesList({
       sx={{
         padding: {
           xs: 0,
-          md: 0, 
-        }, 
+          md: 0,
+        },
       }}>
       {Object.entries(groupedSubCategories).map(([categoryId, categoryData]) => (
         <Box
@@ -95,7 +98,7 @@ export default function SubCategoriesList({
               variant="h5"
               sx={{
                 fontWeight: 600,
-                mb: 0.5, 
+                mb: 0.5,
               }}>
               {categoryData.categoryName}
             </Typography>
@@ -110,13 +113,13 @@ export default function SubCategoriesList({
             container
             spacing={{
               xs: 2,
-              sm: 3, 
+              sm: 3,
             }}
             sx={{
               px: {
                 xs: 1,
-                sm: 0, 
-              }, 
+                sm: 0,
+              },
             }}>
             {categoryData.items.map((subCategory) => (
               <Grid
@@ -167,7 +170,7 @@ export default function SubCategoriesList({
                         style={{
                           width: `100%`,
                           height: `100%`,
-                          objectFit: `cover`, 
+                          objectFit: `cover`,
                         }}
                       />
                     </Box>
@@ -178,7 +181,7 @@ export default function SubCategoriesList({
                         minWidth: 0,
                         display: `flex`,
                         flexDirection: `column`,
-                        alignItems: `flex-start`, 
+                        alignItems: `flex-start`,
                       }}>
                       <Typography
                         variant="h6"
@@ -194,10 +197,10 @@ export default function SubCategoriesList({
                       </Typography>
                       {subCategory.status && (
                         <Chip
-                          label={subCategory.status}
+                          label={subCategory.status === subCategoryStatusEnum.disabled ? `not active` : subCategory.status === subCategoryStatusEnum.archived ? `deleted` : subCategory.status}
                           size="small"
-                          color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? `success` : undefined}
-                          variant={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? `filled` : `outlined`}
+                          color={subCategory.status === subCategoryStatusEnum.active ? `success` : subCategory.status === subCategoryStatusEnum.disabled ? `info` : `error`}
+                          variant="filled"
                           sx={{ mt: 0.75 }}
                         />
                       )}
@@ -206,7 +209,7 @@ export default function SubCategoriesList({
                     <ChevronRight
                       sx={{
                         color: `grey.500`,
-                        flexShrink: 0, 
+                        flexShrink: 0,
                       }} />
                   </CardActionArea>
                 </Card>

@@ -52,7 +52,7 @@ export default function ServiceSubCategoryDetailPage() {
     const promises = [];
 
     if (!serviceCategories) {
-      promises.push(dispatch(fetchServiceCategories()));
+      promises.push(dispatch(fetchServiceCategories([`all`])));
     }
 
     if (!serviceSubCategory && !shouldShowSubCategoryForm) {
@@ -119,7 +119,7 @@ export default function ServiceSubCategoryDetailPage() {
     const nextStatus = isArchived ? subCategoryStatusEnum.active : subCategoryStatusEnum.archived;
     await dispatch(updateSubCategory({
       id: serviceSubCategory.id,
-      status: nextStatus, 
+      status: nextStatus,
     }));
     await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
   };
@@ -130,7 +130,7 @@ export default function ServiceSubCategoryDetailPage() {
     const nextStatus = isDisabled ? subCategoryStatusEnum.active : subCategoryStatusEnum.disabled;
     await dispatch(updateSubCategory({
       id: serviceSubCategory.id,
-      status: nextStatus, 
+      status: nextStatus,
     }));
     await dispatch(fetchServiceSubCategories([subCategoryStatusEnum.active, subCategoryStatusEnum.archived, subCategoryStatusEnum.disabled]));
   };
@@ -144,8 +144,8 @@ export default function ServiceSubCategoryDetailPage() {
           padding: {
             xs: 0,
             md: 0,
-            maxWidth: `768px`, 
-          }, 
+            maxWidth: `768px`,
+          },
         }}>
         {!isEditMode && <GoBackNavigation />}
 

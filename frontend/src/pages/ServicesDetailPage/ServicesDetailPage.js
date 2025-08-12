@@ -41,11 +41,11 @@ export default function ServicesDetailPage() {
     const promises = [];
 
     if (!serviceCategories) {
-      promises.push(dispatch(fetchServiceCategories()));
+      promises.push(dispatch(fetchServiceCategories([`all`])));
     }
 
     if (!serviceSubCategories) {
-      promises.push(dispatch(fetchServiceSubCategories()));
+      promises.push(dispatch(fetchServiceSubCategories([`all`])));
     }
 
     if (!employees.length) {
@@ -171,8 +171,8 @@ export default function ServicesDetailPage() {
         sx={{
           padding: {
             xs: 0,
-            md: 0, 
-          }, 
+            md: 0,
+          },
         }}>
         {!isEditMode && <GoBackNavigation />}
 

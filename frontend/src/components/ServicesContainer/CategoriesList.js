@@ -29,12 +29,14 @@ export default function CategoriesList({ categories }) {
           sx={{ marginBottom: 1 }}>
           No categories found
         </Typography>
+
         <Typography
           variant="body2"
           color="text.secondary"
           sx={{ marginBottom: 3 }}>
           Get started by adding your first category
         </Typography>
+
         <RouterLink
           to="/categories/create-category"
           style={{ textDecoration: `none` }}>

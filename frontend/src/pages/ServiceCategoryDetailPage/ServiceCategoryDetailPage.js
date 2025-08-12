@@ -105,14 +105,12 @@ export default function ServiceCategoryDetailPage() {
       status: nextStatus,
     }));
 
-    await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]))
+    await dispatch(fetchServiceCategories([`all`]))
   };
 
   const fetchUpdatedCategories = async () => {
     const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
-    const statuses = storedStatus === `all`
-      ? [categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]
-      : storedStatus ? [storedStatus] : [categoryStatusEnum.active];
+    const statuses = storedStatus ? [storedStatus] : [categoryStatusEnum.active];
 
     await dispatch(fetchServiceCategories(statuses));
   }
@@ -127,7 +125,7 @@ export default function ServiceCategoryDetailPage() {
       status: nextStatus,
     }));
 
-    await dispatch(fetchServiceCategories([categoryStatusEnum.active, categoryStatusEnum.archived, categoryStatusEnum.disabled]))
+    await dispatch(fetchServiceCategories([`all`]))
   };
 
   return (
