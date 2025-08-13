@@ -65,14 +65,14 @@ export const MainListItems = ({ location }) => (
 
     <Link
       to={`/employees`}
-      style={{ textDecoration: `none` }}>
-      <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/employees`)}>
+      style={{ textDecoration: `none` }}
+    >
+      <ListItemButton selected={isActiveRoute(location?.pathname, `/employees`)}>
         <ListItemIcon>
           <GroupsRounded />
         </ListItemIcon>
-        <ListItemText
-          primary="Employees" />
+
+        <ListItemText primary="Team Members" />
       </ListItemButton>
     </Link>
 

@@ -1,7 +1,6 @@
 import {
   Box,
   LinearProgress,
-  Button,
 } from "@mui/material";
 import {
   useEffect,
@@ -149,48 +148,32 @@ export default function ServiceSubCategoryDetailPage() {
             md: 0,
             maxWidth: `768px`,
           },
-        }}>
-        {!isEditMode && <GoBackNavigation
-          beforeGoBack={fetchUpdatedSubCategories} />}
+        }}
+      >
+        {!isEditMode && <GoBackNavigation beforeGoBack={fetchUpdatedSubCategories} />}
 
         {(isUpdateSubCategoryRequestPending || areSubCategoriesFetching) && (
-          <Box
-            mt={2}>
+          <Box mt={2}>
             <LinearProgress />
           </Box>
         )}
 
         {isEditMode && serviceCategories && (
-          <Box
-            mt={3}>
+          <Box mt={3}>
             <ServiceSubCategoryForm
               subCategory={serviceSubCategory}
               submitForm={subCategoryHandler}
               formErrors={updateFormErrors}
               cleanError={handleCleanError}
               cleanErrors={handleCleanErrors}
+              onCancelEdit={handleCancelEdit}
               serviceCategories={serviceCategories}
             />
-
-            <Box
-              mt={2}
-              sx={{ width: `100%` }}>
-              {!shouldShowSubCategoryForm && (
-                <Button
-                  variant="outlined"
-                  onClick={handleCancelEdit}
-                  sx={{ width: `100%` }}
-                >
-                  Cancel
-                </Button>
-              )}
-            </Box>
           </Box>
         )}
 
         {!isEditMode && serviceSubCategory && serviceCategories && (
-          <Box
-            mt={3}>
+          <Box mt={3}>
             <SubCategoryDetails
               subCategory={serviceSubCategory}
               serviceCategories={serviceCategories}

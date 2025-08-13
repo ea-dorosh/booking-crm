@@ -1,4 +1,4 @@
-import { Business, AccessTime, Euro } from "@mui/icons-material";
+import { Business, AccessTime } from "@mui/icons-material";
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function ServicesList({
-  services, employees, categories, 
+  services, employees, categories,
 }) {
   const groupedServices = useMemo(() => {
     if (!services || !categories) return {};
@@ -79,20 +79,26 @@ export default function ServicesList({
           sx={{
             fontSize: 60,
             color: `grey.400`,
-            marginBottom: 2, 
-          }} />
+            marginBottom: 2,
+          }}
+        />
+
         <Typography
           variant="h6"
           color="text.secondary"
-          sx={{ marginBottom: 1 }}>
+          sx={{ marginBottom: 1 }}
+        >
           No services found
         </Typography>
+
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ marginBottom: 3 }}>
+          sx={{ marginBottom: 3 }}
+        >
           Get started by adding your first service
         </Typography>
+
         <Button
           component={RouterLink}
           to="/services/create-service"
@@ -110,13 +116,14 @@ export default function ServicesList({
       sx={{
         padding: {
           xs: 0,
-          md: 0, 
-        }, 
+          md: 0,
+        },
       }}>
       {Object.entries(groupedServices).map(([categoryId, categoryData]) => (
         <Box
           key={categoryId}
-          sx={{ marginBottom: 4 }}>
+          sx={{ marginBottom: 4 }}
+        >
           {/* Category Header */}
           <Box
             sx={{ marginBottom: 2 }}>
@@ -124,10 +131,11 @@ export default function ServicesList({
               variant="h5"
               sx={{
                 fontWeight: 600,
-                marginBottom: 1, 
+                marginBottom: 1,
               }}>
               {categoryData.categoryName}
             </Typography>
+
             <Typography
               variant="body2"
               color="text.secondary">
@@ -139,7 +147,8 @@ export default function ServicesList({
           {Object.entries(categoryData.subCategories).map(([subCategoryId, subCategoryData]) => (
             <Box
               key={subCategoryId}
-              sx={{ marginBottom: 3 }}>
+              sx={{ marginBottom: 3 }}
+            >
               {/* Sub Category Header */}
               <Box
                 sx={{ marginBottom: 2 }}>
@@ -147,8 +156,9 @@ export default function ServicesList({
                   variant="h6"
                   sx={{
                     fontWeight: 500,
-                    color: `text.secondary`, 
-                  }}>
+                    color: `text.secondary`,
+                  }}
+                >
                   {subCategoryData.subCategoryName}
                 </Typography>
               </Box>
@@ -156,24 +166,21 @@ export default function ServicesList({
               {/* Services Grid */}
               <Grid
                 container
-                spacing={2}>
+                spacing={2}
+              >
                 {subCategoryData.services.map((service) => (
                   <Grid
                     item
                     xs={12}
                     sm={6}
                     md={4}
-                    key={service.id}>
+                    key={service.id}
+                  >
                     <Card
                       sx={{
                         height: `100%`,
                         display: `flex`,
                         flexDirection: `column`,
-                        transition: `all 0.2s ease-in-out`,
-                        '&:hover': {
-                          transform: `translateY(-2px)`,
-                          boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
-                        },
                       }}
                     >
                       <CardActionArea
@@ -208,18 +215,14 @@ export default function ServicesList({
                               alignItems: `center`,
                               gap: 1,
                               marginBottom: 1.5,
-                            }}>
-                            <Euro
-                              sx={{
-                                fontSize: 16,
-                                color: `primary.main`, 
-                              }} />
+                            }}
+                          >
                             <Typography
                               variant="body1"
                               color="primary"
                               sx={{
                                 fontWeight: 600,
-                                fontSize: `1rem`, 
+                                fontSize: `1rem`,
                               }}
                             >
                               {getPriceRange(service.employeePrices)}
@@ -233,11 +236,11 @@ export default function ServicesList({
                               gap: 1,
                               marginBottom: 2,
                               color: `text.secondary`,
-                            }}>
-                            <AccessTime
-                              sx={{ fontSize: 16 }} />
-                            <Typography
-                              variant="body2">
+                            }}
+                          >
+                            <AccessTime sx={{ fontSize: 16 }} />
+
+                            <Typography variant="body2">
                               {service.durationTime}
                             </Typography>
                           </Box>
@@ -249,37 +252,17 @@ export default function ServicesList({
                                 display: `flex`,
                                 flexWrap: `wrap`,
                                 gap: 0.5,
-                                marginBottom: 2,
                                 flexGrow: 1,
-                              }}>
-                              {service.employeePrices.slice(0, 3).map((empPrice) => (
+                              }}
+                            >
+                              {service.employeePrices.map((empPrice) => (
                                 <Chip
                                   key={empPrice.employeeId}
                                   label={`${getEmployeeName(empPrice.employeeId)} - ${empPrice.price}€`}
                                   size="small"
                                   variant="outlined"
-                                  sx={{
-                                    fontSize: `0.75rem`,
-                                    height: `24px`,
-                                    borderColor: `primary.200`,
-                                    color: `primary.600`,
-                                    backgroundColor: `primary.50`,
-                                  }}
                                 />
                               ))}
-                              {service.employeePrices.length > 3 && (
-                                <Chip
-                                  label={`+${service.employeePrices.length - 3} more`}
-                                  size="small"
-                                  variant="outlined"
-                                  sx={{
-                                    fontSize: `0.75rem`,
-                                    height: `24px`,
-                                    borderColor: `grey.300`,
-                                    color: `text.secondary`,
-                                  }}
-                                />
-                              )}
                             </Box>
                           )}
                         </CardContent>

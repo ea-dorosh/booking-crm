@@ -28,6 +28,7 @@
         "caseInsensitive": true
       }
     }],
+    "no-unused-vars": "warn",
     "quotes": ["error", "backtick", {
       "avoidEscape": true,
       "allowTemplateLiterals": true
@@ -45,7 +46,7 @@
     }],
     "comma-dangle": ["error", "always-multiline"],
     "object-curly-spacing": ["error", "always"],
-    "react/jsx-first-prop-new-line": ["error", "always"],
+    "react/jsx-first-prop-new-line": ["error", "multiline"],
     "react/jsx-max-props-per-line": ["error", { "maximum": 1 }],
     "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": false }]
   }

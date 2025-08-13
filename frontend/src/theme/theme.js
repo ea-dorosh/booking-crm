@@ -247,6 +247,7 @@ const theme = createTheme({
           fontWeight: 500,
           padding: `10px 24px`,
           boxShadow: `none`,
+          flexShrink: 0,
         },
         sizeSmall: {
           borderRadius: `9999px`,

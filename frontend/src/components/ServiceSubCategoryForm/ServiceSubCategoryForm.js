@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Card, CardContent } from "@mui/material";
 import FormActions from "@/components/common/FormActions";
 import FormField from "@/components/common/FormField";
 import ImageUpload from "@/components/common/ImageUpload";
@@ -12,6 +12,7 @@ export default function ServiceSubCategoryForm({
   cleanError,
   cleanErrors,
   serviceCategories = [],
+  onCancelEdit,
 }) {
   const isEditMode = Boolean(subCategory);
 
@@ -69,37 +70,42 @@ export default function ServiceSubCategoryForm({
   };
 
   return (
-    <Box
-      sx={{
-        display: `flex`,
-        flexDirection: `column`,
-        gap: 2.2,
-      }}
-    >
-      {formFields.map((field) => (
-        <FormField
-          key={field.name}
-          type={field.type}
-          name={field.name}
-          label={field.label}
-          value={formData[field.name]}
-          onChange={handleChange}
-          error={formErrors?.[field.name]}
-          required={field.required}
-          options={field.options}
-        />
-      ))}
+    <Card>
+      <CardContent>
+        <Box
+          sx={{
+            display: `flex`,
+            flexDirection: `column`,
+            gap: 2.2,
+          }}
+        >
+          {formFields.map((field) => (
+            <FormField
+              key={field.name}
+              type={field.type}
+              name={field.name}
+              label={field.label}
+              value={formData[field.name]}
+              onChange={handleChange}
+              error={formErrors?.[field.name]}
+              required={field.required}
+              options={field.options}
+            />
+          ))}
 
-      <ImageUpload
-        name="image"
-        onChange={handleImageChange}
-        currentImage={subCategory?.image}
-      />
+          <ImageUpload
+            name="image"
+            onChange={handleImageChange}
+            currentImage={subCategory?.image}
+          />
 
-      <FormActions
-        onSubmit={handleSubmit}
-        disabled={formErrors && Object.keys(formErrors).length > 0}
-      />
-    </Box>
+          <FormActions
+            onSubmit={handleSubmit}
+            disabled={formErrors && Object.keys(formErrors).length > 0}
+            onCancel={onCancelEdit}
+          />
+        </Box>
+      </CardContent>
+    </Card>
   );
 }

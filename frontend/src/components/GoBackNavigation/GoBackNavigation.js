@@ -25,22 +25,23 @@ export default function GoBackNavigation({ beforeGoBack }) {
         }
         variant="outlined"
         size="small"
+        color="secondary"
         sx={{
-          borderRadius: 2,
-          padding: `6px 12px`,
-          fontSize: `0.85rem`,
-          fontWeight: 500,
-          textTransform: `none`,
-          color: `text.primary`,
-          borderColor: `grey.300`,
-          backgroundColor: `white`,
-          '&:hover': {
-            backgroundColor: `grey.50`,
-            borderColor: `grey.400`,
-            transform: `translateX(-2px)`,
-          },
-          transition: `all 0.2s ease-in-out`,
-          minWidth: `auto`,
+          // borderRadius: 2,
+          // padding: `6px 12px`,
+          // fontSize: `0.85rem`,
+          // fontWeight: 500,
+          // textTransform: `none`,
+          // color: `text.primary`,
+          // borderColor: `grey.300`,
+          // backgroundColor: `white`,
+          // '&:hover': {
+          //   backgroundColor: `grey.50`,
+          //   borderColor: `grey.400`,
+          //   transform: `translateX(-2px)`,
+          // },
+          // transition: `all 0.2s ease-in-out`,
+          // minWidth: `auto`,
         }}
       >
         Go back

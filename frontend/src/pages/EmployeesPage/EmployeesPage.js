@@ -15,11 +15,8 @@ export default function EmployeesPage() {
   }, []);
 
   return (
-    <PageContainer
-      pageTitle="Employees">
-      {employees.length > 0 && <EmployeesContainer
-        employees={employees}
-      />}
+    <PageContainer pageTitle="Team Members">
+      {employees.length > 0 && <EmployeesContainer employees={employees}/>}
     </PageContainer>
   );
 }

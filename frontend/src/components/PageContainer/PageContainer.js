@@ -83,7 +83,7 @@ export default function PageContainer({
             color="inherit"
             onClick={toggleDrawer}
             sx={{
-              marginRight: `36px`,
+              marginRight: `28px`,
               ml: `-9px`,
 
               '&:hover': {

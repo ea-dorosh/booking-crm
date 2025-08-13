@@ -1,7 +1,6 @@
 import {
   Box,
   LinearProgress,
-  Button,
 } from "@mui/material";
 import {
   useEffect,
@@ -158,27 +157,13 @@ export default function ServiceCategoryDetailPage() {
               formErrors={updateFormErrors}
               cleanError={handleCleanError}
               cleanErrors={handleCleanErrors}
+              onCancelEdit={handleCancelEdit}
             />
-
-            <Box
-              mt={2}
-              sx={{ width: `100%` }}>
-              {!shouldShowCategoryForm && (
-                <Button
-                  variant="outlined"
-                  onClick={handleCancelEdit}
-                  sx={{ width: `100%` }}
-                >
-                  Cancel
-                </Button>
-              )}
-            </Box>
           </Box>
         )}
 
         {!isEditMode && serviceCategory && (
-          <Box
-            mt={3}>
+          <Box mt={3}>
             <CategoryDetails
               category={serviceCategory}
               onEditClick={handleEditClick}
