@@ -13,7 +13,7 @@ import {
 import AppointmentFilters from "@/components/EmployeeAppointments/AppointmentFilters";
 import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppointments";
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
-import GoogleCalendarIntegration from '@/components/GoogleCalendarIntegration/GoogleCalendarIntegration';
+import EmployeeGoogleCalenderSection from '@/components/EmployeeGoogleCalenderSection/EmployeeGoogleCalenderSection';
 
 export default function EmployeeDetails({
   employee,
@@ -32,7 +32,7 @@ export default function EmployeeDetails({
         sx={{
           marginTop: 2,
           borderRadius: 2,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
         }}>
         <CardContent
           sx={{ padding: 2.5 }}>
@@ -40,7 +40,7 @@ export default function EmployeeDetails({
             sx={{
               display: `flex`,
               justifyContent: `flex-end`,
-              marginBottom: 2, 
+              marginBottom: 2,
             }}>
             <Button
               variant="contained"
@@ -94,7 +94,7 @@ export default function EmployeeDetails({
                   variant="h6"
                   sx={{
                     fontWeight: 600,
-                    marginBottom: 1, 
+                    marginBottom: 1,
                   }}>
                   {`${employee.firstName} ${employee.lastName}`}
                 </Typography>
@@ -121,7 +121,7 @@ export default function EmployeeDetails({
                     color="text.secondary"
                     sx={{
                       marginBottom: 0.5,
-                      fontWeight: 600, 
+                      fontWeight: 600,
                     }}>
                     Contact Information
                   </Typography>
@@ -131,12 +131,12 @@ export default function EmployeeDetails({
                       sx={{
                         display: `flex`,
                         alignItems: `center`,
-                        gap: 1, 
+                        gap: 1,
                       }}>
                       <Email
                         sx={{
                           fontSize: 16,
-                          color: `text.secondary`, 
+                          color: `text.secondary`,
                         }} />
                       <Typography
                         variant="body2">{employee.email}</Typography>
@@ -145,12 +145,12 @@ export default function EmployeeDetails({
                       sx={{
                         display: `flex`,
                         alignItems: `center`,
-                        gap: 1, 
+                        gap: 1,
                       }}>
                       <Phone
                         sx={{
                           fontSize: 16,
-                          color: `text.secondary`, 
+                          color: `text.secondary`,
                         }} />
                       <Typography
                         variant="body2">{employee.phone}</Typography>
@@ -164,7 +164,7 @@ export default function EmployeeDetails({
                     color="text.secondary"
                     sx={{
                       marginBottom: 0.5,
-                      fontWeight: 600, 
+                      fontWeight: 600,
                     }}>
                     Work Information
                   </Typography>
@@ -174,12 +174,12 @@ export default function EmployeeDetails({
                       sx={{
                         display: `flex`,
                         alignItems: `center`,
-                        gap: 1, 
+                        gap: 1,
                       }}>
                       <CalendarMonth
                         sx={{
                           fontSize: 16,
-                          color: `text.secondary`, 
+                          color: `text.secondary`,
                         }} />
                       <Typography
                         variant="body2">
@@ -194,35 +194,14 @@ export default function EmployeeDetails({
         </CardContent>
       </Card>
 
-      {/* Google Calendar Integration */}
-      <Card
-        sx={{
-          marginTop: 2,
-          borderRadius: 2,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
-        }}>
-        <CardContent
-          sx={{ padding: 2.5 }}>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              marginBottom: 1.5,
-              fontSize: `1.1rem`, 
-            }}>
-            Calendar Integration
-          </Typography>
-          <GoogleCalendarIntegration
-            employeeId={employee.employeeId} />
-        </CardContent>
-      </Card>
+      <EmployeeGoogleCalenderSection employeeId={employee.employeeId} />
 
       {/* Employee Availability */}
       <Card
         sx={{
           marginTop: 2,
           borderRadius: 2,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
         }}>
         <CardContent
           sx={{ padding: 2.5 }}>
@@ -231,7 +210,7 @@ export default function EmployeeDetails({
             sx={{
               fontWeight: 600,
               marginBottom: 1.5,
-              fontSize: `1.1rem`, 
+              fontSize: `1.1rem`,
             }}>
             Work Schedule
           </Typography>
@@ -244,7 +223,7 @@ export default function EmployeeDetails({
       <Box
         sx={{
           marginTop: 2,
-          position: `relative`, 
+          position: `relative`,
         }}>
         <AppointmentFilters
           filters={appointmentFilters}

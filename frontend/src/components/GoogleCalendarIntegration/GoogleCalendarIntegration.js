@@ -20,7 +20,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState({
     enabled: false,
-    calendarId: null, 
+    calendarId: null,
   });
   const [calendarId, setCalendarId] = useState(``);
   const [syncLoading, setSyncLoading] = useState(false);
@@ -182,15 +182,18 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
   }
 
   return (
-    <Box
-      mt={3}>
+    <Box>
       <Typography
         variant="h6"
-        gutterBottom>
+        gutterBottom
+        sx={{
+          fontSize: `1rem`,
+        }}
+      >
         Google Calendar Integration
       </Typography>
-      <Divider
-        sx={{ mb: 2 }} />
+
+      <Divider sx={{ mb: 2 }} />
 
       {error && (
         <Alert
@@ -238,7 +241,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
                 mb: 2,
                 p: 2,
                 bgcolor: `background.paper`,
-                borderRadius: 1, 
+                borderRadius: 1,
               }}>
               <Stack
                 direction="row"
@@ -353,7 +356,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             variant="body2"
             sx={{
               color: `text.secondary`,
-              mt: 2, 
+              mt: 2,
             }}>
             You will be redirected to Google to authorize access to the calendar.
           </Typography>
