@@ -63,7 +63,7 @@ export default function ServiceCategoryDetailPage() {
     await dispatch(fetchServiceCategories(statuses));
   }
 
-  const categoryHandler = async (category) => {
+  const onSubmitForm = async (category) => {
     try {
       const categoryId = await dispatch(updateCategory(category)).unwrap();
 
@@ -154,7 +154,7 @@ export default function ServiceCategoryDetailPage() {
             mt={3}>
             <ServiceCategoryForm
               category={serviceCategory}
-              submitForm={categoryHandler}
+              submitForm={onSubmitForm}
               formErrors={updateFormErrors}
               cleanError={handleCleanError}
               cleanErrors={handleCleanErrors}

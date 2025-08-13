@@ -46,6 +46,7 @@ export default function CategoryDetails({
               }}>
               {category.name}
             </Typography>
+
             {category.status && (
               <Chip
                 label={category.status === categoryStatusEnum.disabled ? `not active` : category.status === categoryStatusEnum.archived ? `deleted` : category.status}
@@ -72,34 +73,6 @@ export default function CategoryDetails({
               Edit
             </Button>
           </Box>
-        </Box>
-
-        <Box
-          sx={{
-            display: `flex`,
-            gap: 2,
-            alignItems: `center`,
-            mt: 2,
-            justifyContent: `space-between`,
-          }}>
-          <Button
-            variant="outlined"
-            color={category.status === categoryStatusEnum.disabled ? `success` : `warning`}
-            onClick={onDeactivateToggle}
-            size="small"
-          >
-            {category.status === categoryStatusEnum.disabled ? `Activate` : `Deactivate`}
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<DeleteOutline />}
-            color={category.status === categoryStatusEnum.archived ? `success` : `error`}
-            onClick={onArchiveToggle}
-            size="small"
-          >
-            {category.status === categoryStatusEnum.archived ? `Restore` : `Delete`}
-          </Button>
         </Box>
 
         {/* Details Grid */}
@@ -136,6 +109,35 @@ export default function CategoryDetails({
             </Grid>
           )}
         </Grid>
+
+        <Box
+          sx={{
+            display: `flex`,
+            gap: 2,
+            alignItems: `center`,
+            mt: 2,
+            justifyContent: `space-between`,
+          }}>
+          <Button
+            disabled={category.status === categoryStatusEnum.archived}
+            variant="outlined"
+            color={category.status === categoryStatusEnum.disabled ? `success` : `warning`}
+            onClick={onDeactivateToggle}
+            size="small"
+          >
+            {category.status === categoryStatusEnum.disabled ? `Activate` : `Deactivate`}
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<DeleteOutline />}
+            color={category.status === categoryStatusEnum.archived ? `success` : `primary`}
+            onClick={onArchiveToggle}
+            size="small"
+          >
+            {category.status === categoryStatusEnum.archived ? `Restore` : `Delete`}
+          </Button>
+        </Box>
       </CardContent>
     </Card>
   );

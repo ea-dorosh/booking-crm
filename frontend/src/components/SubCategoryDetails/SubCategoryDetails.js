@@ -24,7 +24,7 @@ export default function SubCategoryDetails({
       sx={{
         marginTop: 1,
         borderRadius: 2,
-        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
       }}>
       <CardContent
         sx={{ padding: 2.5 }}>
@@ -45,31 +45,24 @@ export default function SubCategoryDetails({
               sx={{
                 fontWeight: 700,
                 marginBottom: 0.5,
-                color: `text.primary`, 
+                color: `text.primary`,
               }}>
               {subCategory.name}
             </Typography>
+
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ mb: 0.5 }}>
               {categoryName}
             </Typography>
+
             {subCategory.status && (
               <Chip
-                label={subCategory.status}
+                label={subCategory.status === subCategoryStatusEnum.disabled ? `not active` : subCategory.status === subCategoryStatusEnum.archived ? `deleted` : subCategory.status}
                 size="small"
-                color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? `success` : undefined}
-                variant={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.active ? `filled` : `outlined`}
-                sx={String(subCategory.status).toLowerCase() !== subCategoryStatusEnum.active ? {
-                  fontWeight: 600,
-                  height: 24,
-                  backgroundColor: `grey.100`,
-                  color: `text.secondary`,
-                } : {
-                  fontWeight: 700,
-                  height: 24, 
-                }}
+                color={subCategory.status === subCategoryStatusEnum.active ? `success` : subCategory.status === subCategoryStatusEnum.disabled ? `warning` : `error`}
+                variant="filled"
               />
             )}
           </Box>
@@ -77,25 +70,17 @@ export default function SubCategoryDetails({
           <Box
             sx={{
               display: `flex`,
-              gap: 1, 
+              gap: 1,
             }}>
             <Button
               variant="contained"
-              startIcon={<Edit
-                sx={{ fontSize: `16px` }} />}
+              color="primary"
+              size="small"
+              startIcon={
+                <Edit
+                  sx={{ fontSize: `16px` }} />
+              }
               onClick={onEditClick}
-              sx={{
-                borderRadius: 1.5,
-                padding: `6px 12px`,
-                fontSize: `0.8rem`,
-                fontWeight: 600,
-                textTransform: `none`,
-                minWidth: `auto`,
-                boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
-                '&:hover': {
-                  boxShadow: `0 4px 12px rgba(0,0,0,0.2)`,
-                },
-              }}
             >
               Edit
             </Button>
@@ -129,7 +114,7 @@ export default function SubCategoryDetails({
                   style={{
                     width: `100%`,
                     height: `auto`,
-                    display: `block`, 
+                    display: `block`,
                   }}
                 />
               </Box>
@@ -143,29 +128,27 @@ export default function SubCategoryDetails({
             gap: 2,
             alignItems: `center`,
             mt: 2,
-            justifyContent: `space-between`, 
+            justifyContent: `space-between`,
           }}>
           <Button
+            disabled={subCategory.status === subCategoryStatusEnum.archived}
             variant="outlined"
-            color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.disabled ? `success` : `warning`}
+            size="small"
+            color={subCategory.status === subCategoryStatusEnum.disabled ? `secondary` : `warning`}
             onClick={onDeactivateToggle}
-            sx={{
-              borderRadius: 1.5,
-              padding: `6px 12px`,
-              fontSize: `0.8rem`,
-              fontWeight: 600,
-              textTransform: `none`,
-              minWidth: `auto`,
-            }}
           >
-            {String(subCategory.status).toLowerCase() === subCategoryStatusEnum.disabled ? `Activate` : `Deactivate`}
+            {subCategory.status === subCategoryStatusEnum.disabled ? `Activate` : `Deactivate`}
           </Button>
 
           <Button
             variant="outlined"
-            startIcon={<DeleteOutline
-              sx={{ fontSize: `16px` }} />}
-            color={String(subCategory.status).toLowerCase() === subCategoryStatusEnum.archived ? `success` : `error`}
+            size="small"
+            startIcon={
+              <DeleteOutline
+                sx={{ fontSize: `16px` }}
+              />
+            }
+            color={subCategory.status === subCategoryStatusEnum.archived ? `success` : `primary`}
             onClick={onArchiveToggle}
             sx={{
               borderRadius: 1.5,
@@ -176,7 +159,7 @@ export default function SubCategoryDetails({
               minWidth: `auto`,
             }}
           >
-            {String(subCategory.status).toLowerCase() === subCategoryStatusEnum.archived ? `Unarchive` : `Archive`}
+            {subCategory.status === subCategoryStatusEnum.archived ? `Restore` : `Delete`}
           </Button>
         </Box>
       </CardContent>

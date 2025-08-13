@@ -54,7 +54,7 @@ export default function ServiceSubCategoryDetailPage() {
     }
 
     if (!serviceSubCategory && !shouldShowSubCategoryForm) {
-      promises.push(dispatch(fetchUpdatedSubCategories()));
+      promises.push(fetchUpdatedSubCategories());
     } else if (shouldShowSubCategoryForm) {
       dispatch(cleanErrors());
       setIsEditMode(true);
@@ -84,7 +84,7 @@ export default function ServiceSubCategoryDetailPage() {
 
       navigate(`/sub-categories/${subCategoryId}`, { replace: true });
 
-      dispatch(fetchServiceSubCategories());
+      await fetchUpdatedSubCategories();
       setIsEditMode(false);
     } catch (error) {
       console.error(error);

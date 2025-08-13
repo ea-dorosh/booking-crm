@@ -236,6 +236,10 @@ const theme = createTheme({
   ],
   components: {
     MuiButton: {
+      defaultProps: {
+        disableRipple: true,
+        disableElevation: true,
+      },
       styleOverrides: {
         root: {
           borderRadius: 12,
@@ -244,10 +248,159 @@ const theme = createTheme({
           padding: `10px 24px`,
           boxShadow: `none`,
         },
-        contained: {
-          // Removed hover styles
+        sizeSmall: {
+          borderRadius: `9999px`,
+          padding: `6px 12px`,
+          fontSize: `0.8rem`,
+          fontWeight: 600,
+          textTransform: `none`,
+          minWidth: `auto`,
+        },
+        sizeMedium: {
+          borderRadius: `9999px`,
+          padding: `8px 16px`,
+          fontSize: `0.9rem`,
+          fontWeight: 600,
+          textTransform: `none`,
+        },
+        sizeLarge: {
+          borderRadius: `9999px`,
+          padding: `12px 24px`,
+          fontSize: `1rem`,
+          fontWeight: 600,
+          textTransform: `none`,
         },
       },
+      variants: [
+        {
+          props: {
+            color: `primary`,
+            variant: `contained`,
+          },
+          style: {
+            backgroundColor: colors.primary[500],
+            color: `#ffffff`,
+
+            '&:hover': {
+              backgroundColor: colors.primary[500],
+              color: `#ffffff`,
+            },
+          },
+        },
+        {
+          props: {
+            color: `primary`,
+            variant: `outlined`,
+          },
+          style: {
+            backgroundColor: `#ffffff`,
+            color: colors.primary[500],
+            borderColor: colors.primary[500],
+
+            '&:hover': {
+              backgroundColor: `#ffffff`,
+              color: colors.primary[500],
+              borderColor: colors.primary[500],
+            },
+          },
+        },
+        {
+          props: {
+            color: `secondary`,
+            variant: `contained`,
+          },
+          style: {
+            backgroundColor: colors.secondary[500],
+            color: `#ffffff`,
+
+            '&:hover': {
+              backgroundColor: colors.secondary[500],
+              color: `#ffffff`,
+            },
+          },
+        },
+        {
+          props: {
+            color: `secondary`,
+            variant: `outlined`,
+          },
+          style: {
+            backgroundColor: `#ffffff`,
+            color: colors.secondary[500],
+            borderColor: colors.secondary[500],
+
+            '&:hover': {
+              backgroundColor: `#ffffff`,
+              color: colors.secondary[500],
+              borderColor: colors.secondary[500],
+            },
+          },
+        },
+        {
+          props: {
+            color: `warning`,
+            variant: `contained`,
+          },
+          style: {
+            backgroundColor: colors.warning[500],
+            color: `#ffffff`,
+
+            '&:hover': {
+              backgroundColor: colors.warning[500],
+              color: `#ffffff`,
+            },
+          },
+        },
+        {
+          props: {
+            color: `warning`,
+            variant: `outlined`,
+          },
+          style: {
+            backgroundColor: `#ffffff`,
+            color: colors.warning[500],
+            borderColor: colors.warning[500],
+
+            '&:hover': {
+              backgroundColor: `#ffffff`,
+              color: colors.warning[500],
+              borderColor: colors.warning[500],
+            },
+          },
+        },
+        {
+          props: {
+            color: `success`,
+            variant: `contained`,
+          },
+          style: {
+            backgroundColor: colors.success[500],
+            color: `#ffffff`,
+
+            '&:hover': {
+              backgroundColor: colors.success[500],
+              color: `#ffffff`,
+            },
+          },
+        },
+        {
+          props: {
+            color: `secondary`,
+            variant: `outlined`,
+          },
+          style: {
+            backgroundColor: `#ffffff`,
+            color: colors.success[500],
+            borderColor: colors.success[500],
+
+            '&:hover': {
+              backgroundColor: `#ffffff`,
+              color: colors.success[500],
+              borderColor: colors.success[500],
+            },
+          },
+        },
+      ],
     },
     MuiCard: {
       styleOverrides: {
@@ -316,6 +469,12 @@ const theme = createTheme({
         root: {
           borderRadius: 8,
           fontWeight: 500,
+          height: `auto`,
+
+          '& .MuiChip-label': {
+            fontWeight: 500,
+            textTransform: `lowercase`,
+          },
         },
       },
       variants: [
@@ -327,9 +486,6 @@ const theme = createTheme({
           style: {
             backgroundColor: colors.success[500],
             color: `#ffffff`,
-            '& .MuiChip-label': {
-              fontWeight: 600,
-            },
           },
         },
         {
@@ -338,11 +494,8 @@ const theme = createTheme({
             variant: `filled`,
           },
           style: {
-            backgroundColor: colors.neutral[400],
+            backgroundColor: colors.warning[400],
             color: `#ffffff`,
-            '& .MuiChip-label': {
-              fontWeight: 600,
-            },
           },
         },
         {
@@ -353,9 +506,6 @@ const theme = createTheme({
           style: {
             backgroundColor: colors.error[500],
             color: `#ffffff`,
-            '& .MuiChip-label': {
-              fontWeight: 600,
-            },
           },
         },
       ],
