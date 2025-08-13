@@ -40,10 +40,12 @@ export default function ServiceDetails({
       sx={{
         marginTop: 1,
         borderRadius: 2,
-        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
-      }}>
+        boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
+      }}
+    >
       <CardContent
-        sx={{ padding: 2.5 }}>
+        sx={{ padding: 2.5 }}
+      >
         {/* Header with Edit Button */}
         <Box
           sx={{
@@ -54,15 +56,17 @@ export default function ServiceDetails({
             paddingBottom: 1.5,
             borderBottom: `1px solid`,
             borderColor: `grey.100`,
-          }}>
+          }}
+        >
           <Box>
             <Typography
               variant="h4"
               sx={{
                 fontWeight: 700,
                 marginBottom: 0.5,
-                color: `text.primary`, 
-              }}>
+                color: `text.primary`,
+              }}
+            >
               {service.name}
             </Typography>
             <Box
@@ -70,23 +74,27 @@ export default function ServiceDetails({
                 display: `flex`,
                 alignItems: `center`,
                 gap: 1.5,
-                marginBottom: 0, 
-              }}>
+                marginBottom: 0,
+              }}
+            >
               <Box
                 sx={{
                   display: `flex`,
                   alignItems: `center`,
-                  gap: 0.5, 
-                }}>
+                  gap: 0.5,
+                }}
+              >
                 <Euro
                   sx={{
                     fontSize: 16,
-                    color: `primary.main`, 
-                  }} />
+                    color: `primary.main`,
+                  }}
+                />
                 <Typography
                   variant="h6"
                   color="primary"
-                  sx={{ fontWeight: 700 }}>
+                  sx={{ fontWeight: 700 }}
+                >
                   {getPriceRange(service.employeePrices)}
                 </Typography>
               </Box>
@@ -95,13 +103,16 @@ export default function ServiceDetails({
                   display: `flex`,
                   alignItems: `center`,
                   gap: 0.5,
-                  color: `text.secondary`, 
-                }}>
+                  color: `text.secondary`,
+                }}
+              >
                 <AccessTime
-                  sx={{ fontSize: 16 }} />
+                  sx={{ fontSize: 16 }}
+                />
                 <Typography
                   variant="body1"
-                  sx={{ fontWeight: 500 }}>
+                  sx={{ fontWeight: 500 }}
+                >
                   {service.durationTime}
                 </Typography>
               </Box>
@@ -110,8 +121,7 @@ export default function ServiceDetails({
 
           <Button
             variant="contained"
-            startIcon={<Edit
-              sx={{ fontSize: `16px` }} />}
+            startIcon={<Edit sx={{ fontSize: `16px` }} />}
             onClick={onEditClick}
             sx={{
               borderRadius: 1.5,
@@ -133,12 +143,14 @@ export default function ServiceDetails({
         {/* Service Details Grid */}
         <Grid
           container
-          spacing={1.5}>
+          spacing={1.5}
+        >
           {/* Category & Subcategory */}
           <Grid
             item
             xs={12}
-            md={6}>
+            md={6}
+          >
             <Box
               sx={{
                 padding: 1.5,
@@ -146,23 +158,26 @@ export default function ServiceDetails({
                 borderRadius: 1.5,
                 border: `1px solid`,
                 borderColor: `grey.100`,
-              }}>
+              }}
+            >
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 sx={{
                   marginBottom: 0.25,
                   fontWeight: 600,
-                  fontSize: `0.75rem`, 
-                }}>
+                  fontSize: `0.75rem`,
+                }}
+              >
                   Category
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  color: `text.primary`, 
-                }}>
+                  color: `text.primary`,
+                }}
+              >
                 {serviceCategories?.find(category => category.id === service.categoryId)?.name || `-`}
               </Typography>
             </Box>
@@ -171,7 +186,8 @@ export default function ServiceDetails({
           <Grid
             item
             xs={12}
-            md={6}>
+            md={6}
+          >
             <Box
               sx={{
                 padding: 1.5,
@@ -179,23 +195,26 @@ export default function ServiceDetails({
                 borderRadius: 1.5,
                 border: `1px solid`,
                 borderColor: `grey.100`,
-              }}>
+              }}
+            >
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 sx={{
                   marginBottom: 0.25,
                   fontWeight: 600,
-                  fontSize: `0.75rem`, 
-                }}>
+                  fontSize: `0.75rem`,
+                }}
+              >
                   Sub-Category
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  color: `text.primary`, 
-                }}>
+                  color: `text.primary`,
+                }}
+              >
                 {serviceSubCategories?.find(subCategory => subCategory.id === service.subCategoryId)?.name || `-`}
               </Typography>
             </Box>
@@ -205,7 +224,8 @@ export default function ServiceDetails({
           <Grid
             item
             xs={12}
-            md={6}>
+            md={6}
+          >
             <Box
               sx={{
                 padding: 1.5,
@@ -213,23 +233,26 @@ export default function ServiceDetails({
                 borderRadius: 1.5,
                 border: `1px solid`,
                 borderColor: `grey.100`,
-              }}>
+              }}
+            >
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 sx={{
                   marginBottom: 0.25,
                   fontWeight: 600,
-                  fontSize: `0.75rem`, 
-                }}>
+                  fontSize: `0.75rem`,
+                }}
+              >
                   Duration
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  color: `text.primary`, 
-                }}>
+                  color: `text.primary`,
+                }}
+              >
                 {service.durationTime}
               </Typography>
             </Box>
@@ -238,7 +261,8 @@ export default function ServiceDetails({
           <Grid
             item
             xs={12}
-            md={6}>
+            md={6}
+          >
             <Box
               sx={{
                 padding: 1.5,
@@ -246,23 +270,26 @@ export default function ServiceDetails({
                 borderRadius: 1.5,
                 border: `1px solid`,
                 borderColor: `grey.100`,
-              }}>
+              }}
+            >
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 sx={{
                   marginBottom: 0.25,
                   fontWeight: 600,
-                  fontSize: `0.75rem`, 
-                }}>
+                  fontSize: `0.75rem`,
+                }}
+              >
                   Buffer Time
               </Typography>
               <Typography
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  color: `text.primary`, 
-                }}>
+                  color: `text.primary`,
+                }}
+              >
                 {service.bufferTime || `-`}
               </Typography>
             </Box>
@@ -272,7 +299,8 @@ export default function ServiceDetails({
           {service.bookingNote && (
             <Grid
               item
-              xs={12}>
+              xs={12}
+            >
               <Box
                 sx={{
                   padding: 1.5,
@@ -280,20 +308,23 @@ export default function ServiceDetails({
                   borderRadius: 1.5,
                   border: `1px solid`,
                   borderColor: `grey.100`,
-                }}>
+                }}
+              >
                 <Typography
                   variant="subtitle2"
                   color="text.secondary"
                   sx={{
                     marginBottom: 0.25,
                     fontWeight: 600,
-                    fontSize: `0.75rem`, 
-                  }}>
+                    fontSize: `0.75rem`,
+                  }}
+                >
                     Note
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: `text.primary` }}>
+                  sx={{ color: `text.primary` }}
+                >
                   {service.bookingNote}
                 </Typography>
               </Box>
@@ -303,20 +334,23 @@ export default function ServiceDetails({
 
         {/* Employees Section */}
         <Box
-          sx={{ marginTop: 1.5 }}>
+          sx={{ marginTop: 1.5 }}
+        >
           <Typography
             variant="h6"
             sx={{
               fontWeight: 600,
               marginBottom: 1,
-              fontSize: `1rem`, 
-            }}>
+              fontSize: `1rem`,
+            }}
+          >
               Service Providers
           </Typography>
 
           <Grid
             container
-            spacing={1.5}>
+            spacing={1.5}
+          >
             {service.employeePrices.map((employeePrice) => {
               const employee = employees.find(emp => emp.employeeId === employeePrice.employeeId);
               return (
@@ -325,7 +359,8 @@ export default function ServiceDetails({
                   xs={6}
                   sm={4}
                   md={3}
-                  key={employeePrice.employeeId}>
+                  key={employeePrice.employeeId}
+                >
                   <Card
                     elevation={0}
                     sx={{
@@ -339,8 +374,9 @@ export default function ServiceDetails({
                     <CardContent
                       sx={{
                         padding: 2,
-                        textAlign: `center`, 
-                      }}>
+                        textAlign: `center`,
+                      }}
+                    >
                       <Avatar
                         src={employee?.image}
                         sx={{

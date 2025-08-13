@@ -33,7 +33,8 @@ export default function CustomersContainer({ customers }) {
         </Typography>
 
         <RouterLink
-          to={`/customers/create-customer`}>
+          to={`/customers/create-customer`}
+        >
           <IconButton
             sx={{ color: `#fff` }}
           >
@@ -47,7 +48,8 @@ export default function CustomersContainer({ customers }) {
           display: `flex`,
           justifyContent: `flex-end`,
           mt: `1rem`,
-        }}>
+        }}
+      >
         <CustomersSorting />
       </Box>
   
@@ -96,14 +98,16 @@ export default function CustomersContainer({ customers }) {
               sx={{
                 fontSize: `1rem`,
                 fontWeight: `bold`,
-              }}>
+              }}
+            >
               {customer.lastName} {customer.firstName}
             </Typography>
 
             <Typography
               sx={{
                 fontSize: `.8rem`,
-              }}>
+              }}
+            >
               {customer.email}
             </Typography>
           </Box>

@@ -44,14 +44,16 @@ const ImageUpload = ({
       sx={{
         width: `100%`,
         ...sx, 
-      }}>
+      }}
+    >
       <Box
         sx={{
           display: `flex`,
           flexDirection: `column`,
           alignItems: `center`,
           gap: 2,
-        }}>
+        }}
+      >
         {/* Image Preview */}
         {displayImage ? (
           <Box
@@ -61,7 +63,8 @@ const ImageUpload = ({
               flexDirection: `column`,
               alignItems: `center`,
               gap: 1,
-            }}>
+            }}
+          >
             <Avatar
               src={displayImage}
               sx={{
@@ -77,7 +80,8 @@ const ImageUpload = ({
               sx={{
                 display: `flex`,
                 gap: 1, 
-              }}>
+              }}
+            >
               {/* Change Image Button */}
               <Button
                 component="label"
@@ -116,7 +120,8 @@ const ImageUpload = ({
                 }}
               >
                 <Delete
-                  fontSize="small" />
+                  fontSize="small"
+                />
               </IconButton>
             </Box>
           </Box>
@@ -139,17 +144,20 @@ const ImageUpload = ({
                 borderColor: `primary.main`,
                 backgroundColor: `primary.50`,
               },
-            }}>
+            }}
+          >
             <CloudUpload
               sx={{
                 fontSize: 48,
                 color: `text.secondary`, 
-              }} />
+              }}
+            />
 
             <Typography
               variant="body2"
               color="text.secondary"
-              textAlign="center">
+              textAlign="center"
+            >
               Upload profile image
             </Typography>
 

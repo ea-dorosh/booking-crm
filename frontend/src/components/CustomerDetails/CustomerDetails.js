@@ -34,7 +34,8 @@ export default function CustomerDetails({
 
       <Typography
         variant="h6"
-        color="text.secondary">
+        color="text.secondary"
+      >
         Address
       </Typography>
 

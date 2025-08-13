@@ -34,7 +34,7 @@ export default function CompanyDetailPage() {
   const navigate = useNavigate();
 
   const {
-    data: company, isPending, updateFormPending, error, 
+    data: company, isPending, updateFormPending, error,
   } = useSelector(state => state.company);
 
   const formErrors = useSelector(state => state.company.updateFormErrors);
@@ -83,12 +83,13 @@ export default function CompanyDetailPage() {
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {isPending && <Box
-        mt={2}>
+      {isPending &&
+      <Box mt={2}>
         <LinearProgress />
       </Box>}
 
-      {hasCreateButton && !isEditMode &&<Box
+      {hasCreateButton && !isEditMode &&
+      <Box
         onClick={() => {
           dispatch(cleanErrors());
           setIsEditMode(true);
@@ -118,8 +119,8 @@ export default function CompanyDetailPage() {
         </IconButton>
       </Box>}
 
-      {isEditMode && <Box
-        mt={3}>
+      {isEditMode &&
+      <Box mt={3}>
         <CompanyForm
           company={company}
           submitForm={updateHandler}
@@ -131,8 +132,9 @@ export default function CompanyDetailPage() {
 
         <Box
           mt={2}
-          sx={{ width:`100%` }}>
-          {<Button
+          sx={{ width:`100%` }}
+        >
+          <Button
             variant="outlined"
             onClick={() => {
               dispatch(cleanErrors());
@@ -148,24 +150,22 @@ export default function CompanyDetailPage() {
             disabled={updateFormPending}
           >
             Cancel
-          </Button>}
+          </Button>
         </Box>
       </Box>}
 
-      {!isEditMode && company && <Box
-        mt={3}>
-        <CompanyDetails
-          company={company}
-          onChangeCompanyClick={() => {
-            dispatch(cleanErrors());
-            setIsEditMode(true);
-          }}
-        />
-      </Box>}
+      {!isEditMode && company &&
+        <Box mt={3}>
+          <CompanyDetails
+            company={company}
+            onChangeCompanyClick={() => {
+              dispatch(cleanErrors());
+              setIsEditMode(true);
+            }}
+          />
+        </Box>}
 
-      <CompanyBranchesContainer
-        branches={company?.branches || []}
-      />
+      <CompanyBranchesContainer branches={company?.branches || []} />
     </PageContainer>
   );
 }

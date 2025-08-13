@@ -23,14 +23,16 @@ export default function CustomersPage() {
 
   return (
     <PageContainer
-      pageTitle="Customers">
+      pageTitle="Customers"
+    >
 
-      {isPending && <Box
-        mt={2}>
+      {isPending &&
+      <Box mt={2}>
         <LinearProgress />
       </Box>}
 
-      {customers && customers.length > 0 && <CustomersContainer
+      {customers && customers.length > 0 &&
+      <CustomersContainer
         customers={customers}
       />}
     </PageContainer>

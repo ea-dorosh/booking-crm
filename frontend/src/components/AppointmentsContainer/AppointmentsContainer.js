@@ -25,15 +25,17 @@ export default function AppointmentsContainer({ appointments }) {
           maxWidth: `768px`,
         }}
       >
-        {appointments.length === 0 && <Typography
-          variant="h5"
-          sx={{
-            textAlign: `center`,
-            marginTop: `2rem`,
-          }}
-        >
-          No upcoming appointments
-        </Typography>}
+        {appointments.length === 0 &&
+          <Typography
+            variant="h5"
+            sx={{
+              textAlign: `center`,
+              marginTop: `2rem`,
+            }}
+          >
+            No upcoming appointments
+          </Typography>
+        }
         {appointments && appointments.map((appointment) => (
           <Box
             component={RouterLink}
@@ -56,18 +58,21 @@ export default function AppointmentsContainer({ appointments }) {
                 display: `flex`,
                 flexDirection: `column`,
                 alignItems: `center`,
-              }}>
+              }}
+            >
               <Typography
                 sx={{
                   fontSize: `1.2rem`,
-                }}>
+                }}
+              >
                 {getDay(appointment.date)}
               </Typography>
 
               <Typography
                 sx={{
                   fontSize: `.8rem`,
-                }}>
+                }}
+              >
                 {getMonth(appointment.date)}
               </Typography>
             </Box>
@@ -78,20 +83,24 @@ export default function AppointmentsContainer({ appointments }) {
                 display: `flex`,
                 flexDirection: `column`,
                 position: `relative`,
-              }}>
-              {appointment.status === appointmentStatusEnum.canceled && <Box
-                sx={{
-                  fontSize: `.5rem`,
-                  bgcolor: `red`,
-                  color: `#fff`,
-                  marginLeft: `auto`,
-                  position: `absolute`,
-                  padding: `1px 4px`,
-                  left: `0`,
-                  top: `-12px`,
-                }}>
-                canceled
-              </Box>}
+              }}
+            >
+              {appointment.status === appointmentStatusEnum.canceled &&
+                <Box
+                  sx={{
+                    fontSize: `.5rem`,
+                    bgcolor: `red`,
+                    color: `#fff`,
+                    marginLeft: `auto`,
+                    position: `absolute`,
+                    padding: `1px 4px`,
+                    left: `0`,
+                    top: `-12px`,
+                  }}
+                >
+                  canceled
+                </Box>
+              }
 
               <Typography
                 sx={{
@@ -110,21 +119,24 @@ export default function AppointmentsContainer({ appointments }) {
                 sx={{
                   fontSize: `1rem`,
                   fontWeight: `bold`,
-                }}>
+                }}
+              >
                 {appointment.serviceName}
               </Typography>
 
               <Typography
                 sx={{
                   fontSize: `.8rem`,
-                }}>
+                }}
+              >
                 {getDayOfWeek(appointment.date)}, {formattedDateToTime(appointment.timeStart)} ({formatTimeToString(appointment.serviceDuration)})
               </Typography>
 
               <Typography
                 sx={{
                   fontSize: `1rem`,
-                }}>
+                }}
+              >
                 {appointment.customerLastName} {appointment.customerFirstName}
               </Typography>
             </Box>

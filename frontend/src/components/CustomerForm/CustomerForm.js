@@ -83,7 +83,8 @@ export default function CustomerForm({
         fields.push(
           <SectionHeader
             key="address-header"
-            title="Address" />,
+            title="Address"
+          />,
         );
         currentSection = `address`;
       }
@@ -110,7 +111,8 @@ export default function CustomerForm({
             color: `error.main`,
             fontSize: `16px`,
             mt: 1, 
-          }}>
+          }}
+        >
           {errorMessage}
         </Box>
       )}

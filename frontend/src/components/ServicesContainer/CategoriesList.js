@@ -22,24 +22,28 @@ export default function CategoriesList({ categories }) {
             fontSize: 60,
             color: `grey.400`,
             marginBottom: 2,
-          }} />
+          }}
+        />
         <Typography
           variant="h6"
           color="text.secondary"
-          sx={{ marginBottom: 1 }}>
+          sx={{ marginBottom: 1 }}
+        >
           No categories found
         </Typography>
 
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ marginBottom: 3 }}>
+          sx={{ marginBottom: 3 }}
+        >
           Get started by adding your first category
         </Typography>
 
         <RouterLink
           to="/categories/create-category"
-          style={{ textDecoration: `none` }}>
+          style={{ textDecoration: `none` }}
+        >
           <Box
             component="span"
             sx={{
@@ -80,7 +84,8 @@ export default function CategoriesList({ categories }) {
           xs={12}
           sm={6}
           md={4}
-          key={category.id}>
+          key={category.id}
+        >
           <Card
             sx={{
               height: `100%`,
@@ -132,7 +137,8 @@ export default function CategoriesList({ categories }) {
                 sx={{
                   flex: 1,
                   minWidth: 0,
-                }}>
+                }}
+              >
                 <Typography
                   variant="h6"
                   sx={{
@@ -161,7 +167,8 @@ export default function CategoriesList({ categories }) {
                 sx={{
                   color: `grey.500`,
                   flexShrink: 0,
-                }} />
+                }}
+              />
 
             </CardActionArea>
           </Card>

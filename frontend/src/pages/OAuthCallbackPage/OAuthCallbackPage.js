@@ -54,17 +54,20 @@ const OAuthCallbackPage = () => {
     >
       <CircularProgress
         size={60}
-        sx={{ mb: 4 }} />
+        sx={{ mb: 4 }}
+      />
 
       <Typography
         variant="h5"
-        gutterBottom>
+        gutterBottom
+      >
         Processing Google authentication...
       </Typography>
 
       <Typography
         variant="body1"
-        color="text.secondary">
+        color="text.secondary"
+      >
         Please wait, you will be redirected automatically.
       </Typography>
     </Box>

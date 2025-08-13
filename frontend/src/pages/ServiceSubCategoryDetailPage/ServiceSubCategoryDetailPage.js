@@ -140,7 +140,8 @@ export default function ServiceSubCategoryDetailPage() {
   return (
     <PageContainer
       pageTitle={getPageTitle()}
-      hideSideNav>
+      hideSideNav
+    >
       <Box
         sx={{
           padding: {

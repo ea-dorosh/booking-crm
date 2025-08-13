@@ -76,10 +76,12 @@ export default function ForgotPasswordPage() {
 
   return (
     <ThemeProvider
-      theme={defaultTheme}>
+      theme={defaultTheme}
+    >
       <Container
         component="main"
-        maxWidth="xs">
+        maxWidth="xs"
+      >
         <CssBaseline />
         <Box
           sx={{
@@ -93,12 +95,14 @@ export default function ForgotPasswordPage() {
             sx={{
               m: 1,
               bgcolor: `secondary.main`, 
-            }}>
+            }}
+          >
             <LockOutlinedIcon />
           </Avatar>
           <Typography
             component="h1"
-            variant="h5">
+            variant="h5"
+          >
             Forgot Password
           </Typography>
 
@@ -121,7 +125,8 @@ export default function ForgotPasswordPage() {
             sx={{
               mt: 1,
               width: `100%`, 
-            }}>
+            }}
+          >
             <TextField
               margin="normal"
               required
@@ -151,13 +156,16 @@ export default function ForgotPasswordPage() {
 
             <Grid
               container
-              justifyContent="center">
+              justifyContent="center"
+            >
               <Grid
-                item>
+                item
+              >
                 <Link
                   component={RouterLink}
                   to="/login"
-                  variant="body2">
+                  variant="body2"
+                >
                   Back to Login
                 </Link>
               </Grid>
@@ -169,11 +177,13 @@ export default function ForgotPasswordPage() {
           variant="body2"
           color="text.secondary"
           align="center"
-          sx={{ mt: 8 }}>
+          sx={{ mt: 8 }}
+        >
           {`Copyright © `}
           <Link
             color="inherit"
-            href="#">
+            href="#"
+          >
             Booking CRM
           </Link>{` `}
           {new Date().getFullYear()}

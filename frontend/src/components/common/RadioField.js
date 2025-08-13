@@ -22,14 +22,16 @@ const RadioField = ({
   return (
     <FormControl
       error={Boolean(error)}
-      sx={sx}>
+      sx={sx}
+    >
       <Box
         sx={{
           display: `flex`,
           flexDirection: `row`,
           alignItems: `center`,
           gap: 3,
-        }}>
+        }}
+      >
         <FormLabel
           id={`${name}-group-label`}
           sx={{ mr: 4 }}
@@ -51,7 +53,8 @@ const RadioField = ({
               control={
                 <Radio
                   color="info"
-                  disabled={disabled} />
+                  disabled={disabled}
+                />
               }
               label={option.label}
             />

@@ -33,7 +33,9 @@ const SubCategorySelectField = ({
         error={Boolean(error)}
       >
         <InputLabel
-          id={`${name}-select-label`}>Service Sub Category</InputLabel>
+          id={`${name}-select-label`}
+        >Service Sub Category
+        </InputLabel>
 
         <Select
           name={name}
@@ -52,7 +54,8 @@ const SubCategorySelectField = ({
           {serviceSubCategories.map((subCategory) => (
             <MenuItem
               key={subCategory.id}
-              value={subCategory.id}>
+              value={subCategory.id}
+            >
               {subCategory.name}
             </MenuItem>
           ))}
@@ -67,7 +70,8 @@ const SubCategorySelectField = ({
 
       {value && (
         <RouterLink
-          to={`/categories/${value}`}>
+          to={`/categories/${value}`}
+        >
           <Button
             variant="outlined"
             color="primary"

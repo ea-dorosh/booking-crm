@@ -37,7 +37,7 @@ export default function CustomerDetailPage() {
   const navigate = useNavigate();
 
   const {
-    data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending, 
+    data: customer, isPending, updateFormPending, savedAppointments, isSavedAppointmentsPending,
   } = useSelector(state => state.customer);
 
   const formErrors = useSelector(state => state.customer.updateFormErrors);
@@ -89,13 +89,14 @@ export default function CustomerDetailPage() {
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {(isPending || isSavedAppointmentsPending) && <Box
-        mt={2}>
-        <LinearProgress />
-      </Box>}
+      {(isPending || isSavedAppointmentsPending) &&
+        <Box mt={2}>
+          <LinearProgress />
+        </Box>
+      }
 
-      {isEditMode && <Box
-        mt={3}>
+      {isEditMode &&
+      <Box mt={3}>
         <CustomerForm
           customer={customer}
           submitForm={updateHandler}
@@ -108,8 +109,9 @@ export default function CustomerDetailPage() {
 
         <Box
           mt={2}
-          sx={{ width:`100%` }}>
-          {<Button
+          sx={{ width:`100%` }}
+        >
+          <Button
             variant="outlined"
             onClick={() => {
               dispatch(cleanErrors());
@@ -124,20 +126,20 @@ export default function CustomerDetailPage() {
             disabled={updateFormPending}
           >
             Cancel
-          </Button>}
+          </Button>
         </Box>
       </Box>}
 
-      {!isEditMode && customer && <Box
-        mt={3}>
+      {!isEditMode && customer &&
+      <Box mt={3}>
         <CustomerDetails
           customer={customer}
           onChangeCustomerClick={() => setIsEditMode(true)}
         />
       </Box>}
 
-      {!isEditMode && savedAppointments && <Box
-        mt={3}>
+      {!isEditMode && savedAppointments &&
+      <Box mt={3}>
         <CustomerSavedAppointments
           appointments={savedAppointments}
         />

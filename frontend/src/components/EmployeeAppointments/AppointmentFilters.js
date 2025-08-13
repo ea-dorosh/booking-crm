@@ -115,7 +115,8 @@ export default function AppointmentFilters({
           marginBottom: isExpanded ? 2 : 0,
           flexWrap: `wrap`,
           gap: 1,
-        }}>
+        }}
+      >
         <Box
           sx={{
             display: `flex`,
@@ -123,14 +124,16 @@ export default function AppointmentFilters({
             gap: 1,
             flex: 1,
             minWidth: 0, 
-          }}>
+          }}
+        >
           <Typography
             variant="h6"
             sx={{
               fontSize: `1.1rem`,
               fontWeight: 600,
               mr: `auto`, 
-            }}>
+            }}
+          >
             Recent Appointments
           </Typography>
 
@@ -197,7 +200,8 @@ export default function AppointmentFilters({
       {/* Filters */}
       {isExpanded && (
         <Stack
-          spacing={2}>
+          spacing={2}
+        >
           {/* Date Range */}
           <Box>
             <Typography
@@ -206,13 +210,15 @@ export default function AppointmentFilters({
                 marginBottom: 1,
                 fontWeight: 600,
                 color: `text.secondary`, 
-              }}>
+              }}
+            >
               <CalendarToday
                 sx={{
                   fontSize: 16,
                   verticalAlign: `middle`,
                   marginRight: 0.5, 
-                }} />
+                }}
+              />
               Date Range
             </Typography>
             <Stack
@@ -227,13 +233,15 @@ export default function AppointmentFilters({
                 sx={{
                   flex: 1,
                   minWidth: 0, 
-                }}>
+                }}
+              >
                 <Typography
                   variant="body2"
                   sx={{
                     mb: 0.5,
                     fontWeight: 500, 
-                  }}>
+                  }}
+                >
                   Start Date
                 </Typography>
                 <TextField
@@ -248,13 +256,15 @@ export default function AppointmentFilters({
                 sx={{
                   flex: 1,
                   minWidth: 0, 
-                }}>
+                }}
+              >
                 <Typography
                   variant="body2"
                   sx={{
                     mb: 0.5,
                     fontWeight: 500, 
-                  }}>
+                  }}
+                >
                   End Date
                 </Typography>
                 <TextField
@@ -281,13 +291,15 @@ export default function AppointmentFilters({
               sx={{
                 flex: 1,
                 minWidth: 100, 
-              }}>
+              }}
+            >
               <Typography
                 variant="body2"
                 sx={{
                   mb: 0.5,
                   fontWeight: 500, 
-                }}>
+                }}
+              >
                 Status
               </Typography>
               <Select
@@ -329,13 +341,15 @@ export default function AppointmentFilters({
               sx={{
                 flex: 1,
                 minWidth: 100, 
-              }}>
+              }}
+            >
               <Typography
                 variant="body2"
                 sx={{
                   mb: 0.5,
                   fontWeight: 500, 
-                }}>
+                }}
+              >
                 Sort By
               </Typography>
               <Select
@@ -347,7 +361,8 @@ export default function AppointmentFilters({
                 {sortOptions.map((option) => (
                   <MenuItem
                     key={option.value}
-                    value={option.value}>
+                    value={option.value}
+                  >
                     {option.label}
                   </MenuItem>
                 ))}
@@ -358,13 +373,15 @@ export default function AppointmentFilters({
               sx={{
                 flex: 1,
                 minWidth: 100, 
-              }}>
+              }}
+            >
               <Typography
                 variant="body2"
                 sx={{
                   mb: 0.5,
                   fontWeight: 500, 
-                }}>
+                }}
+              >
                 Order
               </Typography>
               <Select
@@ -376,7 +393,8 @@ export default function AppointmentFilters({
                 {sortOrderOptions.map((option) => (
                   <MenuItem
                     key={option.value}
-                    value={option.value}>
+                    value={option.value}
+                  >
                     {option.label}
                   </MenuItem>
                 ))}
@@ -390,7 +408,8 @@ export default function AppointmentFilters({
               sx={{
                 display: `flex`,
                 justifyContent: `flex-end`, 
-              }}>
+              }}
+            >
               <Button
                 size="small"
                 variant="outlined"

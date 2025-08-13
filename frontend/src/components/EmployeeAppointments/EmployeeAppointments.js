@@ -169,12 +169,14 @@ export default function EmployeeAppointments({
                   alignItems: `center`,
                   gap: 1,
                   marginBottom: 1.5,
-                }}>
+                }}
+              >
                 <MiscellaneousServices
                   sx={{
                     fontSize: 16,
                     color: `grey.600`,
-                  }} />
+                  }}
+                />
                 <Box>
                   <Typography
                     variant="body2"

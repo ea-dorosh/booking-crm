@@ -64,8 +64,7 @@ export default function AppointmentsStatus() {
             backgroundColor: status === appointmentStatusEnum.active ? `lightgrey` : `initial`,              
           }}
         >
-          <Typography
-          >
+          <Typography >
             Active
           </Typography>
         </MenuItem>
@@ -76,8 +75,7 @@ export default function AppointmentsStatus() {
             backgroundColor: status === appointmentStatusEnum.canceled ? `lightgrey` : `initial`,              
           }}
         >
-          <Typography
-          >
+          <Typography >
             Canceled
           </Typography>
         </MenuItem>
@@ -88,8 +86,7 @@ export default function AppointmentsStatus() {
             backgroundColor: status === null ? `lightgrey` : `initial`,              
           }}
         >
-          <Typography
-          >
+          <Typography >
             All
           </Typography>
         </MenuItem>

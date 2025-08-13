@@ -12,12 +12,15 @@ import theme from '@/theme/theme';
 const root = ReactDOM.createRoot(document.getElementById(`root`));
 root.render(
   <Provider
-    store={store}>
+    store={store}
+  >
     <ThemeProvider
-      theme={theme}>
+      theme={theme}
+    >
       <CssBaseline />
       <RouterProvider
-        router={router} />
+        router={router}
+      />
     </ThemeProvider>
   </Provider>,
 );

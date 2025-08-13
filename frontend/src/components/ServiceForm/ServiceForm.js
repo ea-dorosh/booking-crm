@@ -185,7 +185,8 @@ export default function ServiceForm({
             <Grid
               item
               xs={12}
-              md={6}>
+              md={6}
+            >
               <FormField
                 type="select"
                 name="categoryId"
@@ -204,7 +205,8 @@ export default function ServiceForm({
             <Grid
               item
               xs={12}
-              md={6}>
+              md={6}
+            >
               <FormField
                 type="select"
                 name="subCategoryId"
@@ -230,7 +232,8 @@ export default function ServiceForm({
             <Grid
               item
               xs={12}
-              md={6}>
+              md={6}
+            >
               <FormField
                 type="select"
                 name="durationTime"
@@ -246,7 +249,8 @@ export default function ServiceForm({
             <Grid
               item
               xs={12}
-              md={6}>
+              md={6}
+            >
               <FormField
                 type="select"
                 name="bufferTime"
@@ -260,7 +264,8 @@ export default function ServiceForm({
 
             <Grid
               item
-              xs={12}>
+              xs={12}
+            >
               <FormField
                 type="textarea"
                 name="bookingNote"
@@ -281,23 +286,27 @@ export default function ServiceForm({
           marginBottom: 2,
           borderRadius: 2,
           boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
-        }}>
+        }}
+      >
         <CardContent
-          sx={{ padding: 2.5 }}>
+          sx={{ padding: 2.5 }}
+        >
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
               marginBottom: 1.5,
               color: `text.primary`,
-            }}>
+            }}
+          >
             Service Providers & Pricing
           </Typography>
 
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ marginBottom: 2 }}>
+            sx={{ marginBottom: 2 }}
+          >
             Select employees and set their prices for this service
           </Typography>
 
@@ -306,7 +315,8 @@ export default function ServiceForm({
               display: `flex`,
               flexDirection: `column`,
               gap: 1,
-            }}>
+            }}
+          >
             {employees.map((employee) => {
               const isSelected = isEmployeeSelected(employee.employeeId);
               const price = getEmployeePrice(employee.employeeId);
@@ -362,13 +372,15 @@ export default function ServiceForm({
                   </Avatar>
 
                   <Box
-                    sx={{ flex: 1 }}>
+                    sx={{ flex: 1 }}
+                  >
                     <Typography
                       variant="body1"
                       sx={{
                         fontWeight: 600,
                         color: `text.primary`,
-                      }}>
+                      }}
+                    >
                       {`${employee.firstName} ${employee.lastName}`}
                     </Typography>
                   </Box>
@@ -379,7 +391,8 @@ export default function ServiceForm({
                         display: `flex`,
                         alignItems: `center`,
                         gap: 1,
-                      }}>
+                      }}
+                    >
                       <TextField
                         type="number"
                         value={price}
@@ -394,9 +407,13 @@ export default function ServiceForm({
                           },
                         }}
                         InputProps={{
-                          endAdornment: <Typography
-                            variant="caption"
-                            color="text.secondary">€</Typography>,
+                          endAdornment:
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              €
+                            </Typography>,
                         }}
                         error={formErrors?.employeePrices?.some(ep => ep.employeeId === employee.employeeId)}
                         helperText={formErrors?.employeePrices?.find(ep => ep.employeeId === employee.employeeId)?.price}
@@ -411,7 +428,8 @@ export default function ServiceForm({
           {formErrors?.employeePrices && (
             <FormHelperText
               error
-              sx={{ marginTop: 1 }}>
+              sx={{ marginTop: 1 }}
+            >
               Please select at least one employee and set valid prices
             </FormHelperText>
           )}

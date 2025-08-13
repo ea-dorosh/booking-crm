@@ -40,31 +40,31 @@ const filter = createFilterOptions();
 const daysToPay = [
   {
     value: 0,
-    name: `Today`, 
+    name: `Today`,
   },
   {
     value: 1,
-    name: `1`, 
+    name: `1`,
   },
   {
     value: 7,
-    name: `7`, 
+    name: `7`,
   },
   {
     value: 14,
-    name: `14`, 
+    name: `14`,
   },
   {
     value: 30,
-    name: `30`, 
+    name: `30`,
   },
   {
     value: 60,
-    name: `60`, 
+    name: `60`,
   },
   {
     value: 90,
-    name: `90`, 
+    name: `90`,
   },
 ];
 
@@ -208,7 +208,7 @@ export default function InvoiceForm({
 
   const handleChange = (event) => {
     const {
-      name, value, 
+      name, value,
     } = event.target;
 
     if(formErrors && formErrors[name]) {
@@ -303,7 +303,8 @@ export default function InvoiceForm({
         Client
       </Typography>
 
-      {!isNewCustomer && <FormControl
+      {!isNewCustomer &&
+      <FormControl
         error={Boolean(formErrors?.customerId)}
         size="small"
         sx={{
@@ -335,7 +336,7 @@ export default function InvoiceForm({
           }}
           renderOption={(props, option) => {
             const {
-              key, ...otherProps 
+              key, ...otherProps
             } = props;
 
             if (option.isCreateNew) {
@@ -357,12 +358,14 @@ export default function InvoiceForm({
                   display: `flex`,
                   flexDirection: `column`,
                   alignItems: `flex-start`,
-                }}>
+                }}
+              >
                 {option.lastName} {option.firstName}
 
                 <Typography
                   variant="body2"
-                  color="text.secondary">
+                  color="text.secondary"
+                >
                   {option.email}
                 </Typography>
               </li>
@@ -392,12 +395,14 @@ export default function InvoiceForm({
             width: `100%`,
             color: `#d32f2f`,
             mt: `-.8rem`,
-          }} >
+          }}
+        >
           {formErrors.customerId}
         </FormHelperText>
       }
 
-      {isNewCustomer && <Box>
+      {isNewCustomer &&
+      <Box>
         <Button
           type="submit"
           variant="outlined"
@@ -416,14 +421,16 @@ export default function InvoiceForm({
           }}
         >
           <FormControl
-            error={Boolean(formErrors?.salutation)}>
+            error={Boolean(formErrors?.salutation)}
+          >
             <Box
               sx={{
                 display: `flex`,
                 flexDirection: `row`,
                 alignItems: `center`,
                 gap: 3,
-              }}>
+              }}
+            >
               <FormLabel
                 id="salutation-group-label"
                 sx={{ mr: 4 }}
@@ -442,18 +449,22 @@ export default function InvoiceForm({
                   control={
                     <Radio
                       color="info"
-                      disabled={isPending} />
+                      disabled={isPending}
+                    />
                   }
-                  label="Miss"  />
+                  label="Miss"
+                />
 
                 <FormControlLabel
                   value={0}
                   control={
                     <Radio
                       color="info"
-                      disabled={isPending} />
+                      disabled={isPending}
+                    />
                   }
-                  label="Mister" />
+                  label="Mister"
+                />
               </RadioGroup>
             </Box>
 
@@ -465,7 +476,8 @@ export default function InvoiceForm({
           </FormControl>
 
           <FormControl
-            error={Boolean(formErrors?.lastName)}>
+            error={Boolean(formErrors?.lastName)}
+          >
             <TextField
               value={formData.lastName}
               label="Last Name"
@@ -483,7 +495,8 @@ export default function InvoiceForm({
           </FormControl>
 
           <FormControl
-            error={Boolean(formErrors?.firstName)}>
+            error={Boolean(formErrors?.firstName)}
+          >
             <TextField
               value={formData.firstName}
               label="First Name"
@@ -501,7 +514,8 @@ export default function InvoiceForm({
           </FormControl>
 
           <FormControl
-            error={Boolean(formErrors?.email)}>
+            error={Boolean(formErrors?.email)}
+          >
             <TextField
               value={formData.email}
               label="Email"
@@ -519,7 +533,8 @@ export default function InvoiceForm({
           </FormControl>
 
           <FormControl
-            error={Boolean(formErrors?.phone)}>
+            error={Boolean(formErrors?.phone)}
+          >
             <TextField
               value={formData.phone}
               label="Phone"
@@ -547,27 +562,29 @@ export default function InvoiceForm({
       <Box
         sx={{
           display: `flex`,
-          gap: `1rem`, 
-        }}>
+          gap: `1rem`,
+        }}
+      >
         <FormControl
-          error={Boolean(formErrors?.dateIssued)}>
+          error={Boolean(formErrors?.dateIssued)}
+        >
           <LocalizationProvider
             dateAdapter={AdapterDayjs}
-            adapterLocale="de">
+            adapterLocale="de"
+          >
             <DatePicker
               label="Invoice Date"
               value={formData.dateIssued}
               onChange={handleDateChange}
-              renderInput={(params) => <TextField
-                {...params} />}
+              renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
         </FormControl>
 
-        <FormControl
-          sx={{ flexGrow: 1 }}>
-          <InputLabel
-            id="due-date-select-label">Days to pay:</InputLabel>
+        <FormControl sx={{ flexGrow: 1 }}>
+          <InputLabel id="due-date-select-label">
+            Days to pay:
+          </InputLabel>
 
           <Select
             labelId="due-date-select-label"
@@ -585,7 +602,8 @@ export default function InvoiceForm({
             {daysToPay.map((day) => (
               <MenuItem
                 key={day.value}
-                value={day.value}>
+                value={day.value}
+              >
                 {day.name}
               </MenuItem>
             ))}
@@ -593,271 +611,279 @@ export default function InvoiceForm({
         </FormControl>
       </Box>
 
-      <Typography
-        variant="h5"
-      >
+      <Typography variant="h5">
         Services
       </Typography>
 
       <Box>
         {formData.services.map((service, index, servicesArray) => {
-          return <Box
-            key={index}
-            sx={{
-              position: `relative`,
-              pt: `1rem`,
-              pb: `1rem`,
-              '&::before': {
-                content: `""`,
-                display: `block`,
-                height: `calc(100%)`,
-                width: `calc(100% + 2rem)`,
-                position: `absolute`,
-                top: 0,
-                left: `-1rem`,
-                backgroundColor: index % 2 === 0 ? `#f5f5f5` : `#e4e4e4`,
-                zIndex: -1,
-              },
-            }}
-          >
+          return (
             <Box
+              key={index}
               sx={{
-                display: `flex`,
-                gap: `.5rem`, 
-              }}>
-              <IconButton
-                color="error"
-                onClick={() => handleRemoveService(index)}
+                position: `relative`,
+                pt: `1rem`,
+                pb: `1rem`,
+                '&::before': {
+                  content: `""`,
+                  display: `block`,
+                  height: `calc(100%)`,
+                  width: `calc(100% + 2rem)`,
+                  position: `absolute`,
+                  top: 0,
+                  left: `-1rem`,
+                  backgroundColor: index % 2 === 0 ? `#f5f5f5` : `#e4e4e4`,
+                  zIndex: -1,
+                },
+              }}
+            >
+              <Box
                 sx={{
-                  padding: 0,
-                  alignSelf: `flex-start`,
-                  mt: `16px`,
-                }}
-                disabled={servicesArray.length === 1}
-              >
-                <Cancel />
-              </IconButton>
-
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: `bold`,
-                  textAlign: `center`,
-                  width: `3rem`,
+                  display: `flex`,
+                  gap: `.5rem`,
                 }}
               >
-              # <br />
-                {index + 1}
-              </Typography>
-
-              <FormControl
-                sx={{ width: `100%` }}
-                error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.name)}
-              >
-                <Autocomplete
-                  freeSolo
-                  options={services}
-                  filterOptions={(options, params) => {
-                    const filtered = filter(options, params);
-                    return filtered;
+                <IconButton
+                  color="error"
+                  onClick={() => handleRemoveService(index)}
+                  sx={{
+                    padding: 0,
+                    alignSelf: `flex-start`,
+                    mt: `16px`,
                   }}
-                  getOptionLabel={(option) => {
-                    if (typeof option === `string`) {
-                      return option;
-                    }
+                  disabled={servicesArray.length === 1}
+                >
+                  <Cancel />
+                </IconButton>
 
-                    return option.name;
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: `bold`,
+                    textAlign: `center`,
+                    width: `3rem`,
                   }}
-                  value={service.id
-                    ? services.find((s) => s.id === service.id) || service.name
-                    : service.name}
-                  onInputChange={(_event, newInputValue) => {
-                    handleServiceFieldChange(index, `id`, ``);
-                    handleServiceFieldChange(index, `name`, newInputValue);
-                  }}
-                  onChange={(event, value)=>handleServiceAutocompleteChange(event, value, index)}
-                  renderOption={(props, option) => {
-                    const {
-                      key, ...otherProps 
-                    } = props;
+                >
+                # <br />
+                  {index + 1}
+                </Typography>
 
-                    return (
-                      <li
-                        {...otherProps}
-                        key={key}>
-                        {option.name}
-                      </li>
-                    );
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Service Name"
-                      variant="outlined"
-                    />
-                  )}
-                />
+                <FormControl
+                  sx={{ width: `100%` }}
+                  error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.name)}
+                >
+                  <Autocomplete
+                    freeSolo
+                    options={services}
+                    filterOptions={(options, params) => {
+                      const filtered = filter(options, params);
+                      return filtered;
+                    }}
+                    getOptionLabel={(option) => {
+                      if (typeof option === `string`) {
+                        return option;
+                      }
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.name &&
-              <FormHelperText>
-                {formErrors.services[index].name}
-              </FormHelperText>
-                }
-              </FormControl>
-            </Box>
+                      return option.name;
+                    }}
+                    value={service.id
+                      ? services.find((s) => s.id === service.id) || service.name
+                      : service.name}
+                    onInputChange={(_event, newInputValue) => {
+                      handleServiceFieldChange(index, `id`, ``);
+                      handleServiceFieldChange(index, `name`, newInputValue);
+                    }}
+                    onChange={(event, value)=>handleServiceAutocompleteChange(event, value, index)}
+                    renderOption={(props, option) => {
+                      const {
+                        key, ...otherProps
+                      } = props;
 
-            <Box
-              sx={{
-                display: `flex`,
-                gap: `1rem`,
-                mt: `2rem`,
-                alignItems: `flex-start`,
-              }}>
-              <FormControl
-                error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity)}
+                      return (
+                        <li
+                          {...otherProps}
+                          key={key}
+                        >
+                          {option.name}
+                        </li>
+                      );
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Service Name"
+                        variant="outlined"
+                      />
+                    )}
+                  />
+
+                  {formErrors?.services?.length > 0 && formErrors?.services[index]?.name &&
+                <FormHelperText>
+                  {formErrors.services[index].name}
+                </FormHelperText>
+                  }
+                </FormControl>
+              </Box>
+
+              <Box
                 sx={{
-                  position: `relative`,
-                  flexGrow: 1,
+                  display: `flex`,
+                  gap: `1rem`,
+                  mt: `2rem`,
+                  alignItems: `flex-start`,
                 }}
               >
-                <TextField
-                  value={service.quantity}
-                  label="Quantity"
-                  variant="outlined"
-                  name="subtotal"
-                  onChange={(event) => handleServiceFieldChange(index, `quantity`, event.target.value)}
-                  disabled={isPending}
-                  InputProps={{
-                    readOnly: true,
+                <FormControl
+                  error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity)}
+                  sx={{
+                    position: `relative`,
+                    flexGrow: 1,
                   }}
-                />
+                >
+                  <TextField
+                    value={service.quantity}
+                    label="Quantity"
+                    variant="outlined"
+                    name="subtotal"
+                    onChange={(event) => handleServiceFieldChange(index, `quantity`, event.target.value)}
+                    disabled={isPending}
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  />
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity &&
+                  {formErrors?.services?.length > 0 && formErrors?.services[index]?.quantity &&
                 <FormHelperText>
                   {formErrors.services[index].quantity}
                 </FormHelperText>
-                }
+                  }
 
-                <IconButton
-                  color="primary"
-                  onClick={() => handleServiceFieldChange(index, `quantity`, Number(service.quantity) + 1)}
-                  sx={{
-                    position: `absolute`,
-                    right: `15px`,
-                    top: `-13px`,
-                    transform: `rotate(90deg)`,
-                    height: `55px`,
-                    width: `27px`,
-                    border: `none`,
-                    padding: 0,
-                    margin: 0,
-                    borderRadius: 0,
-                    borderRight: `1px solid #ddd`,
-                    borderBottom: `1px solid #ddd`,
-                    paddingLeft: `12px`,
-                  }}
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleServiceFieldChange(index, `quantity`, Number(service.quantity) + 1)}
+                    sx={{
+                      position: `absolute`,
+                      right: `15px`,
+                      top: `-13px`,
+                      transform: `rotate(90deg)`,
+                      height: `55px`,
+                      width: `27px`,
+                      border: `none`,
+                      padding: 0,
+                      margin: 0,
+                      borderRadius: 0,
+                      borderRight: `1px solid #ddd`,
+                      borderBottom: `1px solid #ddd`,
+                      paddingLeft: `12px`,
+                    }}
+                  >
+                    <ArrowBackIos />
+                  </IconButton>
+
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleServiceFieldChange(index, `quantity`, Number(service.quantity) > 1 ? Number(service.quantity) - 1 : 1)}
+                    sx={{
+                      position: `absolute`,
+                      right: `15px`,
+                      bottom: `-13px`,
+                      transform: `rotate(-90deg)`,
+                      height: `55px`,
+                      width: `27px`,
+                      border: `none`,
+                      padding: 0,
+                      margin: 0,
+                      borderRadius: 0,
+                      borderRight: `1px solid #ddd`,
+                      borderTop: `1px solid #ddd`,
+                      paddingLeft: `12px`,
+                    }}
+                  >
+                    <ArrowBackIos />
+                  </IconButton>
+                </FormControl>
+
+                <FormControl
+                  error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.price)}
+                  sx={{ flexGrow: 1 }}
                 >
-                  <ArrowBackIos />
-                </IconButton>
+                  <InputLabel
+                    htmlFor="outlined-adornment-password"
+                  >Price
+                  </InputLabel>
 
-                <IconButton
-                  color="primary"
-                  onClick={() => handleServiceFieldChange(index, `quantity`, Number(service.quantity) > 1 ? Number(service.quantity) - 1 : 1)}
-                  sx={{
-                    position: `absolute`,
-                    right: `15px`,
-                    bottom: `-13px`,
-                    transform: `rotate(-90deg)`,
-                    height: `55px`,
-                    width: `27px`,
-                    border: `none`,
-                    padding: 0,
-                    margin: 0,
-                    borderRadius: 0,
-                    borderRight: `1px solid #ddd`,
-                    borderTop: `1px solid #ddd`,
-                    paddingLeft: `12px`,
-                  }}
-                >
-                  <ArrowBackIos />
-                </IconButton>
-              </FormControl>
+                  <OutlinedInput
+                    value={service.price}
+                    label="Price"
+                    name="subtotal"
+                    endAdornment={<InputAdornment position="end"> € </InputAdornment>}
+                    onChange={(event) => handleServiceFieldChange(index, `price`, event.target.value)}
+                    disabled={isPending}
+                    type="text"
+                    inputProps={{
+                      inputMode: `decimal`,
+                      pattern: `[0-9]+([.,][0-9]+)?`,
+                    }}
+                  />
 
-              <FormControl
-                error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.price)}
-                sx={{ flexGrow: 1 }}>
-                <InputLabel
-                  htmlFor="outlined-adornment-password">Price</InputLabel>
-
-                <OutlinedInput
-                  value={service.price}
-                  label="Price"
-                  name="subtotal"
-                  endAdornment={<InputAdornment
-                    position="end"> € </InputAdornment>}
-                  onChange={(event) => handleServiceFieldChange(index, `price`, event.target.value)}
-                  disabled={isPending}
-                  type="text"
-                  inputProps={{
-                    inputMode: `decimal`,
-                    pattern: `[0-9]+([.,][0-9]+)?`,
-                  }}
-                />
-
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.price &&
+                  {formErrors?.services?.length > 0 && formErrors?.services[index]?.price &&
                 <FormHelperText>
                   {formErrors.services[index].price}
                 </FormHelperText>
-                }
-              </FormControl>
+                  }
+                </FormControl>
 
-              <FormControl
-                error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate)}
-                sx={{ flexGrow: 1 }}>
-                <InputLabel
-                  htmlFor="outlined-adornment-password">Tax MwSt.</InputLabel>
+                <FormControl
+                  error={Boolean(formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate)}
+                  sx={{ flexGrow: 1 }}
+                >
+                  <InputLabel
+                    htmlFor="outlined-adornment-password"
+                  >Tax MwSt.
+                  </InputLabel>
 
-                <OutlinedInput
-                  value={service.taxRate}
-                  label="Tax MwSt."
-                  endAdornment={<InputAdornment
-                    position="end"> % </InputAdornment>}
-                  name="taxRate"
-                  type="text"
-                  inputProps={{
-                    inputMode: `decimal`,
-                    pattern: `[0-9]+([.,][0-9]+)?`,
-                  }}
-                  onChange={(event) => handleServiceFieldChange(index, `taxRate`, event.target.value)}
-                  disabled={isPending}
-                />
+                  <OutlinedInput
+                    value={service.taxRate}
+                    label="Tax MwSt."
+                    endAdornment={<InputAdornment position="end"> % </InputAdornment>}
+                    name="taxRate"
+                    type="text"
+                    inputProps={{
+                      inputMode: `decimal`,
+                      pattern: `[0-9]+([.,][0-9]+)?`,
+                    }}
+                    onChange={(event) => handleServiceFieldChange(index, `taxRate`, event.target.value)}
+                    disabled={isPending}
+                  />
 
-                {formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate &&
+                  {formErrors?.services?.length > 0 && formErrors?.services[index]?.taxRate &&
                 <FormHelperText>
                   {formErrors.services[index].taxRate}
                 </FormHelperText>
-                }
-              </FormControl>
-            </Box>
+                  }
+                </FormControl>
+              </Box>
 
-            <Box
-              sx={{
-                display: `flex`,
-                justifyContent: `flex-end`,
-              }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={service.isTaxesIncluded}
-                    onChange={(event) => handleServiceFieldChange(index, `isTaxesIncluded`, event.target.checked)}
-                    inputProps={{ 'aria-label': `controlled` }}
-                  />
-                }
-                labelPlacement="start"
-                label="Tax included in Price"
-              />
+              <Box
+                sx={{
+                  display: `flex`,
+                  justifyContent: `flex-end`,
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={service.isTaxesIncluded}
+                      onChange={(event) => handleServiceFieldChange(index, `isTaxesIncluded`, event.target.checked)}
+                      inputProps={{ 'aria-label': `controlled` }}
+                    />
+                  }
+                  labelPlacement="start"
+                  label="Tax included in Price"
+                />
+              </Box>
             </Box>
-          </Box>
+          );
         })}
       </Box>
 
@@ -867,8 +893,7 @@ export default function InvoiceForm({
         variant="text"
         color="secondary"
         size="large"
-        endIcon={<AddCircle
-          size={30} />}
+        endIcon={<AddCircle size={30} />}
         sx={{
           alignSelf: `flex-end`,
           padding: 0,
@@ -884,8 +909,7 @@ export default function InvoiceForm({
         onClick={handleSubmit}
         sx={{ mt: `20px` }}
         disabled={isPending}
-        endIcon={isPending && <CircularProgress
-          size={16} />}
+        endIcon={isPending && <CircularProgress size={16} />}
       >
         Save
       </Button>

@@ -175,7 +175,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       <Box
         display="flex"
         justifyContent="center"
-        my={3}>
+        my={3}
+      >
         <CircularProgress />
       </Box>
     );
@@ -198,7 +199,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       {error && (
         <Alert
           severity="error"
-          sx={{ mb: 2 }}>
+          sx={{ mb: 2 }}
+        >
           {error}
         </Alert>
       )}
@@ -216,7 +218,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       {status.enabled ? (
         <Card
           variant="outlined"
-          sx={{ mb: 3 }}>
+          sx={{ mb: 3 }}
+        >
           <CardContent>
             <Stack
               direction="row"
@@ -357,7 +360,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
           />
 
           <Box
-            sx={{ mb: 2 }}>
+            sx={{ mb: 2 }}
+          >
             <Button
               variant="contained"
               onClick={handleConnect}

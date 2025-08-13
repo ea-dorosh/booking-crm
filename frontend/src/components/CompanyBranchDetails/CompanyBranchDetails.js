@@ -22,53 +22,59 @@ export default function CompanyBranchDetails({
 
   return (
     <Box>
-      {!isEditMode && <List>
-        <ListItemText
-          value={branch.name}
-          label="Name"
+      {!isEditMode &&
+        <List>
+          <ListItemText
+            value={branch.name}
+            label="Name"
+          />
+
+          <ListItemText
+            value={`${branch.addressStreet}, ${branch.addressZip} ${branch.addressCity}, ${branch.addressCountry}`}
+            label="Address"
+          />
+
+          <ListItemText
+            value={branch.phone}
+            label="Phone"
+          />
+
+          <ListItemText
+            value={branch.email}
+            label="Email"
+          />
+        </List>
+      }
+
+      {isEditMode &&
+        <CompanyBranchForm
+          branch={branch}
+          submitForm={submitForm}
+          formErrors={formErrors}
+          cleanError={cleanError}
+          cleanErrors={cleanErrors}
+          isPending={isPending}
+          onCancelClick={() => {
+            cleanErrors();
+            setIsEditMode(false);
+          }}
         />
+      }
 
-        <ListItemText
-          value={`${branch.addressStreet}, ${branch.addressZip} ${branch.addressCity}, ${branch.addressCountry}`}
-          label="Address"
-        />
-
-        <ListItemText
-          value={branch.phone}
-          label="Phone"
-        />
-
-        <ListItemText
-          value={branch.email}
-          label="Email"
-        />
-      </List>}
-
-      {isEditMode && <CompanyBranchForm
-        branch={branch}
-        submitForm={submitForm}
-        formErrors={formErrors}
-        cleanError={cleanError}
-        cleanErrors={cleanErrors}
-        isPending={isPending}
-        onCancelClick={() => {
-          cleanErrors();
-          setIsEditMode(false);
-        }}
-      />}
-
-      {!isEditMode && !disabledEditMode && <Button
-        startIcon={<EditIcon />}
-        onClick={() => {
-          cleanErrors();
-          setIsEditMode(true);
-          onEditModeClick();
-        }}
-        variant="outlined"
-        sx={{ mt: 2 }}
-      >
-        Change Branch Details
-      </Button>}
+      {!isEditMode && !disabledEditMode &&
+        <Button
+          startIcon={<EditIcon />}
+          onClick={() => {
+            cleanErrors();
+            setIsEditMode(true);
+            onEditModeClick();
+          }}
+          variant="outlined"
+          sx={{ mt: 2 }}
+        >
+          Change Branch Details
+        </Button>
+      }
     </Box>
   );
 }

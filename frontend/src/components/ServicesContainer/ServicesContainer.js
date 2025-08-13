@@ -105,30 +105,38 @@ export default function ServicesContainer({
   const renderContent = () => {
     switch (activeTab) {
     case TABS[SERVICES].value:
-      return <ServicesList
-        services={filteredServices}
-        employees={employees}
-        categories={categories}
-        statusFilter={categoryStatusFilter}
-      />;
+      return (
+        <ServicesList
+          services={filteredServices}
+          employees={employees}
+          categories={categories}
+          statusFilter={categoryStatusFilter}
+        />
+      );
     case TABS[SUB_CATEGORIES].value:
-      return <SubCategoriesList
-        subCategories={subCategories}
-        categories={categories}
-        statusFilter={subCategoryStatusFilter}
-      />;
+      return (
+        <SubCategoriesList
+          subCategories={subCategories}
+          categories={categories}
+          statusFilter={subCategoryStatusFilter}
+        />
+      );
     case TABS[CATEGORIES].value:
-      return <CategoriesList
-        categories={categories}
-        statusFilter={categoryStatusFilter}
-      />;
+      return (
+        <CategoriesList
+          categories={categories}
+          statusFilter={categoryStatusFilter}
+        />
+      );
     default:
-      return <ServicesList
-        services={filteredServices}
-        employees={employees}
-        categories={categories}
-        statusFilter={categoryStatusFilter}
-      />;
+      return (
+        <ServicesList
+          services={filteredServices}
+          employees={employees}
+          categories={categories}
+          statusFilter={categoryStatusFilter}
+        />
+      );
     }
   };
 
@@ -152,7 +160,8 @@ export default function ServicesContainer({
           xs: 0,
           md: 3,
         },
-      }}>
+      }}
+    >
       {/* Header */}
       <Box
         sx={{
@@ -161,20 +170,23 @@ export default function ServicesContainer({
             xs: 0,
             md: 0,
           },
-        }}>
+        }}
+      >
         <Typography
           variant="h4"
           sx={{
             fontWeight: 700,
             marginBottom: 1,
-          }}>
+          }}
+        >
           {TABS[activeTab].label}
         </Typography>
 
         <Typography
           variant="body1"
           color="text.secondary"
-          sx={{ marginBottom: 2 }}>
+          sx={{ marginBottom: 2 }}
+        >
           {getTabDescription()}
         </Typography>
 
@@ -185,13 +197,15 @@ export default function ServicesContainer({
             gap: 2,
             justifyContent: `flex-end`,
             alignItems: `flex-start`,
-          }}>
+          }}
+        >
           {activeTab === TABS[SERVICES].value && (
             <FilterButton
               employees={employees}
               categories={categories}
               subCategories={subCategories}
-              sx={{ mr: `auto` }} />
+              sx={{ mr: `auto` }}
+            />
           )}
 
           <AddButton
@@ -211,7 +225,8 @@ export default function ServicesContainer({
             xs: 0,
             md: 0,
           },
-        }}>
+        }}
+      >
         <Tabs
           tabs={[TABS[SERVICES], TABS[SUB_CATEGORIES], TABS[CATEGORIES]]}
           onChange={handleTabChange}
@@ -230,13 +245,21 @@ export default function ServicesContainer({
             }}
           >
             <ToggleButton
-              value="all">all</ToggleButton>
+              value="all"
+            >all
+            </ToggleButton>
             <ToggleButton
-              value={categoryStatusEnum.active}>active</ToggleButton>
+              value={categoryStatusEnum.active}
+            >active
+            </ToggleButton>
             <ToggleButton
-              value={categoryStatusEnum.disabled}>not active</ToggleButton>
+              value={categoryStatusEnum.disabled}
+            >not active
+            </ToggleButton>
             <ToggleButton
-              value={categoryStatusEnum.archived}>deleted</ToggleButton>
+              value={categoryStatusEnum.archived}
+            >deleted
+            </ToggleButton>
           </ToggleButtonGroup>
         )}
 
@@ -251,14 +274,10 @@ export default function ServicesContainer({
               mt: 2,
             }}
           >
-            <ToggleButton
-              value="all">all</ToggleButton>
-            <ToggleButton
-              value={subCategoryStatusEnum.active}>active</ToggleButton>
-            <ToggleButton
-              value={subCategoryStatusEnum.disabled}>not active</ToggleButton>
-            <ToggleButton
-              value={subCategoryStatusEnum.archived}>deleted</ToggleButton>
+            <ToggleButton value="all">all</ToggleButton>
+            <ToggleButton value={subCategoryStatusEnum.active}>active</ToggleButton>
+            <ToggleButton value={subCategoryStatusEnum.disabled}>not active</ToggleButton>
+            <ToggleButton value={subCategoryStatusEnum.archived}>deleted</ToggleButton>
           </ToggleButtonGroup>
         )}
       </Box>

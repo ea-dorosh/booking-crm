@@ -12,7 +12,8 @@ export default function GoBackNavigation({ beforeGoBack }) {
 
   return (
     <Box
-      sx={{ marginBottom: 2 }}>
+      sx={{ marginBottom: 2 }}
+    >
       <Button
         onClick={async () => {
           await beforeGoBack?.();

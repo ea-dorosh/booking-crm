@@ -17,10 +17,12 @@ export default function ServiceCategoriesContainer({ categories }) {
         sx={{
           p: 2,
           textAlign: `center`, 
-        }}>
+        }}
+      >
         <Typography
           variant="body1"
-          color="text.secondary">
+          color="text.secondary"
+        >
           No categories found
         </Typography>
       </Box>

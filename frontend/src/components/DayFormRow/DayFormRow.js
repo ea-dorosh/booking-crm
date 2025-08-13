@@ -223,7 +223,8 @@ export default function DayFormRow({
               {timeSlots.map((timeSlot) => (
                 <MenuItem
                   key={timeSlot.startTime}
-                  value={timeSlot.startTime}>
+                  value={timeSlot.startTime}
+                >
                   {formattedTime(timeSlot.startTime)}
                 </MenuItem>
               ))}
@@ -249,7 +250,8 @@ export default function DayFormRow({
               {timeSlots.map((timeSlot) => (
                 <MenuItem
                   key={timeSlot.endTime}
-                  value={timeSlot.endTime}>
+                  value={timeSlot.endTime}
+                >
                   {formattedTime(timeSlot.endTime)}
                 </MenuItem>
               ))}
@@ -374,15 +376,15 @@ export default function DayFormRow({
               color="secondary"
             >
               <Delete
-                sx={{ fontSize: 16 }} />
+                sx={{ fontSize: 16 }}
+              />
             </IconButton>
           </>
         ) : (
           <Button
             size="small"
             variant="contained"
-            startIcon={<Add
-              sx={{ fontSize: 16 }} />}
+            startIcon={<Add sx={{ fontSize: 16 }} />}
             onClick={() => setIsEditMode(true)}
             color="secondary"
             sx={{

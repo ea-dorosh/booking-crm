@@ -27,7 +27,8 @@ export default function Tabs({
 
   return (
     <Box
-      sx={{ width: `100%` }}>
+      sx={{ width: `100%` }}
+    >
       <Box
         sx={{
           borderBottom: 1,
@@ -36,7 +37,8 @@ export default function Tabs({
           borderRadius: 2,
           overflow: `hidden`,
           boxShadow: `0 1px 3px rgba(0,0,0,0.1)`,
-        }}>
+        }}
+      >
         <MuiTabs
           value={value}
           onChange={handleChange}

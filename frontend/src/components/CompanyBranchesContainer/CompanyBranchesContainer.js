@@ -17,7 +17,7 @@ import { fetchCompany } from "@/features/company/companySlice";
 export default function CompanyBranchesContainer({ branches }) {
   const dispatch = useDispatch();
   const {
-    updateFormPending, updateFormErrors, 
+    updateFormPending, updateFormErrors,
   } = useSelector(state => state.companyBranch);
 
   const [isAddMode, setIsAddMode] = useState(false);
@@ -47,32 +47,37 @@ export default function CompanyBranchesContainer({ branches }) {
 
   return (
     <Box
-      mt={3}>
-      {hasAddButton && <Box>
-        <Button
-          onClick={() => {
+      mt={3}
+    >
+      {hasAddButton &&
+        <Box>
+          <Button
+            onClick={() => {
+              dispatch(cleanErrors());
+              setIsAddMode(true);
+            }}
+            disabled={isAddMode}
+          >
+            <AddIcon />
+            Add Branch
+          </Button>
+
+        </Box>
+      }
+
+      {isAddMode &&
+        <CompanyBranchForm
+          submitForm={submitForm}
+          formErrors={updateFormErrors?.validationErrors}
+          cleanError={handleCleanError}
+          cleanErrors={handleCleanErrors}
+          isPending={updateFormPending}
+          onCancelClick={() => {
             dispatch(cleanErrors());
-            setIsAddMode(true);
+            setIsAddMode(false);
           }}
-          disabled={isAddMode}
-        >
-          <AddIcon />
-          Add Branch
-        </Button>
-
-      </Box>}
-
-      {isAddMode && <CompanyBranchForm
-        submitForm={submitForm}
-        formErrors={updateFormErrors?.validationErrors}
-        cleanError={handleCleanError}
-        cleanErrors={handleCleanErrors}
-        isPending={updateFormPending}
-        onCancelClick={() => {
-          dispatch(cleanErrors());
-          setIsAddMode(false);
-        }}
-      />}
+        />
+      }
 
       {branches.map((branch) => (
         <CompanyBranchDetails

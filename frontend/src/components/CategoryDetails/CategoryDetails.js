@@ -22,9 +22,11 @@ export default function CategoryDetails({
         marginTop: 1,
         borderRadius: 2,
         boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
-      }}>
+      }}
+    >
       <CardContent
-        sx={{ padding: 2.5 }}>
+        sx={{ padding: 2.5 }}
+      >
         {/* Header with Edit Button */}
         <Box
           sx={{
@@ -35,7 +37,8 @@ export default function CategoryDetails({
             paddingBottom: 1.5,
             borderBottom: `1px solid`,
             borderColor: `grey.100`,
-          }}>
+          }}
+        >
           <Box>
             <Typography
               variant="h4"
@@ -43,7 +46,8 @@ export default function CategoryDetails({
                 fontWeight: 700,
                 marginBottom: 0.5,
                 color: `text.primary`,
-              }}>
+              }}
+            >
               {category.name}
             </Typography>
 
@@ -61,7 +65,8 @@ export default function CategoryDetails({
             sx={{
               display: `flex`,
               gap: 1,
-            }}>
+            }}
+          >
             <Button
               variant="contained"
               size="small"
@@ -78,12 +83,14 @@ export default function CategoryDetails({
         {/* Details Grid */}
         <Grid
           container
-          spacing={1.5}>
+          spacing={1.5}
+        >
           {/* Image Preview */}
           {category.image && (
             <Grid
               item
-              xs={12}>
+              xs={12}
+            >
               <Box
                 sx={{
                   width: `100%`,
@@ -117,7 +124,8 @@ export default function CategoryDetails({
             alignItems: `center`,
             mt: 2,
             justifyContent: `space-between`,
-          }}>
+          }}
+        >
           <Button
             disabled={category.status === categoryStatusEnum.archived}
             variant="outlined"

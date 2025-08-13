@@ -23,7 +23,7 @@ export default function AppointmentsPage() {
 
   const appointments = useSelector(selectSortedAppointments);
   const {
-    startDate, isPending, 
+    startDate, isPending,
   } = useSelector((state) => state.appointments);
 
   useEffect(() => {
@@ -53,8 +53,10 @@ export default function AppointmentsPage() {
           alignItems: `flex-start`,
           mt: 1.5,
           gap: 2,
-        }}>
-        {startDate && <AppointmentsStartDate
+        }}
+      >
+        {startDate &&
+        <AppointmentsStartDate
           startDate={startDate}
           onStartDateChange={onStartDateChange}
         />}
@@ -62,17 +64,19 @@ export default function AppointmentsPage() {
         <AppointmentsStatus />
 
         <Box
-          ml="auto">
+          ml="auto"
+        >
           <AppointmentsSorting />
         </Box>
       </Box>
 
-      {isPending && <Box
-        mt={2}>
+      {isPending &&
+      <Box mt={2}>
         <LinearProgress />
       </Box>}
 
-      {appointments && <AppointmentsContainer
+      {appointments &&
+      <AppointmentsContainer
         appointments={appointments}
       />}
     </PageContainer>

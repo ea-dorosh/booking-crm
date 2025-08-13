@@ -58,86 +58,114 @@ export const router = createBrowserRouter([
   },
   {
     path: `/appointments`,
-    element: <ProtectedRoute>
-      <AppointmentsPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <AppointmentsPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/appointments/:appointmentId`,
-    element: <ProtectedRoute>
-      <AppointmentDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <AppointmentDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/company`,
-    element: <ProtectedRoute>
-      <CompanyDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <CompanyDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/customers`,
-    element: <ProtectedRoute>
-      <CustomersPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <CustomersPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/customers/:customerId`,
-    element: <ProtectedRoute>
-      <CustomerDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <CustomerDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/employees`,
-    element: <ProtectedRoute>
-      <EmployeesPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <EmployeesPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/employees/:employeeId`,
-    element: <ProtectedRoute>
-      <EmployeeDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <EmployeeDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/invoices`,
-    element: <ProtectedRoute>
-      <InvoicesPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <InvoicesPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/invoices/:invoiceId`,
-    element: <ProtectedRoute>
-      <InvoiceDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <InvoiceDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/services`,
-    element: <ProtectedRoute>
-      <ServicesPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <ServicesPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/services/:serviceId`,
-    element: <ProtectedRoute>
-      <ServicesDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <ServicesDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/sub-categories/:subCategoryId`,
-    element: <ProtectedRoute>
-      <ServiceSubCategoryDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <ServiceSubCategoryDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/categories/:categoryId`,
-    element: <ProtectedRoute>
-      <ServiceCategoryDetailPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <ServiceCategoryDetailPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: `/account`,
-    element: <ProtectedRoute>
-      <AccountPage />
-    </ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <AccountPage />
+      </ProtectedRoute>
+    ),
   },
 ]);

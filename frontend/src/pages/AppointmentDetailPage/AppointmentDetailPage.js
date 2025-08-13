@@ -87,13 +87,15 @@ export default function AppointmentDetailPage() {
           sx={{
             mt: 3,
             mb: 5, 
-          }}>
+          }}
+        >
           <Card
             elevation={3}
             sx={{
               mb: 4,
               overflow: `visible`, 
-            }}>
+            }}
+          >
             <Box
               sx={{
                 p: 2,
@@ -104,7 +106,8 @@ export default function AppointmentDetailPage() {
             >
               <Typography
                 variant="h5"
-                fontWeight="bold">
+                fontWeight="bold"
+              >
                 {appointment.serviceName}
               </Typography>
               <Chip
@@ -120,27 +123,33 @@ export default function AppointmentDetailPage() {
             </Box>
 
             <CardContent
-              sx={{ p: 3 }}>
+              sx={{ p: 3 }}
+            >
               <Grid
                 container
-                spacing={3}>
+                spacing={3}
+              >
                 <Grid
                   item
                   xs={12}
-                  md={6}>
+                  md={6}
+                >
                   <Box
                     sx={{
                       display: `flex`,
                       alignItems: `center`,
                       mb: 2, 
-                    }}>
+                    }}
+                  >
                     <CalendarIcon
                       sx={{
                         mr: 1,
                         color: `primary.main`, 
-                      }} />
+                      }}
+                    />
                     <Typography
-                      variant="body1">
+                      variant="body1"
+                    >
                       <strong>Date:</strong> {formatIsoDate(appointment.date)}
                     </Typography>
                   </Box>
@@ -150,14 +159,17 @@ export default function AppointmentDetailPage() {
                       display: `flex`,
                       alignItems: `center`,
                       mb: 2, 
-                    }}>
+                    }}
+                  >
                     <TimeIcon
                       sx={{
                         mr: 1,
                         color: `primary.main`, 
-                      }} />
+                      }}
+                    />
                     <Typography
-                      variant="body1">
+                      variant="body1"
+                    >
                       <strong>Time:</strong> {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
                     </Typography>
                   </Box>
@@ -167,14 +179,17 @@ export default function AppointmentDetailPage() {
                       display: `flex`,
                       alignItems: `center`,
                       mb: 2, 
-                    }}>
+                    }}
+                  >
                     <ScheduleIcon
                       sx={{
                         mr: 1,
                         color: `primary.main`, 
-                      }} />
+                      }}
+                    />
                     <Typography
-                      variant="body1">
+                      variant="body1"
+                    >
                       <strong>Duration:</strong> {formatTimeToString(appointment.serviceDuration)}
                     </Typography>
                   </Box>
@@ -183,28 +198,33 @@ export default function AppointmentDetailPage() {
                 <Grid
                   item
                   xs={12}
-                  md={6}>
+                  md={6}
+                >
                   <Paper
                     elevation={1}
                     sx={{
                       p: 2,
                       bgcolor: `grey.50`, 
-                    }}>
+                    }}
+                  >
                     <Typography
                       variant="subtitle2"
                       color="text.secondary"
-                      gutterBottom>
+                      gutterBottom
+                    >
                       APPOINTMENT CREATED
                     </Typography>
                     <Typography
                       variant="body1"
                       fontWeight="medium"
-                      color="primary.main">
+                      color="primary.main"
+                    >
                       {formatCreatedDate(appointment.createdDate)}
                     </Typography>
                     <Typography
                       variant="caption"
-                      color="text.secondary">
+                      color="text.secondary"
+                    >
                       {appointment.createdDate}
                     </Typography>
                   </Paper>
@@ -212,28 +232,34 @@ export default function AppointmentDetailPage() {
               </Grid>
 
               <Divider
-                sx={{ my: 3 }} />
+                sx={{ my: 3 }}
+              />
 
               <Grid
                 container
-                spacing={3}>
+                spacing={3}
+              >
                 <Grid
                   item
                   xs={12}
-                  md={6}>
+                  md={6}
+                >
                   <Box
                     sx={{
                       display: `flex`,
                       alignItems: `center`, 
-                    }}>
+                    }}
+                  >
                     <PersonIcon
                       sx={{
                         mr: 1,
                         color: `primary.main`, 
-                      }} />
+                      }}
+                    />
                     <Typography
                       variant="body1"
-                      sx={{ mr: 1 }}>
+                      sx={{ mr: 1 }}
+                    >
                       <strong>Client:</strong>
                     </Typography>
                     <Typography
@@ -265,20 +291,24 @@ export default function AppointmentDetailPage() {
                 <Grid
                   item
                   xs={12}
-                  md={6}>
+                  md={6}
+                >
                   <Box
                     sx={{
                       display: `flex`,
                       alignItems: `center`, 
-                    }}>
+                    }}
+                  >
                     <BadgeIcon
                       sx={{
                         mr: 1,
                         color: `primary.main`, 
-                      }} />
+                      }}
+                    />
                     <Typography
                       variant="body1"
-                      sx={{ mr: 1 }}>
+                      sx={{ mr: 1 }}
+                    >
                       <strong>Master:</strong>
                     </Typography>
                     <Typography
@@ -306,7 +336,8 @@ export default function AppointmentDetailPage() {
               xs: `column`,
               sm: `row`, 
             }}
-            spacing={2}>
+            spacing={2}
+          >
             {appointment.status === appointmentStatusEnum.active && (
               <Button
                 variant="outlined"

@@ -24,7 +24,8 @@ export default function EmployeesContainer({ employees }) {
           xs: 0,
           md: 0,
         },
-      }}>
+      }}
+    >
 
       {/* Header */}
       <Box sx={{ marginBottom: 3 }}>
@@ -69,7 +70,8 @@ export default function EmployeesContainer({ employees }) {
             xs={12}
             sm={6}
             md={4}
-            key={employee.employeeId}>
+            key={employee.employeeId}
+          >
             <Card
               sx={{
                 height: `100%`,
@@ -96,7 +98,8 @@ export default function EmployeesContainer({ employees }) {
                     flexDirection: `column`,
                     alignItems: `center`,
                     textAlign: `center`,
-                  }}>
+                  }}
+                >
                   {/* Avatar */}
                   <Avatar
                     src={employee.image}
@@ -127,7 +130,8 @@ export default function EmployeesContainer({ employees }) {
                       gap: 0.5,
                       marginBottom: 2,
                       color: `text.secondary`,
-                    }}>
+                    }}
+                  >
                     <Email sx={{ fontSize: 16 }} />
 
                     <Typography variant="body2">

@@ -33,20 +33,22 @@ export default function EmployeeDetails({
           marginTop: 2,
           borderRadius: 2,
           boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
-        }}>
+        }}
+      >
         <CardContent
-          sx={{ padding: 2.5 }}>
+          sx={{ padding: 2.5 }}
+        >
           <Box
             sx={{
               display: `flex`,
               justifyContent: `flex-end`,
               marginBottom: 2,
-            }}>
+            }}
+          >
             <Button
               variant="contained"
               size="small"
-              startIcon={<Edit
-                sx={{ fontSize: `16px` }} />}
+              startIcon={<Edit sx={{ fontSize: `16px` }} />}
               onClick={handleEditClick}
               sx={{
                 borderRadius: 1.5,
@@ -63,19 +65,22 @@ export default function EmployeeDetails({
 
           <Grid
             container
-            spacing={3}>
+            spacing={3}
+          >
             {/* Employee Avatar & Status */}
             <Grid
               item
               xs={12}
-              md={4}>
+              md={4}
+            >
               <Box
                 sx={{
                   display: `flex`,
                   flexDirection: `column`,
                   alignItems: `center`,
                   textAlign: `center`,
-                }}>
+                }}
+              >
                 <Avatar
                   src={employee.image}
                   sx={{
@@ -87,7 +92,8 @@ export default function EmployeeDetails({
                   }}
                 >
                   <Person
-                    sx={{ fontSize: 50 }} />
+                    sx={{ fontSize: 50 }}
+                  />
                 </Avatar>
 
                 <Typography
@@ -95,7 +101,8 @@ export default function EmployeeDetails({
                   sx={{
                     fontWeight: 600,
                     marginBottom: 1,
-                  }}>
+                  }}
+                >
                   {`${employee.firstName} ${employee.lastName}`}
                 </Typography>
 
@@ -112,9 +119,11 @@ export default function EmployeeDetails({
             <Grid
               item
               xs={12}
-              md={8}>
+              md={8}
+            >
               <Stack
-                spacing={2}>
+                spacing={2}
+              >
                 <Box>
                   <Typography
                     variant="subtitle2"
@@ -122,38 +131,48 @@ export default function EmployeeDetails({
                     sx={{
                       marginBottom: 0.5,
                       fontWeight: 600,
-                    }}>
+                    }}
+                  >
                     Contact Information
                   </Typography>
                   <Stack
-                    spacing={1}>
+                    spacing={1}
+                  >
                     <Box
                       sx={{
                         display: `flex`,
                         alignItems: `center`,
                         gap: 1,
-                      }}>
+                      }}
+                    >
                       <Email
                         sx={{
                           fontSize: 16,
                           color: `text.secondary`,
-                        }} />
+                        }}
+                      />
                       <Typography
-                        variant="body2">{employee.email}</Typography>
+                        variant="body2"
+                      >{employee.email}
+                      </Typography>
                     </Box>
                     <Box
                       sx={{
                         display: `flex`,
                         alignItems: `center`,
                         gap: 1,
-                      }}>
+                      }}
+                    >
                       <Phone
                         sx={{
                           fontSize: 16,
                           color: `text.secondary`,
-                        }} />
+                        }}
+                      />
                       <Typography
-                        variant="body2">{employee.phone}</Typography>
+                        variant="body2"
+                      >{employee.phone}
+                      </Typography>
                     </Box>
                   </Stack>
                 </Box>
@@ -171,7 +190,8 @@ export default function EmployeeDetails({
                   </Typography>
 
                   <Stack
-                    spacing={1}>
+                    spacing={1}
+                  >
                     <Box
                       sx={{
                         display: `flex`,
@@ -214,7 +234,8 @@ export default function EmployeeDetails({
             paddingBottom: 2,
             paddingLeft: 1.1,
             paddingRight: 1.1,
-          }}>
+          }}
+        >
           <Typography
             variant="h6"
             sx={{

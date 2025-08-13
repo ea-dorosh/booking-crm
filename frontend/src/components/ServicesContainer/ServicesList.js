@@ -118,7 +118,8 @@ export default function ServicesList({
           xs: 0,
           md: 0,
         },
-      }}>
+      }}
+    >
       {Object.entries(groupedServices).map(([categoryId, categoryData]) => (
         <Box
           key={categoryId}
@@ -126,19 +127,22 @@ export default function ServicesList({
         >
           {/* Category Header */}
           <Box
-            sx={{ marginBottom: 2 }}>
+            sx={{ marginBottom: 2 }}
+          >
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 600,
                 marginBottom: 1,
-              }}>
+              }}
+            >
               {categoryData.categoryName}
             </Typography>
 
             <Typography
               variant="body2"
-              color="text.secondary">
+              color="text.secondary"
+            >
               {Object.values(categoryData.subCategories).reduce((total, subCat) => total + subCat.services.length, 0)} services
             </Typography>
           </Box>
@@ -151,7 +155,8 @@ export default function ServicesList({
             >
               {/* Sub Category Header */}
               <Box
-                sx={{ marginBottom: 2 }}>
+                sx={{ marginBottom: 2 }}
+              >
                 <Typography
                   variant="h6"
                   sx={{
@@ -194,7 +199,8 @@ export default function ServicesList({
                             flexGrow: 1,
                             display: `flex`,
                             flexDirection: `column`,
-                          }}>
+                          }}
+                        >
                           {/* Service Name */}
                           <Typography
                             variant="h6"

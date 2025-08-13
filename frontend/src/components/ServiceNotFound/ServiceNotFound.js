@@ -15,7 +15,8 @@ export default function ServiceNotFound({ onBackToServices }) {
           xs: 2,
           md: 3,
         },
-      }}>
+      }}
+    >
       <GoBackNavigation />
 
       <Paper
@@ -33,19 +34,22 @@ export default function ServiceNotFound({ onBackToServices }) {
             fontSize: 60,
             color: `grey.400`,
             marginBottom: 2,
-          }} />
+          }}
+        />
 
         <Typography
           variant="h6"
           color="text.secondary"
-          sx={{ marginBottom: 1 }}>
+          sx={{ marginBottom: 1 }}
+        >
           Service not found
         </Typography>
 
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ marginBottom: 3 }}>
+          sx={{ marginBottom: 3 }}
+        >
           The service you&apos;re looking for doesn&apos;t exist
         </Typography>
 

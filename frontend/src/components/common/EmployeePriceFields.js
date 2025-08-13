@@ -21,7 +21,8 @@ const EmployeePriceFields = ({
     <Box>
       <Typography
         variant="subtitle1"
-        mt={2}>
+        mt={2}
+      >
         Employees for this service:
       </Typography>
 
@@ -33,7 +34,8 @@ const EmployeePriceFields = ({
             border: `1px solid #ccc`,
             borderRadius: `3px`,
             padding: `10px`,
-          }}>
+          }}
+        >
           <FormControl>
             <FormControlLabel
               control={
@@ -61,7 +63,8 @@ const EmployeePriceFields = ({
               sx={{
                 mt: 1,
                 width: `100%`, 
-              }}>
+              }}
+            >
               <TextField
                 value={employeePrices.find(employeePrice => employeePrice.employeeId === employee.employeeId)?.price || ``}
                 label="Service Price"
@@ -89,7 +92,8 @@ const EmployeePriceFields = ({
 
       {formErrors?.employeePrices && (
         <FormHelperText
-          sx={{ color: `error.main` }}>
+          sx={{ color: `error.main` }}
+        >
           {formErrors.employeePrices}
         </FormHelperText>
       )}

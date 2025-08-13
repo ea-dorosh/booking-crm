@@ -15,8 +15,7 @@ export default function AddButton({
       to={to}
       variant="contained"
       size={size}
-      startIcon={<Icon
-        sx={{ fontSize: `16px` }} />}
+      startIcon={<Icon sx={{ fontSize: `16px` }} />}
       {...props}
     >
       {children}

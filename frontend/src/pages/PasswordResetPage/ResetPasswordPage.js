@@ -124,10 +124,12 @@ export default function ResetPasswordPage() {
 
   return (
     <ThemeProvider
-      theme={defaultTheme}>
+      theme={defaultTheme}
+    >
       <Container
         component="main"
-        maxWidth="xs">
+        maxWidth="xs"
+      >
         <CssBaseline />
         <Box
           sx={{
@@ -141,12 +143,14 @@ export default function ResetPasswordPage() {
             sx={{
               m: 1,
               bgcolor: `secondary.main`, 
-            }}>
+            }}
+          >
             <LockOutlinedIcon />
           </Avatar>
           <Typography
             component="h1"
-            variant="h5">
+            variant="h5"
+          >
             Reset Password
           </Typography>
 
@@ -169,7 +173,8 @@ export default function ResetPasswordPage() {
             sx={{
               mt: 1,
               width: `100%`, 
-            }}>
+            }}
+          >
             <TextField
               margin="normal"
               required
@@ -217,13 +222,16 @@ export default function ResetPasswordPage() {
 
             <Grid
               container
-              justifyContent="center">
+              justifyContent="center"
+            >
               <Grid
-                item>
+                item
+              >
                 <Link
                   component={RouterLink}
                   to="/login"
-                  variant="body2">
+                  variant="body2"
+                >
                   Back to Login
                 </Link>
               </Grid>
@@ -235,11 +243,13 @@ export default function ResetPasswordPage() {
           variant="body2"
           color="text.secondary"
           align="center"
-          sx={{ mt: 8 }}>
+          sx={{ mt: 8 }}
+        >
           {`Copyright © `}
           <Link
             color="inherit"
-            href="#">
+            href="#"
+          >
             Booking CRM
           </Link>{` `}
           {new Date().getFullYear()}

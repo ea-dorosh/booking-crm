@@ -23,25 +23,29 @@ export default function SubCategoriesList({
             fontSize: 60,
             color: `grey.400`,
             marginBottom: 2,
-          }} />
+          }}
+        />
 
         <Typography
           variant="h6"
           color="text.secondary"
-          sx={{ marginBottom: 1 }}>
+          sx={{ marginBottom: 1 }}
+        >
           No sub-categories found
         </Typography>
 
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ marginBottom: 3 }}>
+          sx={{ marginBottom: 3 }}
+        >
           Get started by adding your first sub-category
         </Typography>
 
         <RouterLink
           to="/sub-categories/create-sub-category"
-          style={{ textDecoration: `none` }}>
+          style={{ textDecoration: `none` }}
+        >
           <Box
             component="span"
             sx={{
@@ -87,24 +91,29 @@ export default function SubCategoriesList({
           xs: 0,
           md: 0,
         },
-      }}>
+      }}
+    >
       {Object.entries(groupedSubCategories).map(([categoryId, categoryData]) => (
         <Box
           key={categoryId}
-          sx={{ mb: 4 }}>
+          sx={{ mb: 4 }}
+        >
           <Box
-            sx={{ mb: 2 }}>
+            sx={{ mb: 2 }}
+          >
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 600,
                 mb: 0.5,
-              }}>
+              }}
+            >
               {categoryData.categoryName}
             </Typography>
             <Typography
               variant="body2"
-              color="text.secondary">
+              color="text.secondary"
+            >
               {categoryData.items.length} sub-categories
             </Typography>
           </Box>
@@ -120,14 +129,16 @@ export default function SubCategoriesList({
                 xs: 1,
                 sm: 0,
               },
-            }}>
+            }}
+          >
             {categoryData.items.map((subCategory) => (
               <Grid
                 item
                 xs={12}
                 sm={6}
                 md={4}
-                key={subCategory.id}>
+                key={subCategory.id}
+              >
                 <Card
                   sx={{
                     height: `100%`,
@@ -182,7 +193,8 @@ export default function SubCategoriesList({
                         display: `flex`,
                         flexDirection: `column`,
                         alignItems: `flex-start`,
-                      }}>
+                      }}
+                    >
                       <Typography
                         variant="h6"
                         sx={{
@@ -210,7 +222,8 @@ export default function SubCategoriesList({
                       sx={{
                         color: `grey.500`,
                         flexShrink: 0,
-                      }} />
+                      }}
+                    />
                   </CardActionArea>
                 </Card>
               </Grid>

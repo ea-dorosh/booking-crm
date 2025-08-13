@@ -26,40 +26,49 @@ export const MainListItems = ({ location }) => (
   <>
     <Link
       to={`/`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/`)}>
+        selected={isActiveRoute(location?.pathname, `/`)}
+      >
         <ListItemIcon>
           <HomeRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Dashboard" />
+          primary="Dashboard"
+        />
       </ListItemButton>
     </Link>
 
     <Link
       to={`/appointments`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/appointments`)}>
+        selected={isActiveRoute(location?.pathname, `/appointments`)}
+      >
         <ListItemIcon>
           <CalendarMonthRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Appointments" />
+          primary="Appointments"
+        />
       </ListItemButton>
     </Link>
 
     <Link
       to={`/services`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/services`)}>
+        selected={isActiveRoute(location?.pathname, `/services`)}
+      >
         <ListItemIcon>
           <MiscellaneousServicesRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Services" />
+          primary="Services"
+        />
       </ListItemButton>
     </Link>
 
@@ -78,27 +87,33 @@ export const MainListItems = ({ location }) => (
 
     <Link
       to={`/customers`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/customers`)}>
+        selected={isActiveRoute(location?.pathname, `/customers`)}
+      >
         <ListItemIcon>
           <PersonSearchRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Customers" />
+          primary="Customers"
+        />
       </ListItemButton>
     </Link>
 
     <Link
       to={`/invoices`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/invoices`)}>
+        selected={isActiveRoute(location?.pathname, `/invoices`)}
+      >
         <ListItemIcon>
           <ReceiptLongRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Invoices" />
+          primary="Invoices"
+        />
       </ListItemButton>
     </Link>
   </>
@@ -108,27 +123,33 @@ export const SecondaryListItems = ({ location }) => (
   <>
     <Link
       to={`/company`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/company`)}>
+        selected={isActiveRoute(location?.pathname, `/company`)}
+      >
         <ListItemIcon>
           <CorporateFareRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Company" />
+          primary="Company"
+        />
       </ListItemButton>
     </Link>
 
     <Link
       to={`/account`}
-      style={{ textDecoration: `none` }}>
+      style={{ textDecoration: `none` }}
+    >
       <ListItemButton
-        selected={isActiveRoute(location?.pathname, `/account`)}>
+        selected={isActiveRoute(location?.pathname, `/account`)}
+      >
         <ListItemIcon>
           <AccountBoxRounded />
         </ListItemIcon>
         <ListItemText
-          primary="Account" />
+          primary="Account"
+        />
       </ListItemButton>
     </Link>
   </>

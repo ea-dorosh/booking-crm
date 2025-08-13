@@ -25,9 +25,11 @@ export default function SubCategoryDetails({
         marginTop: 1,
         borderRadius: 2,
         boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
-      }}>
+      }}
+    >
       <CardContent
-        sx={{ padding: 2.5 }}>
+        sx={{ padding: 2.5 }}
+      >
         {/* Header with Edit Button */}
         <Box
           sx={{
@@ -38,7 +40,8 @@ export default function SubCategoryDetails({
             paddingBottom: 1.5,
             borderBottom: `1px solid`,
             borderColor: `grey.100`,
-          }}>
+          }}
+        >
           <Box>
             <Typography
               variant="h4"
@@ -46,14 +49,16 @@ export default function SubCategoryDetails({
                 fontWeight: 700,
                 marginBottom: 0.5,
                 color: `text.primary`,
-              }}>
+              }}
+            >
               {subCategory.name}
             </Typography>
 
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mb: 0.5 }}>
+              sx={{ mb: 0.5 }}
+            >
               {categoryName}
             </Typography>
 
@@ -71,14 +76,16 @@ export default function SubCategoryDetails({
             sx={{
               display: `flex`,
               gap: 1,
-            }}>
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
               size="small"
               startIcon={
                 <Edit
-                  sx={{ fontSize: `16px` }} />
+                  sx={{ fontSize: `16px` }}
+                />
               }
               onClick={onEditClick}
             >
@@ -90,12 +97,14 @@ export default function SubCategoryDetails({
         {/* Details Grid */}
         <Grid
           container
-          spacing={1.5}>
+          spacing={1.5}
+        >
           {/* Image */}
           {subCategory.image && (
             <Grid
               item
-              xs={12}>
+              xs={12}
+            >
               <Box
                 sx={{
                   width: `100%`,
@@ -129,7 +138,8 @@ export default function SubCategoryDetails({
             alignItems: `center`,
             mt: 2,
             justifyContent: `space-between`,
-          }}>
+          }}
+        >
           <Button
             disabled={subCategory.status === subCategoryStatusEnum.archived}
             variant="outlined"

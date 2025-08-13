@@ -40,11 +40,13 @@ export default function Loader({
       >
         <CircularProgress
           size={60}
-          thickness={4} />
+          thickness={4}
+        />
 
         <Typography
           variant="body1"
-          sx={{ mt: 2 }}>
+          sx={{ mt: 2 }}
+        >
           {message}
         </Typography>
       </Box>

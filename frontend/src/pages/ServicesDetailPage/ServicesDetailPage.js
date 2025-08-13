@@ -137,8 +137,11 @@ export default function ServicesDetailPage() {
 
     // Show not found
     if (!service && !shouldShowServiceForm) {
-      return <ServiceNotFound
-        onBackToServices={() => navigate(`/services`)} />;
+      return (
+        <ServiceNotFound
+          onBackToServices={() => navigate(`/services`)}
+        />
+      );
     }
 
     // Show service details
@@ -161,19 +164,22 @@ export default function ServicesDetailPage() {
   return (
     <PageContainer
       pageTitle={getPageTitle()}
-      hideSideNav>
+      hideSideNav
+    >
       <Box
         sx={{
           padding: {
             xs: 0,
             md: 0,
           },
-        }}>
+        }}
+      >
         {!isEditMode && <GoBackNavigation />}
 
         {isServicesRequestPending && (
           <Box
-            sx={{ marginTop: 1 }}>
+            sx={{ marginTop: 1 }}
+          >
             <LinearProgress />
           </Box>
         )}

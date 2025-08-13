@@ -31,7 +31,8 @@ export default function InvoicesContainer({ invoices }) {
         </Typography>
 
         <RouterLink
-          to={`/invoices/create-invoice`}>
+          to={`/invoices/create-invoice`}
+        >
           <IconButton
             sx={{ color: `#fff` }}
           >
@@ -45,7 +46,8 @@ export default function InvoicesContainer({ invoices }) {
           display: `flex`,
           justifyContent: `flex-end`,
           mt: `1rem`,
-        }}>
+        }}
+      >
         {/* <CustomersSorting /> */}
       </Box>
 
@@ -82,24 +84,28 @@ export default function InvoicesContainer({ invoices }) {
                 sx={{
                   fontSize: `1.1rem`,
                   fontWeight: `bold`,
-                }}>
+                }}
+              >
                 {invoice.customer.lastName} {invoice.customer.firstName}
               </Typography>
 
               <Typography
                 sx={{
                   fontSize: `1rem`,
-                }}>
+                }}
+              >
                 #{invoice.invoiceNumber}
               </Typography>
             </Box>
 
             <Box
-              textAlign="right">
+              textAlign="right"
+            >
               <Typography
                 sx={{
                   fontSize: `1.1rem`,
-                }}>
+                }}
+              >
                 {invoice.totalAmount}€
               </Typography>
 

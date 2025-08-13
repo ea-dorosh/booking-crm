@@ -130,27 +130,30 @@ export default function ServiceCategoryDetailPage() {
   return (
     <PageContainer
       pageTitle={getPageTitle()}
-      hideSideNav>
+      hideSideNav
+    >
       <Box
         sx={{
           padding: {
             xs: 0,
             md: 0,
           },
-        }}>
-        {!isEditMode && <GoBackNavigation
-          beforeGoBack={fetchUpdatedCategories} />}
+        }}
+      >
+        {!isEditMode && <GoBackNavigation beforeGoBack={fetchUpdatedCategories} />}
 
         {(isUpdateCategoryRequestPending || areCategoriesFetching) && (
           <Box
-            mt={2}>
+            mt={2}
+          >
             <LinearProgress />
           </Box>
         )}
 
         {isEditMode && (
           <Box
-            mt={3}>
+            mt={3}
+          >
             <ServiceCategoryForm
               category={serviceCategory}
               submitForm={onSubmitForm}

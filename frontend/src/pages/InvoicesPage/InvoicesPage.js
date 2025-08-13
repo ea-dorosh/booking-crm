@@ -24,16 +24,17 @@ export default function CustomersPage() {
 
   return (
     <PageContainer
-      pageTitle="Invoices">
+      pageTitle="Invoices"
+    >
 
-      {isPending && <Box
-        mt={2}>
+      {isPending &&
+      <Box
+        mt={2}
+      >
         <LinearProgress />
       </Box>}
 
-      {invoices && invoices.length > 0 && <InvoicesContainer
-        invoices={invoices}
-      />}
+      {invoices && invoices.length > 0 && <InvoicesContainer invoices={invoices} />}
     </PageContainer>
   );
 }

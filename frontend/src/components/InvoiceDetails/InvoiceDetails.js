@@ -16,203 +16,239 @@ import ListItemText from "@/components/ListItemText/ListItemText";
 import { formatIsoDate } from "@/utils/formatters";
 
 export default function InvoiceDetails({
-  invoice, onChangeInvoiceClick, onDownloadInvoiceClick, onViewInvoiceClick, 
+  invoice, onChangeInvoiceClick, onDownloadInvoiceClick, onViewInvoiceClick,
 }) {
 
-  return (<Box>
-    <Box
-      sx={{
-        display: `flex`,
-        alignItems: `center`,
-      }}>
+  return (
+    <Box>
       <Box
         sx={{
           display: `flex`,
-          justifyContent: `space-between`,
           alignItems: `center`,
-          flexGrow: 1,
-        }}>
-        <Typography
-          variant="h4"
+        }}
+      >
+        <Box
           sx={{
-            fontWeight: `bold`,
-            fontSize: `1.2rem`, 
-          }}>Status</Typography>
+            display: `flex`,
+            justifyContent: `space-between`,
+            alignItems: `center`,
+            flexGrow: 1,
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: `bold`,
+              fontSize: `1.2rem`,
+            }}
+          >
+          Status
+          </Typography>
+
+          <Box
+            sx={{
+              display: `flex`,
+              gap: `1rem`,
+              flexWrap: `wrap`,
+            }}
+          >
+            {invoice.status === 1 ?
+              <Chip
+                label="Paid"
+                color="success"
+              /> :
+              <Chip
+                label="Unpaid"
+                color="primary"
+              />}
+          </Box>
+        </Box>
+
+        <Box
+          sx={{ display: `flex` }}
+        >
+          <Tooltip
+            title="View PDF"
+          >
+            <IconButton
+              onClick={onViewInvoiceClick}
+            >
+              <ViewIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            title="Download PDF"
+          >
+            <IconButton
+              onClick={onDownloadInvoiceClick}
+            >
+              <DownloadIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          border: `1px solid #e0e0e0`,
+          borderRadius: `4px`,
+          p: `1rem`,
+          mt: `1rem`,
+          backgroundColor: `#f5f5f5`,
+        }}
+      >
+        <Box
+          sx={{
+            display: `flex`,
+            gap: `1rem`,
+            flexWrap: `wrap`,
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: `bold` }}
+          >
+          Invoice #{invoice.invoiceNumber}
+          </Typography>
+        </Box>
 
         <Box
           sx={{
             display: `flex`,
             gap: `1rem`,
             flexWrap: `wrap`,
-          }}>
-          {invoice.status === 1 ? <Chip
-            label="Paid"
-            color="success" /> : <Chip
-            label="Unpaid"
-            color="primary" />}
+          }}
+        >
+          <ListItemText
+            value={formatIsoDate(invoice.dateIssued)}
+            label="Date Issued"
+          />
+
+          <ListItemText
+            value={formatIsoDate(invoice.dueDate)}
+            label="Due Date"
+          />
         </Box>
-      </Box>
 
-      <Box
-        sx={{ display: `flex` }}>
-        <Tooltip
-          title="View PDF">
-          <IconButton
-            onClick={onViewInvoiceClick}
+        <Box
+          mt={`1rem`}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: `bold`,
+              fontSize: `1rem`,
+            }}
           >
-            <ViewIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip
-          title="Download PDF">
-          <IconButton
-            onClick={onDownloadInvoiceClick}
+            {invoice.company.name}
+          </Typography>
+
+          <Typography
+            variant="body1"
           >
-            <DownloadIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </Box>
+            {invoice.company.address}
+          </Typography>
 
-    <Box
-      sx={{
-        border: `1px solid #e0e0e0`,
-        borderRadius: `4px`,
-        p: `1rem`,
-        mt: `1rem`,
-        backgroundColor: `#f5f5f5`,
-      }}>
-      <Box
-        sx={{
-          display: `flex`,
-          gap: `1rem`,
-          flexWrap: `wrap`,
-        }}>
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: `bold` }}>
-          Invoice #{invoice.invoiceNumber}
-        </Typography>
-      </Box>
+          <Typography
+            variant="body1"
+          >
+            {invoice.company.email}
+          </Typography>
 
-      <Box
-        sx={{
-          display: `flex`,
-          gap: `1rem`,
-          flexWrap: `wrap`,
-        }}>
-        <ListItemText
-          value={formatIsoDate(invoice.dateIssued)}
-          label="Date Issued"
-        />
+          <Typography
+            variant="body1"
+          >
+          Phone: {invoice.company.phone}
+          </Typography>
 
-        <ListItemText
-          value={formatIsoDate(invoice.dueDate)}
-          label="Due Date"
-        />
-      </Box>
+          <Typography
+            variant="body1"
+          >
+            {invoice.company.website}
+          </Typography>
 
-      <Box
-        mt={`1rem`}>
+          <Typography
+            variant="body1"
+          >
+         Company ID: {invoice.company.taxNumber}
+          </Typography>
+
+          <Typography
+            variant="body1"
+            mt={`.5rem`}
+          >
+          IBAN: {invoice.company.bankAccount}
+          </Typography>
+        </Box>
+
+
         <Typography
           variant="h6"
           sx={{
             fontWeight: `bold`,
-            fontSize: `1rem`, 
-          }}>
-          {invoice.company.name}
-        </Typography>
-
-        <Typography
-          variant="body1">
-          {invoice.company.address}
-        </Typography>
-
-        <Typography
-          variant="body1">
-          {invoice.company.email}
-        </Typography>
-
-        <Typography
-          variant="body1">
-          Phone: {invoice.company.phone}
-        </Typography>
-
-        <Typography
-          variant="body1">
-          {invoice.company.website}
-        </Typography>
-
-        <Typography
-          variant="body1">
-         Company ID: {invoice.company.taxNumber}
-        </Typography>
-
-        <Typography
-          variant="body1"
-          mt={`.5rem`}>
-          IBAN: {invoice.company.bankAccount}
-        </Typography>
-      </Box>
-
-
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: `bold`,
-          fontSize: `1rem`,
-          mt: `1rem`, 
-        }}>
+            fontSize: `1rem`,
+            mt: `1rem`,
+          }}
+        >
         Rechnung für:
-      </Typography>
+        </Typography>
 
 
-      <RouterLink
-        to={`/customers/${invoice.customer.id}`}
-        style={{
-          textDecoration: `none`,
-          color: `inherit`,
-        }}>
+        <RouterLink
+          to={`/customers/${invoice.customer.id}`}
+          style={{
+            textDecoration: `none`,
+            color: `inherit`,
+          }}
+        >
+          <Typography
+            variant="body1"
+            sx={{
+              textDecoration: `underline`,
+              color: `#1976d2`,
+              mt: `.5rem`,
+            }}
+          >
+            {invoice.customer.lastName} {invoice.customer.firstName}
+          </Typography>
+        </RouterLink>
+
         <Typography
           variant="body1"
-          sx={{
-            textDecoration: `underline`,
-            color: `#1976d2`,
-            mt: `.5rem`, 
-          }}>
-          {invoice.customer.lastName} {invoice.customer.firstName}
+        >
+          {invoice.customer.email}
         </Typography>
-      </RouterLink>
 
-      <Typography
-        variant="body1">
-        {invoice.customer.email}
-      </Typography>
+        <Typography
+          variant="body1"
+        >
+          {invoice.customer.phone}
+        </Typography>
 
-      <Typography
-        variant="body1">
-        {invoice.customer.phone}
-      </Typography>
-
-      {invoice.servicesItems && <Box
+        {invoice.servicesItems &&
+      <Box
         sx={{
           borderTop: `1px solid #e0e0e0`,
-          mt: `1rem`, 
-        }}>
+          mt: `1rem`,
+        }}
+      >
         <Typography
           variant="h6"
           sx={{
             fontWeight: `bold`,
             mt: `1rem`,
-          }}>Products & Services</Typography>
+          }}
+        >Products & Services
+        </Typography>
 
         <Box
           sx={{
             display: `flex`,
             flexDirection: `column`,
             gap: `1rem`,
-            mt: `.5rem`, 
-          }}>
+            mt: `.5rem`,
+          }}
+        >
           {invoice.servicesItems.map(serviceItem => (
             <Box
               key={serviceItem.id}
@@ -222,106 +258,132 @@ export default function InvoiceDetails({
               }}
             >
               <Box
-                sx={{ display: `flex` }}>
+                sx={{ display: `flex` }}
+              >
                 <Typography
                   variant="body1"
                   sx={{
                     fontWeight: `bold`,
-                    mr: `1rem`, 
+                    mr: `1rem`,
                   }}
-                >{serviceItem.serviceName}</Typography>
+                >{serviceItem.serviceName}
+                </Typography>
                 <Typography
                   variant="body1"
                   sx={{
                     fontWeight: `bold`,
                     ml: `auto`,
-                    whiteSpace: `nowrap`, 
+                    whiteSpace: `nowrap`,
                   }}
-                >{serviceItem.serviceTotalAmount} €</Typography>
+                >{serviceItem.serviceTotalAmount} €
+                </Typography>
               </Box>
 
               <Box
-                sx={{ mt: `.5rem` }}>
+                sx={{ mt: `.5rem` }}
+              >
                 <Typography
-                  variant="body2">{serviceItem.serviceQuantity} x {serviceItem.servicePrice} €</Typography>
+                  variant="body2"
+                >{serviceItem.serviceQuantity} x {serviceItem.servicePrice} €
+                </Typography>
                 <Typography
-                  variant="body2">{Number(serviceItem.serviceTaxRate)}% Tax  </Typography>
+                  variant="body2"
+                >{Number(serviceItem.serviceTaxRate)}% Tax
+                </Typography>
               </Box>
             </Box>
           ))}
         </Box>
       </Box>}
 
-      <Typography
-        variant="h6"
-        sx={{
-          mt: `1rem`,
-          fontWeight: `bold`, 
-        }}>Summary</Typography>
-
-      <Box
-        sx={{
-
-        }}>
-        <Box
+        <Typography
+          variant="h6"
           sx={{
-            display: `flex`,
-            justifyContent: `space-between`, 
-          }}>
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: `bold` }}>Subtotal</Typography>
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: `bold` }}>{invoice.subtotal} €</Typography>
-        </Box>
+            mt: `1rem`,
+            fontWeight: `bold`,
+          }}
+        >Summary
+        </Typography>
 
         <Box
           sx={{
-            display: `flex`,
-            justifyContent: `space-between`, 
-          }}>
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: `bold` }}>MwSt. (19%)</Typography>
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: `bold` }}>{invoice.taxes} €</Typography>
-        </Box>
 
-        <Box
-          sx={{
-            display: `flex`,
-            justifyContent: `space-between`,
-            mt: `1rem`, 
-          }}>
-          <Typography
-            variant="body1"
+          }}
+        >
+          <Box
             sx={{
-              fontWeight: `bold`,
-              fontSize: `1.2rem`, 
-            }}>Total</Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: `bold`,
-              fontSize: `1.2rem`, 
-            }}>{invoice.totalAmount} €</Typography>
-        </Box>
-      </Box>
+              display: `flex`,
+              justifyContent: `space-between`,
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: `bold` }}
+            >Subtotal
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: `bold` }}
+            >{invoice.subtotal} €
+            </Typography>
+          </Box>
 
-      <Button
-        startIcon={<EditIcon />}
-        onClick={onChangeInvoiceClick}
-        variant="outlined"
-        sx={{
-          mt: 2,
-          width: `100%`, 
-        }}
-      >
+          <Box
+            sx={{
+              display: `flex`,
+              justifyContent: `space-between`,
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: `bold` }}
+            >MwSt. (19%)
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: `bold` }}
+            >{invoice.taxes} €
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: `flex`,
+              justifyContent: `space-between`,
+              mt: `1rem`,
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: `bold`,
+                fontSize: `1.2rem`,
+              }}
+            >Total
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: `bold`,
+                fontSize: `1.2rem`,
+              }}
+            >{invoice.totalAmount} €
+            </Typography>
+          </Box>
+        </Box>
+
+        <Button
+          startIcon={<EditIcon />}
+          onClick={onChangeInvoiceClick}
+          variant="outlined"
+          sx={{
+            mt: 2,
+            width: `100%`,
+          }}
+        >
         Change Invoice Details
-      </Button>
+        </Button>
+      </Box>
     </Box>
-  </Box>
   );
 }

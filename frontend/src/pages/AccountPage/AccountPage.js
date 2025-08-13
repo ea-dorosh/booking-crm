@@ -10,7 +10,7 @@ import PageContainer from '@/components/PageContainer/PageContainer';
 import accountService from '@/services/account.service';
 
 const PasswordChangeForm = ({
-  email, cancelPasswordChange, afterPasswordChange, 
+  email, cancelPasswordChange, afterPasswordChange,
 }) => {
   const [currentPassword, setCurrentPassword] = useState(``);
   const [newPassword, setNewPassword] = useState(``);
@@ -38,12 +38,14 @@ const PasswordChangeForm = ({
       <Typography
         variant="h5"
         mb={2}
-        mt={2}>
+        mt={2}
+      >
         Change Password
       </Typography>
 
       <FormControl
-        fullWidth>
+        fullWidth
+      >
         <InputLabel>Current Password</InputLabel>
         <OutlinedInput
           type="password"
@@ -55,7 +57,8 @@ const PasswordChangeForm = ({
 
       <FormControl
         fullWidth
-        sx={{ marginTop: `20px` }}>
+        sx={{ marginTop: `20px` }}
+      >
         <InputLabel>New Password</InputLabel>
         <OutlinedInput
           type="password"
@@ -74,15 +77,17 @@ const PasswordChangeForm = ({
           Change Password
       </Button>
 
-      {errorMessage && <Typography
-        variant="body1"
-        sx={{
-          marginTop: `20px`,
-          color: `red`, 
-        }}
-      >
-        {errorMessage}
-      </Typography>}
+      {errorMessage &&
+        <Typography
+          variant="body1"
+          sx={{
+            marginTop: `20px`,
+            color: `red`,
+          }}
+        >
+          {errorMessage}
+        </Typography>
+      }
 
       <Button
         variant="outlined"
@@ -120,11 +125,13 @@ export default function AccountPage() {
 
   return (
     <PageContainer
-      pageTitle="Account">
+      pageTitle="Account"
+    >
       {userData && (
         <Typography
           variant="body1"
-          sx={{ marginTop: `20px` }}>
+          sx={{ marginTop: `20px` }}
+        >
           Logged in as:
 
           <br />
@@ -133,7 +140,7 @@ export default function AccountPage() {
             variant="span"
             sx={{
               fontWeight: `bold`,
-              color: `blue`, 
+              color: `blue`,
             }}
           >
             {userData.email}
@@ -141,7 +148,8 @@ export default function AccountPage() {
         </Typography>
       )}
 
-      {!showPasswordChange && <Button
+      {!showPasswordChange &&
+      <Button
         sx={{ marginTop: `20px` }}
         variant="outlined"
         color="primary"
@@ -150,7 +158,8 @@ export default function AccountPage() {
         Change Password
       </Button>}
 
-      {showPasswordChange && <PasswordChangeForm
+      {showPasswordChange &&
+      <PasswordChangeForm
         email={userData?.email || ``}
         cancelPasswordChange={() => setShowPasswordChange(false)}
         afterPasswordChange={() => {
@@ -159,20 +168,22 @@ export default function AccountPage() {
         }}
       />}
 
-      {message && <Typography
+      {message &&
+      <Typography
         variant="body1"
         sx={{
           marginTop: `20px`,
-          color: `green`, 
+          color: `green`,
         }}
       >
         {message}
       </Typography>}
 
-      {!showPasswordChange && <Button
+      {!showPasswordChange &&
+      <Button
         sx={{
           marginTop: `20px`,
-          display: `block`, 
+          display: `block`,
         }}
         variant="contained"
         color="primary"

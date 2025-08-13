@@ -192,17 +192,22 @@ export default function CustomerDetailPage() {
     >
       {!isEditMode && <GoBackNavigation />}
 
-      {(isPending || isCustomersRequestPending) && <Box
-        mt={2}>
+      {(isPending || isCustomersRequestPending) &&
+      <Box
+        mt={2}
+      >
         <LinearProgress />
       </Box>}
 
       <Loader
         isOpen={isPdfLoading}
-        message={`Processing PDF...`} />
+        message={`Processing PDF...`}
+      />
 
-      {isEditMode && customers?.length > 0 && services?.length > 0 && <Box
-        mt={3}>
+      {isEditMode && customers?.length > 0 && services?.length > 0 &&
+      <Box
+        mt={3}
+      >
         <InvoiceForm
           invoice={invoice}
           customers={customers}
@@ -217,8 +222,9 @@ export default function CustomerDetailPage() {
 
         <Box
           mt={2}
-          sx={{ width:`100%` }}>
-          {<Button
+          sx={{ width:`100%` }}
+        >
+          <Button
             variant="outlined"
             onClick={() => {
               if (isNewInvoice) {
@@ -232,12 +238,14 @@ export default function CustomerDetailPage() {
             disabled={updateFormPending}
           >
             Cancel
-          </Button>}
+          </Button>
         </Box>
       </Box>}
 
-      {!isEditMode && invoice && <Box
-        mt={3}>
+      {!isEditMode && invoice &&
+      <Box
+        mt={3}
+      >
         <InvoiceDetails
           invoice={invoice}
           onChangeInvoiceClick={changeInvoiceHandler}
@@ -268,7 +276,8 @@ export default function CustomerDetailPage() {
               justifyContent: `flex-end`,
               width: `100%`,
               marginBottom: 1,
-            }}>
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -283,7 +292,8 @@ export default function CustomerDetailPage() {
               height: `calc(100% - 50px)`,
               backgroundColor: `white`,
               overflow: `hidden`,
-            }}>
+            }}
+          >
             {pdfViewerUrl && (
               <iframe
                 ref={iframeRef}

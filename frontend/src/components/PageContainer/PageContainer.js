@@ -70,9 +70,11 @@ export default function PageContainer({
 
   return (
     <Box
-      sx={{ display: `flex` }}>
+      sx={{ display: `flex` }}
+    >
       <AppBar
-        position="absolute">
+        position="absolute"
+      >
         <Toolbar
           sx={{
             pr: `24px`, // keep right padding when drawer closed
@@ -109,18 +111,23 @@ export default function PageContainer({
       {!hideSideNav && (
         /* Collapsed menu - always visible on normal pages */
         <CollapsedDrawer
-          variant="permanent">
+          variant="permanent"
+        >
           <Toolbar />
           <Divider />
           <List
             component="nav"
-            sx={{ px: .5 }}>
+            sx={{ px: .5 }}
+          >
             <MainListItems
-              location={location} />
+              location={location}
+            />
             <Divider
-              sx={{ my: 1 }} />
+              sx={{ my: 1 }}
+            />
             <SecondaryListItems
-              location={location} />
+              location={location}
+            />
           </List>
         </CollapsedDrawer>
       )}
@@ -143,7 +150,8 @@ export default function PageContainer({
           }}
         >
           <IconButton
-            onClick={toggleDrawer}>
+            onClick={toggleDrawer}
+          >
             <ChevronLeft />
           </IconButton>
         </Toolbar>
@@ -152,13 +160,17 @@ export default function PageContainer({
 
         <List
           component="nav"
-          sx={{ px: 1 }}>
+          sx={{ px: 1 }}
+        >
           <MainListItems
-            location={location} />
+            location={location}
+          />
           <Divider
-            sx={{ my: 1 }} />
+            sx={{ my: 1 }}
+          />
           <SecondaryListItems
-            location={location} />
+            location={location}
+          />
         </List>
       </ExpandedDrawer>
 
@@ -178,7 +190,8 @@ export default function PageContainer({
           sx={{
             padding: `24px`,
             minHeight: `calc(100vh - 64px)`,
-          }}>
+          }}
+        >
           {children}
         </Box>
       </Box>
