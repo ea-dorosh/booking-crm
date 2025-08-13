@@ -23,7 +23,7 @@ import {
 } from '@/features/services/servicesSlice';
 
 export default function FilterButton({
-  employees, categories, subCategories, sx, 
+  employees, categories, subCategories, sx,
 }) {
   const dispatch = useDispatch();
   const selectedEmployees = useSelector(state => state.services.selectedEmployees);
@@ -66,6 +66,7 @@ export default function FilterButton({
     <>
       <Button
         variant="outlined"
+        size="medium"
         startIcon={
           <Badge
             badgeContent={totalSelected}
@@ -74,18 +75,8 @@ export default function FilterButton({
           </Badge>
         }
         onClick={handleFilterClick}
+        color={`secondary`}
         sx={{
-          borderRadius: 2,
-          textTransform: `none`,
-          fontWeight: 500,
-          padding: `8px 16px`,
-          fontSize: `0.875rem`,
-          borderColor: totalSelected > 0 ? `primary.main` : `grey.300`,
-          color: totalSelected > 0 ? `primary.main` : `text.secondary`,
-          '&:hover': {
-            borderColor: `primary.main`,
-            backgroundColor: `primary.50`,
-          },
           ...sx,
         }}
       >
@@ -110,31 +101,31 @@ export default function FilterButton({
               width: {
                 xs: `90vw`,
                 sm: `90vw`,
-                md: `600px`, 
+                md: `600px`,
               },
               maxWidth: `600px`,
               maxHeight: {
                 xs: `70vh`,
                 sm: `75vh`,
-                md: `80vh`, 
+                md: `80vh`,
               },
               overflow: `hidden`,
               boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
               borderRadius: {
                 xs: 2,
-                sm: 2, 
+                sm: 2,
               },
               margin: {
                 xs: `8px auto`,
-                sm: `auto`, 
+                sm: `auto`,
               },
               left: {
                 xs: `5vw !important`,
-                sm: `auto`, 
+                sm: `auto`,
               },
               right: {
                 xs: `5vw !important`,
-                sm: `auto`, 
+                sm: `auto`,
               },
             },
           },
@@ -146,7 +137,7 @@ export default function FilterButton({
             maxHeight: {
               xs: `70vh`,
               sm: `75vh`,
-              md: `80vh`, 
+              md: `80vh`,
             },
             overflow: `auto`,
           }}>
@@ -175,7 +166,7 @@ export default function FilterButton({
               variant="subtitle2"
               sx={{
                 fontWeight: 600,
-                marginBottom: `8px`, 
+                marginBottom: `8px`,
               }}>
               Employees
             </Typography>
@@ -227,7 +218,7 @@ export default function FilterButton({
                 variant="subtitle2"
                 sx={{
                   fontWeight: 600,
-                  marginBottom: `8px`, 
+                  marginBottom: `8px`,
                 }}>
                 Categories
               </Typography>
@@ -279,7 +270,7 @@ export default function FilterButton({
                 variant="subtitle2"
                 sx={{
                   fontWeight: 600,
-                  marginBottom: `8px`, 
+                  marginBottom: `8px`,
                 }}>
                 Sub-Categories
               </Typography>
@@ -314,7 +305,7 @@ export default function FilterButton({
                         variant="body2"
                         sx={{
                           fontWeight: 500,
-                          color: `text.secondary`, 
+                          color: `text.secondary`,
                         }}>
                         {category.name}
                       </Typography>

@@ -280,6 +280,7 @@ const theme = createTheme({
           style: {
             backgroundColor: colors.primary[500],
             color: `#ffffff`,
+            border: `1px solid transparent`,
 
             '&:hover': {
               backgroundColor: colors.primary[500],
@@ -312,6 +313,7 @@ const theme = createTheme({
           style: {
             backgroundColor: colors.secondary[500],
             color: `#ffffff`,
+            border: `1px solid transparent`,
 
             '&:hover': {
               backgroundColor: colors.secondary[500],
@@ -344,6 +346,7 @@ const theme = createTheme({
           style: {
             backgroundColor: colors.warning[500],
             color: `#ffffff`,
+            border: `1px solid transparent`,
 
             '&:hover': {
               backgroundColor: colors.warning[500],
@@ -376,6 +379,7 @@ const theme = createTheme({
           style: {
             backgroundColor: colors.success[500],
             color: `#ffffff`,
+            border: `1px solid transparent`,
 
             '&:hover': {
               backgroundColor: colors.success[500],
@@ -385,7 +389,7 @@ const theme = createTheme({
         },
         {
           props: {
-            color: `secondary`,
+            color: `success`,
             variant: `outlined`,
           },
           style: {

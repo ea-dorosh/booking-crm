@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
-import AddButton from './AddButton';
 import CategoriesList from './CategoriesList';
 import FilterButton from './FilterButton';
 import ServicesList from './ServicesList';
 import SubCategoriesList from './SubCategoriesList';
+import AddButton from '@/components/common/AddButton';
 import { categoryStatusEnum, subCategoryStatusEnum } from '@/enums/enums';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { selectFilteredServices } from '@/features/services/servicesSelectors';
@@ -184,6 +184,7 @@ export default function ServicesContainer({
             display: `flex`,
             gap: 2,
             justifyContent: `flex-end`,
+            alignItems: `flex-start`,
           }}>
           {activeTab === TABS[SERVICES].value && (
             <FilterButton
@@ -194,8 +195,11 @@ export default function ServicesContainer({
           )}
 
           <AddButton
-            activeTab={activeTab}
-            tabs={TABS} />
+            to={TABS[activeTab].url}
+            size="medium"
+          >
+            {TABS[activeTab].buttonText}
+          </AddButton>
         </Box>
       </Box>
 
