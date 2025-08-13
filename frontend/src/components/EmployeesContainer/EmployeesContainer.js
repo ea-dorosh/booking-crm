@@ -7,8 +7,8 @@ import {
   Typography,
   Card,
   CardContent,
+  CardActionArea,
   Avatar,
-  Button,
   Grid,
   Paper,
   Chip,
@@ -44,7 +44,8 @@ export default function EmployeesContainer({ employees }) {
         >
           <Typography
             variant="body1"
-            color="text.secondary">
+            color="text.secondary"
+          >
             Manage your employees and their information
           </Typography>
 
@@ -76,76 +77,72 @@ export default function EmployeesContainer({ employees }) {
                 flexDirection: `column`,
               }}
             >
-              {/* Card Content */}
-              <CardContent
+              <CardActionArea
+                component={RouterLink}
+                to={`/employees/${employee.employeeId}`}
                 sx={{
-                  padding: 3,
-                  flexGrow: 1,
+                  height: `100%`,
                   display: `flex`,
                   flexDirection: `column`,
-                  alignItems: `center`,
-                  textAlign: `center`,
-                }}>
-                {/* Avatar */}
-                <Avatar
-                  src={employee.image}
+                }}
+                aria-label={`View ${employee.firstName} ${employee.lastName}`}
+              >
+                {/* Card Content */}
+                <CardContent
                   sx={{
-                    width: 80,
-                    height: 80,
-                    marginBottom: 2,
-                    border: `4px solid`,
-                    borderColor: `primary.50`,
-                  }}
-                >
-                  <Person sx={{ fontSize: 40 }} />
-                </Avatar>
-
-                {/* Name */}
-                <Typography
-                  variant="h6"
-                  sx={{ marginBottom: 0.5 }}
-                >
-                  {`${employee.firstName} ${employee.lastName}`}
-                </Typography>
-
-                {/* Email */}
-                <Box
-                  sx={{
+                    padding: 3,
+                    flexGrow: 1,
                     display: `flex`,
+                    flexDirection: `column`,
                     alignItems: `center`,
-                    gap: 0.5,
-                    marginBottom: 2,
-                    color: `text.secondary`,
+                    textAlign: `center`,
                   }}>
-                  <Email sx={{ fontSize: 16 }} />
-
-                  <Typography variant="body2">
-                    {employee.email}
-                  </Typography>
-                </Box>
-
-                {/* Status Chip */}
-                <Chip
-                  label="Active"
-                  color="success"
-                  size="small"
-                  sx={{
-                    marginBottom: 2,
-                  }}
-                />
-
-                {/* Action Button */}
-                <Box sx={{ marginTop: `auto` }}>
-                  <Button
-                    component={RouterLink}
-                    to={`/employees/${employee.employeeId}`}
-                    variant="outlined"
-                    size="small"
+                  {/* Avatar */}
+                  <Avatar
+                    src={employee.image}
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      marginBottom: 2,
+                      border: `4px solid`,
+                      borderColor: `primary.50`,
+                    }}
                   >
-                    Details
-                  </Button>
-                </Box>
-              </CardContent>
+                    <Person sx={{ fontSize: 40 }} />
+                  </Avatar>
+
+                  {/* Name */}
+                  <Typography
+                    variant="h6"
+                    sx={{ marginBottom: 0.5 }}
+                  >
+                    {`${employee.firstName} ${employee.lastName}`}
+                  </Typography>
+
+                  {/* Email */}
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `center`,
+                      gap: 0.5,
+                      marginBottom: 2,
+                      color: `text.secondary`,
+                    }}>
+                    <Email sx={{ fontSize: 16 }} />
+
+                    <Typography variant="body2">
+                      {employee.email}
+                    </Typography>
+                  </Box>
+
+                  {/* Status Chip */}
+                  <Chip
+                    label="Active"
+                    color="success"
+                    size="small"
+                  />
+                </CardContent>
+              </CardActionArea>
             </Card>
           </Grid>
         ))}

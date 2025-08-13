@@ -46,29 +46,6 @@ export const updateService = createAsyncThunk(
   },
 );
 
-export const deleteService = createAsyncThunk(
-  `services/deleteService`,
-  async (serviceId, thunkAPI) => {
-    try {
-      return await servicesService.deleteService(serviceId);
-    } catch (error) {
-      // Handle validation errors that are already objects
-      if (error.errors) {
-        return thunkAPI.rejectWithValue(error.errors);
-      }
-
-      // Handle string errors that need parsing
-      try {
-        const parsedErrors = JSON.parse(error.message);
-        return thunkAPI.rejectWithValue(parsedErrors);
-      } catch {
-        // If parsing fails, return the error as is
-        return thunkAPI.rejectWithValue({ general: error.message });
-      }
-    }
-  },
-);
-
 const servicesSlice = createSlice({
   name: `services`,
   initialState: {
@@ -170,16 +147,6 @@ const servicesSlice = createSlice({
       .addCase(updateService.rejected, (state, action) => {
         state.isUpdateServiceRequestPending = false;
         state.updateFormErrors = action.payload;
-      })
-      .addCase(deleteService.pending, (state) => {
-        state.isUpdateServiceRequestPending = true;
-        state.deleteServiceErrors = null;
-      })
-      .addCase(deleteService.fulfilled, (state) => {
-        state.isUpdateServiceRequestPending = false;
-      })
-      .addCase(deleteService.rejected, (state) => {
-        state.isUpdateServiceRequestPending = false;
       })
   },
 });

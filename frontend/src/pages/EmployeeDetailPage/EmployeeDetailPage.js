@@ -2,9 +2,9 @@ import { Box, LinearProgress } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
-import EmployeeDetails from './components/EmployeeDetails';
-import EmployeeEditForm from './components/EmployeeEditForm';
-import EmployeeNotFound from './components/EmployeeNotFound';
+import EmployeeDetails from '@/components/EmployeeDetails/EmployeeDetails';
+import EmployeeEditForm from '@/components/EmployeeEditForm/EmployeeEditForm';
+import EmployeeNotFound from '@/components/EmployeeNotFound/EmployeeNotFound';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import {
@@ -52,7 +52,7 @@ export default function EmployeeDetailPage() {
   const dispatch = useDispatch();
   const employee = useSelector(state => state.employees.data.find(employee => employee.employeeId === Number(employeeId)));
   const {
-    isCustomersDataRequestPending, lastAppointments, isLastAppointmentsPending, 
+    isCustomersDataRequestPending, lastAppointments, isLastAppointmentsPending,
   } = useSelector(state => state.employees);
 
   const newEmployeeId = useSelector(state => state.employees.updateFormData);
@@ -74,7 +74,7 @@ export default function EmployeeDetailPage() {
 
       dispatch(fetchEmployeeAppointments({
         id: employeeId,
-        filters, 
+        filters,
       }));
     }
   };
@@ -232,19 +232,20 @@ export default function EmployeeDetailPage() {
   return (
     <PageContainer
       pageTitle={getPageTitle()}
-      hideSideNav>
+      hideSideNav
+    >
       <Box
         sx={{
           padding: {
             xs: 1,
-            md: 2, 
-          }, 
-        }}>
+            md: 2,
+          },
+        }}
+      >
         {!isEditMode && <GoBackNavigation />}
 
         {(isCustomersDataRequestPending || isLastAppointmentsPending) && (
-          <Box
-            sx={{ marginTop: 1 }}>
+          <Box sx={{ marginTop: 1 }}>
             <LinearProgress />
           </Box>
         )}

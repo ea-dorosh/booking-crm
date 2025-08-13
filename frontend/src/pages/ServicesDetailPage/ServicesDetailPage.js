@@ -3,11 +3,11 @@ import { Box, LinearProgress } from '@mui/material';
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from "react-router-dom";
-import ServiceDetails from './components/ServiceDetails';
-import ServiceEditForm from './components/ServiceEditForm';
-import ServiceNotFound from './components/ServiceNotFound';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
+import ServiceDetails from '@/components/ServiceDetails/ServiceDetails';
+import ServiceForm from '@/components/ServiceForm/ServiceForm';
+import ServiceNotFound from '@/components/ServiceNotFound/ServiceNotFound';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
@@ -15,7 +15,6 @@ import {
   updateService,
   cleanError,
   cleanErrors,
-  deleteService,
 } from '@/features/services/servicesSlice';
 import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
@@ -91,13 +90,6 @@ export default function ServicesDetailPage() {
     dispatch(cleanErrors());
   };
 
-  const onDeleteServiceClick = async () => {
-    await dispatch(deleteService(service.id)).unwrap();
-    await dispatch(fetchServices()).unwrap();
-
-    navigate(`/services`);
-  };
-
   const handleEditClick = () => {
     dispatch(cleanErrors());
     setIsEditMode(true);
@@ -124,17 +116,15 @@ export default function ServicesDetailPage() {
     // Show edit form
     if (isEditMode && serviceSubCategories && serviceCategories) {
       return (
-        <ServiceEditForm
+        <ServiceForm
           service={service}
-          employees={employees}
+          employees={employees || []}
           serviceSubCategories={serviceSubCategories}
           serviceCategories={serviceCategories}
-          updateFormErrors={updateFormErrors}
-          shouldShowServiceForm={shouldShowServiceForm}
-          onUpdateService={updateServiceHandler}
-          onCleanError={handleCleanError}
-          onCleanErrors={handleCleanErrors}
-          onDeleteService={onDeleteServiceClick}
+          createNewService={updateServiceHandler}
+          formErrors={updateFormErrors}
+          cleanError={handleCleanError}
+          cleanErrors={handleCleanErrors}
           onCancel={handleCancelEdit}
         />
       );

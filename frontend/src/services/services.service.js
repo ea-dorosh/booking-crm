@@ -117,16 +117,6 @@ const createServiceCategory = async (serviceCategory) => {
   }
 };
 
-const deleteService = async (id) => {
-  try {
-    const response = await axios.delete(`/services/${id}`);
-
-    return response.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
-};
-
 const serviceService = {
   getServices,
   getServiceSubCategories,
@@ -137,7 +127,6 @@ const serviceService = {
   createServiceSubCategory,
   updateServiceCategory,
   createServiceCategory,
-  deleteService,
 };
 
 export default serviceService;
