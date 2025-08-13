@@ -165,9 +165,11 @@ export default function EmployeeDetails({
                     sx={{
                       marginBottom: 0.5,
                       fontWeight: 600,
-                    }}>
+                    }}
+                  >
                     Work Information
                   </Typography>
+
                   <Stack
                     spacing={1}>
                     <Box
@@ -175,14 +177,16 @@ export default function EmployeeDetails({
                         display: `flex`,
                         alignItems: `center`,
                         gap: 1,
-                      }}>
+                      }}
+                    >
                       <CalendarMonth
                         sx={{
                           fontSize: 16,
                           color: `text.secondary`,
-                        }} />
-                      <Typography
-                        variant="body2">
+                        }}
+                      />
+
+                      <Typography variant="body2">
                         Joined: {new Date(employee.createdAt).toLocaleDateString()}
                       </Typography>
                     </Box>
@@ -202,20 +206,27 @@ export default function EmployeeDetails({
           marginTop: 2,
           borderRadius: 2,
           boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
-        }}>
+        }}
+      >
         <CardContent
-          sx={{ padding: 2.5 }}>
+          sx={{
+            paddingTop: 2.5,
+            paddingBottom: 2,
+            paddingLeft: 1.1,
+            paddingRight: 1.1,
+          }}>
           <Typography
             variant="h6"
             sx={{
               fontWeight: 600,
               marginBottom: 1.5,
               fontSize: `1.1rem`,
-            }}>
+            }}
+          >
             Work Schedule
           </Typography>
-          <EmployeeAvailability
-            employeeId={employee.employeeId} />
+
+          <EmployeeAvailability employeeId={employee.employeeId} />
         </CardContent>
       </Card>
 
@@ -224,7 +235,8 @@ export default function EmployeeDetails({
         sx={{
           marginTop: 2,
           position: `relative`,
-        }}>
+        }}
+      >
         <AppointmentFilters
           filters={appointmentFilters}
           onFiltersChange={handleFiltersChange}
@@ -233,13 +245,13 @@ export default function EmployeeDetails({
         />
 
         {/* Appointments Container with Overlay */}
-        <Box
-          sx={{ position: `relative` }}>
+        <Box sx={{ position: `relative` }}>
           {/* Appointments Content */}
           {lastAppointments && lastAppointments.length > 0 && (
             <EmployeeAppointments
               appointments={lastAppointments}
-              onAppointmentClick={handleAppointmentClick} />
+              onAppointmentClick={handleAppointmentClick}
+            />
           )}
 
           {/* Show message when no appointments */}
@@ -249,10 +261,12 @@ export default function EmployeeDetails({
                 textAlign: `center`,
                 py: 4,
                 color: `text.secondary`,
-              }}>
-              <Typography
-                variant="body2">
-                {lastAppointments ? `No appointments found with current filters` : `No appointments yet`}
+              }}
+            >
+              <Typography variant="body2">
+                {lastAppointments ?
+                  `No appointments found with current filters` :
+                  `No appointments yet`}
               </Typography>
             </Box>
           )}
@@ -282,10 +296,12 @@ export default function EmployeeDetails({
                   flexDirection: `column`,
                   alignItems: `center`,
                   gap: 1,
-                }}>
+                }}
+              >
                 <Typography
                   variant="body2"
-                  color="text.secondary">
+                  color="text.secondary"
+                >
                   Loading appointments...
                 </Typography>
               </Box>

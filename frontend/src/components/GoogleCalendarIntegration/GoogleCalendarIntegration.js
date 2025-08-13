@@ -222,11 +222,12 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
               direction="row"
               alignItems="center"
               spacing={1}
-              sx={{ mb: 2 }}>
-              <Google
-                color="primary" />
-              <Typography
-                variant="h6">Google Calendar Connected</Typography>
+              sx={{ mb: 2 }}
+            >
+              <Google color="primary" />
+
+              <Typography variant="h6">Google Calendar Connected</Typography>
+
               <Chip
                 icon={<Check />}
                 label="Active"
@@ -242,22 +243,27 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
                 p: 2,
                 bgcolor: `background.paper`,
                 borderRadius: 1,
-              }}>
+              }}
+            >
               <Stack
                 direction="row"
                 alignItems="center"
                 spacing={1}
-                sx={{ mb: 1 }}>
+                sx={{ mb: 1 }}
+              >
                 <CalendarMonth
                   fontSize="small"
-                  color="action" />
+                  color="action"
+                />
+
                 <Typography
                   variant="body2"
-                  color="text.secondary">
+                  color="text.secondary"
+                >
                   Calendar ID:
                 </Typography>
-                <Typography
-                  variant="body1">
+
+                <Typography variant="body1">
                   {status.calendarId}
                 </Typography>
               </Stack>
@@ -265,18 +271,24 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
               <Stack
                 direction="row"
                 alignItems="center"
-                spacing={1}>
+                spacing={1}
+              >
                 <Link
                   fontSize="small"
-                  color="action" />
+                  color="action"
+                />
+
                 <Typography
                   variant="body2"
-                  color="text.secondary">
+                  color="text.secondary"
+                >
                   Status:
                 </Typography>
+
                 <Typography
                   variant="body1"
-                  color="success.main">
+                  color="success.main"
+                >
                   Synchronizing appointments
                 </Typography>
               </Stack>
@@ -285,13 +297,15 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ mb: 2 }}>
+              sx={{ mb: 2 }}
+            >
               Appointments will be automatically synced with this Google Calendar.
             </Typography>
 
             <Stack
               direction="row"
-              spacing={2}>
+              spacing={2}
+            >
               <Button
                 variant="outlined"
                 color="error"
@@ -319,13 +333,15 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
           {status.tokenExpired ? (
             <Alert
               severity="warning"
-              sx={{ mb: 2 }}>
+              sx={{ mb: 2 }}
+            >
               Google Calendar access has expired. You need to reauthorize.
             </Alert>
           ) : (
             <Typography
               variant="body1"
-              sx={{ mb: 2 }}>
+              sx={{ mb: 2 }}
+            >
               Connect this employee to their Google Calendar to synchronize appointments.
             </Typography>
           )}
@@ -357,7 +373,8 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             sx={{
               color: `text.secondary`,
               mt: 2,
-            }}>
+            }}
+          >
             You will be redirected to Google to authorize access to the calendar.
           </Typography>
         </Box>

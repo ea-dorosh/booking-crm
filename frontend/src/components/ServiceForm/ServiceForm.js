@@ -90,7 +90,7 @@ export default function ServiceForm({
       employeePrices: checked
         ? [...formData.employeePrices, {
           employeeId,
-          price: ``, 
+          price: ``,
         }]
         : formData.employeePrices.filter(price => price.employeeId !== employeeId),
     });
@@ -103,7 +103,7 @@ export default function ServiceForm({
       employeePrices: formData.employeePrices.map(employeePrice =>
         employeePrice.employeeId === employeeId ? {
           ...employeePrice,
-          price: value, 
+          price: value,
         } : employeePrice,
       ),
     });
@@ -111,7 +111,7 @@ export default function ServiceForm({
 
   const handleCategoryChange = (event) => {
     const {
-      name, value, 
+      name, value,
     } = event.target;
     handleChange(event);
 
@@ -143,33 +143,34 @@ export default function ServiceForm({
   };
 
   return (
-    <Box
-      sx={{ padding: 0 }}>
-      {/* Basic Information */}
+    <Box sx={{ padding: 0 }}>
       <Card
         sx={{
           marginBottom: 2,
           borderRadius: 2,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
-        }}>
-        <CardContent
-          sx={{ padding: 2.5 }}>
+          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
+        }}
+      >
+        <CardContent sx={{ padding: 2.5 }}>
           <Typography
             variant="h6"
             sx={{
               fontWeight: 700,
               marginBottom: 2,
-              color: `text.primary`, 
-            }}>
+              color: `text.primary`,
+            }}
+          >
             Basic Information
           </Typography>
 
           <Grid
             container
-            spacing={2}>
+            spacing={2}
+          >
             <Grid
               item
-              xs={12}>
+              xs={12}
+            >
               <FormField
                 type="text"
                 name="name"
@@ -216,7 +217,7 @@ export default function ServiceForm({
                 options={[
                   {
                     value: ``,
-                    label: `Clear`, 
+                    label: `Clear`,
                   },
                   ...filteredSubCategories.map(subCategory => ({
                     value: subCategory.id,
@@ -279,7 +280,7 @@ export default function ServiceForm({
         sx={{
           marginBottom: 2,
           borderRadius: 2,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`, 
+          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
         }}>
         <CardContent
           sx={{ padding: 2.5 }}>
@@ -288,7 +289,7 @@ export default function ServiceForm({
             sx={{
               fontWeight: 700,
               marginBottom: 1.5,
-              color: `text.primary`, 
+              color: `text.primary`,
             }}>
             Service Providers & Pricing
           </Typography>
@@ -304,7 +305,7 @@ export default function ServiceForm({
             sx={{
               display: `flex`,
               flexDirection: `column`,
-              gap: 1, 
+              gap: 1,
             }}>
             {employees.map((employee) => {
               const isSelected = isEmployeeSelected(employee.employeeId);
@@ -340,7 +341,7 @@ export default function ServiceForm({
                     label=""
                     sx={{
                       margin: 0,
-                      marginRight: 1.5, 
+                      marginRight: 1.5,
                     }}
                   />
 
@@ -366,7 +367,7 @@ export default function ServiceForm({
                       variant="body1"
                       sx={{
                         fontWeight: 600,
-                        color: `text.primary`, 
+                        color: `text.primary`,
                       }}>
                       {`${employee.firstName} ${employee.lastName}`}
                     </Typography>
@@ -377,7 +378,7 @@ export default function ServiceForm({
                       sx={{
                         display: `flex`,
                         alignItems: `center`,
-                        gap: 1, 
+                        gap: 1,
                       }}>
                       <TextField
                         type="number"

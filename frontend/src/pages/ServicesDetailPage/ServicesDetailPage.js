@@ -97,7 +97,12 @@ export default function ServicesDetailPage() {
 
   const handleCancelEdit = () => {
     dispatch(cleanErrors());
-    setIsEditMode(false);
+
+    if (service) {
+      setIsEditMode(false);
+    } else {
+      navigate(-1);
+    }
   };
 
   // Determine page title

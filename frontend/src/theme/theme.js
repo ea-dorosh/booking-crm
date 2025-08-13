@@ -295,12 +295,12 @@ const theme = createTheme({
             variant: `outlined`,
           },
           style: {
-            backgroundColor: `#ffffff`,
+            backgroundColor: `transparent`,
             color: colors.primary[500],
             borderColor: colors.primary[500],
 
             '&:hover': {
-              backgroundColor: `#ffffff`,
+              backgroundColor: `transparent`,
               color: colors.primary[500],
               borderColor: colors.primary[500],
             },
@@ -328,12 +328,12 @@ const theme = createTheme({
             variant: `outlined`,
           },
           style: {
-            backgroundColor: `#ffffff`,
+            backgroundColor: `transparent`,
             color: colors.secondary[500],
             borderColor: colors.secondary[500],
 
             '&:hover': {
-              backgroundColor: `#ffffff`,
+              backgroundColor: `transparent`,
               color: colors.secondary[500],
               borderColor: colors.secondary[500],
             },
@@ -361,12 +361,12 @@ const theme = createTheme({
             variant: `outlined`,
           },
           style: {
-            backgroundColor: `#ffffff`,
+            backgroundColor: `transparent`,
             color: colors.warning[500],
             borderColor: colors.warning[500],
 
             '&:hover': {
-              backgroundColor: `#ffffff`,
+              backgroundColor: `transparent`,
               color: colors.warning[500],
               borderColor: colors.warning[500],
             },
@@ -394,12 +394,12 @@ const theme = createTheme({
             variant: `outlined`,
           },
           style: {
-            backgroundColor: `#ffffff`,
+            backgroundColor: `transparent`,
             color: colors.success[500],
             borderColor: colors.success[500],
 
             '&:hover': {
-              backgroundColor: `#ffffff`,
+              backgroundColor: `transparent`,
               color: colors.success[500],
               borderColor: colors.success[500],
             },
