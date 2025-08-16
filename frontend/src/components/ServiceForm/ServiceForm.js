@@ -30,7 +30,6 @@ export default function ServiceForm({
 }) {
   const isEditMode = Boolean(service);
 
-  // Define form fields configuration
   const formFields = [
     {
       name: `name`,
