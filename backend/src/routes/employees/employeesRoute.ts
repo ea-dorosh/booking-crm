@@ -19,6 +19,7 @@ import {
   DEFAULT_APPOINTMENT_SORT_FIELD,
   DEFAULT_SORT_DIRECTION,
 } from '@/enums/enums.js';
+import { getAppointments } from '@/services/appointment/appointmentService.js';
 
 const router = express.Router();
 
@@ -182,7 +183,7 @@ router.post(`/availability`, async (req: CustomRequestType, res: CustomResponseT
 `;
 
   const values = [availability].map(({
-    employeeId, dayId, startTime, endTime, 
+    employeeId, dayId, startTime, endTime,
   }) => [
     employeeId,
     dayId,
@@ -256,7 +257,7 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
   const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
   try {
-    const { getAppointments } = await import(`@/services/appointment/appointmentService.js`);
+    // const { getAppointments } = await import(`@/services/appointment/appointmentService.js`);
 
     const appointmentsData = await getAppointments(request.dbPool, {
       startDate,
