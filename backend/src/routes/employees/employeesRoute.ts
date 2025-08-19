@@ -186,18 +186,24 @@ router.post(`/availability`, async (req: CustomRequestType, res: CustomResponseT
   const availability = req.body;
 
   const upsertQuery = `
-  INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time)
+  INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time, block_start_time_1, block_end_time_1)
   VALUES ?
-  ON DUPLICATE KEY UPDATE start_time = VALUES(start_time), end_time = VALUES(end_time)
+  ON DUPLICATE KEY UPDATE
+    start_time = VALUES(start_time),
+    end_time = VALUES(end_time),
+    block_start_time_1 = VALUES(block_start_time_1),
+    block_end_time_1 = VALUES(block_end_time_1)
 `;
 
   const values = [availability].map(({
-    employeeId, dayId, startTime, endTime,
+    employeeId, dayId, startTime, endTime, blockStartTimeFirst, blockEndTimeFirst,
   }) => [
     employeeId,
     dayId,
     startTime,
     endTime,
+    blockStartTimeFirst,
+    blockEndTimeFirst,
   ]);
 
   try {

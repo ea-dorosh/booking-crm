@@ -52,6 +52,8 @@ export interface EmployeeAvailabilityDataType {
   dayId: number;
   startTime: string;
   endTime: string;
+  blockStartTimeFirst: Time_HH_MM_SS_Type;
+  blockEndTimeFirst: Time_HH_MM_SS_Type;
 }
 
 interface GroupedAvailabilityDayType {
@@ -60,5 +62,7 @@ interface GroupedAvailabilityDayType {
     id: number;
     startTime: Time_HH_MM_SS_Type;
     endTime: Time_HH_MM_SS_Type;
+    blockStartTimeFirst: Time_HH_MM_SS_Type;
+    blockEndTimeFirst: Time_HH_MM_SS_Type;
   }>;
 }

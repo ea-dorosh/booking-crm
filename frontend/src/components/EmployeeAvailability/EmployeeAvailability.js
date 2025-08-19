@@ -29,12 +29,14 @@ export default function EmployeeAvailability({ employeeId }) {
     return employeeAvailability?.find((item) => item.dayId === dayId);
   };
 
-  const applyEmployeeAvailabilityHandler = async (dayId, startTime, endTime) => {
+  const applyEmployeeAvailabilityHandler = async (dayId, startTime, endTime, blockStartTimeFirst, blockEndTimeFirst ) => {
     await dispatch(applyEmployeeAvailability({
       employeeId,
       dayId,
       startTime,
       endTime,
+      blockEndTimeFirst: blockEndTimeFirst === `clear` ? null : blockEndTimeFirst,
+      blockStartTimeFirst: blockStartTimeFirst === `clear` ? null : blockStartTimeFirst,
     }));
 
     // TODO: fix the problem with the data not being updated

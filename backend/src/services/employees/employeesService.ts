@@ -173,6 +173,8 @@ async function getEmployeeAvailability(dbPool: Pool, employeeIds: number[]): Pro
     dayId: row.day_id,
     startTime: row.start_time,
     endTime: row.end_time,
+    blockStartTimeFirst: row.block_start_time_1,
+    blockEndTimeFirst: row.block_end_time_1,
   }));
 
   return data;
@@ -194,7 +196,7 @@ async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[])
 
   const groupedByDay = results.reduce<Record<number, GroupedAvailabilityDayType>>((acc, row) => {
     const {
-      employee_id, day_id, start_time, end_time,
+      employee_id, day_id, start_time, end_time, block_start_time_1, block_end_time_1,
     } = row;
 
     if (!acc[day_id]) {
@@ -208,6 +210,8 @@ async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[])
       id: employee_id,
       startTime: start_time,
       endTime: end_time,
+      blockStartTimeFirst: block_start_time_1,
+      blockEndTimeFirst: block_end_time_1,
     });
 
     return acc;

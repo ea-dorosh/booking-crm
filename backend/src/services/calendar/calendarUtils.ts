@@ -365,6 +365,8 @@ function combinePeriodWithNormalizedAppointments(
         });
       }
 
+      console.log(`blockedTimes: `, JSON.stringify(blockedTimes, null, 2));
+
       const availableTimes = calculateAvailableTimes(
         employee.startWorkingTime,
         employee.endWorkingTime,
@@ -372,7 +374,7 @@ function combinePeriodWithNormalizedAppointments(
         serviceDurationWithBuffer,
       );
 
-      console.log(`availableTimes: `, JSON.stringify(availableTimes, null, 2));
+      console.log(`availableTimes: Q `, JSON.stringify(availableTimes, null, 2));
 
       return {
         ...employee,

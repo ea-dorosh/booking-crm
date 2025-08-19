@@ -44,19 +44,21 @@ const getGroupedTimeSlots = async (
   // Process each service
   for (const [index, serviceData] of servicesData.entries()) {
     const {
-      serviceId, employeeIds, 
+      serviceId, employeeIds,
     } = serviceData;
 
     // Get service details and employee availability
     const service = await getService(dbPool, serviceId);
     const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
     const groupedEmployeeAvailability = await getGroupEmployeeAvailability(dbPool, employeeIds);
-
+    console.log(`groupedEmployeeAvailability: `, JSON.stringify(groupedEmployeeAvailability, null, 2));
     // Get period with employee working times
     const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(
       paramDate,
       groupedEmployeeAvailability,
     );
+
+    console.log(`periodWithDaysAndEmployeeAvailability: `, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 2));
 
     // Get saved appointments if there are working days
     let savedAppointments: AppointmentDataType[] = [];

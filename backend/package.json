@@ -13,10 +13,11 @@
     "migrate:create:users": "knex migrate:make --env=development",
     "migrate:run:users": "knex migrate:latest --env=development",
     "migrate:create:clients": "knex migrate:make --env=client_databases",
-    "migrate:run:client": "knex migrate:latest --env=client_databases",
     "migrate:run:clients": "node scripts/migrate-clients.js",
     "migrate:run:users:prod": "NODE_ENV=production knex migrate:latest --env=production",
     "migrate:run:clients:prod": "NODE_ENV=production node scripts/migrate-clients.js",
+    "migrate:rollback:clients": "node scripts/rollback-clients.js",
+    "migrate:rollback:clients:prod": "NODE_ENV=production node scripts/rollback-clients.js",
     "migrate:deploy": "npm run migrate:run:users:prod && npm run migrate:run:clients:prod",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "lint-fix": "eslint 'src/**/*.{ts,js}' --fix"
