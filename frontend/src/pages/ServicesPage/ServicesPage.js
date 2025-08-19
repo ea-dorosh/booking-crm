@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServicesContainer from "@/components/ServicesContainer/ServicesContainer";
-import { categoryStatusEnum, subCategoryStatusEnum } from '@/enums/enums';
+import { categoryStatusEnum, subCategoryStatusEnum, serviceStatusEnum } from '@/enums/enums';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { fetchServices } from '@/features/services/servicesSlice';
@@ -19,7 +19,9 @@ export default function ServicesPage() {
     const promises = [];
 
     if (!services) {
-      promises.push(dispatch(fetchServices()));
+      const storedServiceStatus = sessionStorage.getItem(`servicesStatusFilter`);
+      const statuses = storedServiceStatus ? [storedServiceStatus] : [serviceStatusEnum.active];
+      promises.push(dispatch(fetchServices(statuses)));
     }
     if (!employees || employees.length === 0) {
       promises.push(dispatch(fetchEmployees()));

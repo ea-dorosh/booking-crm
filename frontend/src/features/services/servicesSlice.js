@@ -2,13 +2,23 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
+import { serviceStatusEnum } from '@/enums/enums'
 import servicesService from "@/services/services.service";
 
 export const fetchServices = createAsyncThunk(
   `services/fetchServices`,
-  async (_arg, thunkAPI) => {
+  async (statuses, thunkAPI) => {
     try {
-      const data = await servicesService.getServices();
+      let statusesToFetch = statuses;
+      if (statuses?.[0] === `all`) {
+        statusesToFetch = [
+          serviceStatusEnum.active,
+          serviceStatusEnum.archived,
+          serviceStatusEnum.disabled,
+        ];
+      }
+
+      const data = await servicesService.getServices(statusesToFetch);
 
       return data;
     } catch (error) {
@@ -42,6 +52,23 @@ export const updateService = createAsyncThunk(
         // If parsing fails, return the error as is
         return thunkAPI.rejectWithValue({ general: error.message });
       }
+    }
+  },
+);
+
+export const updateServiceStatus = createAsyncThunk(
+  `services/updateServiceStatus`,
+  async ({
+    serviceId, status,
+  }, thunkAPI) => {
+    try {
+      await servicesService.updateServiceStatus(serviceId, status);
+      return {
+        serviceId,
+        status,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
     }
   },
 );
@@ -147,6 +174,23 @@ const servicesSlice = createSlice({
       .addCase(updateService.rejected, (state, action) => {
         state.isUpdateServiceRequestPending = false;
         state.updateFormErrors = action.payload;
+      })
+      .addCase(updateServiceStatus.pending, (state) => {
+        state.isUpdateServiceRequestPending = true;
+      })
+      .addCase(updateServiceStatus.fulfilled, (state, action) => {
+        state.isUpdateServiceRequestPending = false;
+        // Update the service status in the current data
+        if (state.data) {
+          const service = state.data.find(s => s.id === action.payload.serviceId);
+          if (service) {
+            service.status = action.payload.status;
+          }
+        }
+      })
+      .addCase(updateServiceStatus.rejected, (state, action) => {
+        state.isUpdateServiceRequestPending = false;
+        state.error = action.payload;
       })
   },
 });

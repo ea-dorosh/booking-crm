@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { serviceStatusEnum } from '@/enums/enums';
 
 export default function ServicesList({
   services, employees, categories,
@@ -199,20 +200,46 @@ export default function ServicesList({
                             flexGrow: 1,
                             display: `flex`,
                             flexDirection: `column`,
+                            alignItems: `flex-start`,
                           }}
                         >
-                          {/* Service Name */}
-                          <Typography
-                            variant="h6"
+                          <Box
                             sx={{
-                              fontWeight: 600,
+                              display: `flex`,
+                              alignItems: `flex-start`,
+                              gap: 1,
+                              justifyContent: `space-between`,
+                              width: `100%`,
                               marginBottom: 1,
-                              color: `text.primary`,
-                              fontSize: `1.1rem`,
+                              maxWidth: `100%`,
+                              wordBreak: `break-word`,
                             }}
                           >
-                            {service.name}
-                          </Typography>
+                            {/* Service Name */}
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontWeight: 600,
+                                color: `text.primary`,
+                                fontSize: `1.1rem`,
+                                hyphens: `auto`,
+                                width: `auto`,
+                              }}
+                            >
+                              {service.name}
+                            </Typography>
+
+                            {/* Service Status */}
+                            {service.status && (
+                              <Chip
+                                label={service.status === serviceStatusEnum.disabled ? `not active` : service.status === serviceStatusEnum.archived ? `deleted` : service.status}
+                                size="small"
+                                color={service.status === serviceStatusEnum.active ? `success` : service.status === serviceStatusEnum.disabled ? `warning` : `error`}
+                                variant="filled"
+                                sx={{ mb: 1.5 }}
+                              />
+                            )}
+                          </Box>
 
                           {/* Price and Duration */}
                           <Box

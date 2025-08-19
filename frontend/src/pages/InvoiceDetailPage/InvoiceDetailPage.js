@@ -16,6 +16,7 @@ import InvoiceDetails from "@/components/InvoiceDetails/InvoiceDetails";
 import InvoiceForm from "@/components/InvoiceForm/InvoiceForm";
 import Loader from '@/components/Loader/Loader';
 import PageContainer from '@/components/PageContainer/PageContainer';
+import { serviceStatusEnum } from '@/enums/enums';
 import { sortedByLastActivityDateCustomers } from '@/features/customers/customersSelectors';
 import { fetchCustomers } from "@/features/customers/customersSlice";
 import {
@@ -67,7 +68,7 @@ export default function CustomerDetailPage() {
       dispatch(fetchInvoice(invoiceId));
     } else {
       dispatch(fetchCustomers());
-      dispatch(fetchServices());
+      dispatch(fetchServices([serviceStatusEnum.active]));
     }
 
     return () => {
@@ -100,7 +101,7 @@ export default function CustomerDetailPage() {
   const changeInvoiceHandler = async () => {
     const promise = Promise.all([
       dispatch(fetchCustomers()),
-      dispatch(fetchServices()),
+      dispatch(fetchServices([serviceStatusEnum.active])),
     ]);
 
     await promise;

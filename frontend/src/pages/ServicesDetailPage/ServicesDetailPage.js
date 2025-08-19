@@ -8,11 +8,13 @@ import PageContainer from '@/components/PageContainer/PageContainer';
 import ServiceDetails from '@/components/ServiceDetails/ServiceDetails';
 import ServiceForm from '@/components/ServiceForm/ServiceForm';
 import ServiceNotFound from '@/components/ServiceNotFound/ServiceNotFound';
+import { serviceStatusEnum } from '@/enums/enums';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import {
   fetchServices,
   updateService,
+  updateServiceStatus,
   cleanError,
   cleanErrors,
 } from '@/features/services/servicesSlice';
@@ -52,7 +54,7 @@ export default function ServicesDetailPage() {
     }
 
     if (!service && !shouldShowServiceForm) {
-      promises.push(dispatch(fetchServices()));
+      promises.push(fetchUpdatedServices());
     } else if (shouldShowServiceForm) {
       dispatch(cleanErrors());
       setIsEditMode(true)
@@ -61,7 +63,11 @@ export default function ServicesDetailPage() {
     Promise.all(promises);
   }, []);
 
-
+  const fetchUpdatedServices = async () => {
+    const storedStatus = sessionStorage.getItem(`servicesStatusFilter`);
+    const statuses = storedStatus ? [storedStatus] : [serviceStatusEnum.active];
+    await dispatch(fetchServices(statuses));
+  }
 
   const updateServiceHandler = async (service) => {
     try {
@@ -74,7 +80,7 @@ export default function ServicesDetailPage() {
         navigate(`/services/${serviceId}`, { replace: true });
       }
 
-      dispatch(fetchServices());
+      dispatch(fetchServices([serviceStatusEnum.active]));
 
       setIsEditMode(false);
     } catch (error) {
@@ -102,6 +108,42 @@ export default function ServicesDetailPage() {
       setIsEditMode(false);
     } else {
       navigate(-1);
+    }
+  };
+
+  const handleArchiveToggle = async () => {
+    if (!service) return;
+
+    const newStatus = service.status === serviceStatusEnum.archived
+      ? serviceStatusEnum.active
+      : serviceStatusEnum.archived;
+
+    try {
+      await dispatch(updateServiceStatus({
+        serviceId: service.id,
+        status: newStatus,
+      })).unwrap();
+      dispatch(fetchServices([`all`]));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeactivateToggle = async () => {
+    if (!service) return;
+
+    const newStatus = service.status === serviceStatusEnum.disabled
+      ? serviceStatusEnum.active
+      : serviceStatusEnum.disabled;
+
+    try {
+      await dispatch(updateServiceStatus({
+        serviceId: service.id,
+        status: newStatus,
+      })).unwrap();
+      dispatch(fetchServices([`all`]));
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -153,6 +195,8 @@ export default function ServicesDetailPage() {
           serviceCategories={serviceCategories}
           serviceSubCategories={serviceSubCategories}
           onEditClick={handleEditClick}
+          onArchiveToggle={handleArchiveToggle}
+          onDeactivateToggle={handleDeactivateToggle}
         />
       );
     }
@@ -174,7 +218,11 @@ export default function ServicesDetailPage() {
           },
         }}
       >
-        {!isEditMode && <GoBackNavigation />}
+        {!isEditMode &&
+          <GoBackNavigation
+            beforeGoBack={fetchUpdatedServices}
+          />
+        }
 
         {isServicesRequestPending && (
           <Box

@@ -1,9 +1,13 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
 import { appendFormData } from '@/utils/formData';
 
-const getServices = async () => {
+const getServices = async (statuses) => {
   try {
-    const response = await axios.get(`/services`);
+    const params = {};
+    if (Array.isArray(statuses) && statuses.length) {
+      params.status = statuses.join(`,`);
+    }
+    const response = await axios.get(`/services`, { params });
 
     return response.data;
   } catch (error) {
@@ -69,6 +73,16 @@ const updateService = async (service) => {
   }
 };
 
+const updateServiceStatus = async (serviceId, status) => {
+  try {
+    const response = await axios.put(`/services/edit/${serviceId}`, { status });
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const updateServiceSubCategory = async (serviceSubCategory) => {
   const formData = appendFormData(serviceSubCategory);
 
@@ -123,6 +137,7 @@ const serviceService = {
   getServiceCategories,
   createService,
   updateService,
+  updateServiceStatus,
   updateServiceSubCategory,
   createServiceSubCategory,
   updateServiceCategory,

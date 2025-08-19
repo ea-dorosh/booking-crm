@@ -38,6 +38,7 @@ interface ServiceRow extends RowDataPacket {
   booking_note: string | null;
   employee_id: number | null;
   price: number | null;
+  status: string;
 }
 
 interface SubCategoryData {
@@ -63,6 +64,7 @@ interface ServiceData {
   bufferTime: string;
   bookingNote: string | null;
   employeePrices: EmployeePrice[];
+  status: string;
 }
 
 interface CreateServiceResult {
@@ -113,8 +115,19 @@ interface UpdateCategoryResult {
   validationErrors: CategoryValidationErrors | null;
 }
 
-async function getServices(dbPool: Pool): Promise<ServiceData[]> {
+async function getServices(dbPool: Pool, statuses?: string[]): Promise<ServiceData[]> {
   const subCategoriesData = await getServiceSubCategories(dbPool);
+
+  const allowedStatuses = new Set<string>([
+    CategoryStatusEnum.Active,
+    CategoryStatusEnum.Archived,
+    CategoryStatusEnum.Disabled,
+  ]);
+  const filterStatuses = (Array.isArray(statuses) && statuses.length > 0 ? statuses : [CategoryStatusEnum.Active])
+    .map(s => String(s).toLowerCase())
+    .filter(s => allowedStatuses.has(s));
+
+  const finalStatuses = filterStatuses.length > 0 ? filterStatuses : [CategoryStatusEnum.Active];
 
   const servicesQuery = `
     SELECT
@@ -125,13 +138,15 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
       s.duration_time,
       s.buffer_time,
       s.booking_note,
+      s.status,
       sep.employee_id,
       sep.price
     FROM Services s
     LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
+    WHERE s.status IN (?)
   `;
 
-  const [servicesResults] = await dbPool.query<ServiceRow[]>(servicesQuery);
+  const [servicesResults] = await dbPool.query<ServiceRow[]>(servicesQuery, [finalStatuses]);
 
   const servicesMap = new Map<number, ServiceData>();
 
@@ -144,6 +159,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
       duration_time,
       buffer_time,
       booking_note,
+      status,
       employee_id,
       price,
     } = row;
@@ -160,6 +176,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
         durationTime: duration_time,
         bufferTime: buffer_time,
         bookingNote: booking_note,
+        status,
         employeePrices: [],
       });
     }
@@ -168,7 +185,7 @@ async function getServices(dbPool: Pool): Promise<ServiceData[]> {
       const service = servicesMap.get(id);
       if (service) {
         service.employeePrices.push({
-          employeeId: employee_id, price, 
+          employeeId: employee_id, price,
         });
       }
     }
@@ -710,6 +727,38 @@ async function updateServiceCategoryStatus(dbPool: Pool, categoryId: number, sta
   }
 }
 
+async function updateServiceStatus(dbPool: Pool, serviceId: number, status: string): Promise<UpdateServiceResult> {
+  const allowedStatuses = new Set<string>([
+    CategoryStatusEnum.Active,
+    CategoryStatusEnum.Archived,
+    CategoryStatusEnum.Disabled,
+  ]);
+
+  if (!allowedStatuses.has(String(status).toLowerCase())) {
+    return {
+      serviceId: null,
+      validationErrors: { status: `Invalid status value` } as unknown as ServiceFormDataValidationErrors,
+    };
+  }
+
+  const updateStatusQuery = `
+    UPDATE Services
+    SET status = ?
+    WHERE id = ?;
+  `;
+
+  try {
+    await dbPool.query(updateStatusQuery, [status, serviceId]);
+
+    return {
+      serviceId,
+      validationErrors: null,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
 export {
   createService,
   createServiceCategory,
@@ -723,4 +772,5 @@ export {
   updateServiceCategoryStatus,
   updateServiceSubCategory,
   updateServiceSubCategoryStatus,
+  updateServiceStatus,
 };

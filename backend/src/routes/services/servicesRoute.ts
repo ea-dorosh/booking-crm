@@ -11,13 +11,14 @@ import {
   updateService,
   updateServiceSubCategory,
   updateServiceSubCategoryStatus,
+  updateServiceStatus,
 } from '@/services/service/serviceService.js';
 import { upload } from '@/utils/uploadFile.js';
 import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { ResultSetHeader } from 'mysql2';
+
 import {
   ServiceDataType,
   SubCategoryDataType,
@@ -33,7 +34,16 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
-    const services = await getServices(req.dbPool);
+    // support query param status similar to categories and subcategories
+    let statuses: string[] | undefined = undefined;
+    const { status } = req.query as { status?: string | string[] };
+    if (Array.isArray(status)) {
+      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
+    } else if (typeof status === `string`) {
+      statuses = status.split(`,`).map(s => s.trim());
+    }
+
+    const services = await getServices(req.dbPool, statuses);
 
     res.json(services);
 
@@ -117,7 +127,7 @@ router.post(`/create-service`, async (req: CustomRequestType, res: CustomRespons
 
   try {
     const {
-      serviceId, validationErrors, 
+      serviceId, validationErrors,
     } = await createService(req.dbPool, service);
 
     if (validationErrors) {
@@ -161,10 +171,28 @@ router.put(`/edit/:id`, async (req: CustomRequestType, res: CustomResponseType) 
 
   const serviceId = Number(req.params.id);
   const service: ServiceDataType = req.body;
+  const { status } = req.body as unknown as { status?: string };
 
   try {
+    // If only status is being updated
+    if (typeof status === `string` && status.length > 0 && !service.name && service.categoryId === undefined && service.subCategoryId === undefined && service.durationTime === undefined && (!service.employeePrices || service.employeePrices.length === 0)) {
+      const {
+        serviceId: updatedId, validationErrors,
+      } = await updateServiceStatus(req.dbPool, serviceId, status);
+      if (validationErrors) {
+        res.status(428).json({ errors: validationErrors });
+        return;
+      }
+      if (updatedId) {
+        res.json({
+          message: `Service status updated successfully`, data: updatedId,
+        });
+        return;
+      }
+    }
+
     const {
-      serviceId: updatedServiceId, validationErrors, 
+      serviceId: updatedServiceId, validationErrors,
     } = await updateService(req.dbPool, serviceId, service);
 
     if (validationErrors) {
@@ -211,7 +239,7 @@ router.post(`/sub-category/create`, upload.single(`image`), async (req: CustomRe
 
   try {
     const {
-      subCategoryId, validationErrors, 
+      subCategoryId, validationErrors,
     } = await createServiceSubCategory(req.dbPool, subCategory, imgPath);
 
     if (validationErrors) {
@@ -261,7 +289,7 @@ router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomR
   try {
     if (typeof status === `string` && status.length > 0 && !subCategory.name && !imgPath && subCategory.categoryId === undefined) {
       const {
-        subCategoryId: updatedId, validationErrors, 
+        subCategoryId: updatedId, validationErrors,
       } = await updateServiceSubCategoryStatus(req.dbPool, subCategoryId, status);
       if (validationErrors) {
         res.status(428).json({ errors: validationErrors });
@@ -269,14 +297,14 @@ router.put(`/sub-category/edit/:id`, upload.single(`image`), async (req: CustomR
       }
       if (updatedId) {
         res.json({
-          message: `SubCategory status updated successfully`, data: updatedId, 
+          message: `SubCategory status updated successfully`, data: updatedId,
         });
         return;
       }
     }
 
     const {
-      subCategoryId: updatedSubCategoryId, validationErrors, 
+      subCategoryId: updatedSubCategoryId, validationErrors,
     } = await updateServiceSubCategory(req.dbPool, subCategoryId, subCategory, imgPath);
 
     if (validationErrors) {
@@ -323,7 +351,7 @@ router.post(`/category/create`, upload.single(`image`), async (req: CustomReques
 
   try {
     const {
-      categoryId, validationErrors, 
+      categoryId, validationErrors,
     } = await createServiceCategory(req.dbPool, name, imgPath);
 
     if (validationErrors) {
@@ -367,14 +395,14 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
 
   const categoryId = Number(req.params.id);
   const {
-    name, status, 
+    name, status,
   } = req.body;
   const imgPath = req.file?.filename || null;
 
   try {
     if (typeof status === `string` && status.length > 0 && !name && !imgPath) {
       const {
-        categoryId: updatedCategoryId, validationErrors, 
+        categoryId: updatedCategoryId, validationErrors,
       } = await updateServiceCategoryStatus(req.dbPool, categoryId, status);
 
       if (validationErrors) {
@@ -392,7 +420,7 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
     }
 
     const {
-      categoryId: updatedCategoryId, validationErrors, 
+      categoryId: updatedCategoryId, validationErrors,
     } = await updateServiceCategory(req.dbPool, categoryId, name, imgPath);
 
     if (validationErrors) {
@@ -422,38 +450,6 @@ router.put(`/category/edit/:id`, upload.single(`image`), async (req: CustomReque
     res.status(500).json({
       errorMessage: `Unknown error occurred while updating category`,
     });
-
-    return;
-  }
-});
-
-
-router.delete(`/:id`, async (req: CustomRequestType, res: CustomResponseType) => {
-  if (!req.dbPool) {
-    res.status(500).json({ message: `Database connection not initialized` });
-
-    return;
-  }
-
-  const serviceId = req.params.id;
-  const deleteQuery = `DELETE FROM Services WHERE id = ?`;
-
-  try {
-    const [serviceResults] = await req.dbPool.query<ResultSetHeader>(deleteQuery, [serviceId]);
-
-    if (serviceResults.affectedRows === 0) {
-      res.status(404).json({ error: `Service not found` });
-
-      return;
-    } else {
-      res.status(200).json({ message: `Service deleted successfully` });
-
-      return;
-    }
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error deleting service` });
 
     return;
   }

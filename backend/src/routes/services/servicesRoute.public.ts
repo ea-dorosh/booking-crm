@@ -19,16 +19,19 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
-    // get service categories
-    const categoriesData = await getServiceCategories(req.dbPool);
+    // get service categories (only active)
+    const categoriesData = await getServiceCategories(req.dbPool, [`active`]);
+    console.log(`categoriesData`, categoriesData);
 
-    // get service sub categories
+    // get service sub categories (only active)
     const subCategoriesSql = `
       SELECT c.id, c.name, c.img
       FROM ServiceSubCategories c
+      WHERE c.status = 'active'
     `;
 
     const [subCategoriesResult] = await req.dbPool.query<SubCategoryRow[]>(subCategoriesSql);
+    console.log(`subCategoriesResult`, subCategoriesResult);
 
     const subCategoriesData = subCategoriesResult.map((row) => ({
       id: row.id,
@@ -39,6 +42,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     const employeesData = await getEmployees(req.dbPool);
 
     // get all services and map with sub categories and employee prices
+    // (only active services with active categories and active subcategories)
     const sql = `
       SELECT
         s.id,
@@ -52,6 +56,10 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         sep.price
       FROM Services s
       LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
+      INNER JOIN ServiceCategories sc ON s.category_id = sc.id AND sc.status = 'active'
+      LEFT JOIN ServiceSubCategories ssc ON s.sub_category_id = ssc.id
+      WHERE s.status = 'active'
+        AND (s.sub_category_id IS NULL OR ssc.status = 'active')
     `;
 
     const [results] = await req.dbPool.query<RowDataPacket[]>(sql);

@@ -26,10 +26,17 @@ const subCategoryStatusEnum = {
   disabled: `disabled`,
 };
 
+const serviceStatusEnum = {
+  active: `active`,
+  archived: `archived`,
+  disabled: `disabled`,
+};
+
 export {
   appointmentStatusEnum,
   customerNewStatusEnum,
   salutationEnum,
   categoryStatusEnum,
   subCategoryStatusEnum,
+  serviceStatusEnum,
 };

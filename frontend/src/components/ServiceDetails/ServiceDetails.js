@@ -1,4 +1,4 @@
-import { Edit, AccessTime, Euro } from "@mui/icons-material";
+import { Edit, AccessTime, DeleteOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -9,6 +9,7 @@ import {
   Chip,
   Avatar,
 } from "@mui/material";
+import { serviceStatusEnum } from '@/enums/enums';
 
 export default function ServiceDetails({
   service,
@@ -16,6 +17,8 @@ export default function ServiceDetails({
   serviceCategories,
   serviceSubCategories,
   onEditClick,
+  onArchiveToggle,
+  onDeactivateToggle,
 }) {
   const getEmployeeName = (employeeId) => {
     const employee = employees.find(emp => emp.employeeId === employeeId);
@@ -47,28 +50,60 @@ export default function ServiceDetails({
         sx={{ padding: 2.5 }}
       >
         {/* Header with Edit Button */}
-        <Box
-          sx={{
-            display: `flex`,
-            justifyContent: `space-between`,
-            alignItems: `flex-start`,
-            marginBottom: 2,
-            paddingBottom: 1.5,
-            borderBottom: `1px solid`,
-            borderColor: `grey.100`,
-          }}
-        >
-          <Box>
+        <Box>
+          <Box
+            sx={{
+              display: `flex`,
+              gap: 1,
+              alignItems: `flex-start`,
+              justifyContent: `space-between`,
+            }}
+          >
             <Typography
               variant="h4"
               sx={{
                 fontWeight: 700,
                 marginBottom: 0.5,
                 color: `text.primary`,
+                hyphens: `auto`,
+                wordBreak: `break-word`,
               }}
             >
               {service.name}
             </Typography>
+
+            <Button
+              variant="contained"
+              startIcon={<Edit sx={{ fontSize: `16px` }} />}
+              onClick={onEditClick}
+              sx={{
+                borderRadius: 1.5,
+                padding: `6px 12px`,
+                fontSize: `0.8rem`,
+                fontWeight: 600,
+                textTransform: `none`,
+                minWidth: `auto`,
+                boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
+                '&:hover': {
+                  boxShadow: `0 4px 12px rgba(0,0,0,0.2)`,
+                },
+              }}
+            >
+              Edit
+            </Button>
+          </Box>
+
+          <Box marginTop={1}>
+            {service.status && (
+              <Chip
+                label={service.status === serviceStatusEnum.disabled ? `not active` : service.status === serviceStatusEnum.archived ? `deleted` : service.status}
+                size="small"
+                color={service.status === serviceStatusEnum.active ? `success` : service.status === serviceStatusEnum.disabled ? `warning` : `error`}
+                variant="filled"
+                sx={{ marginBottom: 1 }}
+              />
+            )}
+
             <Box
               sx={{
                 display: `flex`,
@@ -84,12 +119,6 @@ export default function ServiceDetails({
                   gap: 0.5,
                 }}
               >
-                <Euro
-                  sx={{
-                    fontSize: 16,
-                    color: `primary.main`,
-                  }}
-                />
                 <Typography
                   variant="h6"
                   color="primary"
@@ -118,32 +147,13 @@ export default function ServiceDetails({
               </Box>
             </Box>
           </Box>
-
-          <Button
-            variant="contained"
-            startIcon={<Edit sx={{ fontSize: `16px` }} />}
-            onClick={onEditClick}
-            sx={{
-              borderRadius: 1.5,
-              padding: `6px 12px`,
-              fontSize: `0.8rem`,
-              fontWeight: 600,
-              textTransform: `none`,
-              minWidth: `auto`,
-              boxShadow: `0 2px 8px rgba(0,0,0,0.15)`,
-              '&:hover': {
-                boxShadow: `0 4px 12px rgba(0,0,0,0.2)`,
-              },
-            }}
-          >
-              Edit
-          </Button>
         </Box>
 
         {/* Service Details Grid */}
         <Grid
           container
           spacing={1.5}
+          marginTop={1}
         >
           {/* Category & Subcategory */}
           <Grid
@@ -244,8 +254,9 @@ export default function ServiceDetails({
                   fontSize: `0.75rem`,
                 }}
               >
-                  Duration
+                Duration
               </Typography>
+
               <Typography
                 variant="body2"
                 sx={{
@@ -281,8 +292,9 @@ export default function ServiceDetails({
                   fontSize: `0.75rem`,
                 }}
               >
-                  Buffer Time
+                Buffer Time
               </Typography>
+
               <Typography
                 variant="body2"
                 sx={{
@@ -319,8 +331,9 @@ export default function ServiceDetails({
                     fontSize: `0.75rem`,
                   }}
                 >
-                    Note
+                  Note
                 </Typography>
+
                 <Typography
                   variant="body2"
                   sx={{ color: `text.primary` }}
@@ -368,7 +381,6 @@ export default function ServiceDetails({
                       borderColor: `grey.100`,
                       backgroundColor: `white`,
                       borderRadius: 2,
-                      // Removed hover styles to prevent jumping
                     }}
                   >
                     <CardContent
@@ -393,6 +405,7 @@ export default function ServiceDetails({
                       >
                         {getEmployeeName(employeePrice.employeeId).split(` `).map(n => n[0]).join(``)}
                       </Avatar>
+
                       <Typography
                         variant="body2"
                         sx={{
@@ -405,6 +418,7 @@ export default function ServiceDetails({
                       >
                         {getEmployeeName(employeePrice.employeeId)}
                       </Typography>
+
                       <Chip
                         label={`${employeePrice.price}€`}
                         color="primary"
@@ -426,6 +440,49 @@ export default function ServiceDetails({
               );
             })}
           </Grid>
+        </Box>
+
+        {/* Status Management Buttons */}
+        <Box
+          sx={{
+            display: `flex`,
+            gap: 2,
+            alignItems: `center`,
+            mt: 2,
+            justifyContent: `space-between`,
+          }}
+        >
+          <Button
+            disabled={service.status === serviceStatusEnum.archived}
+            variant="outlined"
+            size="small"
+            color={service.status === serviceStatusEnum.disabled ? `secondary` : `warning`}
+            onClick={onDeactivateToggle}
+          >
+            {service.status === serviceStatusEnum.disabled ? `Activate` : `Deactivate`}
+          </Button>
+
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={
+              <DeleteOutline
+                sx={{ fontSize: `16px` }}
+              />
+            }
+            color={service.status === serviceStatusEnum.archived ? `success` : `primary`}
+            onClick={onArchiveToggle}
+            sx={{
+              borderRadius: 1.5,
+              padding: `6px 12px`,
+              fontSize: `0.8rem`,
+              fontWeight: 600,
+              textTransform: `none`,
+              minWidth: `auto`,
+            }}
+          >
+            {service.status === serviceStatusEnum.archived ? `Restore` : `Delete`}
+          </Button>
         </Box>
       </CardContent>
     </Card>

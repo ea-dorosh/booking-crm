@@ -9,9 +9,10 @@ import FilterButton from './FilterButton';
 import ServicesList from './ServicesList';
 import SubCategoriesList from './SubCategoriesList';
 import AddButton from '@/components/common/AddButton';
-import { categoryStatusEnum, subCategoryStatusEnum } from '@/enums/enums';
+import { categoryStatusEnum, subCategoryStatusEnum, serviceStatusEnum } from '@/enums/enums';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { selectFilteredServices } from '@/features/services/servicesSelectors';
+import { fetchServices } from '@/features/services/servicesSlice';
 import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
 
 const SERVICES = `services`;
@@ -53,6 +54,7 @@ export default function ServicesContainer({
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
   const [categoryStatusFilter, setCategoryStatusFilter] = useState(categoryStatusEnum.active);
   const [subCategoryStatusFilter, setSubCategoryStatusFilter] = useState(subCategoryStatusEnum.active);
+  const [serviceStatusFilter, setServiceStatusFilter] = useState(serviceStatusEnum.active);
   const filteredServices = useSelector(selectFilteredServices);
 
   // Get active tab from URL query parameter
@@ -72,6 +74,11 @@ export default function ServicesContainer({
     const storedSubStatus = sessionStorage.getItem(`subCategoriesStatusFilter`);
     if (storedSubStatus) {
       setSubCategoryStatusFilter(storedSubStatus);
+    }
+    // restore services status filter from session storage
+    const storedServiceStatus = sessionStorage.getItem(`servicesStatusFilter`);
+    if (storedServiceStatus) {
+      setServiceStatusFilter(storedServiceStatus);
     }
   }, [location.search]);
 
@@ -102,6 +109,14 @@ export default function ServicesContainer({
     dispatch(fetchServiceSubCategories([value]));
   };
 
+  const handleServiceStatusChange = (value) => {
+    if (!value) return;
+    setServiceStatusFilter(value);
+    sessionStorage.setItem(`servicesStatusFilter`, value);
+
+    dispatch(fetchServices([value]));
+  };
+
   const renderContent = () => {
     switch (activeTab) {
     case TABS[SERVICES].value:
@@ -110,7 +125,7 @@ export default function ServicesContainer({
           services={filteredServices}
           employees={employees}
           categories={categories}
-          statusFilter={categoryStatusFilter}
+          statusFilter={serviceStatusFilter}
         />
       );
     case TABS[SUB_CATEGORIES].value:
@@ -134,7 +149,7 @@ export default function ServicesContainer({
           services={filteredServices}
           employees={employees}
           categories={categories}
-          statusFilter={categoryStatusFilter}
+          statusFilter={serviceStatusFilter}
         />
       );
     }
@@ -278,6 +293,24 @@ export default function ServicesContainer({
             <ToggleButton value={subCategoryStatusEnum.active}>active</ToggleButton>
             <ToggleButton value={subCategoryStatusEnum.disabled}>not active</ToggleButton>
             <ToggleButton value={subCategoryStatusEnum.archived}>deleted</ToggleButton>
+          </ToggleButtonGroup>
+        )}
+
+        {activeTab === TABS[SERVICES].value && (
+          <ToggleButtonGroup
+            value={serviceStatusFilter}
+            exclusive
+            onChange={(_e, value) => handleServiceStatusChange(value)}
+            size="small"
+            sx={{
+              mr: `auto`,
+              mt: 2,
+            }}
+          >
+            <ToggleButton value="all">all</ToggleButton>
+            <ToggleButton value={serviceStatusEnum.active}>active</ToggleButton>
+            <ToggleButton value={serviceStatusEnum.disabled}>not active</ToggleButton>
+            <ToggleButton value={serviceStatusEnum.archived}>deleted</ToggleButton>
           </ToggleButtonGroup>
         )}
       </Box>
