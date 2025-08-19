@@ -32,6 +32,12 @@ const serviceStatusEnum = {
   disabled: `disabled`,
 };
 
+const employeeStatusEnum = {
+  active: `active`,
+  archived: `archived`,
+  disabled: `disabled`,
+};
+
 export {
   appointmentStatusEnum,
   customerNewStatusEnum,
@@ -39,4 +45,5 @@ export {
   categoryStatusEnum,
   subCategoryStatusEnum,
   serviceStatusEnum,
+  employeeStatusEnum,
 };

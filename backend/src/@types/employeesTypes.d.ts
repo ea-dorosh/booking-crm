@@ -1,5 +1,6 @@
 import { RowDataPacket } from 'mysql2';
 import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
+import { EmployeeStatusEnum } from '@/enums/enums.js';
 
 export interface EmployeeDetailRowType extends RowDataPacket {
   employee_id: number;
@@ -8,6 +9,7 @@ export interface EmployeeDetailRowType extends RowDataPacket {
   email: string;
   phone: string;
   image: string | null;
+  status: EmployeeStatusEnum;
 }
 
 export interface EmployeeDetailDataType {
@@ -17,6 +19,7 @@ export interface EmployeeDetailDataType {
   email: string | null;
   phone: string | null;
   image: string;
+  status: EmployeeStatusEnum;
 }
 
 export interface EmployeeFormDataValidationErrors {
@@ -24,6 +27,15 @@ export interface EmployeeFormDataValidationErrors {
   lastName?: string;
   email?: string;
   phone?: string;
+}
+
+export interface EmployeeValidationErrors {
+  status?: string;
+}
+
+export interface UpdateEmployeeResult {
+  employeeId: number | null;
+  validationErrors: EmployeeValidationErrors | null;
 }
 
 export interface EmployeeAvailabilityRow extends RowDataPacket {

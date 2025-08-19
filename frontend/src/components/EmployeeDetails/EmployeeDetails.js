@@ -1,4 +1,4 @@
-import { Edit, Person, Email, Phone, CalendarMonth } from "@mui/icons-material";
+import { Edit, Person, Email, Phone, CalendarMonth, Archive, Block } from "@mui/icons-material";
 import {
   Button,
   Typography,
@@ -14,6 +14,7 @@ import AppointmentFilters from "@/components/EmployeeAppointments/AppointmentFil
 import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppointments";
 import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
 import EmployeeGoogleCalenderSection from '@/components/EmployeeGoogleCalenderSection/EmployeeGoogleCalenderSection';
+import { employeeStatusEnum } from '@/enums/enums';
 
 export default function EmployeeDetails({
   employee,
@@ -24,6 +25,8 @@ export default function EmployeeDetails({
   handleClearFilters,
   handleAppointmentClick,
   handleEditClick,
+  handleArchiveToggle,
+  handleDeactivateToggle,
 }) {
   return (
     <>
@@ -42,6 +45,7 @@ export default function EmployeeDetails({
             sx={{
               display: `flex`,
               justifyContent: `flex-end`,
+              gap: 1,
               marginBottom: 2,
             }}
           >
@@ -50,14 +54,6 @@ export default function EmployeeDetails({
               size="small"
               startIcon={<Edit sx={{ fontSize: `16px` }} />}
               onClick={handleEditClick}
-              sx={{
-                borderRadius: 1.5,
-                padding: `6px 12px`,
-                fontSize: `0.8rem`,
-                fontWeight: 500,
-                textTransform: `none`,
-                minWidth: `auto`,
-              }}
             >
               Edit
             </Button>
@@ -107,8 +103,12 @@ export default function EmployeeDetails({
                 </Typography>
 
                 <Chip
-                  label="Active"
-                  color="success"
+                  label={employee.status === employeeStatusEnum.archived ? `deleted` : employee.status === employeeStatusEnum.disabled ? `not active` : `active`}
+                  color={
+                    employee.status === employeeStatusEnum.active ? `success` :
+                      employee.status === employeeStatusEnum.archived ? `error` :
+                        employee.status === employeeStatusEnum.disabled ? `warning` : `default`
+                  }
                   size="small"
                   sx={{ fontWeight: 500 }}
                 />
@@ -211,6 +211,36 @@ export default function EmployeeDetails({
                       </Typography>
                     </Box>
                   </Stack>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: `flex`,
+                    justifyContent: `space-between`,
+                    gap: 1,
+                    marginTop: 2,
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Block sx={{ fontSize: `16px` }} />}
+                    onClick={handleDeactivateToggle}
+                    color={employee.status === employeeStatusEnum.disabled ? `secondary` : `secondary`}
+                    disabled={employee.status === employeeStatusEnum.archived}
+                  >
+                    {employee.status === employeeStatusEnum.disabled ? `Activate` : `Deactivate`}
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Archive sx={{ fontSize: `16px` }} />}
+                    onClick={handleArchiveToggle}
+                    color={employee.status === employeeStatusEnum.archived ? `success` : `error`}
+                  >
+                    {employee.status === employeeStatusEnum.archived ? `Restore` : `Delete`}
+                  </Button>
                 </Box>
               </Stack>
             </Grid>

@@ -7,10 +7,12 @@ import EmployeeEditForm from '@/components/EmployeeEditForm/EmployeeEditForm';
 import EmployeeNotFound from '@/components/EmployeeNotFound/EmployeeNotFound';
 import GoBackNavigation from '@/components/GoBackNavigation/GoBackNavigation';
 import PageContainer from '@/components/PageContainer/PageContainer';
+import { employeeStatusEnum } from '@/enums/enums';
 import {
   fetchEmployees,
   fetchEmployeeAppointments,
   updateEmployee,
+  updateEmployeeStatus,
   cleanError,
   cleanErrors,
   resetUpdateFormStatus,
@@ -187,6 +189,32 @@ export default function EmployeeDetailPage() {
     return employee ? `${employee.firstName} ${employee.lastName}` : `Employee Details`;
   };
 
+  const handleArchiveToggle = async () => {
+    if (!employee) return;
+    const isArchived = employee.status === employeeStatusEnum.archived;
+    const nextStatus = isArchived ? employeeStatusEnum.active : employeeStatusEnum.archived;
+
+    await dispatch(updateEmployeeStatus({
+      employeeId: employee.employeeId,
+      status: nextStatus,
+    }));
+
+    await dispatch(fetchEmployees([`all`]));
+  };
+
+  const handleDeactivateToggle = async () => {
+    if (!employee) return;
+    const isDisabled = employee.status === employeeStatusEnum.disabled;
+    const nextStatus = isDisabled ? employeeStatusEnum.active : employeeStatusEnum.disabled;
+
+    await dispatch(updateEmployeeStatus({
+      employeeId: employee.employeeId,
+      status: nextStatus,
+    }));
+
+    await dispatch(fetchEmployees([`all`]));
+  };
+
   // Determine content to render
   const renderContent = () => {
     // Show edit form
@@ -221,6 +249,8 @@ export default function EmployeeDetailPage() {
           handleClearFilters={handleClearFilters}
           handleAppointmentClick={handleAppointmentClick}
           handleEditClick={handleEditClick}
+          handleArchiveToggle={handleArchiveToggle}
+          handleDeactivateToggle={handleDeactivateToggle}
         />
       );
     }

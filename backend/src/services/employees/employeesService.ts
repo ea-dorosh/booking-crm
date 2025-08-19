@@ -5,9 +5,11 @@ import {
   EmployeeAvailabilityRow,
   EmployeeAvailabilityDataType,
   GroupedAvailabilityDayType,
+  EmployeeValidationErrors,
+  UpdateEmployeeResult,
 } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { AppointmentStatusEnum } from '@/enums/enums.js';
+import { AppointmentStatusEnum, EmployeeStatusEnum } from '@/enums/enums.js';
 import { checkGoogleCalendarAvailability } from '@/services/googleCalendar/googleCalendarService.js';
 import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
 
@@ -30,7 +32,18 @@ interface CheckEmployeeAvailabilityResult {
   isEmployeeAvailable: boolean;
 }
 
-async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
+async function getEmployees(dbPool: Pool, statuses?: string[]): Promise<EmployeeDetailDataType[]> {
+  const allowedStatuses = new Set<string>([
+    EmployeeStatusEnum.Active,
+    EmployeeStatusEnum.Archived,
+    EmployeeStatusEnum.Disabled,
+  ]);
+  const filterStatuses = (Array.isArray(statuses) && statuses.length > 0 ? statuses : [EmployeeStatusEnum.Active])
+    .map(s => String(s).toLowerCase())
+    .filter(s => allowedStatuses.has(s));
+
+  const finalStatuses = filterStatuses.length > 0 ? filterStatuses : [EmployeeStatusEnum.Active];
+
   const sql = `
     SELECT
       employee_id,
@@ -38,11 +51,13 @@ async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
       last_name,
       email,
       phone,
-      image
+      image,
+      status
     FROM Employees
+    WHERE status IN (?)
   `;
 
-  const [results] = await dbPool.query<EmployeeDetailRowType[]>(sql);
+  const [results] = await dbPool.query<EmployeeDetailRowType[]>(sql, [finalStatuses]);
 
   const employees: EmployeeDetailDataType[] = results.map((row) => ({
     employeeId: row.employee_id,
@@ -53,6 +68,7 @@ async function getEmployees(dbPool: Pool): Promise<EmployeeDetailDataType[]> {
     image: row.image
       ? `${process.env.SERVER_API_URL}/images/${row.image}`
       : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
+    status: row.status,
   }));
 
   return employees;
@@ -75,13 +91,14 @@ async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDe
     image: row.image
       ? `${process.env.SERVER_API_URL}/images/${row.image}`
       : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
+    status: row.status,
   }));
 
   return employeeData[0];
 }
 
 async function checkEmployeeTimeNotOverlap(dbPool: Pool, {
-  date, employeeId, timeStart, timeEnd, 
+  date, employeeId, timeStart, timeEnd,
 }: CheckEmployeeParams): Promise<CheckEmployeeAvailabilityResult> {
   const mysqlTimeStart = fromDayjsToMySQLDateTime(timeStart); // in UTC
   const mysqlTimeEnd = fromDayjsToMySQLDateTime(timeEnd); // in UTC
@@ -177,7 +194,7 @@ async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[])
 
   const groupedByDay = results.reduce<Record<number, GroupedAvailabilityDayType>>((acc, row) => {
     const {
-      employee_id, day_id, start_time, end_time, 
+      employee_id, day_id, start_time, end_time,
     } = row;
 
     if (!acc[day_id]) {
@@ -199,6 +216,37 @@ async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[])
   return Object.values(groupedByDay).sort((a, b) => a.dayId - b.dayId);
 }
 
+async function updateEmployeeStatus(dbPool: Pool, employeeId: number, status: string): Promise<UpdateEmployeeResult> {
+  // basic validation for status
+  const allowedStatuses = new Set<string>([
+    EmployeeStatusEnum.Active,
+    EmployeeStatusEnum.Archived,
+    EmployeeStatusEnum.Disabled,
+  ]);
+  if (!allowedStatuses.has(status)) {
+    return {
+      employeeId: null,
+      validationErrors: { status: `Invalid status value` } as unknown as EmployeeValidationErrors,
+    };
+  }
+
+  const updateStatusQuery = `
+    UPDATE Employees
+    SET status = ?
+    WHERE employee_id = ?;
+  `;
+
+  try {
+    await dbPool.query(updateStatusQuery, [status, employeeId]);
+
+    return {
+      employeeId,
+      validationErrors: null,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
 
 export {
   getEmployees,
@@ -206,4 +254,5 @@ export {
   getEmployeeAvailability,
   getGroupEmployeeAvailability,
   checkEmployeeTimeNotOverlap,
+  updateEmployeeStatus,
 };

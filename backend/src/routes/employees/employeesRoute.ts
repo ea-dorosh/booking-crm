@@ -2,7 +2,7 @@ import express from 'express';
 import { formatName, formatPhone } from '@/utils/formatters.js';
 import { validateEmployeeData } from '@/validators/employeesValidators.js';
 import { upload } from '@/utils/uploadFile.js';
-import { getEmployees } from '@/services/employees/employeesService.js';
+import { getEmployees, updateEmployeeStatus } from '@/services/employees/employeesService.js';
 import {
   CustomRequestType,
   CustomResponseType,
@@ -31,7 +31,16 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
-    const employees = await getEmployees(req.dbPool);
+    // support query param status similar to services - can handle multiple statuses via comma
+    let statuses: string[] | undefined = undefined;
+    const { status } = req.query as { status?: string | string[] };
+    if (Array.isArray(status)) {
+      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
+    } else if (typeof status === `string`) {
+      statuses = status.split(`,`).map(s => s.trim());
+    }
+
+    const employees = await getEmployees(req.dbPool, statuses);
 
     res.json(employees);
 
@@ -295,6 +304,44 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
   } catch (error) {
     response.status(500).json({
       errorMessage: `Error fetching Employee Appointments`,
+      message: (error as Error).message,
+    });
+  }
+});
+
+router.put(`/:employeeId/status`, async (request: CustomRequestType, response: CustomResponseType) => {
+  const employeeId = Number(request.params.employeeId);
+  const { status } = request.body;
+
+  if (!request.dbPool) {
+    return response.status(500).json({ message: `Database connection not initialized` });
+  }
+
+  if (!status) {
+    return response.status(400).json({
+      errorMessage: `Status is required`,
+      validationErrors: { status: `Status field is required` },
+    });
+  }
+
+  try {
+    const result = await updateEmployeeStatus(request.dbPool, employeeId, status);
+
+    if (result.validationErrors) {
+      return response.status(400).json({
+        errorMessage: `Validation error`,
+        validationErrors: result.validationErrors,
+      });
+    }
+
+    response.json({
+      message: `Employee status updated successfully`,
+      employeeId: result.employeeId,
+    });
+  } catch (error) {
+    console.error(`Error updating employee status:`, error);
+    response.status(500).json({
+      errorMessage: `Error updating employee status`,
       message: (error as Error).message,
     });
   }

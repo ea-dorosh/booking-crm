@@ -2,13 +2,23 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
+import { employeeStatusEnum } from '@/enums/enums';
 import employeesService from "@/services/employees.service";
 
 export const fetchEmployees = createAsyncThunk(
   `employees/fetchEmployees`,
-  async (_arg, thunkAPI) => {
+  async (statuses, thunkAPI) => {
     try {
-      const data = await employeesService.getEmployees();
+      let statusesToFetch = statuses;
+      if (statuses?.[0] === `all`) {
+        statusesToFetch = [
+          employeeStatusEnum.active,
+          employeeStatusEnum.archived,
+          employeeStatusEnum.disabled,
+        ];
+      }
+
+      const data = await employeesService.getEmployees(statusesToFetch);
 
       return data;
     } catch (error) {
@@ -20,7 +30,7 @@ export const fetchEmployees = createAsyncThunk(
 export const fetchEmployeeAppointments = createAsyncThunk(
   `customer/fetchEmployeeLastAppointments`,
   async ({
-    id, filters = {}, 
+    id, filters = {},
   }, thunkAPI) => {
     try {
       const data = await employeesService.getEmployeeAppointments(id, filters);
@@ -58,6 +68,23 @@ export const updateEmployee = createAsyncThunk(
         // If parsing fails, return the error as is
         return thunkAPI.rejectWithValue({ general: error.message });
       }
+    }
+  },
+);
+
+export const updateEmployeeStatus = createAsyncThunk(
+  `employees/updateEmployeeStatus`,
+  async ({
+    employeeId, status,
+  }, thunkAPI) => {
+    try {
+      await employeesService.updateEmployeeStatus(employeeId, status);
+      return {
+        employeeId,
+        status,
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
     }
   },
 );
@@ -125,6 +152,23 @@ const employeesSlice = createSlice({
       .addCase(fetchEmployeeAppointments.rejected, (state, action) => {
         state.isLastAppointmentsPending = false;
         state.lastAppointmentsError = action.payload;
+      })
+      .addCase(updateEmployeeStatus.pending, (state) => {
+        state.updateFormStatus = `loading`;
+      })
+      .addCase(updateEmployeeStatus.fulfilled, (state, action) => {
+        state.updateFormStatus = `succeeded`;
+        // Update the employee status in the current data
+        if (state.data) {
+          const employee = state.data.find(e => e.employeeId === action.payload.employeeId);
+          if (employee) {
+            employee.status = action.payload.status;
+          }
+        }
+      })
+      .addCase(updateEmployeeStatus.rejected, (state, action) => {
+        state.updateFormStatus = `failed`;
+        state.error = action.payload;
       })
   },
 });

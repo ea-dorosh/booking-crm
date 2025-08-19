@@ -12,11 +12,16 @@ import {
   Grid,
   Paper,
   Chip,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import AddButton from '@/components/common/AddButton';
+import { employeeStatusEnum } from '@/enums/enums';
 
-export default function EmployeesContainer({ employees }) {
+export default function EmployeesContainer({
+  employees, statusFilter, onStatusChange,
+}) {
   return (
     <Box
       sx={{
@@ -57,6 +62,54 @@ export default function EmployeesContainer({ employees }) {
             Add Employee
           </AddButton>
         </Box>
+      </Box>
+
+      {/* Status Filter */}
+      <Box
+        sx={{ marginBottom: 3 }}
+      >
+        <Typography
+          variant="h6"
+          sx={{ marginBottom: 2 }}
+        >
+          Status Filter
+        </Typography>
+        <ToggleButtonGroup
+          value={statusFilter}
+          exclusive
+          onChange={(event, newValue) => {
+            if (newValue !== null) {
+              onStatusChange(newValue);
+            }
+          }}
+          aria-label="employee status filter"
+          size="small"
+        >
+          <ToggleButton
+            value="all"
+            aria-label="all employees"
+          >
+            all
+          </ToggleButton>
+          <ToggleButton
+            value={employeeStatusEnum.active}
+            aria-label="active employees"
+          >
+            active
+          </ToggleButton>
+          <ToggleButton
+            value={employeeStatusEnum.disabled}
+            aria-label="disabled employees"
+          >
+            disabled
+          </ToggleButton>
+          <ToggleButton
+            value={employeeStatusEnum.archived}
+            aria-label="archived employees"
+          >
+            deleted
+          </ToggleButton>
+        </ToggleButtonGroup>
       </Box>
 
       {/* Employees Grid */}
@@ -141,8 +194,12 @@ export default function EmployeesContainer({ employees }) {
 
                   {/* Status Chip */}
                   <Chip
-                    label="Active"
-                    color="success"
+                    label={employee.status === employeeStatusEnum.archived ? `deleted` : employee.status === employeeStatusEnum.disabled ? `not active` : `active`}
+                    color={
+                      employee.status === employeeStatusEnum.active ? `success` :
+                        employee.status === employeeStatusEnum.archived ? `error` :
+                          employee.status === employeeStatusEnum.disabled ? `warning` : `default`
+                    }
                     size="small"
                   />
                 </CardContent>
@@ -161,6 +218,7 @@ export default function EmployeesContainer({ employees }) {
             backgroundColor: `grey.50`,
             border: `2px dashed`,
             borderColor: `grey.300`,
+            marginTop: 3,
           }}
         >
           <Person

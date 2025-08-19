@@ -1,9 +1,13 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
 import { appendFormData } from '@/utils/formData';
 
-const getEmployees = async () => {
+const getEmployees = async (statuses) => {
   try {
-    const response = await axios.get(`/employees`);
+    const params = {};
+    if (Array.isArray(statuses) && statuses.length) {
+      params.status = statuses.join(`,`);
+    }
+    const response = await axios.get(`/employees`, { params });
 
     return response.data;
   } catch (error) {
@@ -28,6 +32,18 @@ const updateEmployee = async (employee) => {
 
   try {
     const response = await axios.put(`/employees/edit/${employee.employeeId}`, formData);
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const updateEmployeeStatus = async (employeeId, status) => {
+  try {
+    const response = await axios.put(`/employees/${employeeId}/status`, {
+      status,
+    });
 
     return response.data;
   } catch (error) {
@@ -101,6 +117,7 @@ const adminService = {
   getEmployeeAppointments,
   getEmployees,
   updateEmployee,
+  updateEmployeeStatus,
 };
 
 export default adminService;
