@@ -133,10 +133,10 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`), 
+        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`),
       },
       {
-        startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`), 
+        startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`),
       },
     ];
     const serviceDuration = `01:00:00`;
@@ -156,7 +156,7 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs(), endBlockedTime: dayjs().add(2, `hour`), 
+        startBlockedTime: dayjs(), endBlockedTime: dayjs().add(2, `hour`),
       },
     ];
     const serviceDuration = `01:00:00`;
@@ -171,7 +171,7 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`), 
+        startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`),
       },
     ];
     const serviceDuration = `01:00:00`;
@@ -186,10 +186,10 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(4, `hour`), 
+        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(4, `hour`),
       },
       {
-        startBlockedTime: dayjs().add(3, `hour`), endBlockedTime: dayjs().add(5, `hour`), 
+        startBlockedTime: dayjs().add(3, `hour`), endBlockedTime: dayjs().add(5, `hour`),
       },
     ];
     const serviceDuration = `01:00:00`;
@@ -206,10 +206,10 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(7, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`), 
+        startBlockedTime: dayjs().add(4, `hour`), endBlockedTime: dayjs().add(5, `hour`),
       },
       {
-        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`), 
+        startBlockedTime: dayjs().add(2, `hour`), endBlockedTime: dayjs().add(3, `hour`),
       },
     ];
     const serviceDuration = `01:00:00`;
@@ -228,7 +228,7 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(1, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(1, `hour`), endBlockedTime: dayjs().add(2, `hour`), 
+        startBlockedTime: dayjs().add(1, `hour`), endBlockedTime: dayjs().add(2, `hour`),
       },
     ];
     const serviceDuration = `01:00:00`;
@@ -241,13 +241,13 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(10, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(2, `hour`).add(30, `minute`), endBlockedTime: dayjs().add(3, `hour`).add(45, `minute`), 
+        startBlockedTime: dayjs().add(2, `hour`).add(30, `minute`), endBlockedTime: dayjs().add(3, `hour`).add(45, `minute`),
       },
       {
-        startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`).add(30, `minute`), 
+        startBlockedTime: dayjs().add(5, `hour`), endBlockedTime: dayjs().add(7, `hour`).add(30, `minute`),
       },
       {
-        startBlockedTime: dayjs().add(8, `hour`), endBlockedTime: dayjs().add(9, `hour`).add(15, `minute`), 
+        startBlockedTime: dayjs().add(8, `hour`), endBlockedTime: dayjs().add(9, `hour`).add(15, `minute`),
       },
     ];
     const serviceDuration = `01:30:00`;
@@ -262,10 +262,10 @@ describe(`calculateAvailableTimes`, () => {
     const endWorkingTime = dayjs().add(8, `hour`);
     const blockedTimes = [
       {
-        startBlockedTime: dayjs().add(30, `minute`), endBlockedTime: dayjs().add(1, `hour`).add(45, `minute`), 
+        startBlockedTime: dayjs().add(30, `minute`), endBlockedTime: dayjs().add(1, `hour`).add(45, `minute`),
       },
       {
-        startBlockedTime: dayjs().add(4, `hour`).add(15, `minute`), endBlockedTime: dayjs().add(5, `hour`).add(20, `minute`), 
+        startBlockedTime: dayjs().add(4, `hour`).add(15, `minute`), endBlockedTime: dayjs().add(5, `hour`).add(20, `minute`),
       },
     ];
     const serviceDuration = `00:45:00`;
@@ -469,6 +469,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `09:00:00`,
             endTime: `17:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -496,6 +498,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `10:00:00`,
             endTime: `18:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -516,6 +520,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `08:00:00`,
             endTime: `16:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -538,6 +544,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `08:00:00`,
             endTime: `16:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -557,6 +565,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `10:00:00`,
             endTime: `14:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -579,6 +589,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `10:00:00`,
             endTime: `14:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -600,11 +612,15 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `09:00:00`,
             endTime: `17:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
           {
             id: 2,
             startTime: `10:00:00`,
             endTime: `18:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -615,6 +631,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `08:00:00`,
             endTime: `16:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -625,6 +643,8 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 2,
             startTime: `11:00:00`,
             endTime: `19:00:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },
@@ -635,11 +655,15 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             id: 1,
             startTime: `09:30:00`,
             endTime: `17:30:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
           {
             id: 2,
             startTime: `08:30:00`,
             endTime: `16:30:00`,
+            blockStartTimeFirst: null,
+            blockEndTimeFirst: null,
           },
         ],
       },

@@ -62,7 +62,7 @@ interface GroupedAvailabilityDayType {
     id: number;
     startTime: Time_HH_MM_SS_Type;
     endTime: Time_HH_MM_SS_Type;
-    blockStartTimeFirst: Time_HH_MM_SS_Type;
-    blockEndTimeFirst: Time_HH_MM_SS_Type;
+    blockStartTimeFirst: Time_HH_MM_SS_Type | null;
+    blockEndTimeFirst: Time_HH_MM_SS_Type | null;
   }>;
 }
