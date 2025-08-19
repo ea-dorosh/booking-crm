@@ -52,7 +52,7 @@ import {
   formatName,
   formatPhone,
 } from '@/utils/formatters.js';
-import { sendAppointmentConfirmationEmail } from '@/mailer/mailer.js';
+import { sendAppointmentConfirmationEmail, sendAppointmentNotificationEmail } from '@/mailer/mailer.js';
 
 interface GetAppointmentsOptions {
   startDate: Date_ISO_Type;
@@ -87,7 +87,7 @@ async function getAppointments(
   }
 
   const {
-    startDate, endDate, status, employeeId, sortBy, sortOrder, 
+    startDate, endDate, status, employeeId, sortBy, sortOrder,
   } = finalOptions;
 
   // Build dynamic WHERE clause
@@ -454,6 +454,49 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     }
   } catch (error) {
     console.error(`Failed to send confirmation email for appointment ${firstSavedAppointment.appointmentId}: `, error);
+  }
+
+  // Send notification email to salon
+  try {
+    const employee = await getEmployee(dbPool, appointment.service.employeeIds[0]); // TODO: create logic for selecting from employeeIds array
+    const salonEmail = company.branches[0].email;
+
+    const notificationEmailPayload: any = {
+      recipientEmail: salonEmail,
+      appointmentData: {
+        location: `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
+        lastName: formatName(appointment.lastName),
+        firstName: formatName(appointment.firstName),
+        phone: formatPhone(appointment.phone),
+        email: appointment.email,
+        isCustomerNew: isCustomerNew === CustomerNewStatusEnum.New,
+      },
+      firstServiceData:{
+        date:  dayjs.tz(`${appointment.date} 12:00:00`, `Europe/Berlin`).format(`DD.MM.YYYY`),
+        time: dayjs.tz(firstSavedAppointment.timeStartUTC, `Europe/Berlin`).format(`HH:mm`),
+        service: firstSavedAppointment.serviceName,
+        specialist: `${employee.firstName} ${employee.lastName}`,
+      },
+      companyData: company,
+    }
+
+    if (secondSavedAppointment) {
+      notificationEmailPayload.secondServiceData = {
+        date: dayjs.tz(`${appointment.date} 12:00:00`, `Europe/Berlin`).format(`DD.MM.YYYY`),
+        time: dayjs.tz(secondSavedAppointment.timeStartUTC, `Europe/Berlin`).format(`HH:mm`),
+        service: secondSavedAppointment.serviceName,
+        specialist: `${employee.firstName} ${employee.lastName}`,
+      }
+    }
+
+    const notificationResult = await sendAppointmentNotificationEmail(notificationEmailPayload);
+    console.log(`Notification email sent to salon: ${salonEmail}`);
+
+    if (notificationResult?.previewUrl) {
+      console.log(`Salon notification email preview available at: ${notificationResult.previewUrl}`);
+    }
+  } catch (error) {
+    console.error(`Failed to send notification email to salon for appointment ${firstSavedAppointment.appointmentId}: `, error);
   }
 
   const response: CreateAppointmentServiceResponseSuccessType = {

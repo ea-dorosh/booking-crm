@@ -99,12 +99,12 @@ export async function sendPasswordResetEmail(recipientEmail: string, token: stri
     }
 
     return {
-      success: true, messageId: info.messageId, previewUrl, 
+      success: true, messageId: info.messageId, previewUrl,
     };
   } catch (error) {
     console.error(`Error sending password reset email:`, error);
     return {
-      success: false, error, 
+      success: false, error,
     };
   }
 }
@@ -214,12 +214,145 @@ export async function sendAppointmentConfirmationEmail({
     }
 
     return {
-      success: true, messageId: info.messageId, previewUrl, 
+      success: true, messageId: info.messageId, previewUrl,
     };
   } catch (error) {
     console.error(`Error sending appointment confirmation email:`, error);
     return {
-      success: false, error, 
+      success: false, error,
+    };
+  }
+}
+
+export async function sendAppointmentNotificationEmail({
+  recipientEmail,
+  appointmentData,
+  firstServiceData,
+  secondServiceData,
+  companyData,
+}: {
+    recipientEmail: string,
+    appointmentData: {
+      location: string,
+      lastName: string,
+      firstName: string,
+      phone: string | null,
+      email: string,
+      isCustomerNew: boolean,
+    },
+    firstServiceData: {
+      date: string;
+      time: string;
+      service: string;
+      specialist: string;
+    },
+    secondServiceData?: {
+      date: string;
+      time: string;
+      service: string;
+      specialist: string;
+    },
+    companyData: CompanyResponseData,
+  },
+) {
+  if (!transporter) {
+    await createTransporter();
+  }
+
+  const {
+    location,
+    lastName,
+    firstName,
+    phone,
+    email,
+    isCustomerNew,
+  } = appointmentData;
+
+  const sender = getSenderInfo();
+  const currentTime = new Date();
+
+  const templateContext: any = {
+    lastName,
+    firstName,
+    location,
+    phone: phone || `Keine Angabe`,
+    email,
+    isCustomerNew,
+    companyData: companyData,
+    currentYear: currentTime.getFullYear(),
+    bookingTime: currentTime.toLocaleString(`de-DE`, {
+      timeZone: `Europe/Berlin`,
+      day: `2-digit`,
+      month: `2-digit`,
+      year: `numeric`,
+      hour: `2-digit`,
+      minute: `2-digit`,
+    }),
+    firstServiceData: firstServiceData,
+  };
+
+  if (secondServiceData) {
+    templateContext.secondServiceData = secondServiceData;
+  }
+
+  const htmlContent = renderTemplate(`appointment-notification`, templateContext);
+
+  const subjectText = secondServiceData
+    ? `Neue Buchung: 2 Termine für ${firstName} ${lastName}`
+    : `Neue Buchung: ${firstServiceData.service} für ${firstName} ${lastName}`;
+
+  const textContent = secondServiceData
+    ? `Neue Terminbuchung erhalten!\n\n` +
+      `Kunde: ${firstName} ${lastName}\n` +
+      `Email: ${email}\n` +
+      `Telefon: ${phone || `Keine Angabe`}\n` +
+      `Kundenstatus: ${isCustomerNew ? `Neukunde` : `Bestandskunde`}\n\n` +
+      `Erster Termin:\n` +
+      `${firstServiceData.date} um ${firstServiceData.time} Uhr\n` +
+      `Service: ${firstServiceData.service}\n` +
+      `Spezialist: ${firstServiceData.specialist}\n\n` +
+      `Zweiter Termin:\n` +
+      `${secondServiceData.date} um ${secondServiceData.time} Uhr\n` +
+      `Service: ${secondServiceData.service}\n` +
+      `Spezialist: ${secondServiceData.specialist}\n\n` +
+      `Standort: ${location}\n\n` +
+      `Diese Benachrichtigung wurde automatisch generiert.`
+    : `Neue Terminbuchung erhalten!\n\n` +
+      `Kunde: ${firstName} ${lastName}\n` +
+      `Email: ${email}\n` +
+      `Telefon: ${phone || `Keine Angabe`}\n` +
+      `Kundenstatus: ${isCustomerNew ? `Neukunde` : `Bestandskunde`}\n\n` +
+      `Termin: ${firstServiceData.date} um ${firstServiceData.time} Uhr\n` +
+      `Service: ${firstServiceData.service}\n` +
+      `Spezialist: ${firstServiceData.specialist}\n` +
+      `Standort: ${location}\n\n` +
+      `Diese Benachrichtigung wurde automatisch generiert.`;
+
+  const mailOptions = {
+    from: sender.formatted,
+    to: recipientEmail,
+    subject: subjectText,
+    text: textContent,
+    html: htmlContent,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Appointment notification email sent to salon: %s`, info.messageId, info.envelope);
+
+    // If using Ethereal test account, get preview URL
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`Email preview: %s`, previewUrl);
+    }
+
+    return {
+      success: true, messageId: info.messageId, previewUrl,
+    };
+  } catch (error) {
+    console.error(`Error sending appointment notification email:`, error);
+    return {
+      success: false, error,
     };
   }
 }
@@ -274,12 +407,12 @@ export async function sendGoogleCalendarReconnectEmail(
     }
 
     return {
-      success: true, messageId: info.messageId, previewUrl, 
+      success: true, messageId: info.messageId, previewUrl,
     };
   } catch (error) {
     console.error(`Error sending Google Calendar reconnect email:`, error);
     return {
-      success: false, error, 
+      success: false, error,
     };
   }
 }

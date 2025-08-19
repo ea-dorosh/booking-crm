@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neue Terminbuchung - MOOD BEAUTY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f5f5;
+        color: #333333;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        padding: 20px 30px;
+        background-color: #2c3e50;
+        color: #ffffff;
+        border-bottom: 3px solid #3498db;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .alert-badge {
+        display: inline-block;
+        background-color: #e74c3c;
+        color: #ffffff;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-left: 10px;
+      }
+      .content {
+        padding: 30px;
+      }
+      .notification-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+      .status-icon {
+        width: 20px;
+        height: 20px;
+        background-color: #27ae60;
+        border-radius: 50%;
+        margin-right: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+      }
+      .summary-box {
+        background-color: #ecf0f1;
+        border-left: 4px solid #3498db;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 0 4px 4px 0;
+      }
+      .summary-item {
+        margin-bottom: 10px;
+        display: flex;
+      }
+      .summary-item:last-child {
+        margin-bottom: 0;
+      }
+      .summary-label {
+        font-weight: 600;
+        min-width: 120px;
+        color: #2c3e50;
+      }
+      .summary-value {
+        flex: 1;
+        color: #34495e;
+      }
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 25px 0 15px 0;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 5px;
+      }
+      .appointment-section {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 15px 0;
+      }
+      .appointment-header {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 15px;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .detail-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .detail-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      .detail-value {
+        font-size: 14px;
+        color: #2c3e50;
+        font-weight: 500;
+      }
+      .customer-info {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 15px 0;
+      }
+      .footer {
+        background-color: #34495e;
+        color: #ecf0f1;
+        padding: 20px 30px;
+        text-align: center;
+        font-size: 12px;
+      }
+      .footer-info {
+        margin-bottom: 10px;
+      }
+      .action-note {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 15px;
+        margin: 20px 0;
+        color: #856404;
+      }
+      .action-note strong {
+        color: #533a03;
+      }
+      @media only screen and (max-width: 480px) {
+          .content {
+              padding: 20px;
+          }
+          .detail-grid {
+              grid-template-columns: 1fr;
+          }
+          .notification-title {
+              font-size: 18px;
+          }
+      }
+  </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+              MOOD BEAUTY
+              <span class="alert-badge">NEUE BUCHUNG</span>
+            </h1>
+        </div>
+
+        <div class="content">
+            <div class="notification-title">
+              <div class="status-icon">!</div>
+              Neue Terminbuchung erhalten
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-item">
+                  <div class="summary-label">Kunde:</div>
+                  <div class="summary-value">{{firstName}} {{lastName}}</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">Buchungszeit:</div>
+                  <div class="summary-value">{{bookingTime}}</div>
+                </div>
+                {{#secondServiceData}}
+                <div class="summary-item">
+                  <div class="summary-label">Termine:</div>
+                  <div class="summary-value">2 Services gebucht</div>
+                </div>
+                {{/secondServiceData}}
+                {{^secondServiceData}}
+                <div class="summary-item">
+                  <div class="summary-label">Service:</div>
+                  <div class="summary-value">{{firstServiceData.service}}</div>
+                </div>
+                {{/secondServiceData}}
+            </div>
+
+            {{#secondServiceData}}
+            <div class="section-title">📅 Termine</div>
+
+            <div class="appointment-section">
+                <div class="appointment-header">Erster Termin</div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Datum & Zeit</div>
+                        <div class="detail-value">{{../firstServiceData.date}} um {{../firstServiceData.time}} Uhr</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Service</div>
+                        <div class="detail-value">{{../firstServiceData.service}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Spezialist</div>
+                        <div class="detail-value">{{../firstServiceData.specialist}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Standort</div>
+                        <div class="detail-value">{{../location}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="appointment-section">
+                <div class="appointment-header">Zweiter Termin</div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Datum & Zeit</div>
+                        <div class="detail-value">{{date}} um {{time}} Uhr</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Service</div>
+                        <div class="detail-value">{{service}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Spezialist</div>
+                        <div class="detail-value">{{specialist}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Standort</div>
+                        <div class="detail-value">{{../location}}</div>
+                    </div>
+                </div>
+            </div>
+            {{/secondServiceData}}
+
+            {{^secondServiceData}}
+            <div class="section-title">📅 Termindetails</div>
+
+            <div class="appointment-section">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Datum & Zeit</div>
+                        <div class="detail-value">{{firstServiceData.date}} um {{firstServiceData.time}} Uhr</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Service</div>
+                        <div class="detail-value">{{firstServiceData.service}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Spezialist</div>
+                        <div class="detail-value">{{firstServiceData.specialist}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Standort</div>
+                        <div class="detail-value">{{location}}</div>
+                    </div>
+                </div>
+            </div>
+            {{/secondServiceData}}
+
+            <div class="section-title">👤 Kundendaten</div>
+
+            <div class="customer-info">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Name</div>
+                        <div class="detail-value">{{firstName}} {{lastName}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">{{email}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Telefon</div>
+                        <div class="detail-value">{{phone}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Kundenstatus</div>
+                        <div class="detail-value">{{#eq isCustomerNew true}}Neukunde{{else}}Bestandskunde{{/eq}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-note">
+                <strong>Nächste Schritte:</strong>
+                Der Kunde hat eine Bestätigungsmail erhalten. Bitte prüfen Sie Ihren Kalender und bereiten Sie den Termin entsprechend vor.
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-info">
+              Diese Benachrichtigung wurde automatisch vom Booking-System generiert.
+            </div>
+            <div>© {{currentYear}} {{companyData.name}} - Booking CRM</div>
+        </div>
+    </div>
+</body>
+</html>
