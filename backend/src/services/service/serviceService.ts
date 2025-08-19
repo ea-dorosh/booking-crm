@@ -620,7 +620,7 @@ async function createServiceCategory(dbPool: Pool, name: string, imgPath: string
       img,
       status
     )
-    VALUES (?, ?, 'active')
+    VALUES (?, ?, ${CategoryStatusEnum.Active})
   `;
 
   const categoryValues = [name, imgPath];

@@ -257,8 +257,6 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
   const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
   try {
-    // const { getAppointments } = await import(`@/services/appointment/appointmentService.js`);
-
     const appointmentsData = await getAppointments(request.dbPool, {
       startDate,
       endDate,

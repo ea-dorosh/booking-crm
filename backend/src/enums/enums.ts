@@ -45,3 +45,9 @@ export enum CategoryStatusEnum {
   Archived = `archived`,
   Disabled = `disabled`,
 }
+
+export enum EmployeeStatusEnum {
+  Active = `active`,
+  Archived = `archived`,
+  Disabled = `disabled`,
+}

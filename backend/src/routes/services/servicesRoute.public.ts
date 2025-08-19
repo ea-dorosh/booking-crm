@@ -8,6 +8,7 @@ import { SubCategoryRow } from '@/@types/categoriesTypes.js';
 import { getEmployees } from '@/services/employees/employeesService.js';
 import { getServiceCategories } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
+import { CategoryStatusEnum } from '@/enums/enums.js';
 
 const router = express.Router();
 
@@ -20,14 +21,14 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
   try {
     // get service categories (only active)
-    const categoriesData = await getServiceCategories(req.dbPool, [`active`]);
+    const categoriesData = await getServiceCategories(req.dbPool, [CategoryStatusEnum.Active]);
     console.log(`categoriesData`, categoriesData);
 
     // get service sub categories (only active)
     const subCategoriesSql = `
       SELECT c.id, c.name, c.img
       FROM ServiceSubCategories c
-      WHERE c.status = 'active'
+      WHERE c.status = '${CategoryStatusEnum.Active}'
     `;
 
     const [subCategoriesResult] = await req.dbPool.query<SubCategoryRow[]>(subCategoriesSql);
@@ -56,10 +57,10 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         sep.price
       FROM Services s
       LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
-      INNER JOIN ServiceCategories sc ON s.category_id = sc.id AND sc.status = 'active'
+      INNER JOIN ServiceCategories sc ON s.category_id = sc.id AND sc.status = '${CategoryStatusEnum.Active}'
       LEFT JOIN ServiceSubCategories ssc ON s.sub_category_id = ssc.id
-      WHERE s.status = 'active'
-        AND (s.sub_category_id IS NULL OR ssc.status = 'active')
+      WHERE s.status = '${CategoryStatusEnum.Active}'
+        AND (s.sub_category_id IS NULL OR ssc.status = '${CategoryStatusEnum.Active}')
     `;
 
     const [results] = await req.dbPool.query<RowDataPacket[]>(sql);

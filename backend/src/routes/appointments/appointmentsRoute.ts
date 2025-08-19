@@ -10,6 +10,11 @@ import {
   cancelAppointment,
 } from '@/services/appointment/appointmentService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
+import {
+  deleteGoogleCalendarEvent,
+  createGoogleCalendarEvent,
+  updateGoogleCalendarEvent,
+} from '@/services/googleCalendar/googleCalendarService.js';
 
 
 const router = express.Router();
@@ -132,10 +137,6 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
     if (appointment.googleCalendarEventId) {
       try {
         if (appointment.employee.id !== appointmentData.employeeId) {
-          const {
-            deleteGoogleCalendarEvent, createGoogleCalendarEvent, 
-          } = await import(`@/services/googleCalendar/googleCalendarService.js`);
-
           await deleteGoogleCalendarEvent(request.dbPool, appointment.employee.id, appointment.googleCalendarEventId);
 
           const newGoogleEventId = await createGoogleCalendarEvent(
@@ -161,8 +162,6 @@ router.put(`/:id/edit`, async (request: CustomRequestType, response: CustomRespo
             await request.dbPool.query(updateGoogleEventQuery, [newGoogleEventId, appointmentId]);
           }
         } else {
-          const { updateGoogleCalendarEvent } = await import(`@/services/googleCalendar/googleCalendarService.js`);
-
           await updateGoogleCalendarEvent(
             request.dbPool,
             appointment.employee.id,
