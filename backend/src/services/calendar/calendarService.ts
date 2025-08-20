@@ -10,6 +10,7 @@ import {
   generateGroupedTimeSlotsForTwoServices,
   PeriodWithEmployeeWorkingTimeType,
   EmployeeWithWorkingTimesType,
+  normalizePauseTimesForEmployees,
 } from '@/services/calendar/calendarUtils.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
@@ -84,7 +85,12 @@ const getGroupedTimeSlots = async (
       periodWithDaysAndEmployeeAvailability,
     );
 
-    const allNormalizedAppointments = [...normalizedSavedAppointments, ...normalizedGoogleEvents];
+    const normalizedPauseTimes = normalizePauseTimesForEmployees(periodWithDaysAndEmployeeAvailability);
+    const allNormalizedAppointments = [
+      ...normalizedSavedAppointments,
+      ...normalizedGoogleEvents,
+      ...normalizedPauseTimes,
+    ];
 
     // Calculate available time slots
     const periodWithClearedDays = combinePeriodWithNormalizedAppointments(

@@ -41,10 +41,16 @@ export interface PeriodWithClearedDaysType {
   serviceId: number;
 }
 
+interface PauseTime {
+  startPauseTime: dayjs.Dayjs;
+  endPauseTime: dayjs.Dayjs;
+}
+
 export interface EmployeeWithWorkingTimesType {
   employeeId: number;
   startWorkingTime: dayjs.Dayjs;
   endWorkingTime: dayjs.Dayjs;
+  pauseTimes: PauseTime[];
 }
 
 interface EmployeeWithBlockedAndAvailableTimesType {
@@ -241,20 +247,33 @@ function getPeriodWithDaysAndEmployeeAvailability(
       if (dayAvailability) {
         const dayData: PeriodWithEmployeeWorkingTimeType = {
           day: indexDay.format(DATE_FORMAT) as Date_ISO_Type,
-          employees: dayAvailability.employees.map(employee => ({
-            employeeId: employee.id,
+          employees: dayAvailability.employees.map(employee => {
 
-            /**
+            const pauseTimes: PauseTime[] = [];
+            if (employee.blockStartTimeFirst && employee.blockEndTimeFirst) {
+              pauseTimes.push({
+                startPauseTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.blockStartTimeFirst}`, `Europe/Berlin`).utc(),
+                endPauseTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.blockEndTimeFirst}`, `Europe/Berlin`).utc(),
+              });
+            }
+
+            return {
+              employeeId: employee.id,
+
+              /**
              * in DB we store time in German time zone
              * so we need to convert it to UTC here not in the Service
              * because in the service we don't know calendar day (summer/winter time)
              * First we calculate time in german time zone for real calendar date "indexDay"
              * and then convert it to UTC for next calculations
              */
-            startWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.startTime}`, `Europe/Berlin`).utc(),
-            endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, `Europe/Berlin`).utc(),
-          })),
+              startWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.startTime}`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, `Europe/Berlin`).utc(),
+              pauseTimes,
+            }
+          }),
         };
+
         period.push(dayData);
       }
     }
@@ -324,6 +343,33 @@ function normalizeGoogleEventsForEmployees(
   }
 
   return normalizedGoogleEvents;
+}
+
+/**
+ * Normalize pause times from employee availability into generic normalized appointments
+ * so they are handled as blocked times downstream
+ */
+function normalizePauseTimesForEmployees(
+  periodWithDaysAndEmployeeAvailability: PeriodWithEmployeeWorkingTimeType[],
+): NormalizedAppointmentData[] {
+  const normalizedPauseTimes: NormalizedAppointmentData[] = [];
+
+  for (const dayData of periodWithDaysAndEmployeeAvailability) {
+    for (const employee of dayData.employees) {
+      if (!employee.pauseTimes || employee.pauseTimes.length === 0) continue;
+
+      for (const pause of employee.pauseTimes) {
+        normalizedPauseTimes.push({
+          date: dayData.day,
+          timeStart: pause.startPauseTime.toISOString(),
+          timeEnd: pause.endPauseTime.toISOString(),
+          employeeId: employee.employeeId,
+        });
+      }
+    }
+  }
+
+  return normalizedPauseTimes;
 }
 
 function combinePeriodWithNormalizedAppointments(
@@ -649,4 +695,5 @@ export {
   getPeriodWithDaysAndEmployeeAvailability,
   normalizeSavedAppointments,
   normalizeGoogleEventsForEmployees,
+  normalizePauseTimesForEmployees,
 };
