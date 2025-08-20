@@ -2,6 +2,11 @@
 import {
   Box,
   LinearProgress,
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  Chip,
 } from "@mui/material";
 import dayjs from 'dayjs';
 import { useEffect } from "react";
@@ -46,39 +51,98 @@ export default function AppointmentsPage() {
       pageTitle="Appointments"
       hideSideNav
     >
-
-      <Box
+      <Card
         sx={{
-          display: `flex`,
-          alignItems: `flex-start`,
-          mt: 1.5,
-          gap: 2,
+          mt: 2,
+          mb: 3,
         }}
       >
-        {startDate &&
-        <AppointmentsStartDate
-          startDate={startDate}
-          onStartDateChange={onStartDateChange}
-        />}
+        <CardContent>
+          <Box
+            sx={{
+              display: `flex`,
+              justifyContent: `space-between`,
+              alignItems: `flex-start`,
+              mb: 3,
+              flexWrap: `wrap`,
+              gap: 1,
+            }}
+          >
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{
+                fontWeight: 600,
+                color: `text.primary`,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              Filter & Sort Appointments
+            </Typography>
 
-        <AppointmentsStatus />
+            {appointments && (
+              <Chip
+                label={`${appointments.length} found`}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{
+                  fontWeight: 600,
+                }}
+              />
+            )}
+          </Box>
 
+          <Stack
+            direction={{
+              xs: `column`,
+              sm: `row`,
+            }}
+            spacing={2}
+            alignItems={{
+              xs: `stretch`,
+              sm: `center`,
+            }}
+          >
+            {startDate && (
+              <AppointmentsStartDate
+                startDate={startDate}
+                onStartDateChange={onStartDateChange}
+              />
+            )}
+
+            <AppointmentsStatus />
+
+            <Box
+              sx={{
+                ml: {
+                  sm: `auto`,
+                },
+              }}
+            >
+              <AppointmentsSorting />
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {isPending && (
         <Box
-          ml="auto"
+          sx={{
+            mt: 2,
+            mb: 2,
+          }}
         >
-          <AppointmentsSorting />
+          <LinearProgress />
         </Box>
-      </Box>
+      )}
 
-      {isPending &&
-      <Box mt={2}>
-        <LinearProgress />
-      </Box>}
-
-      {appointments &&
-      <AppointmentsContainer
-        appointments={appointments}
-      />}
+      {appointments && (
+        <AppointmentsContainer
+          appointments={appointments}
+        />
+      )}
     </PageContainer>
   );
 }

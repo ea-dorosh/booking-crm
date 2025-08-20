@@ -1,6 +1,16 @@
 import {
+  AccessTime as TimeIcon,
+  Person as PersonIcon,
+  Badge as BadgeIcon,
+} from '@mui/icons-material';
+import {
   Box,
   Typography,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Grid,
 } from "@mui/material";
 import { Link as RouterLink } from 'react-router-dom';
 import { appointmentStatusEnum } from '@/enums/enums';
@@ -14,135 +24,292 @@ import {
 } from '@/utils/formatters';
 
 export default function AppointmentsContainer({ appointments }) {
-  return (
-    <Box>
+  if (appointments.length === 0) {
+    return (
       <Box
         sx={{
-          display: `flex`,
-          flexDirection: `column`,
-          gap: `0.5rem`,
-          marginTop: `2rem`,
-          maxWidth: `768px`,
+          textAlign: `center`,
+          py: 8,
         }}
       >
-        {appointments.length === 0 &&
-          <Typography
-            variant="h5"
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{
+            mb: 1,
+          }}
+        >
+          No appointments found
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
+          Try adjusting your filters or check a different date range.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        display: `flex`,
+        flexDirection: `column`,
+        gap: 2,
+      }}
+    >
+      {appointments.map((appointment) => (
+        <Card
+          key={appointment.id}
+          component={RouterLink}
+          to={`/appointments/${appointment.id}`}
+          sx={{
+            textDecoration: `none`,
+            transition: `all 0.2s ease-in-out`,
+            cursor: `pointer`,
+            position: `relative`,
+            '&:hover': {
+              transform: `translateY(-1px)`,
+              boxShadow: (theme) => theme.shadows[4],
+            },
+          }}
+        >
+          <CardContent
             sx={{
-              textAlign: `center`,
-              marginTop: `2rem`,
+              p: 2,
+              '&:last-child': {
+                pb: 2,
+              },
             }}
           >
-            No upcoming appointments
-          </Typography>
-        }
-        {appointments && appointments.map((appointment) => (
-          <Box
-            component={RouterLink}
-            key={appointment.id}
-            to={`/appointments/${appointment.id}`}
-            sx={{
-              display: `flex`,
-              alignItems: `center`,
-              width: `100%`,
-              gap: `.4rem`,
-              padding: `.8rem 0 .4rem 0`,
-              borderBottom: `1px solid #ddd`,
-              textDecoration: `none`,
-              color: `#333`,
-            }}
-          >
-            <Box
+            {/* Status Chip in top right */}
+            <Chip
+              label={appointment.status === appointmentStatusEnum.active ? `Active` : `Canceled`}
+              color={appointment.status === appointmentStatusEnum.active ? `success` : `error`}
+              size="small"
               sx={{
-                flex: `0 0 40px`,
-                display: `flex`,
-                flexDirection: `column`,
-                alignItems: `center`,
+                position: `absolute`,
+                top: 12,
+                right: 12,
+                fontWeight: 600,
+                fontSize: `0.75rem`,
               }}
-            >
-              <Typography
-                sx={{
-                  fontSize: `1.2rem`,
-                }}
-              >
-                {getDay(appointment.date)}
-              </Typography>
+            />
 
-              <Typography
-                sx={{
-                  fontSize: `.8rem`,
-                }}
-              >
-                {getMonth(appointment.date)}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                flex: `1`,
-                display: `flex`,
-                flexDirection: `column`,
-                position: `relative`,
-              }}
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
             >
-              {appointment.status === appointmentStatusEnum.canceled &&
+              {/* Compact Date Column */}
+              <Grid
+                item
+                xs={12}
+                sm={3}
+                md={2}
+              >
                 <Box
                   sx={{
-                    fontSize: `.5rem`,
-                    bgcolor: `red`,
-                    color: `#fff`,
-                    marginLeft: `auto`,
-                    position: `absolute`,
-                    padding: `1px 4px`,
-                    left: `0`,
-                    top: `-12px`,
+                    display: `flex`,
+                    alignItems: `center`,
+                    justifyContent: `flex-start`,
+                    gap: 1,
                   }}
                 >
-                  canceled
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: `primary.main`,
+                      lineHeight: 1,
+                      mb: 0.5,
+                    }}
+                  >
+                    {getDay(appointment.date)}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      textTransform: `uppercase`,
+                      fontWeight: 600,
+                      letterSpacing: `0.5px`,
+                      fontSize: `0.7rem`,
+                    }}
+                  >
+                    {getMonth(appointment.date)} • {getDayOfWeek(appointment.date)}
+                  </Typography>
                 </Box>
-              }
+              </Grid>
 
-              <Typography
-                sx={{
-                  fontSize: `.8rem`,
-                  color: `green`,
-                  marginLeft: `auto`,
-                  position: `absolute`,
-                  right: `0`,
-                  top: `-14px`,
-                }}
+              {/* Main Content */}
+              <Grid
+                item
+                xs={12}
+                sm={9}
+                md={7}
               >
-                {formatCreatedDate(appointment.createdDate)}
-              </Typography>
+                <Stack spacing={1}>
+                  <Typography
+                    variant="subtitle1"
+                    component="h3"
+                    sx={{
+                      fontWeight: 600,
+                      color: `text.primary`,
+                      lineHeight: 1.3,
+                      pr: 8, // Space for status chip
+                    }}
+                  >
+                    {appointment.serviceName}
+                  </Typography>
 
-              <Typography
-                sx={{
-                  fontSize: `1rem`,
-                  fontWeight: `bold`,
-                }}
-              >
-                {appointment.serviceName}
-              </Typography>
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    flexWrap="wrap"
+                    sx={{
+                      '& > *': {
+                        fontSize: `0.8rem`,
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: `flex`,
+                        alignItems: `center`,
+                        gap: 0.5,
+                      }}
+                    >
+                      <TimeIcon
+                        sx={{
+                          fontSize: `0.9rem`,
+                          color: `text.secondary`,
+                        }}
+                      />
 
-              <Typography
-                sx={{
-                  fontSize: `.8rem`,
-                }}
-              >
-                {getDayOfWeek(appointment.date)}, {formattedDateToTime(appointment.timeStart)} ({formatTimeToString(appointment.serviceDuration)})
-              </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: `0.8rem` }}
+                      >
+                        {formattedDateToTime(appointment.timeStart)} - {formattedDateToTime(appointment.timeEnd)}
+                      </Typography>
+                    </Box>
 
-              <Typography
-                sx={{
-                  fontSize: `1rem`,
-                }}
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontSize: `0.8rem` }}
+                    >
+                      {formatTimeToString(appointment.serviceDuration)}
+                    </Typography>
+                  </Stack>
+
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    flexWrap="wrap"
+                  >
+                    <Box
+                      sx={{
+                        display: `flex`,
+                        alignItems: `center`,
+                        gap: 0.5,
+                      }}
+                    >
+                      <PersonIcon
+                        sx={{
+                          fontSize: `0.9rem`,
+                          color: `text.secondary`,
+                        }}
+                      />
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                          fontSize: `0.8rem`,
+                        }}
+                      >
+                        {appointment.customerLastName} {appointment.customerFirstName}
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: `flex`,
+                        alignItems: `center`,
+                        gap: 0.5,
+                      }}
+                    >
+                      <BadgeIcon
+                        sx={{
+                          fontSize: `0.9rem`,
+                          color: `text.secondary`,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: `0.8rem` }}
+                      >
+                        {appointment.employee?.lastName} {appointment.employee?.firstName}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Stack>
+              </Grid>
+
+              {/* Created Date - Compact */}
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={3}
               >
-                {appointment.customerLastName} {appointment.customerFirstName}
-              </Typography>
-            </Box>
-          </Box>
-        ))}
-      </Box>
+                <Box
+                  sx={{
+                    display: `flex`,
+                    alignItems: `flex-start`,
+                    gap: 1,
+                    textAlign: {
+                      xs: `left`,
+                      md: `right`,
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      textTransform: `uppercase`,
+                      fontWeight: 600,
+                      letterSpacing: `0.5px`,
+                      fontSize: `0.7rem`,
+                    }}
+                  >
+                    Created
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 500,
+                      color: `primary.main`,
+                      fontSize: `0.8rem`,
+                      display: `block`,
+                    }}
+                  >
+                    {formatCreatedDate(appointment.createdDate)}
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      ))}
     </Box>
   );
 }

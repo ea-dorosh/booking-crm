@@ -1,137 +1,135 @@
-/* eslint-disable no-unused-vars */
 import {
-  North,
-  South,
-  Sort,
+  CalendarToday as CalendarIcon,
+  AccessTime as TimeIcon,
+  ArrowUpward,
+  ArrowDownward,
 } from '@mui/icons-material';
-import { 
+import {
   Box,
-  IconButton,
-  Menu,
-  MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
   Typography,
+  Stack,
 } from "@mui/material";
-import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { 
+import {
   APPOINTMENTS_SORT_RULE,
   SORT_DIRECTION,
 } from '@/constants/sorting';
-import { 
+import {
   setSortingRule,
+  fetchAppointments,
 } from '@/features/appointments/appointmentsSlice';
 
-export default function AppointmentsPage() {
+export default function AppointmentsSorting() {
   const dispatch = useDispatch();
 
-  const [menuEl, setMenuEl] = useState(null);
-  const isSortMenuOpen = Boolean(menuEl);
-
   const {
-    sortRule, sortDirection, 
+    sortRule, sortDirection,
   } = useSelector((state) => state.appointments);
 
-  const handleMenuClick = (event) => {
-    setMenuEl(event.currentTarget);
-  };
+  const handleSortChange = (event, newSortRule) => {
+    let newSortDirection;
+    let ruleToSet;
 
-  const handleClose = () => {
-    setMenuEl(null);
-  };
-
-  const updateSortOrder = (newSortRule) => {
-    const newSortDirection = sortRule === newSortRule &&
-    sortDirection === SORT_DIRECTION.DESC ? SORT_DIRECTION.ASC : SORT_DIRECTION.DESC;
+    if (newSortRule === null) {
+      // Clicking on already selected button - toggle direction
+      newSortDirection = sortDirection === SORT_DIRECTION.ASC ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+      ruleToSet = sortRule; // Keep the same rule
+    } else {
+      // Clicking on different button - start with DESC
+      newSortDirection = SORT_DIRECTION.DESC;
+      ruleToSet = newSortRule;
+    }
 
     dispatch(setSortingRule({
-      sortRule: newSortRule,
+      sortRule: ruleToSet,
       sortDirection: newSortDirection,
     }));
 
-    handleClose();
+    dispatch(fetchAppointments());
+  };
+
+  const getSortIcon = (rule) => {
+    const isActive = sortRule === rule;
+    const IconComponent = sortDirection === SORT_DIRECTION.ASC ? ArrowUpward : ArrowDownward;
+
+    return (
+      <IconComponent
+        fontSize="small"
+        sx={{
+          opacity: isActive ? 1 : 0,
+          transition: `opacity 0.2s ease-in-out`,
+        }}
+      />
+    );
   };
 
   return (
     <Box>
-      <IconButton
-        variant="outlined"
-        onClick={handleMenuClick}
-      >
-        <Sort />
-      </IconButton>
-
-      <Menu
-        anchorEl={menuEl}
-        open={isSortMenuOpen}
-        onClose={handleClose}
+      <Typography
+        variant="caption"
+        color="text.secondary"
         sx={{
-          '& .MuiList-root': {
-            padding: 0,
+          mb: 1,
+          display: `block`,
+          fontWeight: 600,
+          textTransform: `uppercase`,
+          letterSpacing: `0.5px`,
+        }}
+      >
+        Sort by
+      </Typography>
+
+      <ToggleButtonGroup
+        value={sortRule}
+        exclusive
+        onChange={handleSortChange}
+        size="small"
+        sx={{
+          '& .MuiToggleButton-root': {
+            minWidth: 100,
           },
         }}
       >
-        <MenuItem 
-          onClick={() => updateSortOrder(APPOINTMENTS_SORT_RULE.DATE)}
+        <ToggleButton
+          value={APPOINTMENTS_SORT_RULE.DATE}
           sx={{
-            backgroundColor: sortRule === APPOINTMENTS_SORT_RULE.DATE ? 
-              `lightgrey` : `initial`,
-            display: `flex`,
-              
+            textTransform: `none`,
           }}
         >
-          <North 
-            fontSize='small'
-            sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
-            }}
-          />
-
-          <South 
-            fontSize='small'
-            sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.DATE && sortDirection === SORT_DIRECTION.DESC
-                ? `initial` : `grey`,
-            }}
-          />
-
-          <Typography
-            sx={{
-              marginLeft: 1.5,
-            }}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
           >
-            Date
-          </Typography>
-        </MenuItem>
+            <CalendarIcon fontSize="small" />
+            <Typography variant="body2">
+              Date
+            </Typography>
+            {getSortIcon(APPOINTMENTS_SORT_RULE.DATE)}
+          </Stack>
+        </ToggleButton>
 
-        <MenuItem 
-          onClick={() => updateSortOrder(APPOINTMENTS_SORT_RULE.CREATED_DATE)}
+        <ToggleButton
+          value={APPOINTMENTS_SORT_RULE.CREATED_DATE}
           sx={{
-            backgroundColor: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE ? `lightgrey` : `initial`,
+            textTransform: `none`,
           }}
         >
-          <North 
-            fontSize='small'
-            sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.ASC ? `initial` : `grey`,
-            }}
-          />
-          
-          <South 
-            fontSize='small'
-            sx={{
-              color: sortRule === APPOINTMENTS_SORT_RULE.CREATED_DATE && sortDirection === SORT_DIRECTION.DESC ? `initial` : `grey`,
-            }}
-          /> 
-
-          <Typography
-            sx={{
-              marginLeft: 1.5,
-            }}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
           >
-            Created Date
-          </Typography>
-        </MenuItem>
-      </Menu>
+            <TimeIcon fontSize="small" />
+            <Typography variant="body2">
+              Created
+            </Typography>
+            {getSortIcon(APPOINTMENTS_SORT_RULE.CREATED_DATE)}
+          </Stack>
+        </ToggleButton>
+      </ToggleButtonGroup>
     </Box>
   );
 }

@@ -1,13 +1,27 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
 import { transformIsoDates } from '@/utils/formatters';
 
-const getAppointments = async (startDate, status) => {
+const getAppointments = async (startDate, status, sortBy, sortOrder) => {
   try {
+    const params = {
+      startDate,
+    };
+
+    // Only add status if it's not null/undefined
+    if (status !== null && status !== undefined) {
+      params.status = status;
+    }
+
+    // Add sorting parameters if provided
+    if (sortBy) {
+      params.sortBy = sortBy;
+    }
+    if (sortOrder) {
+      params.sortOrder = sortOrder;
+    }
+
     const response = await axios.get(`/appointments`, {
-      params: {
-        startDate,
-        status,
-      },
+      params,
     });
 
     const data = transformIsoDates(

@@ -65,26 +65,14 @@ interface GetAppointmentsOptions {
 
 async function getAppointments(
   dbPool: Pool,
-  options: GetAppointmentsOptions | Date_ISO_Type,
-  legacyStatus?: AppointmentStatusEnum | null,
+  options: GetAppointmentsOptions,
 ): Promise<AppointmentDataType[]> {
 
-  // Handle backward compatibility with old function signature
-  let finalOptions: GetAppointmentsOptions;
-  if (typeof options === `string`) {
-    finalOptions = {
-      startDate: options,
-      status: legacyStatus || null,
-      sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
-      sortOrder: `asc`,
-    };
-  } else {
-    finalOptions = {
-      sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
-      sortOrder: `asc`,
-      ...options,
-    };
-  }
+  const finalOptions: GetAppointmentsOptions = {
+    sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
+    sortOrder: `asc`,
+    ...options,
+  };
 
   const {
     startDate, endDate, status, employeeId, sortBy, sortOrder,

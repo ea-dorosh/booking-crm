@@ -1,5 +1,8 @@
 import express from 'express';
-import { AppointmentStatusEnum } from '@/enums/enums.js';
+import {
+  DEFAULT_APPOINTMENT_SORT_FIELD,
+  DEFAULT_SORT_DIRECTION,
+} from '@/enums/enums.js';
 import {
   CustomRequestType,
   CustomResponseType,
@@ -9,7 +12,11 @@ import {
   getAppointment,
   cancelAppointment,
 } from '@/services/appointment/appointmentService.js';
-import { Date_ISO_Type } from '@/@types/utilTypes.js';
+import {
+  Date_ISO_Type,
+  AppointmentSortField,
+  SortDirection,
+} from '@/@types/utilTypes.js';
 import {
   deleteGoogleCalendarEvent,
   createGoogleCalendarEvent,
@@ -26,7 +33,15 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
   }
 
   const startDate = request.query?.startDate as Date_ISO_Type | null;
-  const status = Number(request.query?.status) as AppointmentStatusEnum | null || null;
+  const endDate = (request.query?.endDate as string | null) as Date_ISO_Type | null;
+
+  let status: number | null = null;
+  if (request.query?.status !== undefined) {
+    status = request.query.status === `null` ? null : Number(request.query.status);
+  }
+
+  const sortBy = (request.query?.sortBy as AppointmentSortField) || DEFAULT_APPOINTMENT_SORT_FIELD;
+  const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
   if (!startDate) {
     response.status(400).json({ error: `startDate query parameter is required` });
@@ -34,7 +49,13 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
   }
 
   try {
-    const appointmentsData = await getAppointments(request.dbPool, startDate, status);
+    const appointmentsData = await getAppointments(request.dbPool, {
+      startDate,
+      endDate,
+      status,
+      sortBy,
+      sortOrder,
+    });
 
     response.json(appointmentsData);
   } catch (error) {

@@ -1,14 +1,18 @@
-import { 
+import {
+  CheckCircle as ActiveIcon,
+  Cancel as CancelIcon,
+  ViewList as AllIcon,
+} from '@mui/icons-material';
+import {
   Box,
-  Button,
-  Menu,
-  MenuItem,
+  ToggleButtonGroup,
+  ToggleButton,
   Typography,
+  Stack,
 } from "@mui/material";
-import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { appointmentStatusEnum } from '@/enums/enums';
-import { 
+import {
   setStatus,
   fetchAppointments,
 } from '@/features/appointments/appointmentsSlice';
@@ -16,81 +20,111 @@ import {
 export default function AppointmentsStatus() {
   const dispatch = useDispatch();
 
-  const [menuEl, setMenuEl] = useState(null);
-  const isMenuOpen = Boolean(menuEl);
-
   const { status } = useSelector((state) => state.appointments);
 
-  const handleMenuClick = (event) => {
-    setMenuEl(event.currentTarget);
-  };
+  const handleStatusChange = (event, newStatus) => {
+    // Allow deselection by clicking the same button
+    const selectedStatus = newStatus === status ? null : newStatus;
 
-  const handleClose = () => {
-    setMenuEl(null);
-  };
-
-  const updateStatus = (newStatus) => {
     dispatch(setStatus({
-      status: newStatus,
+      status: selectedStatus,
     }));
 
     dispatch(fetchAppointments());
-
-    handleClose();
   };
 
   return (
     <Box>
-      <Button
-        variant="outlined"
-        onClick={handleMenuClick}
-      >
-        Status
-      </Button>
-
-      <Menu
-        anchorEl={menuEl}
-        open={isMenuOpen}
-        onClose={handleClose}
+      <Typography
+        variant="caption"
+        color="text.secondary"
         sx={{
-          '& .MuiList-root': {
-            padding: 0,
+          mb: 1,
+          display: `block`,
+          fontWeight: 600,
+          textTransform: `uppercase`,
+          letterSpacing: `0.5px`,
+        }}
+      >
+        Filter by Status
+      </Typography>
+
+      <ToggleButtonGroup
+        value={status}
+        exclusive
+        onChange={handleStatusChange}
+        size="small"
+        sx={{
+          '& .MuiToggleButton-root': {
+            minWidth: 80,
           },
         }}
       >
-        <MenuItem 
-          onClick={() => updateStatus(appointmentStatusEnum.active)}
+        <ToggleButton
+          value={appointmentStatusEnum.active}
           sx={{
-            backgroundColor: status === appointmentStatusEnum.active ? `lightgrey` : `initial`,              
+            textTransform: `none`,
           }}
         >
-          <Typography >
-            Active
-          </Typography>
-        </MenuItem>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+          >
+            <ActiveIcon
+              fontSize="small"
+              sx={{
+                color: `success.main`,
+              }}
+            />
+            <Typography variant="body2">
+              Active
+            </Typography>
+          </Stack>
+        </ToggleButton>
 
-        <MenuItem 
-          onClick={() => updateStatus(appointmentStatusEnum.canceled)}
+        <ToggleButton
+          value={appointmentStatusEnum.canceled}
           sx={{
-            backgroundColor: status === appointmentStatusEnum.canceled ? `lightgrey` : `initial`,              
+            textTransform: `none`,
           }}
         >
-          <Typography >
-            Canceled
-          </Typography>
-        </MenuItem>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+          >
+            <CancelIcon
+              fontSize="small"
+              sx={{
+                color: `error.main`,
+              }}
+            />
+            <Typography variant="body2">
+              Canceled
+            </Typography>
+          </Stack>
+        </ToggleButton>
 
-        <MenuItem 
-          onClick={() => updateStatus(null)}
+        <ToggleButton
+          value={null}
           sx={{
-            backgroundColor: status === null ? `lightgrey` : `initial`,              
+            textTransform: `none`,
           }}
         >
-          <Typography >
-            All
-          </Typography>
-        </MenuItem>
-      </Menu>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+          >
+            <AllIcon fontSize="small" />
+
+            <Typography variant="body2">
+              All
+            </Typography>
+          </Stack>
+        </ToggleButton>
+      </ToggleButtonGroup>
     </Box>
   );
 }
