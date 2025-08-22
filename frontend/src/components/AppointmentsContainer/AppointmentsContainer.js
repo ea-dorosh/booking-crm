@@ -41,6 +41,7 @@ export default function AppointmentsContainer({ appointments }) {
         >
           No appointments found
         </Typography>
+
         <Typography
           variant="body2"
           color="text.secondary"
@@ -56,7 +57,7 @@ export default function AppointmentsContainer({ appointments }) {
       sx={{
         display: `flex`,
         flexDirection: `column`,
-        gap: 2,
+        gap: 1,
       }}
     >
       {appointments.map((appointment) => (
@@ -66,13 +67,9 @@ export default function AppointmentsContainer({ appointments }) {
           to={`/appointments/${appointment.id}`}
           sx={{
             textDecoration: `none`,
-            transition: `all 0.2s ease-in-out`,
             cursor: `pointer`,
             position: `relative`,
-            '&:hover': {
-              transform: `translateY(-1px)`,
-              boxShadow: (theme) => theme.shadows[4],
-            },
+            height: `100%`,
           }}
         >
           <CardContent
@@ -99,7 +96,7 @@ export default function AppointmentsContainer({ appointments }) {
 
             <Grid
               container
-              spacing={2}
+              spacing={0}
               alignItems="center"
             >
               {/* Compact Date Column */}
@@ -151,7 +148,7 @@ export default function AppointmentsContainer({ appointments }) {
                 sm={9}
                 md={7}
               >
-                <Stack spacing={1}>
+                <Stack spacing={0}>
                   <Typography
                     variant="subtitle1"
                     component="h3"

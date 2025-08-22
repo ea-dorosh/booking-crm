@@ -180,23 +180,13 @@ export default function ServicesContainer({
       {/* Header */}
       <Box
         sx={{
-          marginBottom: 3,
+          marginBottom: 2,
           padding: {
             xs: 0,
             md: 0,
           },
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 700,
-            marginBottom: 1,
-          }}
-        >
-          {TABS[activeTab].label}
-        </Typography>
-
         <Typography
           variant="body1"
           color="text.secondary"
@@ -225,7 +215,7 @@ export default function ServicesContainer({
 
           <AddButton
             to={TABS[activeTab].url}
-            size="medium"
+            size="small"
           >
             {TABS[activeTab].buttonText}
           </AddButton>

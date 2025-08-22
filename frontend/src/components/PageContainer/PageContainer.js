@@ -11,6 +11,7 @@ import {
   List,
   Toolbar,
   Typography,
+  Container,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import * as React from 'react';
@@ -182,18 +183,22 @@ export default function PageContainer({
               ? theme.palette.grey[100]
               : theme.palette.grey[900],
           flexGrow: 1,
+          minHeight: `100vh`,
         }}
       >
-        <Toolbar />
-
-        <Box
+        <Container
           sx={{
-            padding: `24px`,
-            minHeight: `calc(100vh - 64px)`,
+          // padding: `24px`,
+            paddingTop: {
+              xs: `calc(56px + 16px)`, // header + min padding for next content
+              sm: `calc(65px + 16px)`, // header + min padding for next content
+              // md: `65px`,
+            },
+            paddingBottom: 3,
           }}
         >
           {children}
-        </Box>
+        </Container>
       </Box>
     </Box>
   );

@@ -580,6 +580,7 @@ const theme = createTheme({
           gap: 0, // seamless segmented control
         },
         grouped: {
+          minWidth: `55px`,
           margin: 0,
           border: `1px solid ${colors.neutral[200]}`,
           borderRadius: 0,

@@ -6,7 +6,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import * as React from 'react';
 
-export default function BasicDatePicker({
+export default function AppointmentsStartDate({
   startDate,
   onStartDateChange,
 }) {

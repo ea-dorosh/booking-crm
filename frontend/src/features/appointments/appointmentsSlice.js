@@ -11,6 +11,8 @@ import appointmentsService from "@/services/appointments.service";
 
 // SessionStorage key for filters
 const APPOINTMENTS_FILTERS_KEY = `appointmentsFilters`;
+const APPOINTMENTS_CALENDAR_KEY = `appointmentsCalendarState`;
+const APPOINTMENTS_ACTIVE_TAB_KEY = `appointmentsActiveTab`;
 
 // Helper functions for sessionStorage
 const saveFiltersToStorage = (filters) => {
@@ -33,20 +35,53 @@ const loadFiltersFromStorage = () => {
   return null;
 };
 
+const saveCalendarToStorage = (calendarState) => {
+  try {
+    sessionStorage.setItem(APPOINTMENTS_CALENDAR_KEY, JSON.stringify(calendarState));
+  } catch (error) {
+    console.warn(`Failed to save calendar state to sessionStorage:`, error);
+  }
+};
+
+const loadCalendarFromStorage = () => {
+  try {
+    const saved = sessionStorage.getItem(APPOINTMENTS_CALENDAR_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch (error) {
+    console.warn(`Failed to load calendar state from sessionStorage:`, error);
+  }
+  return null;
+};
+
+const loadActiveTabFromStorage = () => {
+  try {
+    const saved = sessionStorage.getItem(APPOINTMENTS_ACTIVE_TAB_KEY);
+    if (saved) return saved;
+  } catch (error) {
+    // ignore
+  }
+  return `list`;
+};
+
 export const fetchAppointments = createAsyncThunk(
   `appointments/fetchAppointments`,
   async (_arg, thunkAPI) => {
     try {
       const state = thunkAPI.getState();
       const {
-        startDate, status, sortRule, sortDirection,
+        startDate, status, sortRule, sortDirection, calendar,
       } = state.appointments;
+
+      // Respect active tab: only send endDate for calendar view
+      const activeTab = loadActiveTabFromStorage();
+      const endDate = activeTab === `calendar` ? calendar?.endDate : undefined;
 
       const data = await appointmentsService.getAppointments(
         startDate,
         status,
         sortRule,
         sortDirection,
+        endDate,
       );
       return data;
     } catch (error) {
@@ -66,6 +101,13 @@ const getInitialState = () => {
     sortDirection: SORT_DIRECTION.ASC,
     startDate: null,
     status: appointmentStatusEnum.active,
+    calendar: {
+      view: `timeGridDay`,
+      endDate: null,
+      minHour: 9,
+      maxHour: 20,
+      showSunday: false,
+    },
   };
 
   if (savedFilters) {
@@ -75,6 +117,7 @@ const getInitialState = () => {
       sortDirection: savedFilters.sortDirection || defaultState.sortDirection,
       startDate: savedFilters.startDate || defaultState.startDate,
       status: savedFilters.status !== undefined ? savedFilters.status : defaultState.status,
+      calendar: loadCalendarFromStorage() || defaultState.calendar,
     };
   }
 
@@ -122,6 +165,13 @@ const appointmentsSlice = createSlice({
         status: state.status,
       });
     },
+    setCalendarState: (state, action) => {
+      state.calendar = {
+        ...state.calendar,
+        ...action.payload,
+      };
+      saveCalendarToStorage(state.calendar);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -144,5 +194,6 @@ export const {
   setStartDate,
   setStatus,
   resetAppointmentsData,
+  setCalendarState,
 } = appointmentsSlice.actions;
 export default appointmentsSlice.reducer;

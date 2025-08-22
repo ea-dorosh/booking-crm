@@ -34,13 +34,6 @@ export default function EmployeesContainer({
 
       {/* Header */}
       <Box sx={{ marginBottom: 3 }}>
-        <Typography
-          variant="h4"
-          sx={{ marginBottom: 1 }}
-        >
-          Team Members
-        </Typography>
-
         <Box
           sx={{
             display: `flex`,

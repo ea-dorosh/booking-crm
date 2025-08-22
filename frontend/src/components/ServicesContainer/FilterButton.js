@@ -66,13 +66,13 @@ export default function FilterButton({
     <>
       <Button
         variant="outlined"
-        size="medium"
+        size="small"
         startIcon={
           <Badge
             badgeContent={totalSelected}
             color="primary"
           >
-            <FilterListIcon />
+            <FilterListIcon fontSize='18px'/>
           </Badge>
         }
         onClick={handleFilterClick}

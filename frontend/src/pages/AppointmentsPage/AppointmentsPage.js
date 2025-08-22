@@ -1,30 +1,38 @@
-/* eslint-disable no-unused-vars */
-import {
-  Box,
-  LinearProgress,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Chip,
-} from "@mui/material";
 import dayjs from 'dayjs';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import AppointmentsContainer from "@/components/AppointmentsContainer/AppointmentsContainer";
-import AppointmentsSorting from "@/components/AppointmentsSorting/AppointmentsSorting";
-import AppointmentsStartDate from "@/components/AppointmentsStartDate/AppointmentsStartDate";
-import AppointmentsStatus from "@/components/AppointmentsStatus/AppointmentsStatus";
+import AppointmentsPageCalendarView from '@/components/AppointmentsPageCalendarView';
+import AppointmentsPageListView from '@/components/AppointmentsPageListView';
 import PageContainer from '@/components/PageContainer/PageContainer';
+import Tabs from '@/components/Tabs/Tabs';
 import { selectSortedAppointments } from '@/features/appointments/appointmentsSelectors';
 import {
   fetchAppointments,
-  resetAppointmentsData,
   setStartDate,
 } from '@/features/appointments/appointmentsSlice';
 
 export default function AppointmentsPage() {
   const dispatch = useDispatch();
+  // Tabs state with session persistence
+  const STORAGE_KEY = `appointmentsActiveTab`;
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      return sessionStorage.getItem(STORAGE_KEY) || `list`;
+    } catch (e) {
+      return `list`;
+    }
+  });
+
+  const handleTabChange = (newValue) => {
+    setActiveTab(newValue);
+    try {
+      sessionStorage.setItem(STORAGE_KEY, newValue);
+    } catch (e) {
+      // ignore
+    }
+    // Trigger fresh fetch to respect list vs calendar params (endDate)
+    dispatch(fetchAppointments());
+  };
 
   const appointments = useSelector(selectSortedAppointments);
   const {
@@ -46,101 +54,39 @@ export default function AppointmentsPage() {
     dispatch(fetchAppointments());
   };
 
+  const tabs = [
+    {
+      label: `List`,
+      value: `list`,
+    },
+    {
+      label: `Calendar`,
+      value: `calendar`,
+    },
+  ];
+
   return (
     <PageContainer
       pageTitle="Appointments"
       hideSideNav
     >
-      <Card
-        sx={{
-          mt: 2,
-          mb: 3,
-        }}
-      >
-        <CardContent>
-          <Box
-            sx={{
-              display: `flex`,
-              justifyContent: `space-between`,
-              alignItems: `flex-start`,
-              mb: 3,
-              flexWrap: `wrap`,
-              gap: 1,
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="h2"
-              sx={{
-                fontWeight: 600,
-                color: `text.primary`,
-                flex: 1,
-                minWidth: 0,
-              }}
-            >
-              Filter & Sort Appointments
-            </Typography>
+      <Tabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={handleTabChange}
+      />
 
-            {appointments && (
-              <Chip
-                label={`${appointments.length} found`}
-                size="small"
-                color="primary"
-                variant="outlined"
-                sx={{
-                  fontWeight: 600,
-                }}
-              />
-            )}
-          </Box>
-
-          <Stack
-            direction={{
-              xs: `column`,
-              sm: `row`,
-            }}
-            spacing={2}
-            alignItems={{
-              xs: `stretch`,
-              sm: `center`,
-            }}
-          >
-            {startDate && (
-              <AppointmentsStartDate
-                startDate={startDate}
-                onStartDateChange={onStartDateChange}
-              />
-            )}
-
-            <AppointmentsStatus />
-
-            <Box
-              sx={{
-                ml: {
-                  sm: `auto`,
-                },
-              }}
-            >
-              <AppointmentsSorting />
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
-
-      {isPending && (
-        <Box
-          sx={{
-            mt: 2,
-            mb: 2,
-          }}
-        >
-          <LinearProgress />
-        </Box>
-      )}
-
-      {appointments && (
-        <AppointmentsContainer
+      {activeTab === `list` ? (
+        <AppointmentsPageListView
           appointments={appointments}
+          startDate={startDate}
+          isPending={isPending}
+          onStartDateChange={onStartDateChange}
+        />
+      ) : (
+        <AppointmentsPageCalendarView
+          appointments={appointments}
+          startDate={startDate}
         />
       )}
     </PageContainer>

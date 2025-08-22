@@ -9,6 +9,7 @@ export default function Tabs({
   tabs,
   onChange,
   activeTab,
+  sx,
 }) {
   const [internalValue, setInternalValue] = useState(tabs[0].value);
 
@@ -27,7 +28,10 @@ export default function Tabs({
 
   return (
     <Box
-      sx={{ width: `100%` }}
+      sx={{
+        width: `100%`,
+        ...sx,
+      }}
     >
       <Box
         sx={{
@@ -43,10 +47,9 @@ export default function Tabs({
           value={value}
           onChange={handleChange}
           sx={{
-            minHeight: `48px`,
+            minHeight: `30px`,
             '& .MuiTabs-indicator': {
-              backgroundColor: `primary.main`,
-              height: 3,
+              height: 2.5,
             },
             '& .MuiTabs-flexContainer': {
               gap: 0,
@@ -60,8 +63,8 @@ export default function Tabs({
               value={tab.value}
               sx={{
                 flex: 1,
-                minHeight: `48px`,
-                padding: `8px 12px`,
+                minHeight: `30px`,
+                padding: `4px 8px`,
                 fontSize: `0.875rem`,
                 fontWeight: 500,
                 textTransform: `none`,
@@ -70,12 +73,9 @@ export default function Tabs({
                 transition: `all 0.2s ease-in-out`,
                 wordBreak: `break-word`,
                 whiteSpace: `normal`,
+                maxWidth: `50%`,
                 lineHeight: 1.2,
                 '&.Mui-selected': {
-                  color: `primary.main`,
-                },
-                '&:hover': {
-                  backgroundColor: `action.hover`,
                   color: `primary.main`,
                 },
                 '&.Mui-focusVisible': {
