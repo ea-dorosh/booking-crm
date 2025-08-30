@@ -109,12 +109,94 @@ const deleteEmployeeAvailability = async (id) => {
   }
 };
 
+// New schedule periods API
+const createEmployeeSchedulePeriod = async (employeeId, body) => {
+  try {
+    const response = await axios.post(`/employees/${employeeId}/schedule-periods`, body);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const updateEmployeeSchedulePeriodDates = async (periodId, body) => {
+  try {
+    const response = await axios.put(`/employees/schedule-periods/${periodId}/dates`, body);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const getEmployeeActiveSchedulePeriod = async (employeeId, date) => {
+  try {
+    const response = await axios.get(`/employees/${employeeId}/schedule-periods/active`, { params: { date } });
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const getEmployeeSchedulePeriods = async (employeeId) => {
+  try {
+    const response = await axios.get(`/employees/${employeeId}/schedule-periods`);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const upsertEmployeePeriodDay = async (periodId, weekNumber, dayId, body) => {
+  try {
+    const response = await axios.post(`/employees/schedule-periods/${periodId}/week/${weekNumber}/day/${dayId}`, body);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const deleteEmployeePeriodDay = async (periodId, weekNumber, dayId) => {
+  try {
+    const response = await axios.delete(`/employees/schedule-periods/${periodId}/week/${weekNumber}/day/${dayId}`);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const getPeriodScheduleRows = async (periodId) => {
+  try {
+    const response = await axios.get(`/employees/schedule-periods/${periodId}/schedule`);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const updateRepeatCycle = async (periodId, repeatCycle) => {
+  try {
+    const response = await axios.put(`/employees/schedule-periods/${periodId}/repeat-cycle`, { repeatCycle });
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const adminService = {
   applyEmployeeAvailability,
   createEmployee,
   deleteEmployeeAvailability,
   getEmployeeAvailability,
   getEmployeeAppointments,
+  // schedule periods
+  createEmployeeSchedulePeriod,
+  updateEmployeeSchedulePeriodDates,
+  getEmployeeActiveSchedulePeriod,
+  getEmployeeSchedulePeriods,
+  upsertEmployeePeriodDay,
+  deleteEmployeePeriodDay,
+  getPeriodScheduleRows,
+  updateRepeatCycle,
   getEmployees,
   updateEmployee,
   updateEmployeeStatus,

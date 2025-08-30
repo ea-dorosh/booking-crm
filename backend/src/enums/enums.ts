@@ -51,3 +51,8 @@ export enum EmployeeStatusEnum {
   Archived = `archived`,
   Disabled = `disabled`,
 }
+
+// Feature flags (temporary hardcoded switches)
+export const FEATURE_FLAGS = {
+  employeeSchedulePeriods: true,
+};

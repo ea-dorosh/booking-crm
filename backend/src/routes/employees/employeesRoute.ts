@@ -4,6 +4,18 @@ import { validateEmployeeData } from '@/validators/employeesValidators.js';
 import { upload } from '@/utils/uploadFile.js';
 import { getEmployees, updateEmployeeStatus } from '@/services/employees/employeesService.js';
 import {
+  createEmployeePeriod,
+  updatePeriodDates,
+  getEmployeeActivePeriod,
+  getEmployeePeriods,
+  getPeriodScheduleRows,
+  getEmployeeWorkingTimes,
+  upsertEmployeePeriodDay,
+  updatePeriodRepeatCycle,
+  deleteEmployeePeriodDay,
+} from '@/services/employees/employeesScheduleService.js';
+import { FEATURE_FLAGS } from '@/enums/enums.js';
+import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
@@ -250,6 +262,236 @@ router.delete(`/:id/availability`, async (req: CustomRequestType, res: CustomRes
     res.status(500).json({ error: `Error deleting EmployeeAvailability` });
 
     return;
+  }
+});
+
+// --- New schedule periods API ---
+router.post(`/:employeeId/schedule-periods`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const employeeId = Number(req.params.employeeId);
+  const {
+    validFrom, validUntil, repeatCycle,
+  } = req.body;
+
+  try {
+    const periodId = await createEmployeePeriod(req.dbPool, employeeId, {
+      validFrom,
+      validUntil,
+      repeatCycle,
+    });
+    res.json({ id: periodId });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.put(`/schedule-periods/:periodId/dates`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const periodId = Number(req.params.periodId);
+  const {
+    validFrom, validUntil,
+  } = req.body;
+
+  try {
+    await updatePeriodDates(req.dbPool, periodId, {
+      validFrom, validUntil,
+    });
+    res.json({ message: `Period dates updated` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.get(`/:employeeId/schedule-periods/active`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const employeeId = Number(req.params.employeeId);
+  const date = String(req.query.date);
+
+  try {
+    const period = await getEmployeeActivePeriod(req.dbPool, employeeId, date as any);
+    res.json(period);
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.get(`/:employeeId/schedule-periods`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const employeeId = Number(req.params.employeeId);
+
+  try {
+    const periods = await getEmployeePeriods(req.dbPool, employeeId);
+    res.json(periods);
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.get(`/schedule-periods/:periodId/schedule`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const periodId = Number(req.params.periodId);
+
+  try {
+    const rows = await getPeriodScheduleRows(req.dbPool, periodId);
+    res.json(rows);
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.put(`/schedule-periods/:periodId/repeat-cycle`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const periodId = Number(req.params.periodId);
+  const { repeatCycle } = req.body as { repeatCycle: 1 | 2 | 3 | 4 };
+
+  try {
+    await updatePeriodRepeatCycle(req.dbPool, periodId, repeatCycle);
+    res.json({ message: `Repeat cycle updated` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.get(`/:employeeId/working-times`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const employeeId = Number(req.params.employeeId);
+  const date = String(req.query.date);
+
+  try {
+    const result = await getEmployeeWorkingTimes(req.dbPool, employeeId, date as any);
+    res.json(result);
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.post(`/schedule-periods/:periodId/week/:weekNumber/day/:dayId`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const periodId = Number(req.params.periodId);
+  const weekNumber = Number(req.params.weekNumber);
+  const dayId = Number(req.params.dayId);
+  const {
+    startTime, endTime, blockStartTimeFirst, blockEndTimeFirst,
+  } = req.body;
+
+  try {
+    await upsertEmployeePeriodDay(
+      req.dbPool,
+      periodId,
+      weekNumber,
+      dayId,
+      startTime,
+      endTime,
+      blockStartTimeFirst,
+      blockEndTimeFirst,
+    );
+    res.json({ message: `Day schedule upserted` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.delete(`/schedule-periods/:periodId/week/:weekNumber/day/:dayId`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const periodId = Number(req.params.periodId);
+  const weekNumber = Number(req.params.weekNumber);
+  const dayId = Number(req.params.dayId);
+
+  try {
+    await deleteEmployeePeriodDay(req.dbPool, periodId, weekNumber, dayId);
+    res.json({ message: `Day schedule deleted` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
   }
 });
 

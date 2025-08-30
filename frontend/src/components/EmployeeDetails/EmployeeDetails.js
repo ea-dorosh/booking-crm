@@ -12,8 +12,8 @@ import {
 } from "@mui/material";
 import AppointmentFilters from "@/components/EmployeeAppointments/AppointmentFilters";
 import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppointments";
-import EmployeeAvailability from "@/components/EmployeeAvailability/EmployeeAvailability";
 import EmployeeGoogleCalenderSection from '@/components/EmployeeGoogleCalenderSection/EmployeeGoogleCalenderSection';
+import EmployeeSchedulePeriods from "@/components/EmployeeSchedulePeriods/EmployeeSchedulePeriods";
 import { employeeStatusEnum } from '@/enums/enums';
 
 export default function EmployeeDetails({
@@ -277,7 +277,7 @@ export default function EmployeeDetails({
             Work Schedule
           </Typography>
 
-          <EmployeeAvailability employeeId={employee.employeeId} />
+          <EmployeeSchedulePeriods employeeId={employee.employeeId} />
         </CardContent>
       </Card>
 

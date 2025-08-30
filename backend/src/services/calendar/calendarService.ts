@@ -18,9 +18,12 @@ import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getAppointmentsForCalendar } from '@/services/appointment/appointmentService.js';
 import { getGoogleCalendarEventsForSpecificDates } from '@/services/googleCalendar/googleCalendarService.js';
 import { getGroupEmployeeAvailability } from '@/services/employees/employeesService.js';
+import { getEmployeeWorkingTimes } from '@/services/employees/employeesScheduleService.js';
+import { FEATURE_FLAGS } from '@/enums/enums.js';
 import { getService } from '@/services/service/serviceService.js';
 import { getServiceDuration } from '@/utils/timeUtils.js';
 import { Pool } from 'mysql2/promise';
+import { dayjs } from '@/services/dayjs/dayjsService.js';
 
 /**
  * Get grouped time slots for one or two services
@@ -51,13 +54,54 @@ const getGroupedTimeSlots = async (
     // Get service details and employee availability
     const service = await getService(dbPool, serviceId);
     const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
-    const groupedEmployeeAvailability = await getGroupEmployeeAvailability(dbPool, employeeIds);
-    console.log(`groupedEmployeeAvailability: `, JSON.stringify(groupedEmployeeAvailability, null, 2));
-    // Get period with employee working times
-    const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(
-      paramDate,
-      groupedEmployeeAvailability,
-    );
+    let periodWithDaysAndEmployeeAvailability;
+    if (FEATURE_FLAGS.employeeSchedulePeriods) {
+      // Build groupedEmployeeAvailability equivalent dynamically per date from schedule periods
+      const initialDate = paramDate;
+      const initialDateObject = dayjs(initialDate).utc();
+      const firstDayInPeriod = initialDateObject.startOf(`week`);
+      const lastDayInPeriod = initialDateObject.endOf(`week`);
+
+      const groupedByDay: any[] = [];
+      let indexDay = firstDayInPeriod;
+      while (indexDay.isBefore(lastDayInPeriod) || indexDay.isSame(lastDayInPeriod, `day`)) {
+        const dayId = indexDay.day();
+        const dateIso = indexDay.format(`YYYY-MM-DD`);
+        // Load working times for each employee for this exact day
+        const employeesForDay = [] as any[];
+        for (const employeeId of employeeIds) {
+          const workingTimes = await getEmployeeWorkingTimes(dbPool, employeeId, dateIso as any);
+          if (workingTimes.startTime && workingTimes.endTime) {
+            employeesForDay.push({
+              id: employeeId,
+              startTime: workingTimes.startTime,
+              endTime: workingTimes.endTime,
+              blockStartTimeFirst: workingTimes.blockStartTimeFirst,
+              blockEndTimeFirst: workingTimes.blockEndTimeFirst,
+            });
+          }
+        }
+        if (employeesForDay.length > 0) {
+          groupedByDay.push({
+            dayId,
+            employees: employeesForDay,
+          });
+        }
+        indexDay = indexDay.add(1, `day`);
+      }
+
+      periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(
+        paramDate,
+        groupedByDay,
+      );
+    } else {
+      const groupedEmployeeAvailability = await getGroupEmployeeAvailability(dbPool, employeeIds);
+      console.log(`groupedEmployeeAvailability: `, JSON.stringify(groupedEmployeeAvailability, null, 2));
+      periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(
+        paramDate,
+        groupedEmployeeAvailability,
+      );
+    }
 
     console.log(`periodWithDaysAndEmployeeAvailability: `, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 2));
 
