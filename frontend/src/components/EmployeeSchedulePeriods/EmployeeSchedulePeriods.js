@@ -12,7 +12,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
-
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import daysOfWeek from '@/constants/daysOfWeek';
@@ -25,6 +24,7 @@ import {
   updateSchedulePeriodDates,
   deleteSchedulePeriodDay,
 } from '@/features/employees/employeeSchedulePeriodsSlice';
+import { formatIsoDate } from '@/utils/formatters';
 import { formattedTime } from '@/utils/formatters';
 
 function WeekTabs({
@@ -389,8 +389,8 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
   const canGoNext = periodIndex < periods.length;
 
   const periodTitle = useMemo(() => {
-    if (!period) return `No periods`;
-    return `${period.validFrom}${period.validUntil ? ` → ${period.validUntil}` : ``}`;
+    if (!period) return ``;
+    return `${formatIsoDate(period.validFrom)}${period.validUntil ? ` → ${formatIsoDate(period.validUntil)}` : ``}`;
   }, [period]);
 
   const getExistingForDay = (weekNumber, dayId) => {
@@ -631,8 +631,8 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                   size="small"
                   label="Cycle"
                   color="secondary"
-                  defaultValue={period.repeatCycle}
-                  onChange={(e) => onChangeRepeatCycle(e.target.value)}
+                  value={period.repeatCycle}
+                  onChange={(e) => onChangeRepeatCycle(Number(e.target.value))}
                   sx={{ maxWidth: `100%` }}
                 >
                   {[1,2,3,4].map(v => (
@@ -687,14 +687,14 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
         </>
       )}
 
-      {!period && (
+      {!period && !isCreateOpen &&(
         <Button
           size="medium"
           startIcon={<Add />}
           onClick={onCreatePeriod}
           color="secondary"
           variant="contained"
-          sx={{ margin: `0 auto` }}
+          sx={{ margin: `10rem auto` }}
         >
           Add new period
         </Button>
