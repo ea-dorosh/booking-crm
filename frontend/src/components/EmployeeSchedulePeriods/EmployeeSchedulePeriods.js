@@ -365,6 +365,8 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
   const [newFrom, setNewFrom] = useState(``);
   const [newUntil, setNewUntil] = useState(``);
   const [newCycle, setNewCycle] = useState(1);
+  const [createPeriodError, setCreatePeriodError] = useState(``);
+  const [createPeriodSuccess, setCreatePeriodSuccess] = useState(``);
 
   useEffect(() => {
     dispatch(fetchEmployeeSchedulePeriods(employeeId));
@@ -384,7 +386,7 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
   }, [dispatch, period && period.id]);
 
   const canGoPrev = periodIndex > 0;
-  const canGoNext = periodIndex < (periods.length - 1);
+  const canGoNext = periodIndex < periods.length;
 
   const periodTitle = useMemo(() => {
     if (!period) return `No periods`;
@@ -495,29 +497,45 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
   const onSubmitCreate = async () => {
     if (!newFrom) return;
-    await dispatch(createSchedulePeriod({
-      employeeId,
-      body: {
-        validFrom: newFrom,
-        validUntil: newUntil || null,
-        repeatCycle: Number(newCycle),
-      },
-    }));
-    setIsCreateOpen(false);
-    setTimeout(() => dispatch(fetchEmployeeSchedulePeriods(employeeId)), 200);
+    setCreatePeriodError(``);
+
+    try {
+      await dispatch(createSchedulePeriod({
+        employeeId,
+        body: {
+          validFrom: newFrom,
+          validUntil: newUntil || null,
+          repeatCycle: Number(newCycle),
+        },
+      })).unwrap();
+
+      setIsCreateOpen(false);
+      setCreatePeriodSuccess(`Period created`);
+      setTimeout(() => setCreatePeriodSuccess(``), 1500);
+      setTimeout(() => dispatch(fetchEmployeeSchedulePeriods(employeeId)), 200);
+    } catch (e) {
+      const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
+      setCreatePeriodError(msg);
+    }
   };
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: `flex`,
+        flexDirection: `column`,
+      }}
+    >
       <Stack
         direction="row"
         spacing={1}
         alignItems="center"
+        justifyContent="space-between"
         sx={{ mb: 1 }}
       >
         <IconButton
           disabled={!canGoPrev}
-          onClick={() => setPeriodIndex(i => Math.max(0, i - 1))}
+          onClick={() => setPeriodIndex(oldValue => oldValue - 1)}
           color="secondary"
         >
           <ArrowBack />
@@ -525,28 +543,21 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
         <Typography
           variant="subtitle2"
-          sx={{ flex: 1 }}
+          sx={{
+            flex: 1,
+            textAlign: `center`,
+          }}
         >
           {periodTitle}
         </Typography>
 
         <IconButton
           disabled={!canGoNext}
-          onClick={() => setPeriodIndex(i => Math.min(periods.length - 1, i + 1))}
+          onClick={() => setPeriodIndex(oldValue => oldValue + 1)}
           color="secondary"
         >
           <ArrowForward />
         </IconButton>
-
-        <Button
-          size="small"
-          startIcon={<Add />}
-          onClick={onCreatePeriod}
-          color="secondary"
-          variant="contained"
-        >
-          Add period
-        </Button>
       </Stack>
 
       {period && (
@@ -554,50 +565,61 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Grid
               container
-              spacing={1}
+              spacing={2}
               sx={{ mb: 1 }}
             >
               <Grid
                 item
                 xs={6}
               >
-                <DatePicker
-                  label="Valid from"
-                  value={editFrom ? dayjs(editFrom) : null}
-                  onChange={(newValue) => setEditFrom(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
-                  onAccept={(newValue) => newValue && onChangeFrom(newValue.format(`YYYY-MM-DD`))}
-                  slotProps={{
-                    textField: {
-                      size: `small`,
-                      color: `secondary`,
-                      error: Boolean(dateError),
-                      helperText: dateError || undefined,
-                      sx: { maxWidth: `100%` },
-                    },
-                    actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
-                  }}
-                />
+
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="de"
+                >
+                  <DatePicker
+                    label="Valid from"
+                    value={editFrom ? dayjs(editFrom) : null}
+                    onChange={(newValue) => setEditFrom(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
+                    onAccept={(newValue) => newValue && onChangeFrom(newValue.format(`YYYY-MM-DD`))}
+                    slotProps={{
+                      textField: {
+                        size: `small`,
+                        color: `secondary`,
+                        error: Boolean(dateError),
+                        helperText: dateError || undefined,
+                        sx: { maxWidth: `100%` },
+                      },
+                      actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
+                    }}
+                  />
+                </LocalizationProvider>
               </Grid>
 
               <Grid
                 item
                 xs={6}
               >
-                <DatePicker
-                  label="Valid until"
-                  value={editUntil ? dayjs(editUntil) : null}
-                  onChange={(newValue) => setEditUntil(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
-                  onAccept={(newValue) => newValue && onChangeUntil(newValue.format(`YYYY-MM-DD`))}
-                  slotProps={{
-                    textField: {
-                      size: `small`,
-                      color: `secondary`,
-                      error: Boolean(dateError),
-                      sx: { maxWidth: `100%` },
-                    },
-                    actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
-                  }}
-                />
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="de"
+                >
+                  <DatePicker
+                    label="Valid until"
+                    value={editUntil ? dayjs(editUntil) : null}
+                    onChange={(newValue) => setEditUntil(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
+                    onAccept={(newValue) => newValue && onChangeUntil(newValue.format(`YYYY-MM-DD`))}
+                    slotProps={{
+                      textField: {
+                        size: `small`,
+                        color: `secondary`,
+                        error: Boolean(dateError),
+                        sx: { maxWidth: `100%` },
+                      },
+                      actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
+                    }}
+                  />
+                </LocalizationProvider>
               </Grid>
 
               <Grid
@@ -628,17 +650,13 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                 xs={8}
               >
                 {dateError && (
-                  <Alert
-                    severity="error"
-                  >
+                  <Alert severity="error">
                     {dateError}
                   </Alert>
                 )}
 
                 {dateSuccess && !dateError && (
-                  <Alert
-                    severity="success"
-                  >
+                  <Alert severity="success">
                     {dateSuccess}
                   </Alert>
                 )}
@@ -669,7 +687,20 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
         </>
       )}
 
-      {isCreateOpen && (
+      {!period && (
+        <Button
+          size="medium"
+          startIcon={<Add />}
+          onClick={onCreatePeriod}
+          color="secondary"
+          variant="contained"
+          sx={{ margin: `0 auto` }}
+        >
+          Add new period
+        </Button>
+      )}
+
+      {isCreateOpen && !period && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle2">Create new period</Typography>
 
@@ -755,6 +786,18 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
               </Button>
             </Grid>
 
+            <Grid
+              item
+              xs={12}
+            >
+              {createPeriodError && (
+                <Alert severity="error">{createPeriodError}</Alert>
+              )}
+
+              {createPeriodSuccess && (
+                <Alert severity="success">{createPeriodSuccess}</Alert>
+              )}
+            </Grid>
           </Grid>
         </Box>
       )}
