@@ -63,15 +63,7 @@ export interface WorkingTimesForDateResult {
   blockEndTimeFirst: Time_HH_MM_SS_Type | null;
 }
 
-function assertMondayOrThrow(dateIso: Date_ISO_Type) {
-  const d = dayjs.utc(dateIso);
-  if (d.day() !== 1) {
-    // 400 - bad request
-    const error: any = new Error(`valid_from must be a Monday`);
-    error.statusCode = 400;
-    throw error;
-  }
-}
+// Monday enforcement disabled: periods can start from any calendar day
 
 async function validateNoPeriodOverlap(
   dbPool: Pool,
@@ -109,7 +101,7 @@ async function createEmployeePeriod(
   employeeId: number,
   data: CreatePeriodData,
 ): Promise<number> {
-  assertMondayOrThrow(data.validFrom);
+  // Allow any calendar day as a start of the period
   if (data.validUntil && dayjs.utc(data.validFrom).isAfter(dayjs.utc(data.validUntil))) {
     const error: any = new Error(`valid_from must be before or equal to valid_until`);
     error.statusCode = 400;
@@ -136,7 +128,7 @@ async function updatePeriodDates(
   periodId: number,
   data: UpdatePeriodDatesData,
 ): Promise<void> {
-  assertMondayOrThrow(data.validFrom);
+  // Allow any calendar day as a start of the period
   if (data.validUntil && dayjs.utc(data.validFrom).isAfter(dayjs.utc(data.validUntil))) {
     const error: any = new Error(`valid_from must be before or equal to valid_until`);
     error.statusCode = 400;

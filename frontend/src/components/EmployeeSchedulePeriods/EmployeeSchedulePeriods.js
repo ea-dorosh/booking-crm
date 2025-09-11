@@ -7,6 +7,8 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -28,26 +30,39 @@ import { formatIsoDate } from '@/utils/formatters';
 import { formattedTime } from '@/utils/formatters';
 
 function WeekTabs({
-  repeatCycle, activeWeek, onChangeWeek,
+  repeatCycle,
+  activeWeek,
+  onChangeWeek,
 }) {
+  const weeks = Array.from({ length: repeatCycle }, (_, i) => i + 1);
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{ mb: 1 }}
+    <ToggleButtonGroup
+      exclusive
+      size="small"
+      color="secondary"
+      value={activeWeek}
+      onChange={(_, val) => {
+        if (val) {
+          onChangeWeek(val);
+        }
+      }}
+      sx={{
+        mb: 1,
+        flexWrap: `wrap`,
+      }}
     >
-      {Array.from({ length: repeatCycle }, (_, i) => i + 1).map(week => (
-        <Button
+      {weeks.map(week => (
+        <ToggleButton
           key={week}
-          size="small"
-          variant={activeWeek === week ? `contained` : `outlined`}
-          color="secondary"
-          onClick={() => onChangeWeek(week)}
+          value={week}
+          sx={{
+            textTransform: `none`,
+          }}
         >
           {`Week ${week}`}
-        </Button>
+        </ToggleButton>
       ))}
-    </Stack>
+    </ToggleButtonGroup>
   );
 }
 
