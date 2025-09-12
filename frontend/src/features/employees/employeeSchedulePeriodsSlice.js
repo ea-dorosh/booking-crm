@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import employeesService from '@/services/employees.service';
 
@@ -132,6 +131,19 @@ export const updateRepeatCycleThunk = createAsyncThunk(
   },
 );
 
+export const deleteSchedulePeriod = createAsyncThunk(
+  `employeeSchedulePeriods/deleteSchedulePeriod`,
+  async (periodId, thunkAPI) => {
+    try {
+      await employeesService.deleteEmployeeSchedulePeriod(periodId);
+      return periodId;
+    } catch (error) {
+      const msg = typeof error === `string` ? error : (error?.message || String(error));
+      return thunkAPI.rejectWithValue(msg);
+    }
+  },
+);
+
 const employeeSchedulePeriodsSlice = createSlice({
   name: `employeeSchedulePeriods`,
   initialState: {
@@ -143,6 +155,7 @@ const employeeSchedulePeriodsSlice = createSlice({
     updateStatus: `idle`,
     upsertDayStatus: `idle`,
     deleteDayStatus: `idle`,
+    deletePeriodStatus: `idle`,
   },
   reducers: {
     clearEmployeeSchedulePeriods: (state) => {
@@ -213,6 +226,19 @@ const employeeSchedulePeriodsSlice = createSlice({
       })
       .addCase(fetchPeriodScheduleRows.rejected, (state, action) => {
         state.status = `failed`;
+        state.error = action.payload;
+      })
+      .addCase(deleteSchedulePeriod.pending, (state) => {
+        state.deletePeriodStatus = `loading`;
+      })
+      .addCase(deleteSchedulePeriod.fulfilled, (state, action) => {
+        state.deletePeriodStatus = `succeeded`;
+        const id = action.payload;
+        state.periods = state.periods.filter(p => p.id !== id);
+        delete state.periodSchedules[id];
+      })
+      .addCase(deleteSchedulePeriod.rejected, (state, action) => {
+        state.deletePeriodStatus = `failed`;
         state.error = action.payload;
       })
       .addCase(updateRepeatCycleThunk.fulfilled, (state, action) => {

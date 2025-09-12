@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
+import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -14,7 +15,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import daysOfWeek from '@/constants/daysOfWeek';
 import {
@@ -25,6 +26,7 @@ import {
   updateRepeatCycleThunk,
   updateSchedulePeriodDates,
   deleteSchedulePeriodDay,
+  deleteSchedulePeriod,
 } from '@/features/employees/employeeSchedulePeriodsSlice';
 import { formatIsoDate } from '@/utils/formatters';
 import { formattedTime } from '@/utils/formatters';
@@ -49,6 +51,7 @@ function WeekTabs({
       sx={{
         mb: 1,
         flexWrap: `wrap`,
+        alignSelf: `center`,
       }}
     >
       {weeks.map(week => (
@@ -375,13 +378,38 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
   const [editFrom, setEditFrom] = useState(``);
   const [editUntil, setEditUntil] = useState(``);
   const [dateError, setDateError] = useState(``);
-  const [dateSuccess, setDateSuccess] = useState(``);
+  const [toast, setToast] = useState({
+    open: false,
+    severity: `info`,
+    message: ``,
+  });
+  const showToast = (severity, message) => setToast({
+    open: true,
+    severity,
+    message,
+  });
+  const closeToast = () => setToast(prev => ({
+    ...prev,
+    open: false,
+  }));
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newFrom, setNewFrom] = useState(``);
   const [newUntil, setNewUntil] = useState(``);
   const [newCycle, setNewCycle] = useState(1);
-  const [createPeriodError, setCreatePeriodError] = useState(``);
-  const [createPeriodSuccess, setCreatePeriodSuccess] = useState(``);
+  const [openFrom, setOpenFrom] = useState(false);
+  const [openUntil, setOpenUntil] = useState(false);
+  const lastPeriod = periods.length ? periods[periods.length - 1] : null;
+  const fromPendingRef = useRef(``);
+  const untilPendingRef = useRef(``);
+  const fromChangeCommitTsRef = useRef(0);
+  const untilChangeCommitTsRef = useRef(0);
+  const createFromMinDate = useMemo(() => {
+    if (!lastPeriod || !lastPeriod.validUntil) return null;
+    return dayjs(lastPeriod.validUntil).add(1, `day`);
+  }, [lastPeriod]);
+  const createUntilMinDate = useMemo(() => (newFrom ? dayjs(newFrom).add(1, `day`) : null), [newFrom]);
+
+  // no refs needed; onAccept uses provided newValue
 
   useEffect(() => {
     dispatch(fetchEmployeeSchedulePeriods(employeeId));
@@ -389,6 +417,11 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
   useEffect(() => {
     setActiveWeek(1);
+    // Reset any inline errors and close creation form/pickers when switching periods
+    setDateError(``);
+    setIsCreateOpen(false);
+    setOpenFrom(false);
+    setOpenUntil(false);
   }, [periodIndex]);
 
   // Ensure schedule rows are loaded when the selected period changes or after initial fetch
@@ -408,6 +441,16 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
     return `${formatIsoDate(period.validFrom)}${period.validUntil ? ` → ${formatIsoDate(period.validUntil)}` : ``}`;
   }, [period]);
 
+  const prevPeriod = periodIndex > 0 ? periods[periodIndex - 1] : null;
+  const validFromMinDate = useMemo(() => {
+    if (!prevPeriod || !prevPeriod.validUntil) return null;
+    return dayjs(prevPeriod.validUntil).add(1, `day`);
+  }, [prevPeriod]);
+
+  const validUntilMinDate = useMemo(() => {
+    return editFrom ? dayjs(editFrom).add(1, `day`) : null;
+  }, [editFrom]);
+
   const getExistingForDay = (weekNumber, dayId) => {
     if (!period) return null;
     const rows = (periodSchedules[period.id] || []).filter(r => r.weekNumberInCycle === weekNumber && r.dayId === dayId);
@@ -424,15 +467,15 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
   const onCreatePeriod = () => {
     // Prefill Monday as valid_from and +2 years as valid_until
-    const today = new Date();
-    const dow = today.getDay(); // 0..6
-    const offsetToMonday = (dow + 6) % 7;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - offsetToMonday);
-    const pad = (n) => String(n).padStart(2, `0`);
-    const isoFrom = `${monday.getFullYear()}-${pad(monday.getMonth() + 1)}-${pad(monday.getDate())}`;
-
-    setNewFrom(isoFrom);
+    // If there is a current period with finite end, suggest next day after its end
+    const last = periods[periods.length - 1] || null;
+    if (last && last.validUntil) {
+      const nextDay = dayjs(last.validUntil).add(1, `day`).format(`YYYY-MM-DD`);
+      setNewFrom(nextDay);
+    } else {
+      const today = dayjs().format(`YYYY-MM-DD`);
+      setNewFrom(today);
+    }
     setNewCycle(1);
     setIsCreateOpen(true);
   };
@@ -460,20 +503,22 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
     setEditFrom(value);
     if (!period) return;
     try {
+      const body = {
+        validFrom: value,
+        validUntil: editUntil || period.validUntil,
+      };
       await dispatch(updateSchedulePeriodDates({
         periodId: period.id,
-        body: {
-          validFrom: value,
-          validUntil: editUntil || period.validUntil,
-        },
+        body,
       })).unwrap();
       setDateError(``);
-      setDateSuccess(`Dates saved`);
-      setTimeout(() => setDateSuccess(``), 1500);
+      showToast(`success`, `Dates saved`);
       dispatch(fetchEmployeeSchedulePeriods(employeeId));
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
       setDateError(msg);
+      showToast(`error`, msg);
+
       // rollback UI to last valid value
       setEditFrom(period.validFrom);
     }
@@ -483,24 +528,27 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
     setEditUntil(value);
     if (!period) return;
     try {
-      await dispatch(updateSchedulePeriodDates({
+      const body = {
         periodId: period.id,
         body: {
           validFrom: editFrom || period.validFrom,
           validUntil: value,
         },
-      })).unwrap();
+      };
+      await dispatch(updateSchedulePeriodDates(body)).unwrap();
       setDateError(``);
-      setDateSuccess(`Dates saved`);
-      setTimeout(() => setDateSuccess(``), 1500);
+      showToast(`success`, `Dates saved`);
       dispatch(fetchEmployeeSchedulePeriods(employeeId));
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
       setDateError(msg);
+      showToast(`error`, msg);
       // rollback UI to last valid value
       setEditUntil(period.validUntil);
     }
   };
+
+  // NOTE: commits are triggered inline in onChange/actionBar handlers now
 
   const onChangeRepeatCycle = async (value) => {
     await dispatch(updateRepeatCycleThunk({
@@ -510,9 +558,28 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
     dispatch(fetchEmployeeSchedulePeriods(employeeId));
   };
 
+  const onDeletePeriod = async () => {
+    if (!period) return;
+    try {
+      const action = await dispatch(deleteSchedulePeriod(period.id));
+      if (deleteSchedulePeriod.fulfilled.match(action)) {
+        showToast(`success`, `Period deleted`);
+        const newIndex = Math.max(0, periodIndex - 1);
+        setPeriodIndex(newIndex);
+        dispatch(fetchEmployeeSchedulePeriods(employeeId));
+      } else {
+        const msg = action.payload || action.error?.message;
+        showToast(`error`, typeof msg === `string` ? msg : JSON.stringify(msg));
+      }
+    } catch (e) {
+      const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
+      showToast(`error`, msg);
+    }
+  };
+
   const onSubmitCreate = async () => {
     if (!newFrom) return;
-    setCreatePeriodError(``);
+    // Clear previous errors (toasts are used)
 
     try {
       await dispatch(createSchedulePeriod({
@@ -525,12 +592,11 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
       })).unwrap();
 
       setIsCreateOpen(false);
-      setCreatePeriodSuccess(`Period created`);
-      setTimeout(() => setCreatePeriodSuccess(``), 1500);
+      showToast(`success`, `Period created`);
       setTimeout(() => dispatch(fetchEmployeeSchedulePeriods(employeeId)), 200);
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
-      setCreatePeriodError(msg);
+      showToast(`error`, msg);
     }
   };
 
@@ -595,8 +661,19 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                   <DatePicker
                     label="Valid from"
                     value={editFrom ? dayjs(editFrom) : null}
-                    onChange={(newValue) => setEditFrom(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
-                    onAccept={(newValue) => newValue && onChangeFrom(newValue.format(`YYYY-MM-DD`))}
+                    referenceDate={editFrom ? dayjs(editFrom) : (validFromMinDate || undefined)}
+                    minDate={validFromMinDate || undefined}
+                    open={openFrom}
+                    onOpen={() => setOpenFrom(true)}
+                    onClose={() => setOpenFrom(false)}
+                    onChange={(newValue) => {
+                      setEditFrom(newValue ? newValue.format(`YYYY-MM-DD`) : ``);
+                      fromPendingRef.current = newValue ? newValue.format(`YYYY-MM-DD`) : ``;
+                      if (newValue) {
+                        fromChangeCommitTsRef.current = Date.now();
+                        void onChangeFrom(newValue.format(`YYYY-MM-DD`));
+                      }
+                    }}
                     slotProps={{
                       textField: {
                         size: `small`,
@@ -605,7 +682,17 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                         helperText: dateError || undefined,
                         sx: { maxWidth: `100%` },
                       },
-                      actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
+                      actionBar: {
+                        actions: [ `accept`, `cancel` ],
+                        onAccept: () => {
+                          const now = Date.now();
+                          if (now - fromChangeCommitTsRef.current > 600) {
+                            const v = fromPendingRef.current || editFrom || (period?.validFrom || ``);
+                            if (v) void onChangeFrom(v);
+                          }
+                          setOpenFrom(false);
+                        },
+                      },
                     }}
                   />
                 </LocalizationProvider>
@@ -622,8 +709,23 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                   <DatePicker
                     label="Valid until"
                     value={editUntil ? dayjs(editUntil) : null}
-                    onChange={(newValue) => setEditUntil(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
-                    onAccept={(newValue) => newValue && onChangeUntil(newValue.format(`YYYY-MM-DD`))}
+                    referenceDate={editFrom ? dayjs(editFrom).endOf(`month`) : undefined}
+                    minDate={validUntilMinDate || undefined}
+                    open={openUntil}
+                    onOpen={() => setOpenUntil(true)}
+                    onClose={() => setOpenUntil(false)}
+                    onChange={(newValue) => {
+                      if (!newValue) {
+                        setEditUntil(``);
+                      } else {
+                        setEditUntil(newValue.format(`YYYY-MM-DD`));
+                      }
+                      untilPendingRef.current = newValue ? newValue.format(`YYYY-MM-DD`) : ``;
+                      if (newValue) {
+                        untilChangeCommitTsRef.current = Date.now();
+                        void onChangeUntil(newValue.format(`YYYY-MM-DD`));
+                      }
+                    }}
                     slotProps={{
                       textField: {
                         size: `small`,
@@ -631,7 +733,25 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                         error: Boolean(dateError),
                         sx: { maxWidth: `100%` },
                       },
-                      actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
+                      actionBar: {
+                        actions: [ `accept`, `cancel`, `clear` ],
+                        onAccept: () => {
+                          const now = Date.now();
+                          if (now - untilChangeCommitTsRef.current > 600) {
+                            const v = untilPendingRef.current;
+                            void onChangeUntil(v === `` ? null : (v || editUntil || null));
+                          }
+                          setOpenUntil(false);
+                        },
+                        onClear: () => {
+                          setEditUntil(``);
+                          const now = Date.now();
+                          if (now - untilChangeCommitTsRef.current > 600) {
+                            void onChangeUntil(null);
+                          }
+                          setOpenUntil(false);
+                        },
+                      },
                     }}
                   />
                 </LocalizationProvider>
@@ -639,7 +759,7 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
               <Grid
                 item
-                xs={4}
+                xs={6}
               >
                 <TextField
                   select
@@ -648,7 +768,10 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                   color="secondary"
                   value={period.repeatCycle}
                   onChange={(e) => onChangeRepeatCycle(Number(e.target.value))}
-                  sx={{ maxWidth: `100%` }}
+                  sx={{
+                    maxWidth: `231px`,
+                    width: `100%`,
+                  }}
                 >
                   {[1,2,3,4].map(v => (
                     <MenuItem
@@ -662,19 +785,22 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
               <Grid
                 item
-                xs={8}
+                xs={6}
               >
-                {dateError && (
-                  <Alert severity="error">
-                    {dateError}
-                  </Alert>
-                )}
-
-                {dateSuccess && !dateError && (
-                  <Alert severity="success">
-                    {dateSuccess}
-                  </Alert>
-                )}
+                <Button
+                  onClick={onDeletePeriod}
+                  color="secondary"
+                  variant="outlined"
+                  size="small"
+                  disabled={!period.canDelete}
+                  sx={{
+                    width: `100%`,
+                    maxWidth: `231px`,
+                  }}
+                  startIcon={<Delete sx={{ fontSize: 16 }} />}
+                >
+                    Delete period
+                </Button>
               </Grid>
             </Grid>
           </LocalizationProvider>
@@ -717,7 +843,12 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
 
       {isCreateOpen && !period && (
         <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2">Create new period</Typography>
+          <Typography
+            variant="h5"
+            sx={{ textAlign: `center` }}
+          >
+            Create new period
+          </Typography>
 
           <Grid
             container
@@ -728,30 +859,52 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
               item
               xs={6}
             >
-              <TextField
-                label="Valid from"
-                type="date"
-                size="small"
-                value={newFrom}
-                onChange={(e) => setNewFrom(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={{ maxWidth: `100%` }}
-              />
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="de"
+              >
+                <DatePicker
+                  label="Valid from"
+                  value={newFrom ? dayjs(newFrom) : null}
+                  referenceDate={newFrom ? dayjs(newFrom) : (createFromMinDate || undefined)}
+                  minDate={createFromMinDate || undefined}
+                  onChange={(newValue) => setNewFrom(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
+                  slotProps={{
+                    textField: {
+                      size: `small`,
+                      color: `secondary`,
+                      sx: { maxWidth: `100%` },
+                    },
+                    actionBar: { actions: [ `accept`, `cancel` ] },
+                  }}
+                />
+              </LocalizationProvider>
             </Grid>
 
             <Grid
               item
               xs={6}
             >
-              <TextField
-                label="Valid until"
-                type="date"
-                size="small"
-                value={newUntil}
-                onChange={(e) => setNewUntil(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={{ maxWidth: `100%` }}
-              />
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="de"
+              >
+                <DatePicker
+                  label="Valid until"
+                  value={newUntil ? dayjs(newUntil) : null}
+                  referenceDate={newFrom ? dayjs(newFrom).endOf(`month`) : undefined}
+                  minDate={createUntilMinDate || undefined}
+                  onChange={(newValue) => setNewUntil(newValue ? newValue.format(`YYYY-MM-DD`) : ``)}
+                  slotProps={{
+                    textField: {
+                      size: `small`,
+                      color: `secondary`,
+                      sx: { maxWidth: `100%` },
+                    },
+                    actionBar: { actions: [ `accept`, `cancel`, `clear` ] },
+                  }}
+                />
+              </LocalizationProvider>
             </Grid>
 
             <Grid
@@ -764,7 +917,10 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
                 label="Cycle"
                 value={newCycle}
                 onChange={(e) => setNewCycle(e.target.value)}
-                sx={{ maxWidth: `100%` }}
+                sx={{
+                  maxWidth: `231px`,
+                  width: `100%`,
+                }}
               >
                 {[1,2,3,4].map(v => (
                   <MenuItem
@@ -781,41 +937,65 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
               item
               xs={6}
             >
-              <Button
-                size="small"
-                variant="contained"
-                color="secondary"
-                onClick={onSubmitCreate}
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  width: `100%`,
+                  maxWidth: `231px`,
+                }}
               >
-                Create
-              </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => setIsCreateOpen(false)}
+                  sx={{
+                    flexGrow: 1,
+                  }}
+                >
+                  Cancel
+                </Button>
 
-              <Button
-                size="small"
-                variant="outlined"
-                color="secondary"
-                onClick={() => setIsCreateOpen(false)}
-                sx={{ marginLeft: 2 }}
-              >
-                Cancel
-              </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="secondary"
+                  onClick={onSubmitCreate}
+                  sx={{
+                    flexGrow: 1,
+                  }}
+                >
+                  Create
+                </Button>
+              </Stack>
             </Grid>
 
             <Grid
               item
               xs={12}
-            >
-              {createPeriodError && (
-                <Alert severity="error">{createPeriodError}</Alert>
-              )}
-
-              {createPeriodSuccess && (
-                <Alert severity="success">{createPeriodSuccess}</Alert>
-              )}
-            </Grid>
+            />
           </Grid>
         </Box>
       )}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={2500}
+        onClose={closeToast}
+        anchorOrigin={{
+          vertical: `bottom`,
+          horizontal: `center`,
+        }}
+      >
+        <Alert
+          onClose={closeToast}
+          severity={toast.severity}
+          variant="filled"
+          sx={{ width: `100%` }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

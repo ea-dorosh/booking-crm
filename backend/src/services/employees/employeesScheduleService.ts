@@ -30,6 +30,7 @@ export interface EmployeeSchedulePeriodDto {
   repeatCycle: number;
   createdAt: string;
   updatedAt: string;
+  canDelete: boolean;
 }
 
 export interface EmployeePeriodScheduleDto {
@@ -201,6 +202,12 @@ async function getEmployeeActivePeriod(
   const [rows] = await dbPool.query<EmployeeSchedulePeriodRow[]>(sql, [employeeId, date, date]);
   const row = rows[0];
   if (!row) return null;
+  const todayIso = dayjs.utc().format(`YYYY-MM-DD`);
+  const startsInFuture = dayjs.utc(row.valid_from).isAfter(dayjs.utc(todayIso));
+  const isOpenEnded = row.valid_until === null;
+  const isActiveToday = dayjs.utc(row.valid_from).isSameOrBefore(dayjs.utc(todayIso))
+    && (row.valid_until === null || dayjs.utc(row.valid_until).isSameOrAfter(dayjs.utc(todayIso)));
+  const endsBeforeToday = row.valid_until !== null && dayjs.utc(row.valid_until).isBefore(dayjs.utc(todayIso));
   return {
     id: row.id,
     employeeId: row.employee_id,
@@ -209,6 +216,7 @@ async function getEmployeeActivePeriod(
     repeatCycle: row.repeat_cycle,
     createdAt: (row as any).created_at,
     updatedAt: (row as any).updated_at,
+    canDelete: !isOpenEnded && startsInFuture && !isActiveToday && !endsBeforeToday,
   };
 }
 
@@ -230,15 +238,24 @@ async function getEmployeePeriods(
     ORDER BY valid_from ASC
   `;
   const [rows] = await dbPool.query<EmployeeSchedulePeriodRow[]>(sql, [employeeId]);
-  return rows.map((row) => ({
-    id: row.id,
-    employeeId: row.employee_id,
-    validFrom: row.valid_from,
-    validUntil: row.valid_until,
-    repeatCycle: row.repeat_cycle,
-    createdAt: (row as any).created_at,
-    updatedAt: (row as any).updated_at,
-  }));
+  const todayIso = dayjs.utc().format(`YYYY-MM-DD`);
+  return rows.map((row) => {
+    const startsInFuture = dayjs.utc(row.valid_from).isAfter(dayjs.utc(todayIso));
+    const isOpenEnded = row.valid_until === null;
+    const isActiveToday = dayjs.utc(row.valid_from).isSameOrBefore(dayjs.utc(todayIso))
+      && (row.valid_until === null || dayjs.utc(row.valid_until).isSameOrAfter(dayjs.utc(todayIso)));
+    const endsBeforeToday = row.valid_until !== null && dayjs.utc(row.valid_until).isBefore(dayjs.utc(todayIso));
+    return {
+      id: row.id,
+      employeeId: row.employee_id,
+      validFrom: row.valid_from,
+      validUntil: row.valid_until,
+      repeatCycle: row.repeat_cycle,
+      createdAt: (row as any).created_at,
+      updatedAt: (row as any).updated_at,
+      canDelete: !isOpenEnded && startsInFuture && !isActiveToday && !endsBeforeToday,
+    };
+  });
 }
 
 async function getPeriodScheduleRows(
@@ -388,6 +405,64 @@ export async function deleteEmployeePeriodDay(
     `DELETE FROM EmployeePeriodSchedule WHERE period_id = ? AND week_number_in_cycle = ? AND day_id = ?`,
     [periodId, weekNumberInCycle, dayId],
   );
+}
+
+export async function deleteEmployeePeriod(
+  dbPool: Pool,
+  periodId: number,
+): Promise<void> {
+  // Load period
+  const [rows] = await dbPool.query<EmployeeSchedulePeriodRow[]>(
+    `SELECT id, valid_from, valid_until FROM EmployeeSchedulePeriods WHERE id = ?`,
+    [periodId],
+  );
+  if (rows.length === 0) {
+    const error: any = new Error(`Schedule period not found`);
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const period = rows[0];
+  const todayIso = dayjs.utc().format(`YYYY-MM-DD`);
+
+  // Business rules:
+  // - Cannot delete past periods (valid_until < today)
+  // - Cannot delete current active period (valid_from <= today <= valid_until or valid_until IS NULL)
+  // - Cannot delete open-ended periods (valid_until IS NULL)
+  // - Only future periods (valid_from > today AND valid_until IS NOT NULL) are deletable
+
+  if (period.valid_until === null) {
+    const error: any = new Error(`Cannot delete open-ended period`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const startsInFuture = dayjs.utc(period.valid_from).isAfter(dayjs.utc(todayIso));
+  const endsBeforeToday = dayjs.utc(period.valid_until).isBefore(dayjs.utc(todayIso));
+  const isActiveToday = dayjs.utc(period.valid_from).isSameOrBefore(dayjs.utc(todayIso))
+    && dayjs.utc(period.valid_until).isSameOrAfter(dayjs.utc(todayIso));
+
+  if (endsBeforeToday) {
+    const error: any = new Error(`Cannot delete past period`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (isActiveToday) {
+    const error: any = new Error(`Cannot delete active period`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!startsInFuture) {
+    const error: any = new Error(`Only future periods can be deleted`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Cascade delete: first delete schedule rows, then the period
+  await dbPool.query(`DELETE FROM EmployeePeriodSchedule WHERE period_id = ?`, [periodId]);
+  await dbPool.query(`DELETE FROM EmployeeSchedulePeriods WHERE id = ?`, [periodId]);
 }
 
 

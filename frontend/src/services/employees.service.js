@@ -182,6 +182,15 @@ const updateRepeatCycle = async (periodId, repeatCycle) => {
   }
 };
 
+const deleteEmployeeSchedulePeriod = async (periodId) => {
+  try {
+    const response = await axios.delete(`/employees/schedule-periods/${periodId}`);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const adminService = {
   applyEmployeeAvailability,
   createEmployee,
@@ -197,6 +206,7 @@ const adminService = {
   deleteEmployeePeriodDay,
   getPeriodScheduleRows,
   updateRepeatCycle,
+  deleteEmployeeSchedulePeriod,
   getEmployees,
   updateEmployee,
   updateEmployeeStatus,

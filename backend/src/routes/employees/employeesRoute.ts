@@ -13,6 +13,7 @@ import {
   upsertEmployeePeriodDay,
   updatePeriodRepeatCycle,
   deleteEmployeePeriodDay,
+  deleteEmployeePeriod,
 } from '@/services/employees/employeesScheduleService.js';
 import { FEATURE_FLAGS } from '@/enums/enums.js';
 import {
@@ -489,6 +490,28 @@ router.delete(`/schedule-periods/:periodId/week/:weekNumber/day/:dayId`, async (
   try {
     await deleteEmployeePeriodDay(req.dbPool, periodId, weekNumber, dayId);
     res.json({ message: `Day schedule deleted` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    res.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.delete(`/schedule-periods/:periodId`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
+    res.status(403).json({ message: `Feature disabled` });
+    return;
+  }
+
+  const periodId = Number(req.params.periodId);
+
+  try {
+    await deleteEmployeePeriod(req.dbPool, periodId);
+    res.json({ message: `Schedule period deleted` });
   } catch (error) {
     const status = (error as any).statusCode || 500;
     res.status(status).json({ message: (error as Error).message });
