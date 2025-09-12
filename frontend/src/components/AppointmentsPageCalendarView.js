@@ -1,10 +1,10 @@
+import deLocale from '@fullcalendar/core/locales/de';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import {
   Box,
-  Paper,
   Stack,
   ToggleButtonGroup,
   ToggleButton,
@@ -63,16 +63,42 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
     },
   })) || [];
 
+  // Touch swipe navigation
+  const touchStart = React.useRef({
+    x: 0,
+    y: 0,
+    t: 0,
+  });
+  const handleTouchStart = (e) => {
+    const t = e.touches?.[0];
+    if (!t) return;
+    touchStart.current = {
+      x: t.clientX,
+      y: t.clientY,
+      t: Date.now(),
+    };
+  };
+  const handleTouchEnd = (e) => {
+    const t = e.changedTouches?.[0];
+    if (!t) return;
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    const dt = Date.now() - touchStart.current.t;
+    // Horizontal swipe with minimal vertical movement
+    if (Math.abs(dx) > 50 && Math.abs(dy) < 60 && dt < 800) {
+      const api = calendarRef.current?.getApi();
+      if (!api) return;
+      if (dx < 0) api.next(); else api.prev();
+      const startIso = api.view?.currentStart?.toISOString()?.slice(0,10);
+      const endIso = api.view?.currentEnd?.toISOString()?.slice(0,10);
+      if (startIso) dispatch(setStartDate({ startDate: startIso }));
+      dispatch(setCalendarState({ endDate: endIso }));
+      dispatch(fetchAppointments());
+    }
+  };
+
   return (
-    <Paper
-      sx={{
-        mt: 1.5,
-        p: 2,
-        pb: 0,
-        border: `1px solid`,
-        borderColor: `grey.200`,
-      }}
-    >
+    <Box sx={{ mt: 1.5 }}>
       <Stack
         direction={{
           xs: `column`,
@@ -223,38 +249,61 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
 
       <Box
         sx={{
-          marginLeft: -2,
-          marginRight: -2,
-
+          // Flush to edges visually
+          mx: {
+            xs: -2,
+            sm: -3,
+          },
+          px: {
+            xs: 0,
+            sm: 1,
+          },
           '& .fc': {
             fontSize: `0.9rem`,
+            // Remove yellow today background
+            '--fc-today-bg-color': `transparent`,
           },
           '& .fc .fc-timegrid-slot, & .fc .fc-timegrid-slot-label, & .fc .fc-timegrid-slot-lane': {
             height: `30px !important`,
             lineHeight: `30px !important`,
           },
+          // Modern look: lighter borders, subtle backgrounds
+          '& .fc-theme-standard .fc-scrollgrid': { border: `none` },
+          '& .fc-theme-standard td, & .fc-theme-standard th': { borderColor: `rgba(0,0,0,0.06)` },
+          '& .fc-col-header, & .fc-theme-standard th': { backgroundColor: `rgba(0,0,0,0.02)` },
+          '& .fc-timegrid-slot': { backgroundColor: `rgba(0,0,0,0.01)` },
+          '& .fc-timegrid-axis': {
+            backgroundColor: `transparent`,
+            borderRight: `1px solid rgba(0,0,0,0.08)`,
+          },
+          '& .fc-timegrid-slot-label-cushion': {
+            color: `rgba(0,0,0,0.68)`,
+            fontWeight: 500,
+          },
         }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <FullCalendar
           ref={calendarRef}
           plugins={[timeGridPlugin, interactionPlugin]}
+          locales={[deLocale]}
+          locale="de"
           initialView="timeGridDay"
           firstDay={1}
           views={{
             timeGridDay: {
-              dayHeaderFormat: {
-                weekday: `long`,
-                month: `short`,
-                day: `numeric`,
-              },
+              dayHeaderContent: (arg) => getDayHeaderText(arg.date, `long`),
             },
             timeGridThreeDay: {
               type: `timeGrid`,
               duration: { days: 3 },
+              dayHeaderContent: (arg) => getDayHeaderText(arg.date, `short`),
             },
             timeGridWeek: {
               // Align to week boundaries (Mon as firstDay)
               hiddenDays: calendar?.showSunday ? [] : [0],
+              dayHeaderContent: (arg) => getDayHeaderText(arg.date, `short`),
             },
           }}
           headerToolbar={false}
@@ -280,6 +329,8 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
               info.el.style.backgroundColor = color.bg;
               info.el.style.borderColor = color.border;
               info.el.style.color = color.text;
+              info.el.style.boxShadow = `0 2px 8px rgba(0,0,0,0.08)`;
+              info.el.style.borderRadius = `6px`;
             }
           }}
           eventClick={(clickInfo) => {
@@ -308,7 +359,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           }}
         />
       </Box>
-    </Paper>
+    </Box>
   );
 }
 
@@ -324,6 +375,23 @@ function getEmployeeColor(employeeId) {
     border,
     text,
   };
+}
+
+// Build German header text according to view:
+// - short: "Fr 31.10"
+// - long:  "Samstag 1.11"
+function getDayHeaderText(dateLike, weekdayLength = `short`) {
+  try {
+    const d = new Date(dateLike.valueOf ? dateLike.valueOf() : dateLike);
+    const weekday = new Intl.DateTimeFormat(`de-DE`, { weekday: weekdayLength }).format(d)
+      .replace(/\.$/, ``); // remove trailing dot from short forms (Fr., So.)
+    const day = String(d.getDate());
+    const month = String(d.getMonth() + 1).padStart(2, `0`);
+    // Use non-breaking space between weekday and date for nicer wrap
+    return `${weekday} ${day}.${month}`;
+  } catch {
+    return ``;
+  }
 }
 
 
