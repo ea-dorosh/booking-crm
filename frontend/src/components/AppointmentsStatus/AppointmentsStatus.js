@@ -23,15 +23,16 @@ export default function AppointmentsStatus() {
   const { status } = useSelector((state) => state.appointments);
 
   const handleStatusChange = (event, newStatus) => {
-    // Allow deselection by clicking the same button
-    const selectedStatus = newStatus === status ? null : newStatus;
+    // Ignore attempts to deselect the current value (not a checkbox)
+    if (newStatus === null) return;
 
-    dispatch(setStatus({
-      status: selectedStatus,
-    }));
+    const selectedStatus = newStatus === `all` ? null : newStatus;
 
+    dispatch(setStatus({ status: selectedStatus }));
     dispatch(fetchAppointments());
   };
+
+  const groupValue = status === null ? `all` : status;
 
   return (
     <Box>
@@ -50,7 +51,7 @@ export default function AppointmentsStatus() {
       </Typography>
 
       <ToggleButtonGroup
-        value={status}
+        value={groupValue}
         exclusive
         onChange={handleStatusChange}
         size="small"
@@ -107,7 +108,7 @@ export default function AppointmentsStatus() {
         </ToggleButton>
 
         <ToggleButton
-          value={null}
+          value={`all`}
           sx={{
             textTransform: `none`,
           }}
@@ -118,10 +119,7 @@ export default function AppointmentsStatus() {
             spacing={1}
           >
             <AllIcon fontSize="small" />
-
-            <Typography variant="body2">
-              All
-            </Typography>
+            <Typography variant="body2">All</Typography>
           </Stack>
         </ToggleButton>
       </ToggleButtonGroup>

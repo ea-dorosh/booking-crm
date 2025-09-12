@@ -297,6 +297,7 @@ function DayRow({
                 {formattedTime(existing.startTime)} - {formattedTime(existing.endTime)}<br />
                 {existing.blockStartTimeFirst && existing.blockEndTimeFirst && (
                   <Typography
+                    component="span"
                     variant="body2"
                     sx={{ color: `text.secondary` }}
                   >

@@ -15,7 +15,6 @@ import {
   deleteEmployeePeriodDay,
   deleteEmployeePeriod,
 } from '@/services/employees/employeesScheduleService.js';
-import { FEATURE_FLAGS } from '@/enums/enums.js';
 import {
   CustomRequestType,
   CustomResponseType,
@@ -27,7 +26,6 @@ import {
 } from '@/@types/utilTypes.js';
 import { ResultSetHeader } from 'mysql2';
 import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
-import { getEmployeeAvailability } from '@/services/employees/employeesService.js';
 import {
   DEFAULT_APPOINTMENT_SORT_FIELD,
   DEFAULT_SORT_DIRECTION,
@@ -166,105 +164,6 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
   }
 });
 
-router.get(`/:employeeId/availabilities`, async (req: CustomRequestType, res: CustomResponseType) => {
-  if (!req.dbPool) {
-    res.status(500).json({ message: `Database connection not initialized` });
-
-    return;
-  }
-
-  const employeeId = req.params.employeeId;
-
-  try {
-    const employeeAvailability = await getEmployeeAvailability(req.dbPool, [Number(employeeId)]);
-
-    res.json(employeeAvailability);
-
-    return;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error fetching EmployeeAvailability` });
-
-    return;
-  }
-});
-
-router.post(`/availability`, async (req: CustomRequestType, res: CustomResponseType) => {
-  if (!req.dbPool) {
-    res.status(500).json({ message: `Database connection not initialized` });
-
-    return;
-  }
-
-  const availability = req.body;
-
-  const upsertQuery = `
-  INSERT INTO EmployeeAvailability (employee_id, day_id, start_time, end_time, block_start_time_1, block_end_time_1)
-  VALUES ?
-  ON DUPLICATE KEY UPDATE
-    start_time = VALUES(start_time),
-    end_time = VALUES(end_time),
-    block_start_time_1 = VALUES(block_start_time_1),
-    block_end_time_1 = VALUES(block_end_time_1)
-`;
-
-  const values = [availability].map(({
-    employeeId, dayId, startTime, endTime, blockStartTimeFirst, blockEndTimeFirst,
-  }) => [
-    employeeId,
-    dayId,
-    startTime,
-    endTime,
-    blockStartTimeFirst,
-    blockEndTimeFirst,
-  ]);
-
-  try {
-    const [result] = await req.dbPool.query<ResultSetHeader>(upsertQuery, [values]);
-
-    res.json({
-      message: `Availability data inserted successfully`,
-      data: result,
-    });
-
-    return;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error updating EmployeeAvailability` });
-    return;
-  }
-});
-
-router.delete(`/:id/availability`, async (req: CustomRequestType, res: CustomResponseType) => {
-  if (!req.dbPool) {
-    res.status(500).json({ message: `Database connection not initialized` });
-
-    return;
-  }
-
-  const availabilityId = req.params.id;
-
-  const deleteQuery = `DELETE FROM EmployeeAvailability WHERE id = ?`;
-
-  try {
-    const [results] = await req.dbPool.query<ResultSetHeader>(deleteQuery, [availabilityId]);
-
-    if (results.affectedRows === 0) {
-      res.status(404).json({ error: `Availability not found` });
-
-      return;
-    } else {
-      res.status(200).json({ message: `Availability deleted successfully` });
-
-      return;
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: `Error deleting EmployeeAvailability` });
-
-    return;
-  }
-});
 
 // --- New schedule periods API ---
 router.post(`/:employeeId/schedule-periods`, async (req: CustomRequestType, res: CustomResponseType) => {
@@ -273,10 +172,6 @@ router.post(`/:employeeId/schedule-periods`, async (req: CustomRequestType, res:
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const employeeId = Number(req.params.employeeId);
   const {
@@ -302,10 +197,6 @@ router.put(`/schedule-periods/:periodId/dates`, async (req: CustomRequestType, r
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const periodId = Number(req.params.periodId);
   const {
@@ -329,10 +220,6 @@ router.get(`/:employeeId/schedule-periods/active`, async (req: CustomRequestType
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const employeeId = Number(req.params.employeeId);
   const date = String(req.query.date);
@@ -352,10 +239,6 @@ router.get(`/:employeeId/schedule-periods`, async (req: CustomRequestType, res: 
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const employeeId = Number(req.params.employeeId);
 
@@ -374,10 +257,6 @@ router.get(`/schedule-periods/:periodId/schedule`, async (req: CustomRequestType
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const periodId = Number(req.params.periodId);
 
@@ -396,10 +275,6 @@ router.put(`/schedule-periods/:periodId/repeat-cycle`, async (req: CustomRequest
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const periodId = Number(req.params.periodId);
   const { repeatCycle } = req.body as { repeatCycle: 1 | 2 | 3 | 4 };
@@ -419,10 +294,6 @@ router.get(`/:employeeId/working-times`, async (req: CustomRequestType, res: Cus
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const employeeId = Number(req.params.employeeId);
   const date = String(req.query.date);
@@ -442,10 +313,6 @@ router.post(`/schedule-periods/:periodId/week/:weekNumber/day/:dayId`, async (re
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const periodId = Number(req.params.periodId);
   const weekNumber = Number(req.params.weekNumber);
@@ -478,10 +345,6 @@ router.delete(`/schedule-periods/:periodId/week/:weekNumber/day/:dayId`, async (
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const periodId = Number(req.params.periodId);
   const weekNumber = Number(req.params.weekNumber);
@@ -502,10 +365,6 @@ router.delete(`/schedule-periods/:periodId`, async (req: CustomRequestType, res:
     return;
   }
 
-  if (!FEATURE_FLAGS.employeeSchedulePeriods) {
-    res.status(403).json({ message: `Feature disabled` });
-    return;
-  }
 
   const periodId = Number(req.params.periodId);
 

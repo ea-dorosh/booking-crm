@@ -51,15 +51,6 @@ const updateEmployeeStatus = async (employeeId, status) => {
   }
 };
 
-const getEmployeeAvailability = async (id) => {
-  try {
-    const response = await axios.get(`/employees/${id}/availabilities`);
-
-    return response.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
-};
 
 const getEmployeeAppointments = async (id, filters = {}) => {
   try {
@@ -89,25 +80,7 @@ const getEmployeeAppointments = async (id, filters = {}) => {
   }
 };
 
-const applyEmployeeAvailability = async (availability) => {
-  try {
-    const response = await axios.post(`/employees/availability`, availability);
 
-    return response.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
-};
-
-const deleteEmployeeAvailability = async (id) => {
-  try {
-    const response = await axios.delete(`/employees/${id}/availability`);
-
-    return response.data;
-  } catch (error) {
-    handleAxiosError(error);
-  }
-};
 
 // New schedule periods API
 const createEmployeeSchedulePeriod = async (employeeId, body) => {
@@ -192,24 +165,20 @@ const deleteEmployeeSchedulePeriod = async (periodId) => {
 };
 
 const adminService = {
-  applyEmployeeAvailability,
   createEmployee,
-  deleteEmployeeAvailability,
-  getEmployeeAvailability,
-  getEmployeeAppointments,
-  // schedule periods
   createEmployeeSchedulePeriod,
-  updateEmployeeSchedulePeriodDates,
-  getEmployeeActiveSchedulePeriod,
-  getEmployeeSchedulePeriods,
-  upsertEmployeePeriodDay,
   deleteEmployeePeriodDay,
-  getPeriodScheduleRows,
-  updateRepeatCycle,
   deleteEmployeeSchedulePeriod,
+  getEmployeeActiveSchedulePeriod,
+  getEmployeeAppointments,
   getEmployees,
+  getEmployeeSchedulePeriods,
+  getPeriodScheduleRows,
   updateEmployee,
+  updateEmployeeSchedulePeriodDates,
   updateEmployeeStatus,
+  updateRepeatCycle,
+  upsertEmployeePeriodDay,
 };
 
 export default adminService;

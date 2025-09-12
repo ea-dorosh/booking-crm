@@ -52,7 +52,4 @@ export enum EmployeeStatusEnum {
   Disabled = `disabled`,
 }
 
-// Feature flags (temporary hardcoded switches)
-export const FEATURE_FLAGS = {
-  employeeSchedulePeriods: true,
-};
+// Feature flags removed: schedule periods are always enabled

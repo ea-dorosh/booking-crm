@@ -17,9 +17,7 @@ import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { getAppointmentsForCalendar } from '@/services/appointment/appointmentService.js';
 import { getGoogleCalendarEventsForSpecificDates } from '@/services/googleCalendar/googleCalendarService.js';
-import { getGroupEmployeeAvailability } from '@/services/employees/employeesService.js';
-// import { getEmployeeWorkingTimes } from '@/services/employees/employeesScheduleService.js';
-import { FEATURE_FLAGS } from '@/enums/enums.js';
+// Legacy availability removed
 import { getService } from '@/services/service/serviceService.js';
 import { getServiceDuration } from '@/utils/timeUtils.js';
 import { Pool } from 'mysql2/promise';
@@ -56,19 +54,8 @@ const getGroupedTimeSlots = async (
     const service = await getService(dbPool, serviceId);
     const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
 
-    let periodWithDaysAndEmployeeAvailability;
-
-    if (FEATURE_FLAGS.employeeSchedulePeriods) {
-      const groupedByDay = await buildGroupedAvailabilityForWeek(dbPool, paramDate, employeeIds);
-      periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedByDay);
-    } else {
-      const groupedEmployeeAvailability = await getGroupEmployeeAvailability(dbPool, employeeIds);
-      console.log(`groupedEmployeeAvailability: `, JSON.stringify(groupedEmployeeAvailability, null, 2));
-      periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(
-        paramDate,
-        groupedEmployeeAvailability,
-      );
-    }
+    const groupedByDay = await buildGroupedAvailabilityForWeek(dbPool, paramDate, employeeIds);
+    const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedByDay);
 
     console.log(`periodWithDaysAndEmployeeAvailability: `, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 2));
 

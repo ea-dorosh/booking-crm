@@ -2,9 +2,6 @@ import { Pool, RowDataPacket } from 'mysql2/promise';
 import {
   EmployeeDetailRowType,
   EmployeeDetailDataType,
-  EmployeeAvailabilityRow,
-  EmployeeAvailabilityDataType,
-  GroupedAvailabilityDayType,
   EmployeeValidationErrors,
   UpdateEmployeeResult,
 } from '@/@types/employeesTypes.js';
@@ -157,68 +154,7 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, {
   return { isEmployeeAvailable: !(hasDbConflict || hasGoogleCalendarConflict) };
 }
 
-async function getEmployeeAvailability(dbPool: Pool, employeeIds: number[]): Promise<EmployeeAvailabilityDataType[]> {
-  const sql = `
-    SELECT *
-    FROM EmployeeAvailability
-    WHERE employee_id IN (?)
-  `;
-
-  const [results] = await dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeIds]);
-
-
-  const data = results.map((row) => ({
-    id: row.id,
-    employeeId: row.employee_id,
-    dayId: row.day_id,
-    startTime: row.start_time,
-    endTime: row.end_time,
-    blockStartTimeFirst: row.block_start_time_1,
-    blockEndTimeFirst: row.block_end_time_1,
-  }));
-
-  return data;
-}
-
-async function getGroupEmployeeAvailability(dbPool: Pool, employeeIds: number[]): Promise<GroupedAvailabilityDayType[]> {
-  const sql = `
-  SELECT *
-  FROM EmployeeAvailability
-  WHERE employee_id IN (?)
-  ORDER BY day_id ASC, start_time ASC
-`;
-
-  const [results] = await dbPool.query<EmployeeAvailabilityRow[]>(sql, [employeeIds]);
-
-  if (!results.length) {
-    return [];
-  }
-
-  const groupedByDay = results.reduce<Record<number, GroupedAvailabilityDayType>>((acc, row) => {
-    const {
-      employee_id, day_id, start_time, end_time, block_start_time_1, block_end_time_1,
-    } = row;
-
-    if (!acc[day_id]) {
-      acc[day_id] = {
-        dayId: day_id,
-        employees: [],
-      };
-    }
-
-    acc[day_id].employees.push({
-      id: employee_id,
-      startTime: start_time,
-      endTime: end_time,
-      blockStartTimeFirst: block_start_time_1,
-      blockEndTimeFirst: block_end_time_1,
-    });
-
-    return acc;
-  }, {});
-
-  return Object.values(groupedByDay).sort((a, b) => a.dayId - b.dayId);
-}
+// Legacy EmployeeAvailability functions removed
 
 async function updateEmployeeStatus(dbPool: Pool, employeeId: number, status: string): Promise<UpdateEmployeeResult> {
   // basic validation for status
@@ -255,8 +191,6 @@ async function updateEmployeeStatus(dbPool: Pool, employeeId: number, status: st
 export {
   getEmployees,
   getEmployee,
-  getEmployeeAvailability,
-  getGroupEmployeeAvailability,
   checkEmployeeTimeNotOverlap,
   updateEmployeeStatus,
 };
