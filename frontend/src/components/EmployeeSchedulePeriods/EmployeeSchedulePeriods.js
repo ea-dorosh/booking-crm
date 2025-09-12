@@ -551,11 +551,20 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
   // NOTE: commits are triggered inline in onChange/actionBar handlers now
 
   const onChangeRepeatCycle = async (value) => {
-    await dispatch(updateRepeatCycleThunk({
-      periodId: period.id,
-      repeatCycle: Number(value),
-    }));
-    dispatch(fetchEmployeeSchedulePeriods(employeeId));
+    try {
+      await dispatch(updateRepeatCycleThunk({
+        periodId: period.id,
+        repeatCycle: Number(value),
+      })).unwrap();
+      showToast(`success`, `Repeat cycle updated`);
+      dispatch(fetchEmployeeSchedulePeriods(employeeId));
+    } catch (e) {
+      const raw = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
+      const friendly = /Existing week numbers exceed new repeat_cycle/i.test(raw)
+        ? `Cannot reduce repeat cycle because some scheduled weeks exceed the new cycle. Remove or move those weeks first, then try again.`
+        : raw;
+      showToast(`error`, friendly);
+    }
   };
 
   const onDeletePeriod = async () => {
