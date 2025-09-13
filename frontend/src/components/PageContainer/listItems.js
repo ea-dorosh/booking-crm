@@ -1,6 +1,7 @@
 import {
   HomeRounded,
   CalendarMonthRounded,
+  ScheduleRounded,
   MiscellaneousServicesRounded,
   GroupsRounded,
   PersonSearchRounded,
@@ -36,6 +37,22 @@ export const MainListItems = ({ location }) => (
         </ListItemIcon>
         <ListItemText
           primary="Dashboard"
+        />
+      </ListItemButton>
+    </Link>
+
+    <Link
+      to={`/team-schedule`}
+      style={{ textDecoration: `none` }}
+    >
+      <ListItemButton
+        selected={isActiveRoute(location?.pathname, `/team-schedule`)}
+      >
+        <ListItemIcon>
+          <ScheduleRounded />
+        </ListItemIcon>
+        <ListItemText
+          primary="Team Schedule"
         />
       </ListItemButton>
     </Link>

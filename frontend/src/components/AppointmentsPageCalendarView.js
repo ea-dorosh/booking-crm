@@ -367,9 +367,10 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
 function getEmployeeColor(employeeId) {
   if (!employeeId && employeeId !== 0) return null;
   const hue = (Number(employeeId) * 47) % 360; // spread hues
-  const bg = `hsl(${hue} 85% 55%)`;
-  const border = `hsl(${hue} 85% 45%)`;
-  const text = `#ffffff`;
+  // Softer pastel palette to reduce visual aggressiveness
+  const bg = `hsl(${hue} 70% 70%)`;
+  const border = `hsl(${hue} 70% 70%)`;
+  const text = `#2b2b2b`;
   return {
     bg,
     border,

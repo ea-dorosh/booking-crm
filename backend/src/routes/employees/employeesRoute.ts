@@ -31,6 +31,7 @@ import {
   DEFAULT_SORT_DIRECTION,
 } from '@/enums/enums.js';
 import { getAppointments } from '@/services/appointment/appointmentService.js';
+import { getEmployeesWorkingTimesRange } from '@/services/employees/employeesSchedulePlannerService.js';
 
 const router = express.Router();
 
@@ -61,6 +62,55 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     res.status(500).json({ error: `Error fetching employees` });
 
     return;
+  }
+});
+
+// Working times for a date range (planning calendar)
+router.get(`/working-times-range`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const {
+    startDate,
+    endDate,
+    employeeIds,
+  } = req.query as {
+    startDate?: string;
+    endDate?: string;
+    employeeIds?: string;
+  };
+
+  if (!startDate || !endDate) {
+    res.status(400).json({ message: `startDate and endDate are required (YYYY-MM-DD)` });
+    return;
+  }
+
+  try {
+    // Resolve employee ids: provided or all active
+    let employeeIdList: number[] = [];
+    if (employeeIds) {
+      employeeIdList = String(employeeIds)
+        .split(`,`)
+        .map(value => Number(value))
+        .filter(num => Number.isFinite(num));
+    } else {
+      const activeEmployees = await getEmployees(req.dbPool, [ `active` ]);
+      employeeIdList = activeEmployees.map(e => e.employeeId);
+    }
+
+    const days = await getEmployeesWorkingTimesRange(
+      req.dbPool,
+      employeeIdList,
+      startDate as any,
+      endDate as any,
+    );
+
+    res.json(days);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Failed to load working times` });
   }
 });
 

@@ -8,6 +8,7 @@ import CustomersPage from '@/pages/CustomersPage/CustomersPage';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 import EmployeeDetailPage from '@/pages/EmployeeDetailPage/EmployeeDetailPage';
 import EmployeesPage from '@/pages/EmployeesPage/EmployeesPage';
+import EmployeesScheduleCalendarPage from '@/pages/EmployeesScheduleCalendarPage/EmployeesScheduleCalendarPage.js';
 import ErrorPage from '@/pages/ErrorPage/ErrorPage';
 import InvoiceDetailPage from '@/pages/InvoiceDetailPage/InvoiceDetailPage';
 import InvoicesPage from '@/pages/InvoicesPage/InvoicesPage';
@@ -101,6 +102,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <EmployeesPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: `/team-schedule`,
+    element: (
+      <ProtectedRoute>
+        <EmployeesScheduleCalendarPage />
       </ProtectedRoute>
     ),
   },

@@ -164,6 +164,19 @@ const deleteEmployeeSchedulePeriod = async (periodId) => {
   }
 };
 
+const getEmployeesWorkingTimesRange = async (startDate, endDate, employeeIds = []) => {
+  try {
+    const params = new URLSearchParams();
+    params.append(`startDate`, startDate);
+    params.append(`endDate`, endDate);
+    if (employeeIds.length) params.append(`employeeIds`, employeeIds.join(`,`));
+    const response = await axios.get(`/employees/working-times-range?${params.toString()}`);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const adminService = {
   createEmployee,
   createEmployeeSchedulePeriod,
@@ -179,6 +192,7 @@ const adminService = {
   updateEmployeeStatus,
   updateRepeatCycle,
   upsertEmployeePeriodDay,
+  getEmployeesWorkingTimesRange,
 };
 
 export default adminService;
