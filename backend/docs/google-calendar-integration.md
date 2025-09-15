@@ -29,18 +29,28 @@ Key features include:
 1. A Google account with access to [Google Cloud Console](https://console.cloud.google.com/)
 2. Google Calendar API enabled for your project
 
-### Development Environment Setup (Desktop Application)
+### Development Environment Setup (Web Application — Recommended)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Select or create a project
-3. Navigate to "APIs & Services" > "Dashboard"
-4. Click "ENABLE APIS AND SERVICES", search for "Google Calendar API" and enable it
-5. Go to "APIs & Services" > "Credentials"
-6. Click "CREATE CREDENTIALS" > "OAuth client ID"
-7. Select "Desktop app" as application type
-8. Give it a name (e.g., "Booking CRM Dev")
-9. Click "CREATE" to generate Client ID and Client Secret
-10. Save the Client ID and Client Secret for development environment (.env.development)
+3. Enable APIs (UI) in "APIs & Services" > "Library": enable "Google Calendar API" and "People API". Or via CLI:
+
+   ```bash
+   gcloud config set project <PROJECT_ID>
+   gcloud services enable calendar-json.googleapis.com people.googleapis.com
+   ```
+4. Go to "APIs & Services" > "Credentials"
+5. If you already have a Web Application OAuth client for production, you can reuse it for dev by adding localhost URIs. Otherwise, click "CREATE CREDENTIALS" > "OAuth client ID" and select "Web application"
+6. Add Authorized JavaScript origins: `http://localhost:3000`
+7. Add Authorized redirect URIs: `http://localhost:3000/google-callback`
+8. Save the Client ID and Client Secret (use them in `.env.development`)
+
+### Alternative: Development Setup (Desktop Application — Native)
+
+1. In "APIs & Services" > "Credentials" click "CREATE CREDENTIALS" > "OAuth client ID"
+2. Select "Desktop app", name it (e.g., "Booking CRM Dev Desktop") and create
+3. Save the Client ID and Secret and set `GOOGLE_OAUTH_CLIENT_TYPE=desktop` in `.env.development`
+4. Внимание: Desktop flow рассчитан на native-приложения; для SPA/веб проще и стабильнее использовать Web client
 
 ### Production Environment Setup (Web Application)
 
@@ -99,16 +109,25 @@ Key features include:
 
 ### Development (.env.development)
 
+```bash
+GOOGLE_CLIENT_ID=<web_application_client_id>
+GOOGLE_CLIENT_SECRET=<web_application_client_secret>
+GOOGLE_REDIRECT_URI=http://localhost:3000/google-callback
+NODE_ENV=development
+GOOGLE_OAUTH_CLIENT_TYPE=web
 ```
+
+Alternative (Desktop in dev — not recommended for SPA):
+```bash
 GOOGLE_CLIENT_ID=<desktop_application_client_id>
 GOOGLE_CLIENT_SECRET=<desktop_application_client_secret>
 GOOGLE_REDIRECT_URI=http://localhost:3000
 NODE_ENV=development
+GOOGLE_OAUTH_CLIENT_TYPE=desktop
 ```
-
 ### Production (.env.production)
 
-```
+```bash
 GOOGLE_CLIENT_ID=<web_application_client_id>
 GOOGLE_CLIENT_SECRET=<web_application_client_secret>
 GOOGLE_REDIRECT_URI=https://domen.org/google-callback
@@ -187,13 +206,16 @@ CREATE TABLE EmployeeGoogleCalendar (
 
 ### Development vs Production Differences
 
-In `googleCalendarRoute.ts`, device parameters are added only in development environment:
+In `googleCalendarRoute.ts`, device parameters are added only for Desktop client in development (not for Web client):
+
 ```typescript
-// Add device params only in development environment
-if (process.env.NODE_ENV !== 'production') {
-  const deviceParams = {
+// Add device params only when explicitly using desktop client in development
+const oauthClientType = (process.env.GOOGLE_OAUTH_CLIENT_TYPE || 'web').toLowerCase();
+const isDesktopClient = oauthClientType === 'desktop';
+if (process.env.NODE_ENV !== 'production' && isDesktopClient) {
+  const deviceParams: Record<string, string> = {
     device_id: `booking_crm_client_${employeeId}_${Date.now()}`,
-    device_name: 'Booking CRM Client'
+    device_name: 'Booking CRM Client',
   };
   finalAuthUrl = `${authUrl}&${new URLSearchParams(deviceParams).toString()}`;
 }
@@ -236,6 +258,7 @@ This component handles:
    ```
 
 2. **Handling OAuth callback** (in OAuthCallbackPage.js):
+
    ```javascript
    const handleOAuthCallback = () => {
      const urlParams = new URLSearchParams(window.location.search);
@@ -257,6 +280,7 @@ This component handles:
    ```
 
 3. **Processing authorization code**:
+
    ```javascript
    useEffect(() => {
      const oauthCode = localStorage.getItem('google_oauth_code');
@@ -267,10 +291,11 @@ This component handles:
        localStorage.removeItem('google_oauth_code');
        localStorage.removeItem('google_calendar_id');
      }
-   }, []);
+   }, [employeeId, calendarId]);
    ```
 
 4. **Sending code to backend**:
+
    ```javascript
    const handleAuthCallback = async (code, idToUse) => {
      await axios.post('/google-calendar/auth-callback', {
@@ -316,11 +341,10 @@ The complete OAuth 2.0 flow in the application:
 
 ## Development vs Production
 
-### Development Environment
-- Uses **Desktop Application** OAuth client type
+### Development Environment (Recommended)
+- Uses **Web Application** OAuth client type
 - Redirect URI is `http://localhost:3000/google-callback`
-- Can use device parameters in authorization URL
-- Suitable for local testing
+- Do NOT use device parameters (they are only for native/desktop)
 
 ### Production Environment
 - Uses **Web Application** OAuth client type
@@ -342,11 +366,15 @@ The complete OAuth 2.0 flow in the application:
 
 3. **invalid_request / Device info can be set only for native apps**
    - **Cause**: Using device parameters with Web Application client
-   - **Solution**: Ensure NODE_ENV is set to 'production' in production environment
+   - **Solution**: Use Web client in dev/prod and set `GOOGLE_OAUTH_CLIENT_TYPE=web` so device params are not appended
 
 4. **No refresh token received**
    - **Cause**: Missing access_type=offline or prompt=consent in authUrl
    - **Solution**: Verify getAuthUrl function includes these parameters
+
+5. **SERVICE_CONFIG_NOT_FOUND_OR_PERMISSION_DENIED when enabling APIs**
+   - **Cause**: Wrong service name or missing permissions
+   - **Solution**: Use correct service IDs: `calendar-json.googleapis.com` and `people.googleapis.com`; ensure your account has permissions (e.g., Owner)
 
 ### Debugging Tips
 

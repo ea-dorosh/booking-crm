@@ -33,7 +33,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
     }
   }, [employeeId]);
 
-  // Effect to check for OAuth code in localStorage on load
+  // Effect to check for OAuth code in localStorage when dependencies are ready
   useEffect(() => {
     const oauthCode = localStorage.getItem(`google_oauth_code`);
     const savedCalendarId = localStorage.getItem(`google_calendar_id`) || calendarId;
@@ -43,7 +43,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       localStorage.removeItem(`google_oauth_code`);
       localStorage.removeItem(`google_calendar_id`);
     }
-  }, []);  // Only runs on component mount
+  }, [employeeId, calendarId]);
 
   const fetchStatus = async () => {
     try {

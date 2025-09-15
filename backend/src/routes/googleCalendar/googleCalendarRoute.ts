@@ -36,8 +36,12 @@ router.get(`/auth-url`, (req: CustomRequestType, res: CustomResponseType) => {
 
     let finalAuthUrl = authUrl;
 
-    // Add device params only in development environment
-    if (process.env.NODE_ENV !== `production`) {
+    // Add device params only when explicitly using desktop client in development
+    const oauthClientType = (process.env.GOOGLE_OAUTH_CLIENT_TYPE || `web`).toLowerCase();
+    const isDesktopClient = oauthClientType === `desktop`;
+
+    // For desktop client only (native apps). Do NOT append for web client.
+    if (process.env.NODE_ENV !== `production` && isDesktopClient) {
       const deviceParams: Record<string, string> = {
         device_id: `booking_crm_client_${employeeId}_${Date.now()}`,
         device_name: `Booking CRM Client`,
@@ -64,7 +68,7 @@ router.post(`/auth-callback`, async (req: CustomRequestType, res: CustomResponse
   }
 
   const {
-    code, employeeId, calendarId, 
+    code, employeeId, calendarId,
   } = req.body;
   console.log(`Received auth callback with params:`, {
     codeLength: code?.length,
@@ -74,7 +78,7 @@ router.post(`/auth-callback`, async (req: CustomRequestType, res: CustomResponse
 
   if (!code || !employeeId || !calendarId) {
     console.error(`Missing required parameters:`, {
-      code: !!code, employeeId: !!employeeId, calendarId: !!calendarId, 
+      code: !!code, employeeId: !!employeeId, calendarId: !!calendarId,
     });
     res.status(400).json({ error: `Missing required parameters` });
     return;

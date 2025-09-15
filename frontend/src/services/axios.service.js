@@ -1,8 +1,13 @@
 import axios from 'axios';
 import ERRORS from '@/constants/errors';
 
+const normalizeBaseUrl = (url) => {
+  if (!url) return `/api/protected`;
+  return url.endsWith(`/`) ? `${url}api/protected` : `${url}/api/protected`;
+};
+
 const axiosInstance = axios.create({
-  baseURL: `${process.env.REACT_APP_API_URL}api/protected`,
+  baseURL: normalizeBaseUrl(process.env.REACT_APP_API_URL),
 });
 
 axiosInstance.interceptors.request.use(
