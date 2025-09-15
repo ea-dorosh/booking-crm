@@ -306,12 +306,13 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             </Typography>
 
             <Stack
-              direction="row"
+              direction="column"
               spacing={2}
             >
               <Button
                 variant="outlined"
                 color="error"
+                size="small"
                 onClick={removeIntegration}
                 disabled={loading}
                 startIcon={<Google />}
@@ -322,6 +323,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
               <Button
                 variant="outlined"
                 color="primary"
+                size="small"
                 onClick={syncMissingAppointments}
                 disabled={syncLoading}
                 startIcon={<Sync />}
