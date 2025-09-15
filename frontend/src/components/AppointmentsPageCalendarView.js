@@ -249,7 +249,13 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
 
       <Box
         sx={{
-          // Flush to edges visually
+          height: {
+            xs: `calc(100vh - 216px)`,
+          },
+          overflowY: `auto`,
+          WebkitOverflowScrolling: `touch`,
+          overscrollBehavior: `contain`,
+          touchAction: `pan-y`,
           mx: {
             xs: -2,
             sm: -3,
@@ -264,8 +270,8 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
             '--fc-today-bg-color': `transparent`,
           },
           '& .fc .fc-timegrid-slot, & .fc .fc-timegrid-slot-label, & .fc .fc-timegrid-slot-lane': {
-            height: `30px !important`,
-            lineHeight: `30px !important`,
+            height: `28px !important`,
+            lineHeight: `28px !important`,
           },
           // Modern look: lighter borders, subtle backgrounds
           '& .fc-theme-standard .fc-scrollgrid': { border: `none` },
@@ -279,6 +285,25 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           '& .fc-timegrid-slot-label-cushion': {
             color: `rgba(0,0,0,0.68)`,
             fontWeight: 500,
+          },
+          '& .fc .fc-timegrid-event .fc-event-main-frame': {
+            display: `flex`,
+            flexDirection: `column`,
+            minWidth: 0,
+          },
+          '& .fc .fc-timegrid-event .fc-event-main, & .fc .fc-timegrid-event .fc-event-title': {
+            whiteSpace: `normal`,
+            overflowWrap: `anywhere`,
+            wordBreak: `break-word`,
+            hyphens: `auto`,
+            lineHeight: 1.2,
+          },
+          '& .fc .fc-timegrid-event .fc-event-main, & .fc .fc-timegrid-event .fc-event-time': {
+            whiteSpace: `normal`,
+            overflowWrap: `anywhere`,
+            wordBreak: `break-word`,
+            hyphens: `auto`,
+            lineHeight: 1.2,
           },
         }}
         onTouchStart={handleTouchStart}

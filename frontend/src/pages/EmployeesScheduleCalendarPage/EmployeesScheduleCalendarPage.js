@@ -60,6 +60,7 @@ export default function EmployeesScheduleCalendarPage() {
     services: new Set(),
   });
   const [lastWorkingData, setLastWorkingData] = useState([]);
+  const [employeeNameMap, setEmployeeNameMap] = useState(new Map());
 
   const getRange = () => {
     const api = calendarRef.current?.getApi();
@@ -92,6 +93,15 @@ export default function EmployeesScheduleCalendarPage() {
     }
   };
 
+  const getEmployeeName = (employeeId) => {
+    const entry = employeeNameMap.get(Number(employeeId));
+    if (!entry) return `Employee ${employeeId}`;
+    const first = entry.firstName || ``;
+    const last = entry.lastName || ``;
+    const full = `${first} ${last}`.trim();
+    return full || `Employee ${employeeId}`;
+  };
+
   const intersects = (setA, setB) => {
     if (!setA || !setB) return false;
     for (const v of setA) { if (setB.has(v)) return true; }
@@ -121,7 +131,7 @@ export default function EmployeesScheduleCalendarPage() {
         .filter((emp) => doesEmployeePassFilters(emp.employeeId))
         .map((emp) => ({
           id: `${dayStart}-${emp.employeeId}`,
-          title: `Employee ${emp.employeeId}`,
+          title: getEmployeeName(emp.employeeId),
           start: `${dayStart}T${emp.startTime}`,
           end: `${dayStart}T${emp.endTime}`,
           extendedProps: {
@@ -134,7 +144,7 @@ export default function EmployeesScheduleCalendarPage() {
   useEffect(() => {
     if (!lastWorkingData || !Array.isArray(lastWorkingData)) return;
     setEvents(buildEventsFromData(lastWorkingData));
-  }, [selectedFilters, lastWorkingData]);
+  }, [selectedFilters, lastWorkingData, employeeNameMap]);
 
   useEffect(() => {
     // Load services meta once for filters/mapping
@@ -178,7 +188,24 @@ export default function EmployeesScheduleCalendarPage() {
         console.error(`Failed to load services meta`, e);
       }
     };
+    const loadEmployees = async () => {
+      try {
+        const employees = await adminService.getEmployees([`active`]);
+        const m = new Map();
+        for (const emp of employees || []) {
+          m.set(Number(emp.employeeId), {
+            firstName: emp.firstName,
+            lastName: emp.lastName,
+          });
+        }
+        setEmployeeNameMap(m);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to load employees`, e);
+      }
+    };
     loadMeta();
+    loadEmployees();
   }, []);
 
   const toggleIdInSet = (set, id) => {
@@ -216,49 +243,10 @@ export default function EmployeesScheduleCalendarPage() {
     });
   };
 
-  useEffect(() => {
-    const api = calendarRef.current?.getApi();
-    if (api) api.changeView(view);
-    fetchWorkingTimes();
-  }, [view]);
-
-  // Swipe for prev/next
-  const touchStart = useRef({
-    x: 0,
-    y: 0,
-    t: 0,
-  });
-  const onTouchStart = (e) => {
-    const t = e.touches?.[0];
-    if (!t) return;
-    touchStart.current = {
-      x: t.clientX,
-      y: t.clientY,
-      t: Date.now(),
-    };
-  };
-  const onTouchEnd = (ev) => {
-    const t = ev?.changedTouches?.[0];
-    if (!t) return;
-    const dx = t.clientX - touchStart.current.x;
-    const dy = t.clientY - touchStart.current.y;
-    const dt = Date.now() - touchStart.current.t;
-    if (Math.abs(dx) > 50 && Math.abs(dy) < 60 && dt < 800) {
-      const api = calendarRef.current?.getApi();
-      if (!api) return;
-      if (dx < 0) api.next(); else api.prev();
-    }
-  };
-
-  const handleViewChange = (_e, newView) => {
-    if (!newView) return;
-    setView(newView);
-  };
-
   const openEmployeeDrawer = async (employeeId) => {
     setDrawerEmployee({
       id: employeeId,
-      name: `Employee ${employeeId}`,
+      name: getEmployeeName(employeeId),
     });
     setEmployeeCategoryTree([]);
     setDrawerLoading(true);
@@ -316,18 +304,51 @@ export default function EmployeesScheduleCalendarPage() {
     }
   };
 
+  useEffect(() => {
+    const api = calendarRef.current?.getApi();
+    if (api) api.changeView(view);
+    fetchWorkingTimes();
+  }, [view]);
+
+  // Swipe for prev/next
+  const touchStart = useRef({
+    x: 0,
+    y: 0,
+    t: 0,
+  });
+  const onTouchStart = (e) => {
+    const t = e.touches?.[0];
+    if (!t) return;
+    touchStart.current = {
+      x: t.clientX,
+      y: t.clientY,
+      t: Date.now(),
+    };
+  };
+  const onTouchEnd = (ev) => {
+    const t = ev?.changedTouches?.[0];
+    if (!t) return;
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    const dt = Date.now() - touchStart.current.t;
+    if (Math.abs(dx) > 50 && Math.abs(dy) < 60 && dt < 800) {
+      const api = calendarRef.current?.getApi();
+      if (!api) return;
+      if (dx < 0) api.next(); else api.prev();
+    }
+  };
+
   return (
     <PageContainer
       pageTitle="Team Schedule"
       hideSideNav
     >
-      <Stack
-        direction={{
-          xs: `row`,
-          sm: `row`,
+      <Box
+        sx={{
+          display: `flex`,
+          alignItems: `center`,
+          mb: 2,
         }}
-        spacing={2}
-        sx={{ mb: 2 }}
       >
         <Button
           size="small"
@@ -345,26 +366,34 @@ export default function EmployeesScheduleCalendarPage() {
             padding: `4px 12px`,
             borderRadius: `4px`,
             lineHeight: 1.2,
-            mr: `auto`,
           }}
         >
           Today
         </Button>
 
-        <IconButton
-          size="small"
-          onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+        <Box
+          sx={{
+            display: `flex`,
+            alignItems: `center`,
+            ml: `auto`,
+            gap: 1,
+          }}
         >
-          <SettingsIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+          >
+            <SettingsIcon fontSize="small" />
+          </IconButton>
 
-        <IconButton
-          size="small"
-          onClick={(e) => setFilterAnchorEl(e.currentTarget)}
-        >
-          <FilterListIcon fontSize="small" />
-        </IconButton>
-      </Stack>
+          <IconButton
+            size="small"
+            onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+          >
+            <FilterListIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Box>
 
       <Stack
         direction="row"
@@ -384,7 +413,7 @@ export default function EmployeesScheduleCalendarPage() {
         <ToggleButtonGroup
           value={view}
           exclusive
-          onChange={handleViewChange}
+          onChange={(_e, newView) => { if (newView) setView(newView); }}
           size="small"
         >
           <ToggleButton value="timeGridDay">1 day</ToggleButton>
@@ -591,8 +620,7 @@ export default function EmployeesScheduleCalendarPage() {
       <Box
         sx={{
           height: {
-            xs: `calc(100vh - 220px)`,
-            sm: `calc(100vh - 200px)`,
+            xs: `calc(100vh - 216px)`,
           },
           overflowY: `auto`,
           WebkitOverflowScrolling: `touch`,
@@ -611,8 +639,8 @@ export default function EmployeesScheduleCalendarPage() {
             '--fc-today-bg-color': `transparent`,
           },
           '& .fc .fc-timegrid-slot, & .fc .fc-timegrid-slot-label, & .fc .fc-timegrid-slot-lane': {
-            height: `30px !important`,
-            lineHeight: `30px !important`,
+            height: `28px !important`,
+            lineHeight: `28px !important`,
           },
           '& .fc-theme-standard .fc-scrollgrid': { border: `none` },
           '& .fc-theme-standard td, & .fc-theme-standard th': { borderColor: `rgba(0,0,0,0.06)` },
@@ -621,6 +649,26 @@ export default function EmployeesScheduleCalendarPage() {
           '& .fc-timegrid-slot-label-cushion': {
             color: `rgba(0,0,0,0.68)`,
             fontWeight: 500,
+          },
+          // Enable wrapping and hyphenation for event titles in narrow columns
+          '& .fc .fc-timegrid-event .fc-event-main-frame': {
+            display: `flex`,
+            flexDirection: `column`,
+            minWidth: 0,
+          },
+          '& .fc .fc-timegrid-event .fc-event-main, & .fc .fc-timegrid-event .fc-event-title': {
+            whiteSpace: `normal`,
+            overflowWrap: `anywhere`,
+            wordBreak: `break-word`,
+            hyphens: `auto`,
+            lineHeight: 1.2,
+          },
+          '& .fc .fc-timegrid-event .fc-event-main, & .fc .fc-timegrid-event .fc-event-time': {
+            whiteSpace: `normal`,
+            overflowWrap: `anywhere`,
+            wordBreak: `break-word`,
+            hyphens: `auto`,
+            lineHeight: 1.2,
           },
         }}
         onTouchStart={onTouchStart}
