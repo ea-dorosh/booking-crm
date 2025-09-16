@@ -3,7 +3,7 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { saveQrScan, QrScanData } from '@/services/tracking/trackingService.js';
+import { saveQrScan, QrScanData, saveLinkClick } from '@/services/tracking/trackingService.js';
 
 function getClientIpFromRequest(req: express.Request): string | undefined {
   // Common proxy/CDN headers precedence
@@ -87,3 +87,34 @@ router.post(`/qr-scan`, async (request: CustomRequestType, response: CustomRespo
 });
 
 export default router;
+/** Track vanity link clicks (e.g., instagram) */
+router.post(`/link-click`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    const clientIp = getClientIpFromRequest(request);
+
+    const result = await saveLinkClick(request.dbPool, {
+      userAgent: request.headers[`user-agent`] || undefined,
+      ipAddress: clientIp,
+      referrer: request.headers.referer || undefined,
+      channel: request.body.channel || `unknown`,
+      target: request.body.target || `/booking`,
+      clickedAt: request.body.linkedAt,
+    });
+
+    response.json({
+      message: `Link click tracked successfully`,
+      data: {
+        id: result.id,
+        clickedAt: result.clicked_at,
+      },
+    });
+  } catch (error) {
+    console.error(`Error tracking link click:`, error);
+    response.status(500).json({ error: `Error tracking link click` });
+  }
+});

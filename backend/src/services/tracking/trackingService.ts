@@ -36,6 +36,60 @@ export interface QrScanStats {
   }>;
 }
 
+export interface LinkClickData {
+  userAgent?: string;
+  ipAddress?: string;
+  referrer?: string;
+  channel: string; // e.g., instagram-bio, instagram-stories
+  target: string; // e.g., /booking
+  clickedAt?: string; // ISO date string
+}
+
+export interface LinkClickRecord {
+  id: number;
+  clicked_at: Date;
+  user_agent: string | null;
+  ip_address: string | null;
+  referrer: string | null;
+  channel: string;
+  target: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export async function saveLinkClick(
+  dbPool: Pool,
+  clickData: LinkClickData,
+): Promise<LinkClickRecord> {
+  const [result] = await dbPool.execute(
+    `INSERT INTO TrackingLinkClicks (
+      clicked_at,
+      user_agent,
+      ip_address,
+      referrer,
+      channel,
+      target
+    ) VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      clickData.clickedAt ? new Date(clickData.clickedAt) : new Date(),
+      clickData.userAgent || null,
+      clickData.ipAddress || null,
+      clickData.referrer || null,
+      clickData.channel,
+      clickData.target,
+    ],
+  );
+
+  const insertId = (result as any).insertId;
+
+  const [rows] = await dbPool.execute(
+    `SELECT * FROM TrackingLinkClicks WHERE id = ?`,
+    [insertId],
+  );
+
+  return (rows as LinkClickRecord[])[0];
+}
+
 export async function saveQrScan(
   dbPool: Pool,
   scanData: QrScanData,
