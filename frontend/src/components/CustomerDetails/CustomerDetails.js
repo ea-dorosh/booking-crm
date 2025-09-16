@@ -8,7 +8,8 @@ import ListItemText from "@/components/ListItemText/ListItemText";
 
 
 export default function CustomerDetails({
-  customer, onChangeCustomerClick, 
+  customer,
+  onChangeCustomerClick,
 }) {
   return (
     <List>
@@ -57,6 +58,24 @@ export default function CustomerDetails({
       <ListItemText
         value={customer.addressCountry}
         label="Country"
+      />
+
+      <Typography
+        variant="h6"
+        color="text.secondary"
+        sx={{ mt: 2 }}
+      >
+        Consents
+      </Typography>
+
+      <ListItemText
+        value={customer.consentPrivacy ? `Yes` : `No`}
+        label="Privacy Consent"
+      />
+
+      <ListItemText
+        value={customer.consentMarketing ? `Yes` : `No`}
+        label="Marketing Consent"
       />
 
       <Button

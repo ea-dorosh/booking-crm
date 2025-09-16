@@ -32,6 +32,8 @@ interface GetCustomerResponse {
   addressZip: string;
   addressCity: string;
   addressCountry: string;
+  consentPrivacy?: boolean;
+  consentMarketing?: boolean;
 }
 
 export interface CreateCustomerResult {
@@ -51,7 +53,7 @@ export interface CheckCustomerExistsResult {
 
 async function getCustomers(dbPool: DbPoolType): Promise<GetCustomersResponse[]> {
   const sql = `
-    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date, last_activity_date, address_street, address_zip, address_city, address_country
+    SELECT customer_id, first_name, last_name, salutation, email, phone, added_date, last_activity_date, address_street, address_zip, address_city, address_country, consent_privacy, consent_marketing
     FROM Customers
   `;
 
@@ -98,7 +100,9 @@ async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<
       address_street,
       address_city,
       address_zip,
-      address_country
+      address_country,
+      consent_privacy,
+      consent_marketing
     FROM Customers
     WHERE customer_id = ?
   `;
@@ -117,6 +121,8 @@ async function getCustomerById(dbPool: DbPoolType, customerId: string): Promise<
     addressCity: row.address_city,
     addressZip: row.address_zip,
     addressCountry: row.address_country,
+    consentPrivacy: row.consent_privacy === 1,
+    consentMarketing: row.consent_marketing === 1,
   }));
 
   return customersResponse.length > 0 ? customersResponse[0] : null;
@@ -150,8 +156,8 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponse
   }
 
   const customerQuery = `
-    INSERT INTO Customers (salutation, first_name, last_name, email, phone, address_street, address_zip, address_city, address_country)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO Customers (salutation, first_name, last_name, email, phone, address_street, address_zip, address_city, address_country, consent_privacy, consent_marketing)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const customerValues = [
@@ -164,6 +170,8 @@ async function createCustomer(dbPool: DbPoolType, customerData: CustomerResponse
     customerData.addressZip || ``,
     customerData.addressCity || ``,
     customerData.addressCountry || ``,
+    customerData.consentPrivacy ? 1 : 0,
+    customerData.consentMarketing ? 1 : 0,
   ];
 
   const [customerResults] = await dbPool.query<ResultSetHeader>(customerQuery, customerValues);
@@ -203,7 +211,9 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResp
 
   const sql = `
     UPDATE Customers
-    SET last_name = ?, first_name = ?, email = ?, phone = ?, salutation = ?, address_street = ?, address_zip = ?, address_city = ?, address_country = ?
+    SET last_name = ?, first_name = ?, email = ?, phone = ?, salutation = ?, address_street = ?, address_zip = ?, address_city = ?, address_country = ?,
+        consent_privacy = COALESCE(?, consent_privacy),
+        consent_marketing = COALESCE(?, consent_marketing)
     WHERE customer_id = ?;
   `;
 
@@ -220,6 +230,8 @@ async function updateCustomerData(dbPool: DbPoolType, customerData: CustomerResp
     customerData.addressZip || ``,
     customerData.addressCity || ``,
     customerData.addressCountry || ``,
+    customerData.consentPrivacy === undefined ? null : (customerData.consentPrivacy ? 1 : 0),
+    customerData.consentMarketing === undefined ? null : (customerData.consentMarketing ? 1 : 0),
     customerId,
   ];
 
@@ -246,18 +258,47 @@ async function checkCustomerExists(dbPool: DbPoolType, params: CheckCustomerExis
 
     if (params.customerId && row.customer_id === params.customerId) {
       return {
-        exists: false, customerId: null, 
+        exists: false,
+        customerId: null,
       };
     }
 
     return {
-      exists: true, customerId: row.customer_id, 
+      exists: true,
+      customerId: row.customer_id,
     };
   } else {
     return {
-      exists: false, customerId: null, 
+      exists: false,
+      customerId: null,
     };
   }
+}
+
+/**
+ * Update only consent fields without touching other customer data.
+ * If a consent value is undefined, it will not be changed.
+ */
+async function updateCustomerConsents(
+  dbPool: DbPoolType,
+  customerId: number,
+  consents: { consentPrivacy?: boolean; consentMarketing?: boolean },
+): Promise<void> {
+  const sql = `
+    UPDATE Customers
+    SET
+      consent_privacy = COALESCE(?, consent_privacy),
+      consent_marketing = COALESCE(?, consent_marketing)
+    WHERE customer_id = ?
+  `;
+
+  const values = [
+    consents.consentPrivacy === undefined ? null : (consents.consentPrivacy ? 1 : 0),
+    consents.consentMarketing === undefined ? null : (consents.consentMarketing ? 1 : 0),
+    customerId,
+  ];
+
+  await dbPool.query(sql, values);
 }
 
 export {
@@ -266,4 +307,5 @@ export {
   createCustomer,
   updateCustomerData,
   checkCustomerExists,
+  updateCustomerConsents,
 };

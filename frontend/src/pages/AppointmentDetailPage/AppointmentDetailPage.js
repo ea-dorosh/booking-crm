@@ -9,6 +9,7 @@ import {
   LocationOn as LocationIcon,
   EventNote as EventIcon,
 } from '@mui/icons-material';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import {
   Typography,
   Box,
@@ -501,6 +502,45 @@ export default function AppointmentDetailPage() {
                     </Typography>
                   </Box>
                 </Box>
+
+                {appointment.orderMessage && (
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      alignItems: `flex-start`,
+                      gap: 1.5,
+                      mt: 2,
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: `success.100`,
+                        color: `success.main`,
+                        width: 32,
+                        height: 32,
+                      }}
+                    >
+                      <TextSnippetIcon fontSize="small" />
+                    </Avatar>
+
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: `0.8rem` }}
+                      >
+                        Nachricht des Kunden
+                      </Typography>
+
+                      <Typography
+                        variant="body1"
+                        sx={{ whiteSpace: `pre-wrap` }}
+                      >
+                        {appointment.orderMessage}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
               </Card>
             </Grid>
 

@@ -43,6 +43,14 @@ const validateCustomerData = ({
       `Phone is invalid`;
   }
 
+  // Require privacy consent ONLY for public booking (publicErrors === true)
+  if (publicErrors) {
+    const hasConsent = Boolean((formData as AppointmentFormDataType).consentPrivacy);
+    if (!hasConsent) {
+      errors.consentPrivacy = `Bitte stimmen Sie der Verarbeitung Ihrer Daten zu`;
+    }
+  }
+
   return errors;
 };
 

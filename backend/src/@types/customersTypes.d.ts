@@ -12,6 +12,8 @@ export interface CustomerRequestRow extends RowDataPacket {
   phone: string;
   added_date: string;
   last_activity_date: string;
+  consent_privacy?: 0 | 1;
+  consent_marketing?: 0 | 1;
 }
 
 export interface CustomerResponseData {
@@ -24,6 +26,8 @@ export interface CustomerResponseData {
   addressZip?: string;
   addressCity?: string;
   addressCountry?: string;
+  consentPrivacy?: boolean;
+  consentMarketing?: boolean;
 }
 
 export interface CustomerFormDataValidationErrors {
@@ -32,4 +36,5 @@ export interface CustomerFormDataValidationErrors {
   firstName?: string;
   lastName?: string;
   phone?: string;
+  consentPrivacy?: string;
 }

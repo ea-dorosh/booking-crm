@@ -43,6 +43,7 @@ import { ServiceDetailsDataType } from '@/@types/servicesTypes.js';
 import {
   checkCustomerExists,
   createCustomer,
+  updateCustomerConsents,
 } from '@/services/customer/customerService.js';
 import { validateCustomerData } from '@/validators/customersValidators.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
@@ -122,6 +123,7 @@ async function getAppointments(
       customerLastName: row.customer_last_name,
       customerFirstName: row.customer_first_name,
       status: row.status,
+      orderMessage: row.order_message ?? null,
       customer: {
         id: row.customer_id,
         firstName: row.customer_first_name,
@@ -170,6 +172,7 @@ async function getAppointment(dbPool: Pool, appointmentId: number): Promise<Appo
       status: row.status,
       googleCalendarEventId: row.google_calendar_event_id,
       location: row.location,
+      orderMessage: row.order_message ?? null,
     };
   });
 
@@ -294,6 +297,16 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
     if (checkCustomerResult.exists) {
       isCustomerNew = CustomerNewStatusEnum.Existing;
       customerId = checkCustomerResult.customerId;
+
+      // Update consents for returning customers if provided (idempotent)
+      try {
+        await updateCustomerConsents(dbPool, customerId!, {
+          consentPrivacy: appointment.consentPrivacy,
+          consentMarketing: appointment.consentMarketing,
+        });
+      } catch (error) {
+        console.error(`Failed to update customer consents for existing customer ${customerId}:`, error);
+      }
     } else {
       const { newCustomerId } = await createCustomer(dbPool, appointment);
 
@@ -320,6 +333,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
       isCustomerNew,
     },
     company,
+    orderMessage: appointment.orderMessage || null,
   });
 
   if (`errorMessage` in firstSavedAppointment || !firstSavedAppointment) {
@@ -341,6 +355,7 @@ CreateAppointmentServiceResponseErrorType | CreateAppointmentServiceResponseSucc
         isCustomerNew,
       },
       company,
+      orderMessage: appointment.orderMessage || null,
     });
   }
 
@@ -523,6 +538,7 @@ const saveAppointment = async (dbPool: Pool, {
   date,
   customer,
   company,
+  orderMessage,
 }: {
   service: AppointmentFormDataServiceType;
   date: Date_ISO_Type;
@@ -535,6 +551,7 @@ const saveAppointment = async (dbPool: Pool, {
     isCustomerNew: CustomerNewStatusEnum;
   };
   company: CompanyResponseData;
+  orderMessage?: string | null;
 }): Promise<SaveAppointmentResult | CreateAppointmentServiceResponseErrorType> => {
   let serviceName: string = ``;
   let serviceDurationAndBufferTimeInMinutes: Time_HH_MM_SS_Type = `00:00:00`;
@@ -609,9 +626,10 @@ const saveAppointment = async (dbPool: Pool, {
       is_customer_new,
       google_calendar_event_id,
       location,
-      location_id
+      location_id,
+      order_message
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const appointmentValues = [
@@ -632,6 +650,7 @@ const saveAppointment = async (dbPool: Pool, {
     null, // placeholder for google_calendar_event_id
     `${company.branches[0].addressStreet}, ${company.branches[0].addressZip} ${company.branches[0].addressCity}`,
     company.branches[0].id,
+    orderMessage || null,
   ];
 
   const [appointmentResults] = await dbPool.query<ResultSetHeader>(appointmentQuery, appointmentValues);

@@ -1,3 +1,4 @@
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import {
   Box,
   Typography,
@@ -96,6 +97,33 @@ export default function AppointmentEventMenu({
           label="Created"
           value={formatCreatedDate(appointment.createdDate)}
         />
+
+        {appointment.orderMessage && (
+          <Stack spacing={0.5}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                textTransform: `uppercase`,
+                fontWeight: 600,
+                display: `flex`,
+                alignItems: `center`,
+                gap: 0.5,
+              }}
+            >
+              <TextSnippetIcon sx={{ fontSize: 14 }} />
+
+              Nachricht des Kunden
+            </Typography>
+
+            <Typography
+              variant="body2"
+              sx={{ whiteSpace: `pre-wrap` }}
+            >
+              {appointment.orderMessage}
+            </Typography>
+          </Stack>
+        )}
       </Stack>
 
       <Stack

@@ -20,6 +20,7 @@ export interface AppointmentRowType extends RowDataPacket {
   customer_last_name: string;
   customer_first_name: string;
   status: AppointmentStatusEnum;
+  order_message?: string | null;
 }
 
 export interface AppointmentDataType {
@@ -44,6 +45,7 @@ export interface AppointmentDataType {
     firstName?: string;
     lastName?: string;
   };
+  orderMessage?: string | null;
 }
 
 export interface AppointmentDetailsRowType extends RowDataPacket {
@@ -86,6 +88,7 @@ export interface AppointmentDetailType {
   status: AppointmentStatusEnum;
   googleCalendarEventId: string | null;
   location: string;
+  orderMessage?: string | null;
 }
 
 export interface AppointmentFormDataType {
@@ -95,6 +98,9 @@ export interface AppointmentFormDataType {
   lastName: string;
   phone: string;
   service: AppointmentFormDataServiceType;
+  orderMessage?: string;
+  consentPrivacy?: boolean;
+  consentMarketing?: boolean;
 }
 
 export interface ServiceBookingBaseType {
