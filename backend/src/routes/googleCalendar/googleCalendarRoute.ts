@@ -13,6 +13,8 @@ import {
   createGoogleCalendarEvent,
   markTokenAsInactive,
   proactivelyRefreshTokens,
+  listEmployeeGoogleCalendarCredentials,
+  deleteEmployeeGoogleCalendarByCalendarId,
 } from '@/services/googleCalendar/googleCalendarService.js';
 import { RowDataPacket } from 'mysql2';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
@@ -366,6 +368,71 @@ router.post(`/:employeeId/sync-appointments`, async (req: CustomRequestType, res
   } catch (error) {
     console.error(`Error syncing appointments to Google Calendar:`, error);
     res.status(500).json({ error: `Failed to sync appointments to Google Calendar` });
+  }
+});
+
+router.get(`/:employeeId/calendars`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const employeeId = Number(req.params.employeeId);
+
+  try {
+    const calendars = await listEmployeeGoogleCalendarCredentials(req.dbPool, employeeId);
+    res.json({
+      calendars: calendars.map((calendar) => ({
+        calendarId: calendar.calendarId,
+        googleEmail: calendar.googleEmail,
+        isActive: calendar.isActive,
+        lastUsed: calendar.lastUsedAt,
+        errorCount: calendar.errorCount,
+        lastError: calendar.lastError,
+        expiresAt: calendar.expiresAt,
+        createdAt: calendar.createdAt,
+        updatedAt: calendar.updatedAt,
+      })),
+    });
+  } catch (error) {
+    console.error(`Error listing calendars for employee ${employeeId}:`, error);
+    res.status(500).json({ error: `Failed to list Google Calendars` });
+  }
+});
+
+router.delete(`/:employeeId/calendars/:calendarId`, async (req: CustomRequestType, res: CustomResponseType) => {
+  if (!req.dbPool) {
+    res.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const employeeId = Number(req.params.employeeId);
+  const calendarId = decodeURIComponent(String(req.params.calendarId || ``));
+
+  if (!calendarId) {
+    res.status(400).json({ error: `Missing calendarId` });
+    return;
+  }
+
+  try {
+    const result = await deleteEmployeeGoogleCalendarByCalendarId(req.dbPool, employeeId, calendarId);
+    if (!result.deleted) {
+      if (result.reason === `not_found`) {
+        res.status(404).json({ error: `Calendar not found` });
+        return;
+      }
+      if (result.reason === `active`) {
+        res.status(400).json({ error: `Cannot delete active calendar. Disconnect it first.` });
+        return;
+      }
+      res.status(500).json({ error: `Failed to delete calendar` });
+      return;
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(`Error deleting calendar ${calendarId} for employee ${employeeId}:`, error);
+    res.status(500).json({ error: `Failed to delete calendar` });
   }
 });
 

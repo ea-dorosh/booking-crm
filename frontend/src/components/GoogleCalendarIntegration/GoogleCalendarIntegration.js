@@ -1,4 +1,4 @@
-import { Google, CalendarMonth, Check, Link, Sync } from '@mui/icons-material';
+import { Google, CalendarMonth, Check, Link, Sync, Delete } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -25,11 +25,13 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
   const [calendarId, setCalendarId] = useState(``);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
+  const [calendars, setCalendars] = useState([]);
 
   // Effect to load integration status when component mounts
   useEffect(() => {
     if (employeeId) {
       fetchStatus();
+      fetchCalendars();
     }
   }, [employeeId]);
 
@@ -65,8 +67,17 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
     }
   };
 
-  const handleConnect = async () => {
-    if (!calendarId) {
+  const fetchCalendars = async () => {
+    try {
+      const response = await axios.get(`/google-calendar/${employeeId}/calendars`);
+      setCalendars(response.data?.calendars || []);
+    } catch (error) {
+      console.error(`Error fetching calendars list:`, error);
+    }
+  };
+
+  const startOAuthWithCalendarId = async (targetCalendarId) => {
+    if (!targetCalendarId) {
       setError(`Please enter your Google Calendar ID`);
       return;
     }
@@ -75,7 +86,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       setLoading(true);
 
       // Save calendarId to localStorage before redirecting
-      localStorage.setItem(`temp_calendar_id`, calendarId);
+      localStorage.setItem(`temp_calendar_id`, targetCalendarId);
 
       // Save current path for return
       localStorage.setItem(`google_oauth_return_path`, window.location.pathname);
@@ -94,6 +105,14 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConnect = async () => {
+    await startOAuthWithCalendarId(calendarId);
+  };
+
+  const reconnectCalendar = async (reconnectCalendarId) => {
+    await startOAuthWithCalendarId(reconnectCalendarId);
   };
 
   const handleAuthCallback = async (code, idToUse) => {
@@ -116,6 +135,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
 
       // Update status after successful integration
       await fetchStatus();
+      await fetchCalendars();
       setError(null);
     } catch (error) {
       console.error(`Error handling Google auth callback:`, error);
@@ -135,6 +155,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       setLoading(true);
       await axios.delete(`/google-calendar/${employeeId}/google-calendar`);
       await fetchStatus();
+      await fetchCalendars();
     } catch (error) {
       console.error(`Error removing Google Calendar integration:`, error);
       setError(`Failed to remove Google Calendar integration`);
@@ -154,7 +175,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       // Show success message with results
       setSyncResult({
         success: true,
-        message: `Synchronization complete: ${response.data.results.synced} entries added to calendar, ${response.data.results.failed} failed to add.`,
+        message: `Synchronization complete: ${response.data.results.synced} entries added to calendar, ${response.data.results.failed} failed to add`,
       });
 
       // Refresh status
@@ -167,6 +188,24 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       });
     } finally {
       setSyncLoading(false);
+    }
+  };
+
+  const deleteCalendar = async (idToDelete) => {
+    if (!window.confirm(`Удалить календарь ${idToDelete}?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await axios.delete(`/google-calendar/${employeeId}/calendars/${encodeURIComponent(idToDelete)}`);
+      await fetchCalendars();
+      await fetchStatus();
+    } catch (error) {
+      console.error(`Error deleting calendar:`, error);
+      setError(error?.response?.data?.error || `Failed to delete calendar`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -356,7 +395,7 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             variant="outlined"
             fullWidth
             value={calendarId}
-            onChange={(e) => setCalendarId(e.target.value)}
+            onChange={(event) => setCalendarId(event.target.value)}
             helperText="Enter the employee's Google Calendar ID (e.g., email@gmail.com)"
             sx={{ mb: 2 }}
           />
@@ -384,6 +423,124 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
             You will be redirected to Google to authorize access to the calendar.
           </Typography>
         </Box>
+      )}
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ fontSize: `1rem` }}
+      >
+        Linked Calendars
+      </Typography>
+
+      {calendars.length === 0 ? (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
+          No linked calendars found.
+        </Typography>
+      ) : (
+        <Stack spacing={1}>
+          {calendars.map((calendar) => (
+
+            <Stack
+              key={`${calendar.calendarId}-${calendar.updatedAt || ``}`}
+              sx={{
+                flexWrap: `wrap`,
+                justifyContent: `flex-start`,
+              }}
+            >
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{
+                  mb: 1,
+                  flexWrap: `wrap`,
+                  justifyContent: `flex-start`,
+                }}
+              >
+                <CalendarMonth
+                  fontSize="small"
+                  color="action"
+                />
+
+                <Typography variant="body1">
+                  {calendar.calendarId}
+                </Typography>
+
+                {calendar.googleEmail && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                    ({calendar.googleEmail})
+                  </Typography>
+                )}
+
+                <Chip
+                  label={calendar.isActive ? `Active` : `Inactive`}
+                  color={calendar.isActive ? `success` : `default`}
+                  size="small"
+                  sx={{
+                    ml: `auto`,
+                    flexShrink: 0,
+                  }}
+                />
+              </Stack>
+
+              {typeof calendar.errorCount === `number` && calendar.errorCount > 0 && (
+                <Chip
+                  label={`Errors: ${calendar.errorCount}`}
+                  color="warning"
+                  size="small"
+                  sx={{
+                    flexShrink: 0,
+                    alignSelf: `flex-start`,
+                  }}
+                />
+              )}
+
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{ mt: 1 }}
+                alignItems="center"
+              >
+                <Box sx={{ ml: `auto` }}>
+                  {!calendar.isActive && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      startIcon={<Google />}
+                      onClick={() => reconnectCalendar(calendar.calendarId)}
+                      disabled={loading}
+                      sx={{ mr: 1 }}
+                    >
+                      Reconnect
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    startIcon={<Delete />}
+                    onClick={() => deleteCalendar(calendar.calendarId)}
+                    disabled={calendar.isActive || loading}
+                    title={calendar.isActive ? `Disconnect calendar first to delete` : `Delete calendar`}
+                  >
+                    Delete
+                  </Button>
+                </Box>
+              </Stack>
+            </Stack>
+          ))}
+        </Stack>
       )}
     </Box>
   );

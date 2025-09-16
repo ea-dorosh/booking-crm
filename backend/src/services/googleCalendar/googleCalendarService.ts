@@ -25,6 +25,8 @@ interface GoogleCalendarCredentialsRow extends RowDataPacket {
   last_error: string | null;
   google_email: string | null;
   expires_at: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 interface GoogleEvent {
@@ -146,7 +148,7 @@ export const saveEmployeeGoogleCalendarCredentials = async (
         oauth2Client.setCredentials({ refresh_token: refreshToken });
 
         const oauth2 = google.oauth2({
-          version: `v2`, auth: oauth2Client, 
+          version: `v2`, auth: oauth2Client,
         });
         const userInfo = await oauth2.userinfo.get();
         userEmail = userInfo.data.email || undefined;
@@ -339,7 +341,7 @@ export const getEmployeeCalendarClient = async (
 
       return {
         calendarClient: google.calendar({
-          version: `v3`, auth: oauth2Client, 
+          version: `v3`, auth: oauth2Client,
         }),
         calendarId: credentials.calendarId,
         credentials,
@@ -399,7 +401,7 @@ export const checkGoogleCalendarAvailability = async (
   }
 
   const {
-    calendarClient, calendarId, 
+    calendarClient, calendarId,
   } = calendarData;
 
   const startOfDay = startTime.startOf(`day`).toISOString();
@@ -508,7 +510,7 @@ export const createGoogleCalendarEvent = async (
   }
 
   const {
-    calendarClient, calendarId, 
+    calendarClient, calendarId,
   } = calendarDataFirstAppointment;
 
   console.log(`Creating Google Calendar event:`, {
@@ -576,7 +578,7 @@ export const updateGoogleCalendarEvent = async (
   }
 
   const {
-    calendarClient, calendarId, 
+    calendarClient, calendarId,
   } = calendarData;
 
   const startDateTime = appointment.timeStart.toISOString();
@@ -640,7 +642,7 @@ export const deleteGoogleCalendarEvent = async (
   }
 
   const {
-    calendarClient, calendarId, 
+    calendarClient, calendarId,
   } = calendarData;
 
   console.log(`Deleting Google Calendar event:`, {
@@ -684,7 +686,7 @@ export const getGoogleCalendarEventsForSpecificDates = async (
     }
 
     const {
-      calendarClient, calendarId, 
+      calendarClient, calendarId,
     } = calendarData;
 
     if (dates.length === 0) {
@@ -814,12 +816,12 @@ export const proactivelyRefreshTokens = async (
     console.log(`Proactive refresh completed: ${refreshed} refreshed, ${failed} failed, ${inactive} marked inactive`);
 
     return {
-      refreshed, failed, inactive, 
+      refreshed, failed, inactive,
     };
   } catch (error: any) {
     console.error(`Error in proactive token refresh:`, error);
     return {
-      refreshed: 0, failed: 0, inactive: 0, 
+      refreshed: 0, failed: 0, inactive: 0,
     };
   }
 };
@@ -851,5 +853,91 @@ export const checkAllGoogleCalendarIntegrations = async (
   } catch (error: any) {
     console.error(`Error checking Google Calendar integrations:`, error);
     return [];
+  }
+};
+
+export type EmployeeCalendarListItem = {
+  employeeId: number;
+  calendarId: string;
+  isActive: boolean;
+  googleEmail?: string;
+  lastUsedAt?: Date;
+  errorCount?: number;
+  lastError?: string;
+  expiresAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export const listEmployeeGoogleCalendarCredentials = async (
+  dbPool: Pool,
+  employeeId: number,
+): Promise<EmployeeCalendarListItem[]> => {
+  const query = `
+    SELECT
+      employee_id,
+      calendar_id,
+      is_active,
+      last_used_at,
+      error_count,
+      last_error,
+      google_email,
+      expires_at,
+      created_at,
+      updated_at
+    FROM EmployeeGoogleCalendar
+    WHERE employee_id = ?
+    ORDER BY is_active DESC, updated_at DESC
+  `;
+
+  const [rows] = await dbPool.query<GoogleCalendarCredentialsRow[]>(query, [employeeId]);
+
+  return rows.map((credentialsRow) => ({
+    employeeId: credentialsRow.employee_id,
+    calendarId: credentialsRow.calendar_id,
+    isActive: credentialsRow.is_active,
+    lastUsedAt: credentialsRow.last_used_at ? new Date(credentialsRow.last_used_at) : undefined,
+    errorCount: credentialsRow.error_count,
+    lastError: credentialsRow.last_error || undefined,
+    googleEmail: credentialsRow.google_email || undefined,
+    expiresAt: credentialsRow.expires_at ? new Date(credentialsRow.expires_at) : undefined,
+    createdAt: credentialsRow.created_at ? new Date(credentialsRow.created_at) : undefined,
+    updatedAt: credentialsRow.updated_at ? new Date(credentialsRow.updated_at) : undefined,
+  }));
+};
+
+export const deleteEmployeeGoogleCalendarByCalendarId = async (
+  dbPool: Pool,
+  employeeId: number,
+  calendarId: string,
+): Promise<{ deleted: boolean; reason?: `not_found` | `active` | `error` }> => {
+  try {
+    const [rows] = await dbPool.query<GoogleCalendarCredentialsRow[]>(
+      `SELECT is_active FROM EmployeeGoogleCalendar WHERE employee_id = ? AND calendar_id = ?`,
+      [employeeId, calendarId],
+    );
+
+    if (rows.length === 0) {
+      return {
+        deleted: false, reason: `not_found`,
+      };
+    }
+
+    if (rows[0].is_active) {
+      return {
+        deleted: false, reason: `active`,
+      };
+    }
+
+    await dbPool.query(
+      `DELETE FROM EmployeeGoogleCalendar WHERE employee_id = ? AND calendar_id = ?`,
+      [employeeId, calendarId],
+    );
+    return { deleted: true };
+  } catch (error) {
+    console.error(`Error deleting calendar ${calendarId} for employee ${employeeId}:`, error);
+    return {
+      deleted: false, reason: `error`,
+    };
   }
 };
