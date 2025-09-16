@@ -14,8 +14,24 @@ const getQrScanStats = async (days = 90) => {
   }
 };
 
+const getLinkClickStats = async (days = 90, channel) => {
+  try {
+    const response = await axios.get(`/tracking/link-stats`, {
+      params: {
+        days,
+        ...(channel ? { channel } : {}),
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const trackingService = {
   getQrScanStats,
+  getLinkClickStats,
 };
 
 export default trackingService;

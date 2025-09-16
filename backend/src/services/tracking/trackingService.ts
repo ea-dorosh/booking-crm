@@ -57,6 +57,15 @@ export interface LinkClickRecord {
   updated_at: Date;
 }
 
+export interface LinkClickStats {
+  totalClicks: number;
+  uniqueClicks: number;
+  clicksByDay: Array<{
+    date: string;
+    count: number;
+  }>;
+}
+
 export async function saveLinkClick(
   dbPool: Pool,
   clickData: LinkClickData,
@@ -88,6 +97,50 @@ export async function saveLinkClick(
   );
 
   return (rows as LinkClickRecord[])[0];
+}
+
+export async function getLinkClickStats(
+  dbPool: Pool,
+  days: number = 90,
+  channel?: string,
+): Promise<LinkClickStats> {
+  const channelWhere = channel ? ` WHERE channel = ?` : ``;
+  const channelParam = channel ? [channel] : [];
+
+  const [totalResult] = await dbPool.execute(
+    `SELECT COUNT(*) as total FROM TrackingLinkClicks${channelWhere}`,
+    channelParam,
+  );
+  const totalClicks = (totalResult as any)[0].total;
+
+  const [uniqueResult] = await dbPool.execute(
+    `SELECT COUNT(DISTINCT ip_address) as unique_count
+     FROM TrackingLinkClicks${channelWhere ? `${channelWhere} AND ip_address IS NOT NULL` : ` WHERE ip_address IS NOT NULL`}`,
+    channelParam,
+  );
+  const uniqueClicks = (uniqueResult as any)[0].unique_count;
+
+  const [dailyResult] = await dbPool.execute(
+    `SELECT
+       DATE(clicked_at) as date,
+       COUNT(*) as count
+     FROM TrackingLinkClicks
+     ${channel ? `WHERE channel = ? AND clicked_at >= DATE_SUB(NOW(), INTERVAL ? DAY)` : `WHERE clicked_at >= DATE_SUB(NOW(), INTERVAL ? DAY)`}
+     GROUP BY DATE(clicked_at)
+     ORDER BY date ASC`,
+    channel ? [channel, days] : [days],
+  );
+
+  const clicksByDay = (dailyResult as any[]).map(row => ({
+    date: row.date,
+    count: row.count,
+  }));
+
+  return {
+    totalClicks,
+    uniqueClicks,
+    clicksByDay,
+  };
 }
 
 export async function saveQrScan(

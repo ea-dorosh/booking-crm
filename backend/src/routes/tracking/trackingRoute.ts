@@ -3,7 +3,7 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { getQrScanStats } from '@/services/tracking/trackingService.js';
+import { getQrScanStats, getLinkClickStats } from '@/services/tracking/trackingService.js';
 
 const router = express.Router();
 
@@ -30,3 +30,24 @@ router.get(`/stats`, async (request: CustomRequestType, response: CustomResponse
 
 
 export default router;
+
+router.get(`/link-stats`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    const days = request.query.days ? parseInt(request.query.days as string) : 90;
+    const channel = request.query.channel ? String(request.query.channel) : undefined;
+    const stats = await getLinkClickStats(request.dbPool, days, channel);
+
+    response.json({
+      message: `Link click stats retrieved successfully`,
+      data: stats,
+    });
+  } catch (error) {
+    console.error(`Error getting link click stats:`, error);
+    response.status(500).json({ error: `Error getting link click stats` });
+  }
+});

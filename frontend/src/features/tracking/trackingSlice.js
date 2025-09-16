@@ -14,10 +14,25 @@ export const fetchQrScanStats = createAsyncThunk(
   },
 );
 
+export const fetchLinkClickStats = createAsyncThunk(
+  `tracking/fetchLinkClickStats`,
+  async ({
+    days = 90, channel, 
+  } = {}, { rejectWithValue }) => {
+    try {
+      const response = await trackingService.getLinkClickStats(days, channel);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message || `Failed to fetch Link click stats`);
+    }
+  },
+);
+
 const trackingSlice = createSlice({
   name: `tracking`,
   initialState: {
     stats: null,
+    linkStats: null,
     loading: false,
     error: null,
   },
@@ -43,11 +58,24 @@ const trackingSlice = createSlice({
       .addCase(fetchQrScanStats.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchLinkClickStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchLinkClickStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.linkStats = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchLinkClickStats.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
 export const {
-  clearTrackingError, clearTrackingStats, 
+  clearTrackingError, clearTrackingStats,
 } = trackingSlice.actions;
 export default trackingSlice.reducer;
