@@ -13,22 +13,18 @@ dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 async function checkAndRunMigration() {
   console.log(`🔍 Checking link tracking migration status...`);
 
-  // Connect to main database to get client list
-  const mainPool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DEFAULT_DATABASE,
-  });
-
   try {
-    // Get all client databases
-    const [clients] = await mainPool.execute(`SELECT database_name FROM Companies WHERE database_name IS NOT NULL`);
+    // Get client databases from environment variable
+    const clientDatabasesEnv = process.env.CLIENT_DATABASES;
+    if (!clientDatabasesEnv) {
+      console.error(`❌ CLIENT_DATABASES environment variable not found`);
+      return;
+    }
 
-    console.log(`📋 Found ${clients.length} client databases`);
+    const clientDatabases = clientDatabasesEnv.split(`,`).map(database => database.trim());
+    console.log(`📋 Found ${clientDatabases.length} client databases: ${clientDatabases.join(`, `)}`);
 
-    for (const client of clients) {
-      const databaseName = client.database_name;
+    for (const databaseName of clientDatabases) {
       console.log(`\n🏢 Checking database: ${databaseName}`);
 
       const clientPool = mysql.createPool({
@@ -84,8 +80,6 @@ async function checkAndRunMigration() {
 
   } catch (error) {
     console.error(`❌ Error:`, error);
-  } finally {
-    await mainPool.end();
   }
 }
 
