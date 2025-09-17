@@ -125,50 +125,50 @@ export default function QrStatsWidget() {
               >
                 Unique QR Visitors
               </Typography>
-              <Grid
-                item
-                xs={6}
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={6}
+          >
+            <Box
+              textAlign="center"
+            >
+              <Typography
+                variant="h4"
+                color="primary"
+                fontWeight="bold"
               >
-                <Box
-                  textAlign="center"
-                >
-                  <Typography
-                    variant="h4"
-                    color="primary"
-                    fontWeight="bold"
-                  >
-                    {linkStats?.totalClicks ?? 0}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                  >
-                Link Clicks (IG)
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid
-                item
-                xs={6}
+                {linkStats?.totalClicks ?? 0}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
               >
-                <Box
-                  textAlign="center"
-                >
-                  <Typography
-                    variant="h4"
-                    color="secondary"
-                    fontWeight="bold"
-                  >
-                    {linkStats?.uniqueClicks ?? 0}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                  >
-                Unique Link Visitors
-                  </Typography>
-                </Box>
-              </Grid>
+            Link Clicks (IG)
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={6}
+          >
+            <Box
+              textAlign="center"
+            >
+              <Typography
+                variant="h4"
+                color="secondary"
+                fontWeight="bold"
+              >
+                {linkStats?.uniqueClicks ?? 0}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+            Unique Link Visitors
+              </Typography>
             </Box>
           </Grid>
         </Grid>

@@ -86,7 +86,6 @@ router.post(`/qr-scan`, async (request: CustomRequestType, response: CustomRespo
   }
 });
 
-export default router;
 /** Track vanity link clicks (e.g., instagram) */
 router.post(`/link-click`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
@@ -118,3 +117,5 @@ router.post(`/link-click`, async (request: CustomRequestType, response: CustomRe
     response.status(500).json({ error: `Error tracking link click` });
   }
 });
+
+export default router;
