@@ -12,16 +12,17 @@ import {
 } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchQrScanStats } from '@/features/tracking/trackingSlice';
+import { fetchQrScanStats, fetchLinkClickStats } from '@/features/tracking/trackingSlice';
 
 export default function QrStatsWidget() {
   const dispatch = useDispatch();
   const {
-    stats, loading, error, 
+    stats, linkStats, loading, error,
   } = useSelector((state) => state.tracking);
 
   useEffect(() => {
     dispatch(fetchQrScanStats(90)); // Last 3 months
+    dispatch(fetchLinkClickStats({ days: 90 }));
   }, [dispatch]);
 
   if (loading) {
@@ -74,7 +75,7 @@ export default function QrStatsWidget() {
             variant="h6"
             component="h2"
           >
-            QR Code Statistics
+            Traffic Statistics
           </Typography>
         </Box>
 
@@ -100,7 +101,7 @@ export default function QrStatsWidget() {
                 variant="body2"
                 color="text.secondary"
               >
-                Total Scans
+                QR Scans
               </Typography>
             </Box>
           </Grid>
@@ -122,8 +123,52 @@ export default function QrStatsWidget() {
                 variant="body2"
                 color="text.secondary"
               >
-                Unique Visitors
+                Unique QR Visitors
               </Typography>
+              <Grid
+                item
+                xs={6}
+              >
+                <Box
+                  textAlign="center"
+                >
+                  <Typography
+                    variant="h4"
+                    color="primary"
+                    fontWeight="bold"
+                  >
+                    {linkStats?.totalClicks ?? 0}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                Link Clicks (IG)
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid
+                item
+                xs={6}
+              >
+                <Box
+                  textAlign="center"
+                >
+                  <Typography
+                    variant="h4"
+                    color="secondary"
+                    fontWeight="bold"
+                  >
+                    {linkStats?.uniqueClicks ?? 0}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                Unique Link Visitors
+                  </Typography>
+                </Box>
+              </Grid>
             </Box>
           </Grid>
         </Grid>
