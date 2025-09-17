@@ -46,8 +46,8 @@ async function createTransporter() {
 }
 
 function getSenderInfo() {
-  const appName = process.env.APP_NAME || `Dorosh Studio`;
-  const senderEmail = process.env.SMTP_USER || `no-reply@dorosh-studio.com`;
+  const appName = process.env.APP_NAME || `Mood Beauty`;
+  const senderEmail = process.env.SMTP_USER || `moodbeady.de@gmail.com`;
   return {
     name: appName,
     email: senderEmail,
