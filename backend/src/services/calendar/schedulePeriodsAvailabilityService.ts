@@ -3,6 +3,7 @@ import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 import { getEmployeeWorkingTimes } from '@/services/employees/employeesScheduleService.js';
+import { getEmployeeAdvanceBookingTime } from '@/services/employees/employeesService.js';
 
 /**
  * Build grouped employee availability for the week of the provided date
@@ -30,12 +31,16 @@ export async function buildGroupedAvailabilityForWeek(
     for (const employeeId of employeeIds) {
       const workingTimes = await getEmployeeWorkingTimes(dbPool, employeeId, dateIso);
       if (workingTimes.startTime && workingTimes.endTime) {
+        // Get employee advance booking time using dedicated service
+        const advanceBookingTime = await getEmployeeAdvanceBookingTime(dbPool, employeeId);
+
         employeesForDay.push({
           id: employeeId,
           startTime: workingTimes.startTime,
           endTime: workingTimes.endTime,
           blockStartTimeFirst: workingTimes.blockStartTimeFirst,
           blockEndTimeFirst: workingTimes.blockEndTimeFirst,
+          advanceBookingTime,
         });
       }
     }

@@ -6,7 +6,7 @@ import {
   UpdateEmployeeResult,
 } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { AppointmentStatusEnum, EmployeeStatusEnum } from '@/enums/enums.js';
+import { AppointmentStatusEnum, EmployeeStatusEnum, ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
 import { checkGoogleCalendarAvailability } from '@/services/googleCalendar/googleCalendarService.js';
 import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
 
@@ -49,7 +49,8 @@ async function getEmployees(dbPool: Pool, statuses?: string[]): Promise<Employee
       email,
       phone,
       image,
-      status
+      status,
+      advance_booking_time
     FROM Employees
     WHERE status IN (?)
   `;
@@ -66,6 +67,10 @@ async function getEmployees(dbPool: Pool, statuses?: string[]): Promise<Employee
       ? `${process.env.SERVER_API_URL}/images/${row.image}`
       : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
     status: row.status,
+    // Convert HH:MM:SS back to HH:MM for frontend, except for special values
+    advanceBookingTime: row.advance_booking_time === ADVANCE_BOOKING_NEXT_DAY
+      ? ADVANCE_BOOKING_NEXT_DAY
+      : (row.advance_booking_time ? row.advance_booking_time.slice(0, 5) : `00:30`),
   }));
 
   return employees;
@@ -89,6 +94,10 @@ async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDe
       ? `${process.env.SERVER_API_URL}/images/${row.image}`
       : `${process.env.SERVER_API_URL}/images/no-user-photo.png`,
     status: row.status,
+    // Convert HH:MM:SS back to HH:MM for frontend, except for special values
+    advanceBookingTime: row.advance_booking_time === ADVANCE_BOOKING_NEXT_DAY
+      ? ADVANCE_BOOKING_NEXT_DAY
+      : (row.advance_booking_time ? row.advance_booking_time.slice(0, 5) : `00:30`),
   }));
 
   return employeeData[0];
@@ -188,9 +197,30 @@ async function updateEmployeeStatus(dbPool: Pool, employeeId: number, status: st
   }
 }
 
+async function getEmployeeAdvanceBookingTime(dbPool: Pool, employeeId: number): Promise<string> {
+  interface EmployeeAdvanceTimeRow extends RowDataPacket {
+    advance_booking_time: string;
+  }
+
+  const sql = `
+    SELECT advance_booking_time
+    FROM Employees
+    WHERE employee_id = ?
+  `;
+
+  try {
+    const [employeeRows] = await dbPool.query<EmployeeAdvanceTimeRow[]>(sql, [employeeId]);
+    return employeeRows[0]?.advance_booking_time || `00:30:00`;
+  } catch (error) {
+    console.error(`Error fetching advance booking time for employee ${employeeId}:`, error);
+    return `00:30:00`; // fallback to default
+  }
+}
+
 export {
   getEmployees,
   getEmployee,
   checkEmployeeTimeNotOverlap,
   updateEmployeeStatus,
+  getEmployeeAdvanceBookingTime,
 };

@@ -10,6 +10,7 @@ export interface EmployeeDetailRowType extends RowDataPacket {
   phone: string;
   image: string | null;
   status: EmployeeStatusEnum;
+  advance_booking_time: string; // can be HH:MM:SS or 'next_day'
 }
 
 export interface EmployeeDetailDataType {
@@ -20,6 +21,7 @@ export interface EmployeeDetailDataType {
   phone: string | null;
   image: string;
   status: EmployeeStatusEnum;
+  advanceBookingTime: string; // HH:MM format for frontend
 }
 
 export interface EmployeeFormDataValidationErrors {
@@ -27,6 +29,7 @@ export interface EmployeeFormDataValidationErrors {
   lastName?: string;
   email?: string;
   phone?: string;
+  advanceBookingTime?: string;
 }
 
 export interface EmployeeValidationErrors {
@@ -64,5 +67,6 @@ interface GroupedAvailabilityDayType {
     endTime: Time_HH_MM_SS_Type;
     blockStartTimeFirst: Time_HH_MM_SS_Type | null;
     blockEndTimeFirst: Time_HH_MM_SS_Type | null;
+    advanceBookingTime: string; // can be HH:MM:SS or 'next_day'
   }>;
 }

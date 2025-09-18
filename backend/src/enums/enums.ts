@@ -40,6 +40,9 @@ export enum InvoiceStatusEnum {
 export const DEFAULT_APPOINTMENT_SORT_FIELD = `date` as const;
 export const DEFAULT_SORT_DIRECTION = `desc` as const;
 
+// Advance booking time constants
+export const ADVANCE_BOOKING_NEXT_DAY = `next_day` as const;
+
 export enum CategoryStatusEnum {
   Active = `active`,
   Archived = `archived`,

@@ -1,4 +1,8 @@
 // Common form field configurations
+
+// Advance booking time constants
+export const ADVANCE_BOOKING_NEXT_DAY = `next_day`;
+
 export const ADDRESS_FIELDS = [
   {
     name: `addressStreet`,
@@ -56,69 +60,77 @@ export const PERSON_FIELDS = [
 export const SALUTATION_OPTIONS = [
   {
     value: 1,
-    label: `Frau`, 
+    label: `Frau`,
   },
   {
     value: 0,
-    label: `Herr`, 
+    label: `Herr`,
   },
 ];
 
 export const TIME_DURATIONS = [
   {
     value: `00:15:00`,
-    label: `15 min`, 
+    label: `15 min`,
   },
   {
     value: `00:30:00`,
-    label: `30 min`, 
+    label: `30 min`,
   },
   {
     value: `00:45:00`,
-    label: `45 min`, 
+    label: `45 min`,
   },
   {
     value: `01:00:00`,
-    label: `1 hour`, 
+    label: `1 hour`,
   },
   {
     value: `01:15:00`,
-    label: `1 hour 15 min`, 
+    label: `1 hour 15 min`,
   },
   {
     value: `01:30:00`,
-    label: `1 hour 30 min`, 
+    label: `1 hour 30 min`,
   },
   {
     value: `01:45:00`,
-    label: `1 hour 45 min`, 
+    label: `1 hour 45 min`,
   },
   {
     value: `02:00:00`,
-    label: `2 hours`, 
+    label: `2 hours`,
   },
   {
     value: `02:30:00`,
-    label: `2 hours 30 min`, 
+    label: `2 hours 30 min`,
   },
   {
     value: `03:00:00`,
-    label: `3 hours`, 
+    label: `3 hours`,
   },
   {
     value: `03:30:00`,
-    label: `3 hours 30 min`, 
+    label: `3 hours 30 min`,
   },
   {
     value: `04:00:00`,
-    label: `4 hours`, 
+    label: `4 hours`,
+  },
+  {
+    value: `08:00:00`,
+    label: `8 hours`,
+  },
+  {
+    value: `24:00:00`,
+    label: `24 hours`,
   },
 ];
 
 export const BUFFER_TIME_OPTIONS = [
   {
     value: ``,
-    label: `Clear`, 
+    label: `Clear`,
   },
   ...TIME_DURATIONS,
 ];
@@ -126,52 +138,89 @@ export const BUFFER_TIME_OPTIONS = [
 export const DAYS_TO_PAY = [
   {
     value: 0,
-    label: `Today`, 
+    label: `Today`,
   },
   {
     value: 1,
-    label: `1`, 
+    label: `1`,
   },
   {
     value: 7,
-    label: `7`, 
+    label: `7`,
   },
   {
     value: 14,
-    label: `14`, 
+    label: `14`,
   },
   {
     value: 30,
-    label: `30`, 
+    label: `30`,
   },
   {
     value: 60,
-    label: `60`, 
+    label: `60`,
   },
   {
     value: 90,
-    label: `90`, 
+    label: `90`,
   },
 ];
 
 export const TAX_RATES = [
   {
     value: `0`,
-    label: `0%`, 
+    label: `0%`,
   },
   {
     value: `7`,
-    label: `7%`, 
+    label: `7%`,
   },
   {
     value: `19`,
-    label: `19%`, 
+    label: `19%`,
   },
 ];
 
 export const EMPLOYEE_FIELDS = [
   ...PERSON_FIELDS,
   ...CONTACT_FIELDS,
+  {
+    name: `advanceBookingTime`,
+    label: `Advance Booking Time`,
+    type: `select`,
+    options: [
+      {
+        value: `00:30`,
+        label: `30 minutes`,
+      },
+      {
+        value: `01:00`,
+        label: `1 hour`,
+      },
+      {
+        value: `02:00`,
+        label: `2 hours`,
+      },
+      {
+        value: `04:00`,
+        label: `4 hours`,
+      },
+      {
+        value: `08:00`,
+        label: `8 hours`,
+      },
+      {
+        value: `24:00`,
+        label: `24 hours`,
+      },
+      {
+        value: ADVANCE_BOOKING_NEXT_DAY,
+        label: `From tomorrow only`,
+      },
+    ],
+    defaultValue: `00:30`,
+    required: false,
+  },
 ];
 
 export const CUSTOMER_FIELDS = [

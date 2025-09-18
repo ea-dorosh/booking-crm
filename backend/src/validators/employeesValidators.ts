@@ -1,5 +1,6 @@
 import { EmployeeDetailDataType, EmployeeFormDataValidationErrors } from '@/@types/employeesTypes.js';
 import { validateEmail, validatePhone } from '@/utils/validators.js';
+import { ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
 
 const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDataValidationErrors => {
   const errors: EmployeeFormDataValidationErrors = {};
@@ -22,6 +23,15 @@ const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDat
     errors.phone = `Phone is required`;
   } else if (!validatePhone(employee.phone)) {
     errors.phone = `Invalid phone number`;
+  }
+
+  // Validate advance booking time format (HH:MM or 'next_day')
+  if (employee.advanceBookingTime) {
+    const timePattern = /^([0-1][0-9]|2[0-3]):([0-5][0-9])$/;
+    const isNextDay = employee.advanceBookingTime === ADVANCE_BOOKING_NEXT_DAY;
+    if (!timePattern.test(employee.advanceBookingTime) && !isNextDay) {
+      errors.advanceBookingTime = `Advance booking time must be in format HH:MM or '${ADVANCE_BOOKING_NEXT_DAY}'`;
+    }
   }
 
   return errors;

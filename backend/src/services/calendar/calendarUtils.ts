@@ -2,6 +2,7 @@ import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
+import { ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
@@ -51,6 +52,7 @@ export interface EmployeeWithWorkingTimesType {
   startWorkingTime: dayjs.Dayjs;
   endWorkingTime: dayjs.Dayjs;
   pauseTimes: PauseTime[];
+  advanceBookingTime: string; // can be HH:MM:SS or 'next_day'
 }
 
 interface EmployeeWithBlockedAndAvailableTimesType {
@@ -270,6 +272,7 @@ function getPeriodWithDaysAndEmployeeAvailability(
               startWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.startTime}`, `Europe/Berlin`).utc(),
               endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, `Europe/Berlin`).utc(),
               pauseTimes,
+              advanceBookingTime: employee.advanceBookingTime,
             }
           }),
         };
@@ -399,19 +402,38 @@ function combinePeriodWithNormalizedAppointments(
         };
       });
 
-      // Add blocked period for current time + 30 minutes if this is today
+      // Add blocked period for current time + advance booking time if this is today
       const today = dayjs().utc().format(DATE_FORMAT);
       if (dayData.day === today) {
         const now = dayjs().utc();
-        const nowPlus30Minutes = now.add(30, `minute`);
 
-        blockedTimes.push({
-          startBlockedTime: employee.startWorkingTime,
-          endBlockedTime: nowPlus30Minutes,
-        });
+        if (employee.advanceBookingTime === ADVANCE_BOOKING_NEXT_DAY) {
+          // If 'next_day' is set, block the entire current day
+          blockedTimes.push({
+            startBlockedTime: employee.startWorkingTime,
+            endBlockedTime: employee.endWorkingTime,
+          });
+        } else {
+          // Parse advance booking time (HH:MM:SS format) and add to current time
+          const [hours, minutes, seconds] = employee.advanceBookingTime.split(`:`).map(Number);
+          const totalMinutes = hours * 60 + minutes + Math.floor(seconds / 60);
+          const nowPlusAdvanceTime = now.add(totalMinutes, `minute`);
+
+          // Only block if nowPlusAdvanceTime is within the working day and after start time
+          if (nowPlusAdvanceTime.isAfter(employee.startWorkingTime) && nowPlusAdvanceTime.isBefore(employee.endWorkingTime)) {
+            blockedTimes.push({
+              startBlockedTime: employee.startWorkingTime,
+              endBlockedTime: nowPlusAdvanceTime,
+            });
+          } else if (nowPlusAdvanceTime.isAfter(employee.endWorkingTime)) {
+            // If advance time goes beyond working hours, block the entire day
+            blockedTimes.push({
+              startBlockedTime: employee.startWorkingTime,
+              endBlockedTime: employee.endWorkingTime,
+            });
+          }
+        }
       }
-
-      console.log(`blockedTimes: `, JSON.stringify(blockedTimes, null, 2));
 
       const availableTimes = calculateAvailableTimes(
         employee.startWorkingTime,
@@ -419,8 +441,6 @@ function combinePeriodWithNormalizedAppointments(
         blockedTimes,
         serviceDurationWithBuffer,
       );
-
-      console.log(`availableTimes: Q `, JSON.stringify(availableTimes, null, 2));
 
       return {
         ...employee,

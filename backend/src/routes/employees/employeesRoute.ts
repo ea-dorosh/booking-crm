@@ -29,6 +29,7 @@ import { SavedAppointmentItemDataType } from '@/@types/appointmentsTypes.js';
 import {
   DEFAULT_APPOINTMENT_SORT_FIELD,
   DEFAULT_SORT_DIRECTION,
+  ADVANCE_BOOKING_NEXT_DAY,
 } from '@/enums/enums.js';
 import { getAppointments } from '@/services/appointment/appointmentService.js';
 import { getEmployeesWorkingTimesRange } from '@/services/employees/employeesSchedulePlannerService.js';
@@ -134,9 +135,16 @@ router.post(`/create-employee`, upload.single(`image`), async (req: CustomReques
   }
 
   const query = `
-    INSERT INTO Employees (first_name, last_name, email, phone, image)
-    VALUES (?, ?, ?, ?, COALESCE(?, image))
+    INSERT INTO Employees (first_name, last_name, email, phone, image, advance_booking_time)
+    VALUES (?, ?, ?, ?, COALESCE(?, image), COALESCE(?, '00:30:00'))
   `;
+
+  // Convert HH:MM format to HH:MM:SS for database storage, except for special values
+  const advanceBookingTime = employee.advanceBookingTime === ADVANCE_BOOKING_NEXT_DAY
+    ? ADVANCE_BOOKING_NEXT_DAY
+    : (employee.advanceBookingTime && employee.advanceBookingTime.length === 5
+      ? `${employee.advanceBookingTime}:00`
+      : employee.advanceBookingTime);
 
   const values = [
     formatName(employee.firstName),
@@ -144,6 +152,7 @@ router.post(`/create-employee`, upload.single(`image`), async (req: CustomReques
     employee.email,
     formatPhone(employee.phone),
     imgPath,
+    advanceBookingTime,
   ];
 
   let employeeId;
@@ -185,9 +194,16 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
   }
 
   const query = `UPDATE Employees
-    SET first_name = ?, last_name = ?, email = ?, phone = ?, image = COALESCE(?, image)
+    SET first_name = ?, last_name = ?, email = ?, phone = ?, image = COALESCE(?, image), advance_booking_time = COALESCE(?, advance_booking_time)
     WHERE employee_id = ?
   `;
+
+  // Convert HH:MM format to HH:MM:SS for database storage, except for special values
+  const advanceBookingTime = employee.advanceBookingTime === ADVANCE_BOOKING_NEXT_DAY
+    ? ADVANCE_BOOKING_NEXT_DAY
+    : (employee.advanceBookingTime && employee.advanceBookingTime.length === 5
+      ? `${employee.advanceBookingTime}:00`
+      : employee.advanceBookingTime);
 
   const values = [
     formatName(employee.firstName),
@@ -195,6 +211,7 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
     employee.email,
     formatPhone(employee.phone),
     imgPath,
+    advanceBookingTime,
     employeeId,
   ];
 

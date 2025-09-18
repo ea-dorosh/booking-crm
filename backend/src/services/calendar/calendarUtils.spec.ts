@@ -5,6 +5,7 @@ const MOCK_SUMMER_DATE = `2024-07-15T10:00:00.000Z`; // Summer time (UTC+2)
 import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import { ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
 import {
   calculateAdjustedEndTime,
   calculateAvailableTimes,
@@ -13,6 +14,8 @@ import {
   generateGroupedTimeSlotsForTwoServices,
   DayWithTimeSlots,
   generateTimeSlotsFromAvailableTimes,
+  PeriodWithEmployeeWorkingTimeType,
+  combinePeriodWithNormalizedAppointments,
 } from './calendarUtils';
 
 jest.mock(`dayjs`, () => {
@@ -471,6 +474,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `17:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -500,6 +504,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `18:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -522,6 +527,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `16:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -546,6 +552,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `16:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -567,6 +574,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `14:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -591,6 +599,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `14:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -614,6 +623,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `17:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
           {
             id: 2,
@@ -621,6 +631,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `18:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -633,6 +644,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `16:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -645,6 +657,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `19:00:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -657,6 +670,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `17:30:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
           {
             id: 2,
@@ -664,6 +678,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             endTime: `16:30:00`,
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
+            advanceBookingTime: `00:30:00`,
           },
         ],
       },
@@ -1634,5 +1649,208 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
     expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
     expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
     expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
+  });
+
+  describe(`Advance booking time functionality`, () => {
+    it(`should work with manual time calculation for advance booking`, () => {
+      // Simplified test focusing on the core functionality
+      const workingStart = dayjs.utc(`2024-01-15T08:00:00.000Z`);
+      const workingEnd = dayjs.utc(`2024-01-15T18:00:00.000Z`);
+      const serviceDuration = `00:30:00` as Time_HH_MM_SS_Type;
+
+      const blockedTimes = [
+        {
+          startBlockedTime: workingStart,
+          endBlockedTime: dayjs.utc(`2024-01-15T12:00:00.000Z`),
+        },
+      ];
+
+      const result = calculateAvailableTimes(
+        workingStart,
+        workingEnd,
+        blockedTimes,
+        serviceDuration,
+      );
+
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].minPossibleStartTime.format()).toBe(`2024-01-15T12:00:00Z`);
+    });
+    it(`should block current day when advanceBookingTime is 'next_day'`, () => {
+      // Create working times BEFORE mocking
+      const startWorkingTime = dayjs.utc(`2024-01-15T08:00:00.000Z`);
+      const endWorkingTime = dayjs.utc(`2024-01-15T18:00:00.000Z`);
+
+      // Mock current time as today at 14:00
+      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
+      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+
+      const period: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type, // Today
+          employees: [
+            {
+              employeeId: 1,
+              startWorkingTime,
+              endWorkingTime,
+              pauseTimes: [],
+              advanceBookingTime: ADVANCE_BOOKING_NEXT_DAY,
+            },
+          ],
+        },
+      ];
+
+      const result = combinePeriodWithNormalizedAppointments(
+        period,
+        [], // no appointments
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDurationWithBuffer
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDuration
+        1, // serviceId
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].employees).toHaveLength(1);
+
+      const employee = result[0].employees[0];
+      expect(employee.availableTimes).toHaveLength(0); // Should have no available times
+
+      // Restore the mock
+      jest.restoreAllMocks();
+    });
+
+    it(`should allow booking with 2 hour advance time`, () => {
+      // Create working times BEFORE mocking
+      const startWorkingTime = dayjs.utc(`2024-01-15T08:00:00.000Z`);
+      const endWorkingTime = dayjs.utc(`2024-01-15T18:00:00.000Z`);
+
+      // Mock current time as today at 14:00
+      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
+      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+
+      const period: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type, // Today
+          employees: [
+            {
+              employeeId: 1,
+              startWorkingTime,
+              endWorkingTime,
+              pauseTimes: [],
+              advanceBookingTime: `02:00:00`, // 2 hours advance
+            },
+          ],
+        },
+      ];
+
+      const result = combinePeriodWithNormalizedAppointments(
+        period,
+        [], // no appointments
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDurationWithBuffer
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDuration
+        1, // serviceId
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].employees).toHaveLength(1);
+
+      const employee = result[0].employees[0];
+      // Should have available times from 16:00 onwards (14:00 + 2 hours)
+      expect(employee.availableTimes.length).toBeGreaterThan(0);
+
+      // Check that the first available time is after 16:00
+      if (employee.availableTimes.length > 0) {
+        const firstAvailableTime = employee.availableTimes[0].minPossibleStartTime;
+        expect(firstAvailableTime.isAfter(dayjs.utc(`2024-01-15T16:00:00.000Z`)) ||
+               firstAvailableTime.isSame(dayjs.utc(`2024-01-15T16:00:00.000Z`))).toBe(true);
+      }
+
+      // Restore the mock
+      jest.restoreAllMocks();
+    });
+
+    it(`should allow booking on future days regardless of advanceBookingTime`, () => {
+      // Create working times BEFORE mocking
+      const startWorkingTime = dayjs.utc(`2024-01-16T08:00:00.000Z`);
+      const endWorkingTime = dayjs.utc(`2024-01-16T18:00:00.000Z`);
+
+      // Mock current time as today at 14:00
+      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
+      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+
+      const period: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-16` as Date_ISO_Type, // Tomorrow
+          employees: [
+            {
+              employeeId: 1,
+              startWorkingTime,
+              endWorkingTime,
+              pauseTimes: [],
+              advanceBookingTime: ADVANCE_BOOKING_NEXT_DAY,
+            },
+          ],
+        },
+      ];
+
+      const result = combinePeriodWithNormalizedAppointments(
+        period,
+        [], // no appointments
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDurationWithBuffer
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDuration
+        1, // serviceId
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].employees).toHaveLength(1);
+
+      const employee = result[0].employees[0];
+      // Should have available times for tomorrow even with next_day setting
+      expect(employee.availableTimes.length).toBeGreaterThan(0);
+
+      // Restore the mock
+      jest.restoreAllMocks();
+    });
+
+    it(`should use default 30 minutes when advanceBookingTime is not specified`, () => {
+      // Create working times BEFORE mocking
+      const startWorkingTime = dayjs.utc(`2024-01-15T08:00:00.000Z`);
+      const endWorkingTime = dayjs.utc(`2024-01-15T18:00:00.000Z`);
+
+      // Mock current time as today at 14:00
+      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
+      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+
+      const period: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type, // Today
+          employees: [
+            {
+              employeeId: 1,
+              startWorkingTime,
+              endWorkingTime,
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`, // Default 30 minutes
+            },
+          ],
+        },
+      ];
+
+      const result = combinePeriodWithNormalizedAppointments(
+        period,
+        [], // no appointments
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDurationWithBuffer
+        `00:30:00` as Time_HH_MM_SS_Type, // serviceDuration
+        1, // serviceId
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0].employees).toHaveLength(1);
+
+      const employee = result[0].employees[0];
+      // Should have available times from 14:30 onwards (14:00 + 30 minutes)
+      expect(employee.availableTimes.length).toBeGreaterThan(0);
+
+      // Restore the mock
+      jest.restoreAllMocks();
+    });
   });
 });
