@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest",
+    "test:fast": "jest --runInBand --silent",
     "test-watch": "jest --watchAll",
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
