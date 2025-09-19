@@ -190,28 +190,60 @@ export const EMPLOYEE_FIELDS = [
     type: `select`,
     options: [
       {
+        value: `00:00`,
+        label: `0 minutes`,
+      },
+      {
+        value: `00:10`,
+        label: `10 minutes`,
+      },
+      {
+        value: `00:15`,
+        label: `15 minutes`,
+      },
+      {
         value: `00:30`,
         label: `30 minutes`,
+      },
+      {
+        value: `00:45`,
+        label: `45 minutes`,
       },
       {
         value: `01:00`,
         label: `1 hour`,
       },
       {
+        value: `01:30`,
+        label: `1 hour 30 min`,
+      },
+      {
         value: `02:00`,
         label: `2 hours`,
+      },
+      {
+        value: `02:30`,
+        label: `2 hours 30 min`,
+      },
+      {
+        value: `03:00`,
+        label: `3 hours`,
+      },
+      {
+        value: `03:30`,
+        label: `3 hours 30 min`,
       },
       {
         value: `04:00`,
         label: `4 hours`,
       },
       {
-        value: `08:00`,
-        label: `8 hours`,
+        value: `04:30`,
+        label: `4 hours 30 min`,
       },
       {
-        value: `24:00`,
-        label: `24 hours`,
+        value: `05:00`,
+        label: `5 hours`,
       },
       {
         value: ADVANCE_BOOKING_NEXT_DAY,

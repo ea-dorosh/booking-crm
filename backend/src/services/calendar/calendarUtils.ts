@@ -442,6 +442,8 @@ function combinePeriodWithNormalizedAppointments(
         serviceDurationWithBuffer,
       );
 
+
+
       return {
         ...employee,
         blockedTimes,
@@ -625,7 +627,6 @@ function combineAndFilterTimeSlotsDataFromTwoServices(
     const sortedCombinedTimeSlots = combinedTimeSlots.sort((a, b) =>
       a.startTime.localeCompare(b.startTime),
     );
-    console.log(`sortedCombinedTimeSlots: `, JSON.stringify(sortedCombinedTimeSlots, null, 2));
 
     result.push({
       day: firstServiceDay.day,

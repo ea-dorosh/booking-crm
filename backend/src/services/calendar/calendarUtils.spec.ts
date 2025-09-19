@@ -1680,9 +1680,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       const startWorkingTime = dayjs.utc(`2024-01-15T08:00:00.000Z`);
       const endWorkingTime = dayjs.utc(`2024-01-15T18:00:00.000Z`);
 
-      // Mock current time as today at 14:00
-      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
-      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+      // Set current time as today at 14:00 using dayjs mock clock
+      (dayjs as any).setMockDate(`2024-01-15T14:00:00.000Z`);
 
       const period: PeriodWithEmployeeWorkingTimeType[] = [
         {
@@ -1713,8 +1712,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       const employee = result[0].employees[0];
       expect(employee.availableTimes).toHaveLength(0); // Should have no available times
 
-      // Restore the mock
-      jest.restoreAllMocks();
+      // Restore mock clock
+      (dayjs as any).resetMockDate();
     });
 
     it(`should allow booking with 2 hour advance time`, () => {
@@ -1722,9 +1721,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       const startWorkingTime = dayjs.utc(`2024-01-15T08:00:00.000Z`);
       const endWorkingTime = dayjs.utc(`2024-01-15T18:00:00.000Z`);
 
-      // Mock current time as today at 14:00
-      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
-      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+      // Set current time as today at 14:00 using dayjs mock clock
+      (dayjs as any).setMockDate(`2024-01-15T14:00:00.000Z`);
 
       const period: PeriodWithEmployeeWorkingTimeType[] = [
         {
@@ -1763,8 +1761,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
                firstAvailableTime.isSame(dayjs.utc(`2024-01-15T16:00:00.000Z`))).toBe(true);
       }
 
-      // Restore the mock
-      jest.restoreAllMocks();
+      // Restore mock clock
+      (dayjs as any).resetMockDate();
     });
 
     it(`should allow booking on future days regardless of advanceBookingTime`, () => {
@@ -1772,9 +1770,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       const startWorkingTime = dayjs.utc(`2024-01-16T08:00:00.000Z`);
       const endWorkingTime = dayjs.utc(`2024-01-16T18:00:00.000Z`);
 
-      // Mock current time as today at 14:00
-      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
-      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+      // Set current time as today at 14:00 using dayjs mock clock
+      (dayjs as any).setMockDate(`2024-01-15T14:00:00.000Z`);
 
       const period: PeriodWithEmployeeWorkingTimeType[] = [
         {
@@ -1806,8 +1803,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       // Should have available times for tomorrow even with next_day setting
       expect(employee.availableTimes.length).toBeGreaterThan(0);
 
-      // Restore the mock
-      jest.restoreAllMocks();
+      // Restore mock clock
+      (dayjs as any).resetMockDate();
     });
 
     it(`should use default 30 minutes when advanceBookingTime is not specified`, () => {
@@ -1815,9 +1812,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       const startWorkingTime = dayjs.utc(`2024-01-15T08:00:00.000Z`);
       const endWorkingTime = dayjs.utc(`2024-01-15T18:00:00.000Z`);
 
-      // Mock current time as today at 14:00
-      const mockNow = dayjs.utc(`2024-01-15T14:00:00.000Z`);
-      jest.spyOn(dayjs, `utc`).mockImplementation(() => mockNow);
+      // Set current time as today at 14:00 using dayjs mock clock
+      (dayjs as any).setMockDate(`2024-01-15T14:00:00.000Z`);
 
       const period: PeriodWithEmployeeWorkingTimeType[] = [
         {
@@ -1849,8 +1845,8 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       // Should have available times from 14:30 onwards (14:00 + 30 minutes)
       expect(employee.availableTimes.length).toBeGreaterThan(0);
 
-      // Restore the mock
-      jest.restoreAllMocks();
+      // Restore mock clock
+      (dayjs as any).resetMockDate();
     });
   });
 });

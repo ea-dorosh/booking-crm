@@ -53,7 +53,7 @@ export default function EmployeeForm({
       sx={{
         display: `flex`,
         flexDirection: `column`,
-        gap: 2, 
+        gap: 2,
       }}
     >
       {/* Personal Information */}
@@ -63,7 +63,7 @@ export default function EmployeeForm({
           sx={{
             fontWeight: 600,
             marginBottom: 2,
-            fontSize: `1.1rem`, 
+            fontSize: `1.1rem`,
           }}
         >
           Personal Information
@@ -88,6 +88,7 @@ export default function EmployeeForm({
                 onChange={handleChange}
                 error={formErrors?.[field.name]}
                 required={field.required}
+                options={field.options || []}
               />
             </Grid>
           ))}
@@ -101,7 +102,7 @@ export default function EmployeeForm({
           sx={{
             fontWeight: 600,
             marginBottom: 2,
-            fontSize: `1.1rem`, 
+            fontSize: `1.1rem`,
           }}
         >
           Profile Image
