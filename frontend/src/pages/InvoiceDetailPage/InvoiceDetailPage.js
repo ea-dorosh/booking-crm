@@ -74,7 +74,13 @@ export default function CustomerDetailPage() {
 
   const updateHandler = async (invoice) => {
     try {
-      const response = await dispatch(updateInvoice(invoice)).unwrap();
+      // Format the date to YYYY-MM-DD format expected by backend
+      const formattedInvoice = {
+        ...invoice,
+        dateIssued: invoice.dateIssued?.format ? invoice.dateIssued.format(`YYYY-MM-DD`) : invoice.dateIssued,
+      };
+
+      const response = await dispatch(updateInvoice(formattedInvoice)).unwrap();
 
       setIsEditMode(false);
 
