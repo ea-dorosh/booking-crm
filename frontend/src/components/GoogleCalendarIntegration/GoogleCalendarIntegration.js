@@ -228,12 +228,11 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
         gutterBottom
         sx={{
           fontSize: `1rem`,
+          mb: 2,
         }}
       >
         Google Calendar Integration
       </Typography>
-
-      <Divider sx={{ mb: 2 }} />
 
       {error && (
         <Alert
@@ -255,123 +254,129 @@ const GoogleCalendarIntegration = ({ employeeId }) => {
       )}
 
       {status.enabled ? (
-        <Card
-          variant="outlined"
-          sx={{ mb: 3 }}
-        >
-          <CardContent>
+        <>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{ mb: 2 }}
+          >
+            <Google color="primary" />
+
+            <Typography
+              variant="h6"
+              fontSize=".75rem"
+              sx={{ mr: `10px` }}
+            >
+              Google Calendar Connected
+            </Typography>
+
+            <Chip
+              icon={<Check />}
+              label="Active"
+              color="success"
+              size="small"
+              sx={{ ml: `auto !important` }}
+            />
+          </Stack>
+
+          <Box
+            sx={{
+              mb: 2,
+              p: 0,
+              bgcolor: `background.paper`,
+              borderRadius: 1,
+            }}
+          >
             <Stack
               direction="row"
               alignItems="center"
               spacing={1}
-              sx={{ mb: 2 }}
-            >
-              <Google color="primary" />
-
-              <Typography variant="h6">Google Calendar Connected</Typography>
-
-              <Chip
-                icon={<Check />}
-                label="Active"
-                color="success"
-                size="small"
-                sx={{ ml: `auto` }}
-              />
-            </Stack>
-
-            <Box
               sx={{
-                mb: 2,
-                p: 2,
-                bgcolor: `background.paper`,
-                borderRadius: 1,
+                mb: 1,
               }}
             >
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={1}
-                sx={{ mb: 1 }}
+              <CalendarMonth
+                fontSize="small"
+                color="action"
+              />
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
               >
-                <CalendarMonth
-                  fontSize="small"
-                  color="action"
-                />
+                Calendar ID:
+              </Typography>
 
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  Calendar ID:
-                </Typography>
-
-                <Typography variant="body1">
-                  {status.calendarId}
-                </Typography>
-              </Stack>
-
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={1}
+              <Typography
+                variant="body1"
+                sx={{ hyphens: `auto` }}
               >
-                <Link
-                  fontSize="small"
-                  color="action"
-                />
-
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  Status:
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  color="success.main"
-                >
-                  Synchronizing appointments
-                </Typography>
-              </Stack>
-            </Box>
-
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mb: 2 }}
-            >
-              Appointments will be automatically synced with this Google Calendar.
-            </Typography>
+                {status.calendarId}
+              </Typography>
+            </Stack>
 
             <Stack
-              direction="column"
-              spacing={2}
+              direction="row"
+              alignItems="center"
+              spacing={1}
             >
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={removeIntegration}
-                disabled={loading}
-                startIcon={<Google />}
-              >
-                Disconnect Calendar
-              </Button>
+              <Link
+                fontSize="small"
+                color="action"
+              />
 
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={syncMissingAppointments}
-                disabled={syncLoading}
-                startIcon={<Sync />}
+              <Typography
+                variant="body2"
+                color="text.secondary"
               >
-                {syncLoading ? `Synchronizing...` : `Sync Missed Appointments`}
-              </Button>
+                  Status:
+              </Typography>
+
+              <Typography
+                variant="body1"
+                color="success.main"
+              >
+                  Synchronizing appointments
+              </Typography>
             </Stack>
-          </CardContent>
-        </Card>
+          </Box>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mb: 2 }}
+          >
+              Appointments will be automatically synced with this Google Calendar.
+          </Typography>
+
+          <Stack
+            direction="column"
+            spacing={2}
+          >
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={removeIntegration}
+              disabled={loading}
+              startIcon={<Google />}
+            >
+                Disconnect Calendar
+            </Button>
+
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={syncMissingAppointments}
+              disabled={syncLoading}
+              startIcon={<Sync />}
+            >
+              {syncLoading ? `Synchronizing...` : `Sync Missed Appointments`}
+            </Button>
+          </Stack>
+        </>
       ) : (
         <Box>
           {status.tokenExpired ? (
