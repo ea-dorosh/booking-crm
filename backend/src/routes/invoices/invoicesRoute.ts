@@ -75,7 +75,7 @@ router.post(`/create-invoice`, async (request: CustomRequestType, response: Cust
 
   try {
     const {
-      createdInvoiceId, validationErrors, 
+      createdInvoiceId, validationErrors,
     } = await createInvoice(request.dbPool, customer);
 
     if (validationErrors) {
@@ -135,7 +135,7 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
   const invoiceId = request.params.id;
 
   let browser;
-  
+
   try {
     const invoice = await geInvoiceById(request.dbPool, invoiceId);
 
@@ -148,7 +148,7 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
     const invoiceHtml = generateInvoiceHtml(invoice);
 
     const isProduction = process.env.NODE_ENV === `production`;
-    
+
     if (isProduction) {
       // Use chromium for production environment
       browser = await puppeteerCore.launch({
@@ -167,11 +167,11 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
       browser = await puppeteer.launch({
         headless: true,
         args: [
-          `--no-sandbox`, 
-          `--disable-setuid-sandbox`, 
+          `--no-sandbox`,
+          `--disable-setuid-sandbox`,
           `--disable-dev-shm-usage`,
           `--disable-web-security`,
-          `--disable-features=VizDisplayCompositor`
+          `--disable-features=VizDisplayCompositor`,
         ],
       });
     }
@@ -180,7 +180,7 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
     await page.setContent(invoiceHtml, { waitUntil: `networkidle0` });
 
     const pdfBuffer = await page.pdf({
-      format: `A4`, printBackground: true, 
+      format: `A4`, printBackground: true,
     });
 
     response.setHeader(`Content-Type`, `application/pdf`);
