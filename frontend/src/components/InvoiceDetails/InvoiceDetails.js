@@ -2,6 +2,7 @@ import {
   Edit as EditIcon,
   PictureAsPdf as DownloadIcon,
   Visibility as ViewIcon,
+  IosShare as ShareIcon,
 } from "@mui/icons-material";
 import {
   IconButton,
@@ -16,7 +17,11 @@ import ListItemText from "@/components/ListItemText/ListItemText";
 import { formatIsoDate } from "@/utils/formatters";
 
 export default function InvoiceDetails({
-  invoice, onChangeInvoiceClick, onDownloadInvoiceClick, onViewInvoiceClick,
+  invoice,
+  onChangeInvoiceClick,
+  onDownloadInvoiceClick,
+  onViewInvoiceClick,
+  onShareInvoiceClick,
 }) {
 
   return (
@@ -67,6 +72,11 @@ export default function InvoiceDetails({
         <Box
           sx={{ display: `flex` }}
         >
+          <Tooltip title="Share PDF">
+            <IconButton onClick={onShareInvoiceClick}>
+              <ShareIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip
             title="View PDF"
           >

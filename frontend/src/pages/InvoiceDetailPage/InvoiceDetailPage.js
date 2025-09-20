@@ -38,7 +38,10 @@ export default function CustomerDetailPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Use PDF handler hook
+  const {
+    data: invoice, isPending, updateFormPending,
+  } = useSelector(state => state.invoice);
+  // Use PDF handler hook (after invoice is available to avoid ReferenceError)
   const {
     isPdfLoading,
     showPdfViewer,
@@ -46,11 +49,8 @@ export default function CustomerDetailPage() {
     handleDownloadPdf,
     handleViewPdf,
     closePdfViewer,
-  } = usePdfHandler(invoiceId);
-
-  const {
-    data: invoice, isPending, updateFormPending,
-  } = useSelector(state => state.invoice);
+    handleSharePdf,
+  } = usePdfHandler(invoiceId, invoice?.invoiceNumber);
   const { isPending: isCustomersRequestPending } = useSelector(state => state.customers);
 
   const customers = useSelector(sortedByLastActivityDateCustomers);
@@ -188,6 +188,7 @@ export default function CustomerDetailPage() {
           onChangeInvoiceClick={changeInvoiceHandler}
           onDownloadInvoiceClick={handleDownloadPdf}
           onViewInvoiceClick={handleViewPdf}
+          onShareInvoiceClick={handleSharePdf}
         />
       </Box>}
 

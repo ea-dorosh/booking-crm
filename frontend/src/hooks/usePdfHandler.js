@@ -10,7 +10,7 @@ import {
 /**
  * Custom hook for handling PDF operations
  */
-export const usePdfHandler = (invoiceId) => {
+export const usePdfHandler = (invoiceId, invoiceNumber) => {
   const [isPdfLoading, setIsPdfLoading] = useState(false);
   const [pdfViewerUrl, setPdfViewerUrl] = useState(null);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
@@ -93,13 +93,27 @@ export const usePdfHandler = (invoiceId) => {
 
         // Other mobile platforms
         if (preOpenedWindow && preOpenedWindow !== window) {
-          const success = openMobilePdfPreview(blob, invoiceId);
+          const success = openMobilePdfPreview(
+            blob,
+            invoiceId,
+            {
+              fileName: `Rechnung-${invoiceId}.pdf`,
+              title: `Rechnung Nr. ${invoiceId}`,
+            },
+          );
           if (!success) {
             // As a fallback, navigate the pre-opened window
             preOpenedWindow.location.href = fileURL;
           }
         } else {
-          const success = openMobilePdfPreview(blob, invoiceId);
+          const success = openMobilePdfPreview(
+            blob,
+            invoiceId,
+            {
+              fileName: `Rechnung-${invoiceId}.pdf`,
+              title: `Rechnung Nr. ${invoiceId}`,
+            },
+          );
           if (!success) {
             // Last resort: navigate current tab
             window.location.href = fileURL;
@@ -136,6 +150,35 @@ export const usePdfHandler = (invoiceId) => {
     isMobileDevice,
     handleDownloadPdf,
     handleViewPdf,
+    handleSharePdf: async () => {
+      try {
+        setIsPdfLoading(true);
+        const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
+        const blob = new Blob([blobResponse], { type: `application/pdf` });
+        const fileName = `Rechnung-${invoiceNumber || invoiceId}.pdf`;
+        const title = `Rechnung Nr. ${invoiceNumber || invoiceId}`;
+
+        const file = new File([blob], fileName, { type: `application/pdf` });
+        if (
+          navigator.share &&
+          navigator.canShare &&
+          navigator.canShare({ files: [file] })
+        ) {
+          await navigator.share({
+            files: [file],
+            title,
+          });
+          return;
+        }
+
+        await downloadPdfFile(blob, fileName, isMobileDevice, title);
+      } catch (error) {
+        console.error(`Failed to share PDF`, error);
+        alert(`Failed to share PDF. Please try again.`);
+      } finally {
+        setIsPdfLoading(false);
+      }
+    },
     closePdfViewer,
   };
 };

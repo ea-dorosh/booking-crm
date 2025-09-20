@@ -33,4 +33,17 @@ export default configureStore({
     services: servicesSlice,
     tracking: trackingSlice,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: {
+      // Ignore non-serializable values like Blob in specific actions
+      ignoredActions: [
+        `invoice/downloadInvoicePdf/pending`,
+        `invoice/downloadInvoicePdf/fulfilled`,
+        `invoice/downloadInvoicePdf/rejected`,
+      ],
+      ignoredActionPaths: [
+        `payload`,
+      ],
+    },
+  }),
 });

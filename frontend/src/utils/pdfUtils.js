@@ -36,7 +36,7 @@ export const checkIsMobileDevice = () => {
 /**
  * Download PDF file with mobile-friendly approach
  */
-export const downloadPdfFile = async (blob, filename, isMobile = false) => {
+export const downloadPdfFile = async (blob, filename, isMobile = false, shareTitle = `PDF Document`) => {
   const fileURL = URL.createObjectURL(blob);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
@@ -49,8 +49,8 @@ export const downloadPdfFile = async (blob, filename, isMobile = false) => {
       try {
         await navigator.share({
           files: [file],
-          title: `PDF Document`,
-          text: `PDF document`,
+          title: shareTitle,
+          text: shareTitle,
         });
         URL.revokeObjectURL(fileURL);
         return;
@@ -111,14 +111,14 @@ export const downloadPdfFile = async (blob, filename, isMobile = false) => {
 /**
  * Create mobile-friendly PDF viewer HTML content
  */
-export const createMobilePdfViewerContent = (fileURL, invoiceId) => {
+export const createMobilePdfViewerContent = (fileURL, titleText = `Invoice`, fileName = `invoice.pdf`) => {
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Invoice ${invoiceId} - PDF Preview</title>
+        <title>${titleText}</title>
         <style>
           body {
             margin: 0;
@@ -189,9 +189,9 @@ export const createMobilePdfViewerContent = (fileURL, invoiceId) => {
       </head>
       <body>
         <div class="header">
-          <h1>Invoice ${invoiceId}</h1>
+          <h1>${titleText}</h1>
           <div class="actions">
-            <a href="${fileURL}" download="invoice-${invoiceId}.pdf" class="btn btn-primary">Download</a>
+            <a href="${fileURL}" download="${fileName}" class="btn btn-primary">Download</a>
             <button onclick="window.close()" class="btn btn-secondary">Close</button>
           </div>
         </div>
@@ -199,7 +199,7 @@ export const createMobilePdfViewerContent = (fileURL, invoiceId) => {
           <embed id="pdf-embed" src="${fileURL}" type="application/pdf" class="pdf-embed">
           <div id="fallback" class="fallback">
             <p>PDF preview not supported on this device.</p>
-            <p><a href="${fileURL}" download="invoice-${invoiceId}.pdf">Click here to download the PDF</a></p>
+            <p><a href="${fileURL}" download="${fileName}">Click here to download the PDF</a></p>
           </div>
         </div>
         <script>
@@ -247,7 +247,11 @@ export const blobToDataURL = (blob) => new Promise((resolve, reject) => {
 /**
  * Open PDF preview in mobile-friendly way
  */
-export const openMobilePdfPreview = (blob, invoiceId) => {
+export const openMobilePdfPreview = (blob, invoiceId, options = {}) => {
+  const {
+    fileName = `invoice-${invoiceId}.pdf`,
+    title = `Invoice #${invoiceId}`,
+  } = options;
   const fileURL = URL.createObjectURL(blob);
 
   // For iOS Safari, try a different approach
@@ -279,7 +283,7 @@ export const openMobilePdfPreview = (blob, invoiceId) => {
 
   if (newWindow && newWindow !== window) {
     // Create the HTML content using modern DOM manipulation
-    const htmlContent = createMobilePdfViewerContent(fileURL, invoiceId);
+    const htmlContent = createMobilePdfViewerContent(fileURL, title, fileName);
 
     // Use innerHTML instead of document.write
     newWindow.document.documentElement.innerHTML = htmlContent;
