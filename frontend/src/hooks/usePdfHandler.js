@@ -78,8 +78,12 @@ export const usePdfHandler = (invoiceId) => {
       if (isMobileDevice) {
         // Use mobile-friendly preview
         const success = openMobilePdfPreview(blob, invoiceId);
-        if (!success) {
-          // Fallback already handled in openMobilePdfPreview
+
+        // For iOS, we always consider it successful since we open the PDF directly
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (!success && !isIOS) {
+          // Show a more helpful message for non-iOS devices
+          alert(`PDF preview opened in a new tab. If you don't see it, please check if popups are blocked and allow them for this site.`);
         }
       } else {
         // Desktop: show in iframe

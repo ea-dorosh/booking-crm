@@ -38,18 +38,44 @@ export const checkIsMobileDevice = () => {
  */
 export const downloadPdfFile = async (blob, filename, isMobile = false) => {
   const fileURL = URL.createObjectURL(blob);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   if (isMobile) {
     const capabilities = getBrowserCapabilities();
     const file = new File([blob], filename, { type: `application/pdf` });
 
+    // Try Web Share API first (works great on iOS)
     if (capabilities.supportsWebShare && navigator.canShare({ files: [file] })) {
-      // Use Web Share API if available (modern mobile browsers)
-      await navigator.share({
-        files: [file],
-        title: `PDF Document`,
-        text: `PDF document`,
-      });
+      try {
+        await navigator.share({
+          files: [file],
+          title: `PDF Document`,
+          text: `PDF document`,
+        });
+        URL.revokeObjectURL(fileURL);
+        return;
+      } catch (error) {
+        console.log(`Web Share failed, falling back to download`, error);
+      }
+    }
+
+    // For iOS, use a different approach
+    if (isIOS) {
+      // On iOS, open the PDF directly - Safari will show share options
+      const link = document.createElement(`a`);
+      link.href = fileURL;
+      link.target = `_blank`;
+      link.rel = `noopener noreferrer`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up after delay
+      setTimeout(() => {
+        URL.revokeObjectURL(fileURL);
+      }, 5000);
+
       return;
     }
   }
@@ -210,10 +236,34 @@ export const createMobilePdfViewerContent = (fileURL, invoiceId) => {
 export const openMobilePdfPreview = (blob, invoiceId) => {
   const fileURL = URL.createObjectURL(blob);
 
-  // Create a new window/tab
+  // For iOS Safari, try a different approach
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  if (isIOS) {
+    // On iOS, directly open the PDF in a new tab
+    // This works better than trying to create a custom viewer
+    const link = document.createElement(`a`);
+    link.href = fileURL;
+    link.target = `_blank`;
+    link.rel = `noopener noreferrer`;
+
+    // Try to open in new tab
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up URL after a delay
+    setTimeout(() => {
+      URL.revokeObjectURL(fileURL);
+    }, 5000);
+
+    return true;
+  }
+
+  // For other mobile devices, try popup first
   const newWindow = window.open(`about:blank`, `_blank`);
 
-  if (newWindow) {
+  if (newWindow && newWindow !== window) {
     // Create the HTML content using modern DOM manipulation
     const htmlContent = createMobilePdfViewerContent(fileURL, invoiceId);
 
@@ -222,9 +272,24 @@ export const openMobilePdfPreview = (blob, invoiceId) => {
 
     return true;
   } else {
-    // If popup is blocked, fallback to direct download
-    alert(`Popup blocked. PDF will be downloaded instead.`);
-    downloadPdfFile(blob, `invoice-${invoiceId}.pdf`, true);
+    // If popup is blocked, fallback to direct link approach
+    const link = document.createElement(`a`);
+    link.href = fileURL;
+    link.target = `_blank`;
+    link.rel = `noopener noreferrer`;
+
+    // For better mobile experience, add download attribute as fallback
+    link.download = `invoice-${invoiceId}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up URL after a delay
+    setTimeout(() => {
+      URL.revokeObjectURL(fileURL);
+    }, 5000);
+
     return false;
   }
 };
