@@ -5,6 +5,7 @@ import {
   checkIsMobileDevice,
   downloadPdfFile,
   openMobilePdfPreview,
+  blobToDataURL,
 } from '@/utils/pdfUtils.js';
 
 /**
@@ -63,6 +64,10 @@ export const usePdfHandler = (invoiceId) => {
    * Handle PDF preview
    */
   const handleViewPdf = useCallback(async () => {
+    // Pre-open a window synchronously on user gesture to avoid popup blocking (non-iOS mobile)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const preOpenedWindow = (isMobileDevice && !isIOS) ? window.open(`about:blank`, `_blank`) : null;
+
     try {
       setIsPdfLoading(true);
       const blobResponse = await dispatch(downloadInvoicePdf(invoiceId)).unwrap();
@@ -76,14 +81,26 @@ export const usePdfHandler = (invoiceId) => {
       const fileURL = URL.createObjectURL(blob);
 
       if (isMobileDevice) {
-        // Use mobile-friendly preview
-        const success = openMobilePdfPreview(blob, invoiceId);
+        if (isIOS) {
+          // iOS: navigate current tab to data URL -> triggers native PDF viewer
+          const dataUrl = await blobToDataURL(blob);
+          window.location.href = dataUrl;
+          return;
+        }
 
-        // For iOS, we always consider it successful since we open the PDF directly
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (!success && !isIOS) {
-          // Show a more helpful message for non-iOS devices
-          alert(`PDF preview opened in a new tab. If you don't see it, please check if popups are blocked and allow them for this site.`);
+        // Other mobile platforms
+        if (preOpenedWindow && preOpenedWindow !== window) {
+          const success = openMobilePdfPreview(blob, invoiceId);
+          if (!success) {
+            // As a fallback, navigate the pre-opened window
+            preOpenedWindow.location.href = fileURL;
+          }
+        } else {
+          const success = openMobilePdfPreview(blob, invoiceId);
+          if (!success) {
+            // Last resort: navigate current tab
+            window.location.href = fileURL;
+          }
         }
       } else {
         // Desktop: show in iframe

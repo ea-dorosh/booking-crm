@@ -231,6 +231,20 @@ export const createMobilePdfViewerContent = (fileURL, invoiceId) => {
 };
 
 /**
+ * Convert Blob to data URL (base64) - useful for iOS Safari navigation
+ */
+export const blobToDataURL = (blob) => new Promise((resolve, reject) => {
+  try {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  } catch (error) {
+    reject(error);
+  }
+});
+
+/**
  * Open PDF preview in mobile-friendly way
  */
 export const openMobilePdfPreview = (blob, invoiceId) => {
