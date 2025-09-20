@@ -46,6 +46,8 @@
     "nodemon": "^3.0.1",
     "phone": "^3.1.42",
     "puppeteer": "^24.1.1",
+    "puppeteer-core": "^24.1.1",
+    "@sparticuz/chromium": "^131.0.0",
     "uuid": "^11.0.5",
     "validator": "^13.11.0"
   },

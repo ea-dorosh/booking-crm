@@ -10,6 +10,8 @@ import {
 } from '@/@types/expressTypes.js';
 import { generateInvoiceHtml } from '@/templates/invoiceTemplate.js';
 import puppeteer from 'puppeteer';
+import puppeteerCore from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 
 const router = express.Router();
 
@@ -132,6 +134,8 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
 
   const invoiceId = request.params.id;
 
+  let browser;
+  
   try {
     const invoice = await geInvoiceById(request.dbPool, invoiceId);
 
@@ -143,15 +147,37 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
 
     const invoiceHtml = generateInvoiceHtml(invoice);
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.NODE_ENV === `development` ? undefined : `/usr/bin/google-chrome-stable`,
-      args: [`--no-sandbox`, `--disable-setuid-sandbox`, `--disable-dev-shm-usage`],
-    });
+    const isProduction = process.env.NODE_ENV === `production`;
+    
+    if (isProduction) {
+      // Use chromium for production environment
+      browser = await puppeteerCore.launch({
+        args: [
+          ...chromium.args,
+          `--hide-scrollbars`,
+          `--disable-web-security`,
+          `--disable-features=VizDisplayCompositor`,
+        ],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      });
+    } else {
+      // Use regular puppeteer for development
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          `--no-sandbox`, 
+          `--disable-setuid-sandbox`, 
+          `--disable-dev-shm-usage`,
+          `--disable-web-security`,
+          `--disable-features=VizDisplayCompositor`
+        ],
+      });
+    }
     const page = await browser.newPage();
 
     await page.setContent(invoiceHtml, { waitUntil: `networkidle0` });
-
 
     const pdfBuffer = await page.pdf({
       format: `A4`, printBackground: true, 
@@ -169,6 +195,10 @@ router.get(`/:id/pdf`, async (request: CustomRequestType, response: CustomRespon
     });
 
     return;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 });
 
