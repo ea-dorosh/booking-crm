@@ -16,7 +16,15 @@ export default async function databaseMiddleware(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
-  const token = req.headers.authorization?.split(` `)[1];
+  // Support JWT from Authorization header and from query param `token` for cases like iOS PDF viewing
+  const authHeader = req.headers.authorization;
+  let token: string | undefined;
+  if (authHeader && authHeader.startsWith(`Bearer `)) {
+    token = authHeader.split(` `)[1];
+  } else if (typeof req.query.token === `string`) {
+    token = req.query.token as string;
+  }
+
   if (!token) {
     res.status(401).json({ message: `No token provided` });
     return;

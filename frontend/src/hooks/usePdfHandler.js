@@ -5,7 +5,6 @@ import {
   checkIsMobileDevice,
   downloadPdfFile,
   openMobilePdfPreview,
-  blobToDataURL,
 } from '@/utils/pdfUtils.js';
 
 /**
@@ -82,9 +81,13 @@ export const usePdfHandler = (invoiceId) => {
 
       if (isMobileDevice) {
         if (isIOS) {
-          // iOS: navigate current tab to data URL -> triggers native PDF viewer
-          const dataUrl = await blobToDataURL(blob);
-          window.location.href = dataUrl;
+          // iOS: open direct API url with token in query to trigger native viewer
+          const token = localStorage.getItem(`token`);
+          const baseUrl = process.env.REACT_APP_API_URL || ``;
+          const apiBase = baseUrl ? `${baseUrl.replace(/\/$/, ``)}/api/protected` : `/api/protected`;
+          const directUrl = `${apiBase}/invoices/${invoiceId}/pdf?token=${encodeURIComponent(token || ``)}`;
+          // Use assign to open in the same tab (more reliable on iOS)
+          window.location.assign(directUrl);
           return;
         }
 
