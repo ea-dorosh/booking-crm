@@ -10,6 +10,7 @@
 
 # testing
 /coverage
+/backend/.jest-cache
 
 # next.js
 /.next/
