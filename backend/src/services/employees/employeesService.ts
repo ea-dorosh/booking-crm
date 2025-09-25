@@ -6,7 +6,7 @@ import {
   UpdateEmployeeResult,
 } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { AppointmentStatusEnum, EmployeeStatusEnum, ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
+import { AppointmentStatusEnum, EmployeeStatusEnum, ADVANCE_BOOKING_NEXT_DAY, TimeslotIntervalEnum } from '@/enums/enums.js';
 import { checkGoogleCalendarAvailability } from '@/services/googleCalendar/googleCalendarService.js';
 import { fromDayjsToMySQLDateTime } from '@/utils/timeUtils.js';
 
@@ -50,7 +50,8 @@ async function getEmployees(dbPool: Pool, statuses?: string[]): Promise<Employee
       phone,
       image,
       status,
-      advance_booking_time
+      advance_booking_time,
+      timeslot_interval
     FROM Employees
     WHERE status IN (?)
   `;
@@ -71,6 +72,7 @@ async function getEmployees(dbPool: Pool, statuses?: string[]): Promise<Employee
     advanceBookingTime: row.advance_booking_time === ADVANCE_BOOKING_NEXT_DAY
       ? ADVANCE_BOOKING_NEXT_DAY
       : (row.advance_booking_time ? row.advance_booking_time.slice(0, 5) : `00:30`),
+    timeslotInterval: (row.timeslot_interval as TimeslotIntervalEnum) || TimeslotIntervalEnum.Thirty,
   }));
 
   return employees;
@@ -98,6 +100,7 @@ async function getEmployee(dbPool: Pool, employeeId: number): Promise<EmployeeDe
     advanceBookingTime: row.advance_booking_time === ADVANCE_BOOKING_NEXT_DAY
       ? ADVANCE_BOOKING_NEXT_DAY
       : (row.advance_booking_time ? row.advance_booking_time.slice(0, 5) : `00:30`),
+    timeslotInterval: (row.timeslot_interval as TimeslotIntervalEnum) || TimeslotIntervalEnum.Thirty,
   }));
 
   return employeeData[0];

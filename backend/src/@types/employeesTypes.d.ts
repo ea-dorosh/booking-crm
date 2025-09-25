@@ -1,6 +1,7 @@
 import { RowDataPacket } from 'mysql2';
 import { Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { EmployeeStatusEnum } from '@/enums/enums.js';
+import { TimeslotIntervalEnum } from '@/enums/enums.js';
 
 export interface EmployeeDetailRowType extends RowDataPacket {
   employee_id: number;
@@ -11,6 +12,7 @@ export interface EmployeeDetailRowType extends RowDataPacket {
   image: string | null;
   status: EmployeeStatusEnum;
   advance_booking_time: string; // can be HH:MM:SS or 'next_day'
+  timeslot_interval: TimeslotIntervalEnum;
 }
 
 export interface EmployeeDetailDataType {
@@ -22,6 +24,7 @@ export interface EmployeeDetailDataType {
   image: string;
   status: EmployeeStatusEnum;
   advanceBookingTime: string; // HH:MM format for frontend
+  timeslotInterval: TimeslotIntervalEnum;
 }
 
 export interface EmployeeFormDataValidationErrors {
@@ -30,6 +33,7 @@ export interface EmployeeFormDataValidationErrors {
   email?: string;
   phone?: string;
   advanceBookingTime?: string;
+  timeslotInterval?: string;
 }
 
 export interface EmployeeValidationErrors {

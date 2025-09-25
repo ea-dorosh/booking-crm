@@ -55,4 +55,8 @@ export enum EmployeeStatusEnum {
   Disabled = `disabled`,
 }
 
-// Feature flags removed: schedule periods are always enabled
+export enum TimeslotIntervalEnum {
+  Fifteen = `15`,
+  Thirty = `30`,
+  Sixty = `60`,
+}

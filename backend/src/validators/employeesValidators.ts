@@ -1,6 +1,6 @@
 import { EmployeeDetailDataType, EmployeeFormDataValidationErrors } from '@/@types/employeesTypes.js';
 import { validateEmail, validatePhone } from '@/utils/validators.js';
-import { ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
+import { ADVANCE_BOOKING_NEXT_DAY, TimeslotIntervalEnum } from '@/enums/enums.js';
 
 const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDataValidationErrors => {
   const errors: EmployeeFormDataValidationErrors = {};
@@ -32,6 +32,12 @@ const validateEmployeeData = (employee: EmployeeDetailDataType): EmployeeFormDat
     if (!timePattern.test(employee.advanceBookingTime) && !isNextDay) {
       errors.advanceBookingTime = `Advance booking time must be in format HH:MM or '${ADVANCE_BOOKING_NEXT_DAY}'`;
     }
+  }
+
+  // Validate timeslot interval
+  const validIntervals = Object.values(TimeslotIntervalEnum);
+  if (!employee.timeslotInterval || !validIntervals.includes(employee.timeslotInterval as TimeslotIntervalEnum)) {
+    errors.timeslotInterval = `Timeslot interval is required and must be one of: ${validIntervals.join(`, `)}`;
   }
 
   return errors;

@@ -2,7 +2,7 @@ import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
-import { ADVANCE_BOOKING_NEXT_DAY } from '@/enums/enums.js';
+import { ADVANCE_BOOKING_NEXT_DAY, TimeslotIntervalEnum } from '@/enums/enums.js';
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
@@ -61,6 +61,7 @@ interface EmployeeWithBlockedAndAvailableTimesType {
   endWorkingTime: dayjs.Dayjs;
   blockedTimes: BlockedTime[];
   availableTimes: AvailableTime[];
+  timeslotInterval?: TimeslotIntervalEnum; // defaults to TimeslotIntervalEnum.Thirty
 }
 
 export interface PeriodWithDaysAndEmployeeAvailabilityTypeWithBlockedTimes {
@@ -467,9 +468,13 @@ function generateTimeSlotsFromAvailableTimes(
     const employeesWithTimeSlots: EmployeeWithTimeSlots[] = dayData.employees.map(employee => {
       const availableTimeSlots: AvailableTimeSlot[] = [];
 
+      // Get timeslot interval for this employee (default to 30 for backward compatibility)
+      const timeslotInterval = employee.timeslotInterval || TimeslotIntervalEnum.Thirty;
+      const intervalMinutes = parseInt(timeslotInterval, 10);
+
       // Process each available time range for this employee
       employee.availableTimes.forEach(availableTime => {
-        // Round start time to next 15-minute interval (00, 15, 30, 45)
+        // Round start time to next 15-minute interval (00, 15, 30, 45) - always use 15-min rounding
         const startMinutes = availableTime.minPossibleStartTime.minute();
         const roundedMinutes = Math.ceil(startMinutes / 15) * 15;
         let currentTime = availableTime.minPossibleStartTime
@@ -484,30 +489,22 @@ function generateTimeSlotsFromAvailableTimes(
 
         const endTime = availableTime.maxPossibleStartTime;
 
-        // Generate time slots
+        // Generate time slots based on timeslot interval
         let isFirstSlot = true;
         while (currentTime.isBefore(endTime) || currentTime.isSame(endTime)) {
           let slotEndTime: dayjs.Dayjs;
 
           if (isFirstSlot) {
-            const currentMinutes = currentTime.minute();
-
-            if (currentMinutes === 15 || currentMinutes === 45) {
-              // First slot is 15 minutes (until next :00 or :30)
-              slotEndTime = currentMinutes === 15
-                ? currentTime.minute(30).second(0).millisecond(0)  // 15 -> 30
-                : currentTime.add(1, `hour`).minute(0).second(0).millisecond(0);  // 45 -> :00 next hour
-            } else {
-              // First slot is 30 minutes (starts at :00 or :30)
-              slotEndTime = currentTime.add(30, `minute`);
-            }
+            // First slot logic - make it short if not on proper boundary
+            slotEndTime = calculateFirstSlotEndTime(currentTime, intervalMinutes);
             isFirstSlot = false;
           } else {
-            // All subsequent slots are 30 minutes and start at :00 or :30
-            slotEndTime = currentTime.add(30, `minute`);
+            // All subsequent slots are full interval duration
+            slotEndTime = currentTime.add(intervalMinutes, `minute`);
           }
 
-          // Add the slot if currentTime is within available time
+          // Add the slot if it can start at or before maxPossibleStartTime
+          // maxPossibleStartTime is the last moment when a service can START
           if (currentTime.isSameOrBefore(endTime)) {
             availableTimeSlots.push({
               startTime: currentTime,
@@ -533,6 +530,43 @@ function generateTimeSlotsFromAvailableTimes(
       serviceId: dayData.serviceId,
     };
   });
+}
+
+/**
+ * Calculate the end time for the first slot based on timeslot interval
+ * First slot is shortened if it doesn't start on proper boundary
+ */
+function calculateFirstSlotEndTime(currentTime: dayjs.Dayjs, intervalMinutes: number): dayjs.Dayjs {
+  const currentMinutes = currentTime.minute();
+
+  if (intervalMinutes === parseInt(TimeslotIntervalEnum.Fifteen, 10)) {
+    // For 15-minute intervals, all 15-minute boundaries are valid (00, 15, 30, 45)
+    // Just add 15 minutes
+    return currentTime.add(15, `minute`);
+  } else if (intervalMinutes === parseInt(TimeslotIntervalEnum.Thirty, 10)) {
+    // For 30-minute intervals, preserve current behavior
+    if (currentMinutes === 15 || currentMinutes === 45) {
+      // First slot is short (until next :00 or :30)
+      return currentMinutes === 15
+        ? currentTime.minute(30).second(0).millisecond(0)  // 15 -> 30
+        : currentTime.add(1, `hour`).minute(0).second(0).millisecond(0);  // 45 -> :00 next hour
+    } else {
+      // First slot is full 30 minutes (starts at :00 or :30)
+      return currentTime.add(30, `minute`);
+    }
+  } else if (intervalMinutes === parseInt(TimeslotIntervalEnum.Sixty, 10)) {
+    // For 60-minute intervals, only :00 is proper boundary
+    if (currentMinutes === 0) {
+      // Already on hour boundary, make full 60-minute slot
+      return currentTime.add(60, `minute`);
+    } else {
+      // Not on hour boundary, make short slot to next hour
+      return currentTime.add(1, `hour`).minute(0).second(0).millisecond(0);
+    }
+  } else {
+    // Fallback for any other interval (shouldn't happen with current enum)
+    return currentTime.add(intervalMinutes, `minute`);
+  }
 }
 
 function combineAndFilterTimeSlotsDataFromTwoServices(

@@ -30,6 +30,7 @@ import {
   DEFAULT_APPOINTMENT_SORT_FIELD,
   DEFAULT_SORT_DIRECTION,
   ADVANCE_BOOKING_NEXT_DAY,
+  TimeslotIntervalEnum,
 } from '@/enums/enums.js';
 import { getAppointments } from '@/services/appointment/appointmentService.js';
 import { getEmployeesWorkingTimesRange } from '@/services/employees/employeesSchedulePlannerService.js';
@@ -135,8 +136,8 @@ router.post(`/create-employee`, upload.single(`image`), async (req: CustomReques
   }
 
   const query = `
-    INSERT INTO Employees (first_name, last_name, email, phone, image, advance_booking_time)
-    VALUES (?, ?, ?, ?, COALESCE(?, image), COALESCE(?, '00:30:00'))
+    INSERT INTO Employees (first_name, last_name, email, phone, image, advance_booking_time, timeslot_interval)
+    VALUES (?, ?, ?, ?, COALESCE(?, image), COALESCE(?, '00:30:00'), ?)
   `;
 
   // Convert HH:MM format to HH:MM:SS for database storage, except for special values
@@ -153,6 +154,7 @@ router.post(`/create-employee`, upload.single(`image`), async (req: CustomReques
     formatPhone(employee.phone),
     imgPath,
     advanceBookingTime,
+    employee.timeslotInterval || TimeslotIntervalEnum.Thirty,
   ];
 
   let employeeId;
@@ -194,7 +196,7 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
   }
 
   const query = `UPDATE Employees
-    SET first_name = ?, last_name = ?, email = ?, phone = ?, image = COALESCE(?, image), advance_booking_time = COALESCE(?, advance_booking_time)
+    SET first_name = ?, last_name = ?, email = ?, phone = ?, image = COALESCE(?, image), advance_booking_time = COALESCE(?, advance_booking_time), timeslot_interval = ?
     WHERE employee_id = ?
   `;
 
@@ -212,6 +214,7 @@ router.put(`/edit/:id`, upload.single(`image`), async (req: CustomRequestType, r
     formatPhone(employee.phone),
     imgPath,
     advanceBookingTime,
+    employee.timeslotInterval || TimeslotIntervalEnum.Thirty,
     employeeId,
   ];
 

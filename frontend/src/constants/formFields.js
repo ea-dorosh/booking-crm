@@ -253,6 +253,27 @@ export const EMPLOYEE_FIELDS = [
     defaultValue: `00:30`,
     required: false,
   },
+  {
+    name: `timeslotInterval`,
+    label: `Timeslot Interval`,
+    type: `select`,
+    options: [
+      {
+        value: `15`,
+        label: `15 minutes`,
+      },
+      {
+        value: `30`,
+        label: `30 minutes`,
+      },
+      {
+        value: `60`,
+        label: `1 hour`,
+      },
+    ],
+    defaultValue: `30`,
+    required: true,
+  },
 ];
 
 export const CUSTOMER_FIELDS = [
