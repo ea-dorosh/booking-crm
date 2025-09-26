@@ -200,23 +200,30 @@ async function updateEmployeeStatus(dbPool: Pool, employeeId: number, status: st
   }
 }
 
-async function getEmployeeAdvanceBookingTime(dbPool: Pool, employeeId: number): Promise<string> {
+async function getEmployeeAdvanceBookingTime(dbPool: Pool, employeeId: number): Promise<{ advanceBookingTime: string; timeslotInterval: TimeslotIntervalEnum }> {
   interface EmployeeAdvanceTimeRow extends RowDataPacket {
     advance_booking_time: string;
+    timeslot_interval: TimeslotIntervalEnum;
   }
 
   const sql = `
-    SELECT advance_booking_time
+    SELECT advance_booking_time, timeslot_interval
     FROM Employees
     WHERE employee_id = ?
   `;
 
   try {
     const [employeeRows] = await dbPool.query<EmployeeAdvanceTimeRow[]>(sql, [employeeId]);
-    return employeeRows[0]?.advance_booking_time || `00:30:00`;
+    return {
+      advanceBookingTime: employeeRows[0]?.advance_booking_time || `00:30:00`,
+      timeslotInterval: employeeRows[0]?.timeslot_interval || TimeslotIntervalEnum.Thirty,
+    };
   } catch (error) {
     console.error(`Error fetching advance booking time for employee ${employeeId}:`, error);
-    return `00:30:00`; // fallback to default
+    return {
+      advanceBookingTime: `00:30:00`,
+      timeslotInterval: TimeslotIntervalEnum.Thirty,
+    };
   }
 }
 

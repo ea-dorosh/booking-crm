@@ -72,5 +72,6 @@ interface GroupedAvailabilityDayType {
     blockStartTimeFirst: Time_HH_MM_SS_Type | null;
     blockEndTimeFirst: Time_HH_MM_SS_Type | null;
     advanceBookingTime: string; // can be HH:MM:SS or 'next_day'
+    timeslotInterval: TimeslotIntervalEnum;
   }>;
 }

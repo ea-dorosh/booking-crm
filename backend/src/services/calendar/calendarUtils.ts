@@ -53,6 +53,7 @@ export interface EmployeeWithWorkingTimesType {
   endWorkingTime: dayjs.Dayjs;
   pauseTimes: PauseTime[];
   advanceBookingTime: string; // can be HH:MM:SS or 'next_day'
+  timeslotInterval: TimeslotIntervalEnum; // defaults to TimeslotIntervalEnum.Thirty
 }
 
 interface EmployeeWithBlockedAndAvailableTimesType {
@@ -61,7 +62,7 @@ interface EmployeeWithBlockedAndAvailableTimesType {
   endWorkingTime: dayjs.Dayjs;
   blockedTimes: BlockedTime[];
   availableTimes: AvailableTime[];
-  timeslotInterval?: TimeslotIntervalEnum; // defaults to TimeslotIntervalEnum.Thirty
+  timeslotInterval: TimeslotIntervalEnum; // defaults to TimeslotIntervalEnum.Thirty
 }
 
 export interface PeriodWithDaysAndEmployeeAvailabilityTypeWithBlockedTimes {
@@ -274,6 +275,7 @@ function getPeriodWithDaysAndEmployeeAvailability(
               endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, `Europe/Berlin`).utc(),
               pauseTimes,
               advanceBookingTime: employee.advanceBookingTime,
+              timeslotInterval: employee.timeslotInterval,
             }
           }),
         };
@@ -387,7 +389,6 @@ function combinePeriodWithNormalizedAppointments(
     const dayAppointments = normalizedAppointments.filter(appointment =>
       dayjs(appointment.date).format(DATE_FORMAT) === dayData.day,
     );
-
     const employeesWithBlockedTimes = dayData.employees.map(employee => {
       const employeeAppointments = dayAppointments.filter(appointment =>
         appointment.employeeId === employee.employeeId,
@@ -469,8 +470,7 @@ function generateTimeSlotsFromAvailableTimes(
       const availableTimeSlots: AvailableTimeSlot[] = [];
 
       // Get timeslot interval for this employee (default to 30 for backward compatibility)
-      const timeslotInterval = employee.timeslotInterval || TimeslotIntervalEnum.Thirty;
-      const intervalMinutes = parseInt(timeslotInterval, 10);
+      const intervalMinutes = parseInt(employee.timeslotInterval, 10);
 
       // Process each available time range for this employee
       employee.availableTimes.forEach(availableTime => {

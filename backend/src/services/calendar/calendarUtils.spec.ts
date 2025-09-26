@@ -475,6 +475,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -505,6 +506,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -528,6 +530,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -553,6 +556,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -575,6 +579,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -600,6 +605,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -624,6 +630,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
           {
             id: 2,
@@ -632,6 +639,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -645,6 +653,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -658,6 +667,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -671,6 +681,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
           {
             id: 2,
@@ -679,6 +690,7 @@ describe(`getPeriodWithDaysAndEmployeeAvailability`, () => {
             blockStartTimeFirst: null,
             blockEndTimeFirst: null,
             advanceBookingTime: `00:30:00`,
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
       },
@@ -1506,6 +1518,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
                 maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
               },
             ],
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
@@ -1553,6 +1566,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
                 maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
               },
             ],
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
@@ -1590,6 +1604,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
                 maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
               },
             ],
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
@@ -1631,6 +1646,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
                 maxPossibleStartTime: dayjs.utc(`2025-07-29T20:00:00.000Z`),
               },
             ],
+            timeslotInterval: TimeslotIntervalEnum.Thirty,
           },
         ],
         serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
@@ -1693,6 +1709,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               endWorkingTime,
               pauseTimes: [],
               advanceBookingTime: ADVANCE_BOOKING_NEXT_DAY,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -1734,6 +1751,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               endWorkingTime,
               pauseTimes: [],
               advanceBookingTime: `02:00:00`, // 2 hours advance
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -1783,6 +1801,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               endWorkingTime,
               pauseTimes: [],
               advanceBookingTime: ADVANCE_BOOKING_NEXT_DAY,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -1825,6 +1844,7 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
               endWorkingTime,
               pauseTimes: [],
               advanceBookingTime: `00:30:00`, // Default 30 minutes
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -2180,52 +2200,6 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       // Third slot: 19:00-20:00 (60min)
       expect(employee2Slots[2].startTime.format(`HH:mm:ss`)).toBe(`19:00:00`);
       expect(employee2Slots[2].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
-    });
-
-    it(`should default to 30-minute intervals when timeslotInterval is not provided`, () => {
-      const periodWithClearedDays = [
-        {
-          day: `2025-07-29` as Date_ISO_Type,
-          employees: [
-            {
-              employeeId: 1,
-              startWorkingTime: dayjs.utc(`2025-07-29T08:00:00.000Z`),
-              endWorkingTime: dayjs.utc(`2025-07-29T21:30:00.000Z`),
-              blockedTimes: [],
-              // timeslotInterval not provided - should default to current 30-minute behavior
-              availableTimes: [
-                {
-                  // Test with same data as current tests
-                  minPossibleStartTime: dayjs.utc(`2025-07-29T19:09:18.673Z`),
-                  maxPossibleStartTime: dayjs.utc(`2025-07-29T20:30:00.000Z`),
-                },
-              ],
-            },
-          ],
-          serviceDuration: `00:30:00` as Time_HH_MM_SS_Type,
-          serviceId: 1,
-        },
-      ];
-
-      const result = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
-      const slots = result[0].employees[0].availableTimeSlots;
-
-      // Should match current behavior exactly
-      expect(slots).toHaveLength(4);
-
-      // First slot: 19:15-19:30 (15min because starts at :15)
-      expect(slots[0].startTime.format(`HH:mm:ss`)).toBe(`19:15:00`);
-      expect(slots[0].endTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
-
-      // Subsequent slots: 30min each
-      expect(slots[1].startTime.format(`HH:mm:ss`)).toBe(`19:30:00`);
-      expect(slots[1].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
-
-      expect(slots[2].startTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
-      expect(slots[2].endTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
-
-      expect(slots[3].startTime.format(`HH:mm:ss`)).toBe(`20:30:00`);
-      expect(slots[3].endTime.format(`HH:mm:ss`)).toBe(`21:00:00`);
     });
   });
 });

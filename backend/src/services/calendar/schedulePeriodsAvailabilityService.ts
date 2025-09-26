@@ -32,8 +32,11 @@ export async function buildGroupedAvailabilityForWeek(
       const workingTimes = await getEmployeeWorkingTimes(dbPool, employeeId, dateIso);
       if (workingTimes.startTime && workingTimes.endTime) {
         // Get employee advance booking time using dedicated service
-        const advanceBookingTime = await getEmployeeAdvanceBookingTime(dbPool, employeeId);
-
+        const {
+          advanceBookingTime,
+          timeslotInterval,
+        } = await getEmployeeAdvanceBookingTime(dbPool, employeeId);
+        console.log(`timeslotInterval: `, JSON.stringify(timeslotInterval, null, 4));
         employeesForDay.push({
           id: employeeId,
           startTime: workingTimes.startTime,
@@ -41,6 +44,7 @@ export async function buildGroupedAvailabilityForWeek(
           blockStartTimeFirst: workingTimes.blockStartTimeFirst,
           blockEndTimeFirst: workingTimes.blockEndTimeFirst,
           advanceBookingTime,
+          timeslotInterval,
         });
       }
     }
