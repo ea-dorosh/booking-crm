@@ -2,7 +2,7 @@ import deLocale from '@fullcalendar/core/locales/de';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import { Settings as SettingsIcon } from '@mui/icons-material';
+import { Settings as SettingsIcon, FilterList as FilterIcon } from '@mui/icons-material';
 import {
   Box,
   Stack,
@@ -20,6 +20,7 @@ import {
   useDispatch,
   useSelector,
 } from 'react-redux';
+import CalendarFiltersMenu from './CalendarFiltersMenu/CalendarFiltersMenu';
 import CalendarMenu from './CalendarMenu/CalendarMenu';
 import AppointmentEventMenu from '@/components/AppointmentEventMenu/AppointmentEventMenu';
 import {
@@ -37,6 +38,8 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
   const [view, setView] = useState(calendar?.view || `timeGridDay`); // timeGridDay | timeGridThreeDay | timeGridWeek
   const [anchorEl, setAnchorEl] = useState(null);
   const openSettings = Boolean(anchorEl);
+  const [filtersAnchorEl, setFiltersAnchorEl] = useState(null);
+  const openFilters = Boolean(filtersAnchorEl);
   const [eventAnchor, setEventAnchor] = useState(null);
   const [selectedAppt, setSelectedAppt] = useState(null);
 
@@ -154,12 +157,29 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
 
 
 
-          <IconButton
-            size="small"
-            onClick={(e) => setAnchorEl(e.currentTarget)}
+          <Stack
+            direction="row"
+            spacing={0.5}
           >
-            <SettingsIcon fontSize="small" />
-          </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => setFiltersAnchorEl(e.currentTarget)}
+              sx={{
+                color: openFilters ? `primary.main` : `inherit`,
+              }}
+            >
+              <FilterIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+              sx={{
+                color: openSettings ? `primary.main` : `inherit`,
+              }}
+            >
+              <SettingsIcon fontSize="small" />
+            </IconButton>
+          </Stack>
         </Box>
 
         <Stack
@@ -227,6 +247,12 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
         anchorEl={anchorEl}
         open={openSettings}
         onClose={() => setAnchorEl(null)}
+      />
+
+      <CalendarFiltersMenu
+        anchorEl={filtersAnchorEl}
+        open={openFilters}
+        onClose={() => setFiltersAnchorEl(null)}
       />
 
       <Box
