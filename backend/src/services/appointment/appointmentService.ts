@@ -25,7 +25,11 @@ import {
   AppointmentSortField,
 } from '@/@types/utilTypes.js';
 import { getCompany } from '@/services/company/companyService.js';
-import { getEmployee } from '@/services/employees/employeesService.js';
+import {
+  checkEmployeeTimeNotOverlap,
+  getEmployee,
+  getEmployees,
+} from '@/services/employees/employeesService.js';
 import {
   fromMySQLToISOString,
   getServiceDuration,
@@ -48,7 +52,6 @@ import {
 import { validateCustomerData } from '@/validators/customersValidators.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { getAppointmentEndTime } from '../calendar/calendarUtils.js';
-import { checkEmployeeTimeNotOverlap } from '@/services/employees/employeesService.js';
 import {
   formatName,
   formatPhone,
@@ -138,11 +141,11 @@ async function getAppointments(
     };
   });
 
-  const employee = await getEmployee(dbPool, appointmentsData[0].employee.id);
+  const employees = await getEmployees(dbPool);
 
   appointmentsData.forEach((appointment) => {
-    appointment.employee.firstName = employee.firstName;
-    appointment.employee.lastName = employee.lastName;
+    appointment.employee.firstName = employees.find((employee) => employee.employeeId === appointment.employee.id)?.firstName;
+    appointment.employee.lastName = employees.find((employee) => employee.employeeId === appointment.employee.id)?.lastName;
   });
 
   return appointmentsData;
