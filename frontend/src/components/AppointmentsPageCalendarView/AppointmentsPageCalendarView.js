@@ -23,6 +23,7 @@ import {
 import CalendarFiltersMenu from './CalendarFiltersMenu/CalendarFiltersMenu';
 import CalendarMenu from './CalendarMenu/CalendarMenu';
 import AppointmentEventMenu from '@/components/AppointmentEventMenu/AppointmentEventMenu';
+import { appointmentStatusEnum } from '@/enums/enums';
 import {
   fetchAppointments,
   setCalendarState,
@@ -43,7 +44,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
   const [eventAnchor, setEventAnchor] = useState(null);
   const [selectedAppt, setSelectedAppt] = useState(null);
 
-  const handleViewChange = (_e, newView) => {
+  const handleViewChange = (_event, newView) => {
     if (!newView) return;
     setView(newView);
     dispatch(setCalendarState({ view: newView }));
@@ -63,14 +64,15 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
     }
   }, [view]);
 
-  const events = appointments?.map((a) => ({
-    id: String(a.id),
-    title: a.serviceName,
-    start: a.timeStart,
-    end: a.timeEnd,
+  const events = appointments?.map((appointment) => ({
+    id: String(appointment.id),
+    title: appointment.serviceName,
+    start: appointment.timeStart,
+    end: appointment.timeEnd,
     extendedProps: {
-      appointment: a,
-      employeeId: a.employee?.id || null,
+      appointment: appointment,
+      employeeId: appointment.employee?.id || null,
+      status: appointment.status,
     },
   })) || [];
 
@@ -80,26 +82,26 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
     y: 0,
     t: 0,
   });
-  const handleTouchStart = (e) => {
-    const t = e.touches?.[0];
-    if (!t) return;
+  const handleTouchStart = (event) => {
+    const touch = event.touches?.[0];
+    if (!touch) return;
     touchStart.current = {
-      x: t.clientX,
-      y: t.clientY,
+      x: touch.clientX,
+      y: touch.clientY,
       t: Date.now(),
     };
   };
-  const handleTouchEnd = (e) => {
-    const t = e.changedTouches?.[0];
-    if (!t) return;
-    const dx = t.clientX - touchStart.current.x;
-    const dy = t.clientY - touchStart.current.y;
-    const dt = Date.now() - touchStart.current.t;
+  const handleTouchEnd = (event) => {
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+    const deltaX = touch.clientX - touchStart.current.x;
+    const deltaY = touch.clientY - touchStart.current.y;
+    const deltaTime = Date.now() - touchStart.current.t;
     // Horizontal swipe with minimal vertical movement
-    if (Math.abs(dx) > 50 && Math.abs(dy) < 60 && dt < 800) {
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60 && deltaTime < 800) {
       const api = calendarRef.current?.getApi();
       if (!api) return;
-      if (dx < 0) api.next(); else api.prev();
+      if (deltaX < 0) api.next(); else api.prev();
       const startIso = api.view?.currentStart?.toISOString()?.slice(0,10);
       const endIso = api.view?.currentEnd?.toISOString()?.slice(0,10);
       if (startIso) dispatch(setStartDate({ startDate: startIso }));
@@ -163,7 +165,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           >
             <IconButton
               size="small"
-              onClick={(e) => setFiltersAnchorEl(e.currentTarget)}
+              onClick={(event) => setFiltersAnchorEl(event.currentTarget)}
               sx={{
                 color: openFilters ? `primary.main` : `inherit`,
               }}
@@ -172,7 +174,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
             </IconButton>
             <IconButton
               size="small"
-              onClick={(e) => setAnchorEl(e.currentTarget)}
+              onClick={(event) => setAnchorEl(event.currentTarget)}
               sx={{
                 color: openSettings ? `primary.main` : `inherit`,
               }}
@@ -357,13 +359,29 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           eventDidMount={(info) => {
             // Deterministic color by employee id
             const employeeId = info.event.extendedProps?.employeeId;
+            const status = info.event.extendedProps?.status;
+            const isCanceled = status === appointmentStatusEnum.canceled;
+
             const color = getEmployeeColor(employeeId);
             if (color) {
               info.el.style.backgroundColor = color.bg;
               info.el.style.borderColor = color.border;
               info.el.style.color = color.text;
-              info.el.style.boxShadow = `0 2px 8px rgba(0,0,0,0.08)`;
               info.el.style.borderRadius = `6px`;
+            }
+
+            // Apply canceled styling
+            if (isCanceled) {
+              info.el.style.opacity = `0.7`;
+              info.el.style.borderColor = `#f44336`;
+              info.el.style.color = `#d32f2f`;
+
+              // Add "CANCELED" text to the event
+              const titleElement = info.el.querySelector(`.fc-event-title`);
+              if (titleElement) {
+                const originalTitle = titleElement.textContent;
+                titleElement.innerHTML = `${originalTitle}<br><span style="font-size: 0.7em; font-weight: bold; color: #d32f2f;">CANCELED</span>`;
+              }
             }
           }}
           eventClick={(clickInfo) => {
@@ -416,11 +434,11 @@ function getEmployeeColor(employeeId) {
 // - long:  "Samstag 1.11"
 function getDayHeaderText(dateLike, weekdayLength = `short`) {
   try {
-    const d = new Date(dateLike.valueOf ? dateLike.valueOf() : dateLike);
-    const weekday = new Intl.DateTimeFormat(`de-DE`, { weekday: weekdayLength }).format(d)
+    const date = new Date(dateLike.valueOf ? dateLike.valueOf() : dateLike);
+    const weekday = new Intl.DateTimeFormat(`de-DE`, { weekday: weekdayLength }).format(date)
       .replace(/\.$/, ``); // remove trailing dot from short forms (Fr., So.)
-    const day = String(d.getDate());
-    const month = String(d.getMonth() + 1).padStart(2, `0`);
+    const day = String(date.getDate());
+    const month = String(date.getMonth() + 1).padStart(2, `0`);
     // Use non-breaking space between weekday and date for nicer wrap
     return `${weekday} ${day}.${month}`;
   } catch {
