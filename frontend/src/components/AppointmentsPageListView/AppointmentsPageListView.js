@@ -10,6 +10,7 @@ import AppointmentsContainer from "@/components/AppointmentsContainer/Appointmen
 import AppointmentsSorting from "@/components/AppointmentsSorting/AppointmentsSorting";
 import AppointmentsStartDate from "@/components/AppointmentsStartDate/AppointmentsStartDate";
 import AppointmentsStatus from "@/components/AppointmentsStatus/AppointmentsStatus";
+import EmployeeFilter from "@/components/EmployeeFilter/EmployeeFilter";
 
 export default function AppointmentsPageListView({
   appointments,
@@ -69,6 +70,8 @@ export default function AppointmentsPageListView({
 
 
             <AppointmentsStatus />
+
+            <EmployeeFilter />
 
             <Box
               sx={{

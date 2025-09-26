@@ -1,8 +1,10 @@
 import {
   Menu,
   Box,
+  Divider,
 } from "@mui/material";
 import AppointmentsStatus from '@/components/AppointmentsStatus/AppointmentsStatus';
+import EmployeeFilter from '@/components/EmployeeFilter/EmployeeFilter';
 
 export default function CalendarFiltersMenu({
   anchorEl,
@@ -18,10 +20,14 @@ export default function CalendarFiltersMenu({
       <Box
         sx={{
           p: 2,
-          minWidth: 200,
+          minWidth: 220,
         }}
       >
         <AppointmentsStatus />
+
+        <Divider sx={{ my: 2 }} />
+
+        <EmployeeFilter />
       </Box>
     </Menu>
   );

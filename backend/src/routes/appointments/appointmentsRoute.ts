@@ -40,6 +40,11 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
     status = request.query.status === `null` ? null : Number(request.query.status);
   }
 
+  let employeeId: number | null = null;
+  if (request.query?.employeeId !== undefined) {
+    employeeId = request.query.employeeId === `null` ? null : Number(request.query.employeeId);
+  }
+
   const sortBy = (request.query?.sortBy as AppointmentSortField) || DEFAULT_APPOINTMENT_SORT_FIELD;
   const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
@@ -53,6 +58,7 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
       startDate,
       endDate,
       status,
+      employeeId,
       sortBy,
       sortOrder,
     });
