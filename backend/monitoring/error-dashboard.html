@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking CRM - Error Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.error {
+            border-left-color: #e74c3c;
+        }
+
+        .stat-card.warning {
+            border-left-color: #f39c12;
+        }
+
+        .stat-card.success {
+            border-left-color: #27ae60;
+        }
+
+        .stat-card.info {
+            border-left-color: #3498db;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .section-content {
+            padding: 1.5rem;
+        }
+
+        .error-list {
+            list-style: none;
+        }
+
+        .error-item {
+            padding: 1rem;
+            border-left: 3px solid #e74c3c;
+            background: #fdf2f2;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .error-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-time {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-message {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .error-details {
+            font-size: 0.9rem;
+            color: #666;
+            background: rgba(255,255,255,0.8);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: #667eea;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle.active::after {
+            transform: translateX(26px);
+        }
+
+        .chart-container {
+            height: 300px;
+            display: flex;
+            align-items: end;
+            gap: 8px;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .chart-bar {
+            background: linear-gradient(to top, #667eea, #764ba2);
+            min-width: 20px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: end;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            padding: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar:hover {
+            transform: scaleY(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
+        }
+
+        .status-offline {
+            background: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚨 Booking CRM Error Monitor</h1>
+        <p>Real-time error tracking and system health monitoring</p>
+    </div>
+
+    <div class="container">
+        <div class="auto-refresh">
+            <span>Auto-refresh:</span>
+            <div class="toggle" id="autoRefreshToggle">
+            </div>
+            <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh Now</button>
+            <span id="lastUpdate" style="margin-left: auto; color: #7f8c8d; font-size: 0.9rem;"></span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card error">
+                <div class="stat-number" id="totalErrors">-</div>
+                <div class="stat-label">Total Errors (24h)</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-number" id="bookingErrors">-</div>
+                <div class="stat-label">Booking Errors</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-number" id="calendarErrors">-</div>
+                <div class="stat-label">Calendar Errors</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-number" id="systemStatus">
+                    <span class="status-indicator status-online"></span>Online
+                </div>
+                <div class="stat-label">System Status</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>📊 Error Distribution (Last 24 Hours)</h2>
+            </div>
+            <div class="section-content">
+                <div class="chart-container" id="errorChart">
+                    <!-- Chart will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>🔥 Recent Critical Errors</h2>
+            </div>
+            <div class="section-content">
+                <ul class="error-list" id="recentErrors">
+                    <li class="error-item loading">
+                        <div class="error-time">Loading...</div>
+                        <div class="error-message">Fetching recent errors...</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>⚡ Performance Issues</h2>
+            </div>
+            <div class="section-content">
+                <ul class="error-list" id="performanceIssues">
+                    <li class="error-item loading">
+                        <div class="error-time">Loading...</div>
+                        <div class="error-message">Fetching performance data...</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let isAutoRefreshEnabled = false;
+
+        // Mock data - в реальном приложении это будет API
+        const mockData = {
+            stats: {
+                totalErrors: Math.floor(Math.random() * 50) + 10,
+                bookingErrors: Math.floor(Math.random() * 20) + 5,
+                calendarErrors: Math.floor(Math.random() * 15) + 3,
+                systemStatus: 'online'
+            },
+            recentErrors: [
+                {
+                    timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+                    level: 'error',
+                    category: 'booking',
+                    message: 'Calendar timeslots retrieval failed',
+                    details: 'Error processing service 1/2: Service not found: 123',
+                    context: { serviceId: 123, employeeIds: [1, 2] }
+                },
+                {
+                    timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+                    level: 'error',
+                    category: 'database',
+                    message: 'Database connection timeout',
+                    details: 'Connection to MySQL server lost during query execution',
+                    context: { query: 'SELECT * FROM appointments' }
+                },
+                {
+                    timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+                    level: 'error',
+                    category: 'validation',
+                    message: 'Invalid servicesData format',
+                    details: 'each item must have serviceId and non-empty employeeIds array',
+                    context: { validation: 'invalid_services_structure' }
+                }
+            ],
+            performanceIssues: [
+                {
+                    timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+                    url: '/api/public/calendar',
+                    method: 'POST',
+                    responseTime: 5430,
+                    message: 'Slow calendar request detected'
+                },
+                {
+                    timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+                    url: '/api/protected/appointments',
+                    method: 'GET',
+                    responseTime: 3200,
+                    message: 'Database query performance issue'
+                }
+            ],
+            hourlyErrorCounts: Array.from({length: 24}, (_, i) => ({
+                hour: i,
+                count: Math.floor(Math.random() * 10)
+            }))
+        };
+
+        function loadDashboard() {
+            // В реальном приложении здесь будет fetch к API
+            updateStats(mockData.stats);
+            updateRecentErrors(mockData.recentErrors);
+            updatePerformanceIssues(mockData.performanceIssues);
+            updateErrorChart(mockData.hourlyErrorCounts);
+            updateLastUpdate();
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalErrors').textContent = stats.totalErrors;
+            document.getElementById('bookingErrors').textContent = stats.bookingErrors;
+            document.getElementById('calendarErrors').textContent = stats.calendarErrors;
+
+            const statusElement = document.getElementById('systemStatus');
+            const statusIndicator = statusElement.querySelector('.status-indicator');
+
+            if (stats.systemStatus === 'online') {
+                statusElement.innerHTML = '<span class="status-indicator status-online"></span>Online';
+            } else {
+                statusElement.innerHTML = '<span class="status-indicator status-offline"></span>Offline';
+            }
+        }
+
+        function updateRecentErrors(errors) {
+            const container = document.getElementById('recentErrors');
+            container.innerHTML = '';
+
+            if (errors.length === 0) {
+                container.innerHTML = '<li class="error-item"><div class="error-message">🎉 No recent errors!</div></li>';
+                return;
+            }
+
+            errors.forEach(error => {
+                const errorItem = document.createElement('li');
+                errorItem.className = 'error-item';
+
+                const timestamp = new Date(error.timestamp).toLocaleString();
+
+                errorItem.innerHTML = `
+                    <div class="error-time">${timestamp} - [${error.category.toUpperCase()}]</div>
+                    <div class="error-message">${error.message}</div>
+                    <div class="error-details">${error.details}</div>
+                `;
+
+                container.appendChild(errorItem);
+            });
+        }
+
+        function updatePerformanceIssues(issues) {
+            const container = document.getElementById('performanceIssues');
+            container.innerHTML = '';
+
+            if (issues.length === 0) {
+                container.innerHTML = '<li class="error-item"><div class="error-message">✅ No performance issues detected!</div></li>';
+                return;
+            }
+
+            issues.forEach(issue => {
+                const issueItem = document.createElement('li');
+                issueItem.className = 'error-item';
+
+                const timestamp = new Date(issue.timestamp).toLocaleString();
+
+                issueItem.innerHTML = `
+                    <div class="error-time">${timestamp}</div>
+                    <div class="error-message">${issue.method} ${issue.url} - ${issue.responseTime}ms</div>
+                    <div class="error-details">Response time exceeded threshold (>3000ms)</div>
+                `;
+
+                container.appendChild(issueItem);
+            });
+        }
+
+        function updateErrorChart(hourlyData) {
+            const container = document.getElementById('errorChart');
+            container.innerHTML = '';
+
+            const maxCount = Math.max(...hourlyData.map(item => item.count), 1);
+
+            hourlyData.forEach(item => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                const height = (item.count / maxCount) * 250; // 250px max height
+                bar.style.height = `${height}px`;
+                bar.textContent = item.count > 0 ? item.count : '';
+                bar.title = `${item.hour}:00 - ${item.count} errors`;
+
+                container.appendChild(bar);
+            });
+        }
+
+        function updateLastUpdate() {
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('lastUpdate').textContent = `Last updated: ${now}`;
+        }
+
+        function toggleAutoRefresh() {
+            const toggle = document.getElementById('autoRefreshToggle');
+            isAutoRefreshEnabled = !isAutoRefreshEnabled;
+
+            if (isAutoRefreshEnabled) {
+                toggle.classList.add('active');
+                autoRefreshInterval = setInterval(loadDashboard, 30000); // 30 seconds
+            } else {
+                toggle.classList.remove('active');
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        // Event listeners
+        document.getElementById('autoRefreshToggle').addEventListener('click', toggleAutoRefresh);
+
+        // Initial load
+        loadDashboard();
+
+        // В реальном приложении здесь был бы WebSocket для real-time обновлений
+        console.log('🚨 Error Monitoring Dashboard loaded');
+        console.log('💡 Tip: Enable auto-refresh for real-time monitoring');
+    </script>
+</body>
+</html>

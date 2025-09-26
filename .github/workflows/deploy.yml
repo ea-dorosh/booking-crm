@@ -32,10 +32,14 @@ jobs:
 
           cp package.json package-lock.json ../temp-backend/
           cp knexfile.js ../temp-backend/
+          cp ecosystem.config.js ../temp-backend/
           cp -r migrations ../temp-backend/
           cp -r scripts ../temp-backend/
+          cp -r monitoring ../temp-backend/
+          cp LOGGING_GUIDE.md LOGGING_EXAMPLES.md ../temp-backend/
 
           mkdir -p ../temp-backend/public/images
+          mkdir -p ../temp-backend/logs
 
           echo "Email templates copied:"
           ls -la ../temp-backend/resources/templates/emails/
@@ -123,15 +127,22 @@ jobs:
               cp backend/.env.production /tmp/.env.production.backup
             fi
 
+            # Preserve images and logs directories
             if [ -d "backend/public/images" ]; then
               echo "Preserving images directory..."
               mv backend/public/images /tmp/booking-images
+            fi
+
+            if [ -d "backend/logs" ]; then
+              echo "Preserving logs directory..."
+              mv backend/logs /tmp/booking-logs
             fi
 
             rm -rf backend
             mkdir -p backend
             tar xzf backend.tar.gz -C backend
 
+            # Restore images
             mkdir -p backend/public
             if [ -d "/tmp/booking-images" ]; then
               echo "Restoring images directory..."
@@ -141,8 +152,19 @@ jobs:
               mkdir -p backend/public/images
             fi
 
-            sudo chown -R $USER:$USER backend/public/images
+            # Restore logs
+            if [ -d "/tmp/booking-logs" ]; then
+              echo "Restoring logs directory..."
+              rm -rf backend/logs
+              mv /tmp/booking-logs backend/logs
+            else
+              mkdir -p backend/logs
+            fi
+
+            # Set proper permissions
+            sudo chown -R $USER:$USER backend/public/images backend/logs
             sudo chmod -R 777 backend/public/images
+            sudo chmod -R 755 backend/logs
 
             # Restore .env.production and copy to .env
             if [ -f "/tmp/.env.production.backup" ]; then
@@ -159,11 +181,38 @@ jobs:
             echo "Checking email templates..."
             ls -la resources/templates/emails/
 
+            echo "Checking logging setup..."
+            ls -la logs/ || echo "Logs directory will be created by application"
+            ls -la monitoring/ || echo "Monitoring directory missing"
+            ls -la ecosystem.config.js || echo "PM2 config missing"
+
+            # Install PM2 log rotation if not already installed
+            pm2 install pm2-logrotate || echo "PM2 logrotate already installed"
+
+            # Configure PM2 log rotation
+            pm2 set pm2-logrotate:max_size 50M
+            pm2 set pm2-logrotate:retain 30
+            pm2 set pm2-logrotate:compress true
+
+            # Stop old instance and start with PM2 ecosystem config
             pm2 delete booking-backend || true
-            pm2 start dist/server.js \
-              --name booking-backend \
-              --cwd ${{ secrets.EC2_DEPLOY_PATH }}/backend \
-              --env production
+
+            if [ -f "ecosystem.config.js" ]; then
+              echo "Starting with PM2 ecosystem config..."
+              pm2 start ecosystem.config.js --env production
+            else
+              echo "Fallback: Starting with basic PM2 config..."
+              pm2 start dist/server.js \
+                --name booking-backend \
+                --cwd ${{ secrets.EC2_DEPLOY_PATH }}/backend \
+                --env production
+            fi
+
+            # Save PM2 configuration
+            pm2 save
+
+            echo "PM2 status after deployment:"
+            pm2 status
             cd ..
 
             # --- Frontend deployment ---

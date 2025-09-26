@@ -1,0 +1,238 @@
+name: Log Monitoring & Health Check
+
+on:
+  schedule:
+    # Запускать каждые 4 часа для мониторинга
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    # Ручной запуск для тестирования
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    name: Monitor Application Health
+
+    steps:
+      - name: Check Application Health
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.EC2_DEPLOY_PATH }}/backend
+
+            echo "🔍 Starting health check and log analysis..."
+
+            # Check if application is running
+            echo "📊 PM2 Status:"
+            pm2 status booking-backend || echo "❌ Application not running!"
+
+            # Check disk space for logs
+            echo "💾 Disk space usage:"
+            df -h | grep -E "(Filesystem|/dev/)"
+
+            # Check logs directory size
+            if [ -d "logs" ]; then
+              echo "📁 Logs directory size:"
+              du -sh logs/
+
+              # Count log files
+              echo "📄 Log files count:"
+              ls -la logs/ | wc -l
+
+              # Check if logs are being written (files modified in last hour)
+              echo "🕒 Recent log activity (last hour):"
+              find logs/ -name "*.log" -mmin -60 -ls || echo "No recent log activity"
+
+              # Check for error patterns in recent logs
+              current_date=$(date +%Y-%m-%d)
+              error_log="logs/error-$current_date.log"
+
+              if [ -f "$error_log" ]; then
+                echo "🚨 Error analysis for today:"
+                error_count=$(wc -l < "$error_log" 2>/dev/null || echo "0")
+                echo "Total error entries today: $error_count"
+
+                if [ "$error_count" -gt 0 ]; then
+                  echo "Recent errors (last 10):"
+                  tail -10 "$error_log" | head -5
+
+                  # Count different error types
+                  echo "Error breakdown:"
+                  grep -o '"category":"[^"]*"' "$error_log" 2>/dev/null | sort | uniq -c | sort -nr || echo "No categorized errors"
+                fi
+              else
+                echo "✅ No error log file for today"
+              fi
+
+              # Performance analysis
+              combined_log="logs/combined-$current_date.log"
+              if [ -f "$combined_log" ]; then
+                echo "⚡ Performance analysis:"
+                # Count slow requests (>3000ms)
+                slow_requests=$(grep '"responseTime":[0-9]*[0-9][0-9][0-9][0-9]' "$combined_log" 2>/dev/null | wc -l || echo "0")
+                echo "Slow requests (>3s) today: $slow_requests"
+
+                # Total requests today
+                total_requests=$(grep '"level":"http"' "$combined_log" 2>/dev/null | wc -l || echo "0")
+                echo "Total HTTP requests today: $total_requests"
+
+                if [ "$total_requests" -gt 0 ] && [ "$error_count" -gt 0 ]; then
+                  error_rate=$(echo "scale=2; $error_count * 100 / $total_requests" | bc 2>/dev/null || echo "N/A")
+                  echo "Error rate: $error_rate%"
+                fi
+              fi
+
+              # Run log analyzer if available
+              if [ -f "scripts/log-analyzer.js" ]; then
+                echo "📊 Running automated log analysis..."
+                timeout 30 node scripts/log-analyzer.js analyze || echo "Log analyzer timed out or failed"
+              fi
+
+            else
+              echo "❌ Logs directory not found!"
+            fi
+
+            # Check memory usage
+            echo "🧠 Memory usage:"
+            pm2 show booking-backend | grep -E "(memory|uptime|restarts)" || echo "Cannot get PM2 details"
+
+            # Check application response
+            echo "🌐 Application response test:"
+            timeout 10 curl -s -o /dev/null -w "HTTP Status: %{http_code}, Response time: %{time_total}s\n" \
+              "http://localhost:3500/api/public/company" || echo "Application not responding"
+
+            echo "✅ Health check completed"
+
+  log-rotation-check:
+    runs-on: ubuntu-latest
+    name: Check Log Rotation
+    needs: health-check
+
+    steps:
+      - name: Verify Log Rotation
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.EC2_DEPLOY_PATH }}/backend
+
+            echo "🔄 Checking log rotation setup..."
+
+            # Check PM2 logrotate module
+            pm2_modules=$(pm2 ls 2>/dev/null | grep -i logrotate || echo "not found")
+            echo "PM2 logrotate module: $pm2_modules"
+
+            # Check log rotation configuration
+            echo "PM2 logrotate settings:"
+            pm2 get pm2-logrotate:max_size 2>/dev/null || echo "max_size not set"
+            pm2 get pm2-logrotate:retain 2>/dev/null || echo "retain not set"
+            pm2 get pm2-logrotate:compress 2>/dev/null || echo "compress not set"
+
+            # Check for old compressed logs
+            if [ -d "logs" ]; then
+              echo "📦 Compressed log files:"
+              find logs/ -name "*.gz" -ls 2>/dev/null || echo "No compressed logs found"
+
+              # Check if logs are growing too large
+              echo "📏 Large log files (>10MB):"
+              find logs/ -name "*.log" -size +10M -ls 2>/dev/null || echo "No large log files"
+            fi
+
+  send-alert:
+    runs-on: ubuntu-latest
+    name: Send Health Alert
+    needs: [health-check, log-rotation-check]
+    if: failure()
+
+    steps:
+      - name: Send Slack Notification on Failure
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: 🚨 Booking CRM Health Check Failed
+          SLACK_MESSAGE: |
+            Health check or log rotation check failed.
+            Please check the application logs and PM2 status.
+
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+        if: env.SLACK_WEBHOOK != ''
+
+      - name: Send Email Alert (Alternative)
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 🚨 Booking CRM Health Check Alert
+          body: |
+            Health monitoring workflow detected issues with the Booking CRM application.
+
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            Time: ${{ github.event.head_commit.timestamp }}
+
+            Please check:
+            1. Application status (PM2)
+            2. Error logs
+            3. Disk space
+            4. Log rotation
+
+            Dashboard: ${{ secrets.EC2_HOST }}/monitoring/error-dashboard.html
+          to: ${{ secrets.ALERT_EMAIL }}
+          from: ${{ secrets.SMTP_FROM }}
+        if: env.SMTP_SERVER != ''
+
+  weekly-report:
+    runs-on: ubuntu-latest
+    name: Weekly Log Report
+    if: github.event.schedule == '0 */4 * * *' && github.event.schedule != null
+
+    steps:
+      - name: Generate Weekly Report
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.EC2_DEPLOY_PATH }}/backend
+
+            # Generate weekly report only on Sundays
+            if [ $(date +%u) -eq 7 ]; then
+              echo "📊 Generating weekly report..."
+
+              if [ -f "scripts/log-analyzer.js" ]; then
+                # Analyze logs for the past week
+                for i in {0..6}; do
+                  analysis_date=$(date -d "$i days ago" +%Y-%m-%d)
+                  echo "Analyzing $analysis_date..."
+                  node scripts/log-analyzer.js analyze "$analysis_date" >> weekly-report.tmp 2>/dev/null || echo "No data for $analysis_date"
+                done
+
+                # Create summary report
+                echo "=== WEEKLY BOOKING CRM REPORT ===" > weekly-report.txt
+                echo "Period: $(date -d '6 days ago' +%Y-%m-%d) to $(date +%Y-%m-%d)" >> weekly-report.txt
+                echo "" >> weekly-report.txt
+
+                if [ -f "weekly-report.tmp" ]; then
+                  cat weekly-report.tmp >> weekly-report.txt
+                  rm weekly-report.tmp
+                fi
+
+                echo "Weekly report generated: weekly-report.txt"
+                head -20 weekly-report.txt
+              else
+                echo "Log analyzer not available for weekly report"
+              fi
+            else
+              echo "Weekly report runs only on Sundays"
+            fi

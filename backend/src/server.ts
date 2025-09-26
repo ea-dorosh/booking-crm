@@ -1,13 +1,15 @@
 import express from 'express';
-import morgan from 'morgan';
+// import morgan from 'morgan'; // Replaced with custom logger
 import cors from 'cors';
 import dotenv from 'dotenv';
 import databaseMiddleware from '@/middlewares/databaseMiddleware.js';
 import databaseSelectionMiddleware from '@/middlewares/databaseSelectionMiddleware.js';
+import { requestLoggerMiddleware, errorLoggerMiddleware } from '@/middlewares/loggerMiddleware.js';
 import { initScheduler } from '@/services/scheduler/schedulerService.js';
 import mysql from 'mysql2/promise';
 import path from "path";
 import { dayjs } from '@/services/dayjs/dayjsService.js';
+import bookingLogger from '@/services/logger/loggerService.js';
 
 // routes for CRM
 import appointmentsRouter from '@/routes/appointments/appointmentsRoute.js';
@@ -39,7 +41,8 @@ const app = express();
 // Trust reverse proxies so req.ip and X-Forwarded-* are respected
 app.set(`trust proxy`, true);
 
-app.use(morgan(`dev`));
+// Replace morgan with our custom request logger
+app.use(requestLoggerMiddleware);
 
 const port = parseInt(process.env.PORT || `3500`, 10);
 
@@ -63,7 +66,9 @@ const corsOptions = {
     if (process.env.NODE_ENV === `development` || allowedOrigins.some(allowedOrigin => origin.startsWith(String(allowedOrigin)))) {
       return callback(null, true);
     } else {
-      console.warn(`CORS blocked request from origin: ${origin}`);
+      bookingLogger.warn(`CORS blocked request`, {
+        origin, userAgent: undefined, method: `CORS_CHECK`,
+      });
       return callback(new Error(`Origin ${origin} not allowed by CORS`), false);
     }
   },
@@ -106,8 +111,19 @@ app.use(`/api/public/employees`, databaseSelectionMiddleware, employeesPublicRou
 app.use(`/api/public/services`, databaseSelectionMiddleware, servicesPublicRouter);
 app.use(`/api/public/tracking`, databaseSelectionMiddleware, trackingPublicRouter);
 
+// Add error logging middleware (must be after all routes)
+app.use(errorLoggerMiddleware);
+
 app.listen(port, `0.0.0.0`, () => {
-  console.log(`Server is running on internal port ${port} and externally accessible as ${process.env.SERVER_API_URL}`);
+  bookingLogger.info(`Server started successfully`, {
+    port,
+    environment: process.env.NODE_ENV,
+    serverUrl: process.env.SERVER_API_URL,
+    timezoneName: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    currentTime: new Date().toISOString(),
+    currentLocalTime: new Date().toString(),
+    dayjsTimezone: dayjs.tz.guess(),
+  });
 
   try {
     const schedulerDbPool = mysql.createPool({
@@ -118,14 +134,8 @@ app.listen(port, `0.0.0.0`, () => {
     });
 
     initScheduler(schedulerDbPool);
+    bookingLogger.info(`Scheduler initialized successfully`);
   } catch (error) {
-    console.error(`Failed to initialize scheduler:`, error);
+    bookingLogger.error(`Failed to initialize scheduler`, { error: error as Error });
   }
-
-  console.log(`Server timezone info:`, {
-    timezoneName: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    currentTime: new Date().toISOString(),
-    currentLocalTime: new Date().toString(),
-    dayjsTimezone: dayjs.tz.guess(),
-  });
 });

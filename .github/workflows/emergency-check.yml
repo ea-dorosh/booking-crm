@@ -1,0 +1,266 @@
+name: Emergency Health Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_logs:
+        description: 'Check recent logs for errors'
+        required: false
+        default: 'true'
+        type: boolean
+      restart_app:
+        description: 'Restart application if needed'
+        required: false
+        default: 'false'
+        type: boolean
+      log_analysis_days:
+        description: 'Number of days to analyze (1-7)'
+        required: false
+        default: '1'
+        type: string
+
+jobs:
+  emergency-check:
+    runs-on: ubuntu-latest
+    name: Emergency Health Check & Recovery
+
+    steps:
+      - name: Emergency Health Assessment
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.EC2_DEPLOY_PATH }}/backend
+
+            echo "🚨 EMERGENCY HEALTH CHECK STARTED"
+            echo "Time: $(date)"
+            echo "======================================"
+
+            # Critical system checks
+            echo "1. 🔍 APPLICATION STATUS:"
+            pm2_status=$(pm2 jlist booking-backend 2>/dev/null | jq -r '.[0].pm2_env.status' 2>/dev/null || echo "not_found")
+            echo "PM2 Status: $pm2_status"
+
+            if [ "$pm2_status" != "online" ]; then
+              echo "❌ APPLICATION IS NOT RUNNING!"
+
+              if [ "${{ github.event.inputs.restart_app }}" == "true" ]; then
+                echo "🔄 Attempting to restart application..."
+
+                # Try to start with ecosystem config
+                if [ -f "ecosystem.config.js" ]; then
+                  pm2 start ecosystem.config.js --env production || echo "Failed to start with ecosystem config"
+                else
+                  pm2 start dist/server.js --name booking-backend --env production || echo "Failed to start with basic config"
+                fi
+
+                sleep 5
+                new_status=$(pm2 jlist booking-backend 2>/dev/null | jq -r '.[0].pm2_env.status' 2>/dev/null || echo "not_found")
+                echo "Status after restart: $new_status"
+              else
+                echo "⚠️  Restart not requested. Use 'restart_app: true' to attempt automatic restart."
+              fi
+            else
+              echo "✅ Application is running"
+
+              # Show detailed PM2 info
+              echo "PM2 Details:"
+              pm2 show booking-backend | grep -E "(uptime|memory|restarts|cpu)" || echo "Cannot get PM2 details"
+            fi
+
+            # Check if application responds
+            echo ""
+            echo "2. 🌐 CONNECTIVITY TEST:"
+            response=$(timeout 10 curl -s -w "HTTPSTATUS:%{http_code};TIME:%{time_total}" \
+              "http://localhost:3500/api/public/company" || echo "HTTPSTATUS:000;TIME:timeout")
+
+            http_code=$(echo "$response" | grep -o "HTTPSTATUS:[0-9]*" | cut -d: -f2)
+            response_time=$(echo "$response" | grep -o "TIME:[0-9.]*" | cut -d: -f2)
+
+            echo "HTTP Status: $http_code"
+            echo "Response Time: ${response_time}s"
+
+            if [ "$http_code" == "200" ]; then
+              echo "✅ Application responding correctly"
+            else
+              echo "❌ Application not responding properly"
+            fi
+
+            # System resources
+            echo ""
+            echo "3. 🖥️  SYSTEM RESOURCES:"
+            echo "Memory usage:"
+            free -h
+            echo ""
+            echo "Disk usage:"
+            df -h | head -5
+            echo ""
+            echo "CPU load:"
+            uptime
+
+            # Check logs if requested
+            if [ "${{ github.event.inputs.check_logs }}" == "true" ]; then
+              echo ""
+              echo "4. 📋 LOG ANALYSIS:"
+
+              if [ -d "logs" ]; then
+                echo "Logs directory size: $(du -sh logs/ | cut -f1)"
+
+                # Analyze recent errors
+                days_to_check="${{ github.event.inputs.log_analysis_days }}"
+                [ -z "$days_to_check" ] && days_to_check=1
+
+                echo "Analyzing last $days_to_check day(s)..."
+
+                total_errors=0
+                for i in $(seq 0 $((days_to_check-1))); do
+                  check_date=$(date -d "$i days ago" +%Y-%m-%d)
+                  error_file="logs/error-$check_date.log"
+
+                  if [ -f "$error_file" ]; then
+                    day_errors=$(wc -l < "$error_file" 2>/dev/null || echo "0")
+                    total_errors=$((total_errors + day_errors))
+                    echo "$check_date: $day_errors errors"
+
+                    # Show recent critical errors for today only
+                    if [ "$i" == "0" ] && [ "$day_errors" -gt 0 ]; then
+                      echo "Recent critical errors (last 5):"
+                      tail -5 "$error_file" | head -3
+                    fi
+                  else
+                    echo "$check_date: no error log"
+                  fi
+                done
+
+                echo "Total errors in $days_to_check day(s): $total_errors"
+
+                # Performance check for today
+                today=$(date +%Y-%m-%d)
+                combined_log="logs/combined-$today.log"
+
+                if [ -f "$combined_log" ]; then
+                  # Count slow requests
+                  slow_requests=$(grep '"responseTime":[0-9]*[0-9][0-9][0-9][0-9]' "$combined_log" 2>/dev/null | wc -l || echo "0")
+                  total_requests=$(grep '"level":"http"' "$combined_log" 2>/dev/null | wc -l || echo "0")
+
+                  echo "Performance today:"
+                  echo "  Total requests: $total_requests"
+                  echo "  Slow requests (>3s): $slow_requests"
+
+                  if [ "$total_requests" -gt 0 ]; then
+                    if [ "$total_errors" -gt 0 ]; then
+                      error_rate=$(echo "scale=2; $total_errors * 100 / $total_requests" | bc 2>/dev/null || echo "N/A")
+                      echo "  Error rate: $error_rate%"
+                    else
+                      echo "  Error rate: 0%"
+                    fi
+                  fi
+                fi
+
+                # Quick log analyzer run
+                if [ -f "scripts/log-analyzer.js" ]; then
+                  echo ""
+                  echo "Running quick log analysis..."
+                  timeout 20 node scripts/log-analyzer.js analyze "$today" 2>/dev/null | head -20 || echo "Log analyzer failed or timed out"
+                fi
+
+              else
+                echo "❌ Logs directory not found!"
+              fi
+            fi
+
+            # Database connectivity (if we can check it)
+            echo ""
+            echo "5. 🗄️  DATABASE CHECK:"
+
+            # Try to check if we can connect to database through the app
+            db_check=$(timeout 5 curl -s "http://localhost:3500/api/public/company" | jq -r '.status' 2>/dev/null || echo "error")
+            if [ "$db_check" != "error" ]; then
+              echo "✅ Database connectivity appears OK"
+            else
+              echo "⚠️  Database connectivity could not be verified"
+            fi
+
+            echo ""
+            echo "======================================"
+            echo "🚨 EMERGENCY CHECK COMPLETED"
+            echo "Time: $(date)"
+
+            # Summary
+            echo ""
+            echo "📊 SUMMARY:"
+            [ "$pm2_status" == "online" ] && echo "✅ App Status: RUNNING" || echo "❌ App Status: NOT RUNNING"
+            [ "$http_code" == "200" ] && echo "✅ Connectivity: OK" || echo "❌ Connectivity: FAILED"
+            [ "$total_errors" -lt 10 ] && echo "✅ Error Level: LOW" || echo "⚠️  Error Level: HIGH ($total_errors errors)"
+
+            if [ "$pm2_status" != "online" ] || [ "$http_code" != "200" ]; then
+              echo ""
+              echo "🔥 IMMEDIATE ACTION REQUIRED!"
+              exit 1
+            fi
+
+      - name: Create Emergency Report
+        if: always()
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ${{ secrets.EC2_DEPLOY_PATH }}/backend
+
+            # Create emergency report file
+            cat > emergency-report-$(date +%Y%m%d-%H%M).txt << EOF
+            BOOKING CRM EMERGENCY HEALTH CHECK REPORT
+            ========================================
+
+            Date: $(date)
+            Triggered by: GitHub Actions
+            Run ID: ${{ github.run_id }}
+
+            Check Parameters:
+            - Check Logs: ${{ github.event.inputs.check_logs }}
+            - Restart App: ${{ github.event.inputs.restart_app }}
+            - Analysis Days: ${{ github.event.inputs.log_analysis_days }}
+
+            System Status:
+            - PM2 Status: $(pm2 jlist booking-backend 2>/dev/null | jq -r '.[0].pm2_env.status' 2>/dev/null || echo "unknown")
+            - Uptime: $(pm2 jlist booking-backend 2>/dev/null | jq -r '.[0].pm2_env.pm_uptime' 2>/dev/null || echo "unknown")
+            - Memory: $(pm2 jlist booking-backend 2>/dev/null | jq -r '.[0].monit.memory' 2>/dev/null || echo "unknown")
+            - CPU: $(pm2 jlist booking-backend 2>/dev/null | jq -r '.[0].monit.cpu' 2>/dev/null || echo "unknown")
+
+            Quick Metrics:
+            - Disk Usage: $(df -h / | tail -1 | awk '{print $5}')
+            - Load Average: $(uptime | awk -F'load average:' '{print $2}')
+            - Free Memory: $(free -h | grep '^Mem:' | awk '{print $7}')
+
+            For detailed analysis, run:
+            node scripts/log-analyzer.js analyze
+
+            Dashboard: http://${{ secrets.EC2_HOST }}/monitoring/error-dashboard.html
+            EOF
+
+            echo "Emergency report created: emergency-report-$(date +%Y%m%d-%H%M).txt"
+
+      - name: Send Emergency Alert
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: 🆘 EMERGENCY - Booking CRM Critical Issue
+          SLACK_MESSAGE: |
+            🚨 EMERGENCY HEALTH CHECK DETECTED CRITICAL ISSUES!
+
+            Application may be down or experiencing severe problems.
+
+            Immediate investigation required:
+            - Check server: ${{ secrets.EC2_HOST }}
+            - Review logs: PM2 and application logs
+            - Verify database connectivity
+
+            Emergency Check Run: ${{ github.run_id }}
+            Time: ${{ github.event.head_commit.timestamp }}
+        if: env.SLACK_WEBHOOK != ''
