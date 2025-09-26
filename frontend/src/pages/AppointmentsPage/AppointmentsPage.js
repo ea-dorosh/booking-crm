@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import AppointmentsPageCalendarView from '@/components/AppointmentsPageCalendarView';
-import AppointmentsPageListView from '@/components/AppointmentsPageListView';
+import AppointmentsPageCalendarView from '@/components/AppointmentsPageCalendarView/AppointmentsPageCalendarView';
+import AppointmentsPageListView from '@/components/AppointmentsPageListView/AppointmentsPageListView';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import Tabs from '@/components/Tabs/Tabs';
 import { selectSortedAppointments } from '@/features/appointments/appointmentsSelectors';

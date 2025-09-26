@@ -15,20 +15,33 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import AppointmentEventMenu from '@/components/AppointmentEventMenu';
-import { fetchAppointments, setCalendarState, setStartDate } from '@/features/appointments/appointmentsSlice';
+import {
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
+import {
+  useDispatch,
+  useSelector,
+} from 'react-redux';
+import AppointmentEventMenu from '@/components/AppointmentEventMenu/AppointmentEventMenu';
+import {
+  fetchAppointments,
+  setCalendarState,
+  setStartDate,
+} from '@/features/appointments/appointmentsSlice';
 
 export default function AppointmentsPageCalendarView({ appointments = [] }) {
   const dispatch = useDispatch();
+  const calendarRef = useRef(null);
+
   const calendar = useSelector((state) => state.appointments.calendar);
   const currentStartDate = useSelector((state) => state.appointments.startDate);
-  const [view, setView] = React.useState(calendar?.view || `timeGridDay`); // timeGridDay | timeGridThreeDay | timeGridWeek
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [view, setView] = useState(calendar?.view || `timeGridDay`); // timeGridDay | timeGridThreeDay | timeGridWeek
+  const [anchorEl, setAnchorEl] = useState(null);
   const openSettings = Boolean(anchorEl);
-  const [eventAnchor, setEventAnchor] = React.useState(null);
-  const [selectedAppt, setSelectedAppt] = React.useState(null);
+  const [eventAnchor, setEventAnchor] = useState(null);
+  const [selectedAppt, setSelectedAppt] = useState(null);
 
   const handleViewChange = (_e, newView) => {
     if (!newView) return;
@@ -36,9 +49,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
     dispatch(setCalendarState({ view: newView }));
   };
 
-  const calendarRef = React.useRef(null);
-
-  React.useEffect(() => {
+  useEffect(() => {
     const api = calendarRef.current?.getApi();
     if (api) {
       api.changeView(view);
@@ -64,7 +75,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
   })) || [];
 
   // Touch swipe navigation
-  const touchStart = React.useRef({
+  const touchStart = useRef({
     x: 0,
     y: 0,
     t: 0,
@@ -220,31 +231,58 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
         open={openSettings}
         onClose={() => setAnchorEl(null)}
       >
-        <MenuItem disabled>Time range</MenuItem>
+        <MenuItem
+          disabled
+          sx={{
+            px: 2,
+            justifyContent: `center`,
+            opacity: `1 !important`,
+            p: `2px 0 !important`,
+            minHeight: `0`,
+            fontWeight: 600,
+          }}
+        >
+          Time range
+        </MenuItem>
+
         <MenuItem onClick={() => { dispatch(setCalendarState({ minHour: 8 })); setAnchorEl(null); }}>Start: 08:00</MenuItem>
         <MenuItem onClick={() => { dispatch(setCalendarState({ minHour: 9 })); setAnchorEl(null); }}>Start: 09:00</MenuItem>
-        <MenuItem onClick={() => { dispatch(setCalendarState({ minHour: 10 })); setAnchorEl(null); }}>Start: 10:00</MenuItem>
-        <MenuItem divider />
+        <MenuItem
+          onClick={() => {
+            dispatch(setCalendarState({ minHour: 10 }));
+            setAnchorEl(null);
+          }}
+          sx={{ borderBottom: `1px solid rgba(0,0,0,0.08)` }}
+        >
+          Start: 10:00
+        </MenuItem>
         <MenuItem onClick={() => { dispatch(setCalendarState({ maxHour: 18 })); setAnchorEl(null); }}>End: 18:00</MenuItem>
         <MenuItem onClick={() => { dispatch(setCalendarState({ maxHour: 20 })); setAnchorEl(null); }}>End: 20:00</MenuItem>
-        <MenuItem onClick={() => { dispatch(setCalendarState({ maxHour: 22 })); setAnchorEl(null); }}>End: 22:00</MenuItem>
-        <MenuItem divider />
-        <FormControlLabel
-          sx={{
-            pl: 1,
-            pr: 2,
-          }}
-          control={
-            (
-              <Checkbox
-                checked={Boolean(calendar?.showSunday)}
-                onChange={(e) => dispatch(setCalendarState({ showSunday: e.target.checked }))}
-                size="small"
-              />
-            )
-          }
-          label="Show Sunday in week view"
-        />
+        <MenuItem
+          onClick={() => { dispatch(setCalendarState({ maxHour: 22 })); setAnchorEl(null); }}
+          sx={{ borderBottom: `1px solid rgba(0,0,0,0.08)` }}
+        >
+          End: 22:00
+        </MenuItem>
+
+        <MenuItem>
+          <FormControlLabel
+            sx={{
+              pl: 0,
+              pr: 0,
+            }}
+            control={
+              (
+                <Checkbox
+                  checked={Boolean(calendar?.showSunday)}
+                  onChange={(e) => dispatch(setCalendarState({ showSunday: e.target.checked }))}
+                  size="small"
+                />
+              )
+            }
+            label="Show Sunday in week view"
+          />
+        </MenuItem>
       </Menu>
 
       <Box
