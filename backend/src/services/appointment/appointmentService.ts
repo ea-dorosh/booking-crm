@@ -132,8 +132,17 @@ async function getAppointments(
       },
       employee: {
         id: row.employee_id,
+        firstName: ``,
+        lastName: ``,
       },
     };
+  });
+
+  const employee = await getEmployee(dbPool, appointmentsData[0].employee.id);
+
+  appointmentsData.forEach((appointment) => {
+    appointment.employee.firstName = employee.firstName;
+    appointment.employee.lastName = employee.lastName;
   });
 
   return appointmentsData;

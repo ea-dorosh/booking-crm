@@ -13,6 +13,12 @@ import {
 
 export default function AppointmentsPage() {
   const dispatch = useDispatch();
+  const appointments = useSelector(selectSortedAppointments);
+  const {
+    startDate,
+    isPending,
+  } = useSelector((state) => state.appointments);
+
   // Tabs state with session persistence
   const STORAGE_KEY = `appointmentsActiveTab`;
   const [activeTab, setActiveTab] = useState(() => {
@@ -33,11 +39,6 @@ export default function AppointmentsPage() {
     // Trigger fresh fetch to respect list vs calendar params (endDate)
     dispatch(fetchAppointments());
   };
-
-  const appointments = useSelector(selectSortedAppointments);
-  const {
-    startDate, isPending,
-  } = useSelector((state) => state.appointments);
 
   useEffect(() => {
     if (!startDate) {
