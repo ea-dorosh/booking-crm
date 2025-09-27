@@ -1,5 +1,4 @@
 import {
-  Box,
   Chip,
   Stack,
 } from "@mui/material";
