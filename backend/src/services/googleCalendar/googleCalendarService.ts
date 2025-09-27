@@ -941,3 +941,84 @@ export const deleteEmployeeGoogleCalendarByCalendarId = async (
     };
   }
 };
+
+export interface GoogleCalendarEventData {
+  id: string;
+  summary: string;
+  description?: string;
+  start: string; // ISO string
+  end: string; // ISO string
+  location?: string;
+  isAllDay: boolean;
+}
+
+export const getEmployeeGoogleCalendarEvents = async (
+  dbPool: Pool,
+  employeeId: number,
+  startDate: Date_ISO_Type,
+  endDate: Date_ISO_Type,
+): Promise<GoogleCalendarEventData[]> => {
+  try {
+    const calendarData = await getEmployeeCalendarClient(dbPool, employeeId);
+
+    if (!calendarData) {
+      console.log(`No active Google Calendar integration found for employee ID:`, employeeId);
+      return [];
+    }
+
+    const {
+      calendarClient,
+      calendarId,
+    } = calendarData;
+
+    const startDateTime = dayjs(startDate).startOf(`day`).toISOString();
+    const endDateTime = dayjs(endDate).endOf(`day`).toISOString();
+
+    const response = await calendarClient.events.list({
+      calendarId,
+      timeMin: startDateTime,
+      timeMax: endDateTime,
+      singleEvents: true,
+      orderBy: `startTime`,
+      maxResults: 100,
+    });
+
+    const events = response.data.items || [];
+
+    return events
+      .filter((event: any) => event.status !== `cancelled`)
+      .map((event: any) => {
+        const start = event.start?.dateTime || event.start?.date;
+        const end = event.end?.dateTime || event.end?.date;
+        const isAllDay = !event.start?.dateTime; // If no dateTime, it's an all-day event
+
+        return {
+          id: event.id || ``,
+          summary: event.summary || `(No title)`,
+          description: event.description,
+          start: start || ``,
+          end: end || ``,
+          location: event.location,
+          isAllDay,
+        };
+      })
+      .filter((event: GoogleCalendarEventData) => event.start && event.end);
+
+  } catch (error: any) {
+    console.error(`Error fetching Google Calendar events for employee ${employeeId}:`, error);
+
+    // Update error count in database
+    try {
+      await dbPool.query(
+        `UPDATE EmployeeGoogleCalendar
+         SET error_count = error_count + 1, last_error = ?, last_used_at = NOW()
+         WHERE employee_id = ? AND is_active = 1`,
+        [error.message || `Unknown error`, employeeId],
+      );
+    } catch (dbError) {
+      console.error(`Failed to update error count:`, dbError);
+    }
+
+    return [];
+  }
+};

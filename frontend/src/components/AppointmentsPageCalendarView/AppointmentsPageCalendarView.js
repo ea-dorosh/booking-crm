@@ -66,14 +66,16 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
   }, [view]);
 
   const events = appointments?.map((appointment) => ({
-    id: String(appointment.id),
-    title: appointment.serviceName,
+    id: String(appointment.id || `google-${appointment.googleEventId}`),
+    title: appointment.isGoogleEvent ? `📅 ${appointment.serviceName}` : appointment.serviceName,
     start: appointment.timeStart,
     end: appointment.timeEnd,
     extendedProps: {
-      appointment: appointment,
+      appointment: appointment.isGoogleEvent ? null : appointment,
       employeeId: appointment.employee?.id || null,
       status: appointment.status,
+      isGoogleEvent: appointment.isGoogleEvent || false,
+      googleEventId: appointment.googleEventId,
     },
   })) || [];
 
@@ -369,36 +371,58 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           eventOverlap={false}
           slotEventOverlap={false}
           eventDidMount={(info) => {
-            // Deterministic color by employee id
+            const isGoogleEvent = info.event.extendedProps?.isGoogleEvent;
             const employeeId = info.event.extendedProps?.employeeId;
             const status = info.event.extendedProps?.status;
             const isCanceled = status === appointmentStatusEnum.canceled;
 
-            const color = getEmployeeColor(employeeId);
-            if (color) {
-              info.el.style.backgroundColor = color.bg;
-              info.el.style.borderColor = color.border;
-              info.el.style.color = color.text;
-              info.el.style.borderRadius = `6px`;
-            }
-
-            // Apply canceled styling
-            if (isCanceled) {
-              info.el.style.opacity = `0.7`;
-              info.el.style.borderColor = `#f44336`;
-              info.el.style.color = `#d32f2f`;
-
-              // Add "CANCELED" text to the event
+            // Apply Google Calendar event styling
+            if (isGoogleEvent) {
+              info.el.style.backgroundColor = `#4285f4`;
+              info.el.style.borderColor = `#1a73e8`;
+              info.el.style.color = `white`;
+              info.el.style.borderRadius = `8px`;
+              info.el.style.border = `2px solid #1a73e8`;
+              info.el.style.boxShadow = `0 2px 6px rgba(66, 133, 244, 0.3)`;
+              info.el.style.fontStyle = `italic`;
+              info.el.style.opacity = `0.85`;
+              
+              // Add Google Calendar indicator
               const titleElement = info.el.querySelector(`.fc-event-title`);
               if (titleElement) {
-                const originalTitle = titleElement.textContent;
-                titleElement.innerHTML = `${originalTitle}<br><span style="font-size: 0.7em; font-weight: bold; color: #d32f2f;">CANCELED</span>`;
+                titleElement.style.fontWeight = `500`;
+              }
+            } else {
+              // Regular appointment styling
+              const color = getEmployeeColor(employeeId);
+              if (color) {
+                info.el.style.backgroundColor = color.bg;
+                info.el.style.borderColor = color.border;
+                info.el.style.color = color.text;
+                info.el.style.borderRadius = `6px`;
+              }
+
+              // Apply canceled styling
+              if (isCanceled) {
+                info.el.style.opacity = `0.7`;
+                info.el.style.borderColor = `#f44336`;
+                info.el.style.color = `#d32f2f`;
+
+                // Add "CANCELED" text to the event
+                const titleElement = info.el.querySelector(`.fc-event-title`);
+                if (titleElement) {
+                  const originalTitle = titleElement.textContent;
+                  titleElement.innerHTML = `${originalTitle}<br><span style="font-size: 0.7em; font-weight: bold; color: #d32f2f;">CANCELED</span>`;
+                }
               }
             }
           }}
           eventClick={(clickInfo) => {
-            setSelectedAppt(clickInfo.event.extendedProps?.appointment || null);
-            setEventAnchor(clickInfo.el);
+            // Only handle clicks on appointment events, not Google Calendar events
+            if (!clickInfo.event.extendedProps?.isGoogleEvent) {
+              setSelectedAppt(clickInfo.event.extendedProps?.appointment || null);
+              setEventAnchor(clickInfo.el);
+            }
           }}
           datesSet={(arg) => {
             const startIso = arg.start?.toISOString()?.slice(0,10);

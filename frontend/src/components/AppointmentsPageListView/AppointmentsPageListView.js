@@ -38,6 +38,9 @@ export default function AppointmentsPageListView({
               xs: `stretch`,
               sm: `center`,
             }}
+            sx={{
+              flexWrap: `wrap`,
+            }}
           >
             <Box
               sx={{

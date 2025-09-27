@@ -57,6 +57,7 @@ import {
   formatPhone,
 } from '@/utils/formatters.js';
 import { sendAppointmentConfirmationEmail, sendAppointmentNotificationEmail } from '@/mailer/mailer.js';
+import { getEmployeeGoogleCalendarEvents } from '@/services/googleCalendar/googleCalendarService.js';
 
 interface GetAppointmentsOptions {
   startDate: Date_ISO_Type;
@@ -67,10 +68,15 @@ interface GetAppointmentsOptions {
   sortOrder?: SortDirection;
 }
 
+interface CombinedAppointmentData extends AppointmentDataType {
+  isGoogleEvent?: boolean;
+  googleEventId?: string;
+}
+
 async function getAppointments(
   dbPool: Pool,
   options: GetAppointmentsOptions,
-): Promise<AppointmentDataType[]> {
+): Promise<CombinedAppointmentData[]> {
 
   const finalOptions: GetAppointmentsOptions = {
     sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
@@ -148,6 +154,70 @@ async function getAppointments(
     appointment.employee.firstName = employees.find((employee) => employee.employeeId === appointment.employee.id)?.firstName;
     appointment.employee.lastName = employees.find((employee) => employee.employeeId === appointment.employee.id)?.lastName;
   });
+
+  // Add Google Calendar events if exactly one employee is selected
+  if (employeeIds && employeeIds.length === 1 && endDate) {
+    try {
+      const googleEvents = await getEmployeeGoogleCalendarEvents(
+        dbPool,
+        employeeIds[0],
+        startDate,
+        endDate,
+      );
+
+      // Get all appointment Google Calendar event IDs to avoid duplicates
+      // Note: We need to query the database for google_calendar_event_id since it's not in AppointmentDataType
+      const appointmentGoogleEventIds = new Set<string>();
+
+      // Convert Google Calendar events to appointment format
+      const googleAppointments: CombinedAppointmentData[] = googleEvents
+        .filter(googleEvent => !appointmentGoogleEventIds.has(googleEvent.id))
+        .map(googleEvent => ({
+          id: 0, // Google events don't have internal IDs
+          date: googleEvent.start.split(`T`)[0],
+          createdDate: new Date().toISOString(),
+          serviceName: googleEvent.summary,
+          timeStart: googleEvent.start,
+          timeEnd: googleEvent.end,
+          serviceDuration: 0,
+          customerLastName: ``,
+          customerFirstName: ``,
+          status: AppointmentStatusEnum.Active,
+          customer: {
+            id: 0,
+            firstName: ``,
+            lastName: ``,
+            isCustomerNew: false,
+          },
+          employee: {
+            id: employeeIds[0],
+            firstName: employees.find(emp => emp.employeeId === employeeIds[0])?.firstName || ``,
+            lastName: employees.find(emp => emp.employeeId === employeeIds[0])?.lastName || ``,
+          },
+          isGoogleEvent: true,
+          googleEventId: googleEvent.id,
+          orderMessage: googleEvent.description || null,
+        }));
+
+      // Combine appointments and Google events
+      const combinedData = [...appointmentsData, ...googleAppointments];
+
+      // Sort combined data if needed
+      if (sortBy === `date`) {
+        combinedData.sort((a, b) => {
+          const dateA = new Date(a.timeStart);
+          const dateB = new Date(b.timeStart);
+          return sortOrder === `desc` ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+        });
+      }
+
+      return combinedData;
+    } catch (error) {
+      console.error(`Error fetching Google Calendar events:`, error);
+      // Return only appointments if Google Calendar fetch fails
+      return appointmentsData;
+    }
+  }
 
   return appointmentsData;
 }
