@@ -113,7 +113,7 @@ async function getAppointments(
   const orderDirection = sortOrder === `desc` ? `DESC` : `ASC`;
 
   const sql = `
-    SELECT *
+    SELECT *, google_calendar_event_id
     FROM SavedAppointments
     WHERE ${whereConditions.join(` AND `)}
     ORDER BY ${orderByColumn} ${orderDirection}
@@ -166,8 +166,11 @@ async function getAppointments(
       );
 
       // Get all appointment Google Calendar event IDs to avoid duplicates
-      // Note: We need to query the database for google_calendar_event_id since it's not in AppointmentDataType
-      const appointmentGoogleEventIds = new Set<string>();
+      const appointmentGoogleEventIds = new Set(
+        appointmentsResults
+          .map(row => row.google_calendar_event_id)
+          .filter(Boolean),
+      );
 
       // Convert Google Calendar events to appointment format
       const googleAppointments: CombinedAppointmentData[] = googleEvents

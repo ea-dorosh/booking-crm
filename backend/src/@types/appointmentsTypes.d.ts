@@ -21,6 +21,7 @@ export interface AppointmentRowType extends RowDataPacket {
   customer_first_name: string;
   status: AppointmentStatusEnum;
   order_message?: string | null;
+  google_calendar_event_id?: string | null;
 }
 
 export interface AppointmentDataType {
