@@ -6,6 +6,7 @@ import {
   Stack,
   Chip,
 } from "@mui/material";
+import ActiveFiltersIndicator from "@/components/ActiveFiltersIndicator/ActiveFiltersIndicator";
 import AppointmentsContainer from "@/components/AppointmentsContainer/AppointmentsContainer";
 import AppointmentsSorting from "@/components/AppointmentsSorting/AppointmentsSorting";
 import AppointmentsStartDate from "@/components/AppointmentsStartDate/AppointmentsStartDate";
@@ -72,6 +73,8 @@ export default function AppointmentsPageListView({
             <AppointmentsStatus />
 
             <EmployeeFilter />
+
+            <ActiveFiltersIndicator />
 
             <Box
               sx={{

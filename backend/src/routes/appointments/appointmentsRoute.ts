@@ -40,9 +40,10 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
     status = request.query.status === `null` ? null : Number(request.query.status);
   }
 
-  let employeeId: number | null = null;
-  if (request.query?.employeeId !== undefined) {
-    employeeId = request.query.employeeId === `null` ? null : Number(request.query.employeeId);
+  let employeeIds: number[] | null = null;
+  if (request.query?.employeeIds !== undefined && request.query.employeeIds !== `null`) {
+    const employeeIdsString = request.query.employeeIds as string;
+    employeeIds = employeeIdsString.split(`,`).map(id => Number(id.trim())).filter(id => !isNaN(id));
   }
 
   const sortBy = (request.query?.sortBy as AppointmentSortField) || DEFAULT_APPOINTMENT_SORT_FIELD;
@@ -58,7 +59,7 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
       startDate,
       endDate,
       status,
-      employeeId,
+      employeeIds,
       sortBy,
       sortOrder,
     });

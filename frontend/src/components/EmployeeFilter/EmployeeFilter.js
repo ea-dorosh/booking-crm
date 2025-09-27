@@ -1,15 +1,16 @@
 import {
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Button,
+  Box,
 } from "@mui/material";
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { employeeStatusEnum } from '@/enums/enums';
 import {
-  setEmployeeId,
+  setEmployeeIds,
   fetchAppointments,
 } from '@/features/appointments/appointmentsSlice';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
@@ -18,7 +19,7 @@ export default function EmployeeFilter() {
   const dispatch = useDispatch();
 
   const employees = useSelector((state) => state.employees.data);
-  const selectedEmployeeId = useSelector((state) => state.appointments.employeeId);
+  const selectedEmployeeIds = useSelector((state) => state.appointments.employeeIds);
   const isEmployeesLoading = useSelector((state) => state.employees.isCustomersDataRequestPending);
 
   useEffect(() => {
@@ -28,11 +29,24 @@ export default function EmployeeFilter() {
     }
   }, [dispatch, employees]);
 
-  const handleEmployeeChange = (event) => {
-    const employeeId = event.target.value === `` ? null : event.target.value;
-    dispatch(setEmployeeId({ employeeId }));
+  const handleEmployeeToggle = (employeeId) => {
+    const currentIds = selectedEmployeeIds || [];
+    const newIds = currentIds.includes(employeeId)
+      ? currentIds.filter(id => id !== employeeId)
+      : [...currentIds, employeeId];
+
+    dispatch(setEmployeeIds({ employeeIds: newIds }));
     dispatch(fetchAppointments());
   };
+
+  const handleSelectAll = () => {
+    const allEmployeeIds = employees?.map(employee => employee.employeeId) || [];
+    dispatch(setEmployeeIds({ employeeIds: allEmployeeIds }));
+    dispatch(fetchAppointments());
+  };
+
+  const selectedCount = selectedEmployeeIds?.length || 0;
+  const totalCount = employees?.length || 0;
 
   return (
     <>
@@ -47,33 +61,45 @@ export default function EmployeeFilter() {
           letterSpacing: `0.5px`,
         }}
       >
-        Filter by Employee
+        Filter by Employee ({selectedCount}/{totalCount})
       </Typography>
 
-      <FormControl
-        size="small"
-        fullWidth
-        disabled={isEmployeesLoading}
-      >
-        <InputLabel>Employee</InputLabel>
-        <Select
-          value={selectedEmployeeId || ``}
-          label="Employee"
-          onChange={handleEmployeeChange}
+      <Box sx={{ mb: 1 }}>
+        <Button
+          size="small"
+          onClick={handleSelectAll}
+          disabled={isEmployeesLoading || selectedCount === totalCount}
+          sx={{
+            minWidth: `auto`,
+            fontSize: `0.75rem`,
+          }}
         >
-          <MenuItem value="">
-            <em>All Employees</em>
-          </MenuItem>
-          {employees?.map((employee) => (
-            <MenuItem
-              key={employee.employeeId}
-              value={employee.employeeId}
-            >
-              {`${employee.firstName} ${employee.lastName}`}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          Select All
+        </Button>
+      </Box>
+
+      <FormGroup>
+        {employees?.map((employee) => (
+          <FormControlLabel
+            key={employee.employeeId}
+            control={
+              <Checkbox
+                checked={selectedEmployeeIds?.includes(employee.employeeId) || false}
+                onChange={() => handleEmployeeToggle(employee.employeeId)}
+                size="small"
+                disabled={isEmployeesLoading}
+              />
+            }
+            label={`${employee.firstName} ${employee.lastName}`}
+            sx={{
+              fontSize: `0.875rem`,
+              '& .MuiFormControlLabel-label': {
+                fontSize: `0.875rem`,
+              },
+            }}
+          />
+        ))}
+      </FormGroup>
     </>
   );
 }

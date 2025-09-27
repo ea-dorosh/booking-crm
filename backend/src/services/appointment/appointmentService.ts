@@ -62,7 +62,7 @@ interface GetAppointmentsOptions {
   startDate: Date_ISO_Type;
   endDate?: Date_ISO_Type | null;
   status?: AppointmentStatusEnum | null;
-  employeeId?: number | null;
+  employeeIds?: number[] | null;
   sortBy?: AppointmentSortField;
   sortOrder?: SortDirection;
 }
@@ -79,7 +79,7 @@ async function getAppointments(
   };
 
   const {
-    startDate, endDate, status, employeeId, sortBy, sortOrder,
+    startDate, endDate, status, employeeIds, sortBy, sortOrder,
   } = finalOptions;
 
   // Build dynamic WHERE clause
@@ -96,9 +96,10 @@ async function getAppointments(
     queryParams.push(status);
   }
 
-  if (employeeId !== null && employeeId !== undefined) {
-    whereConditions.push(`employee_id = ?`);
-    queryParams.push(employeeId);
+  if (employeeIds !== null && employeeIds !== undefined && employeeIds.length > 0) {
+    const placeholders = employeeIds.map(() => `?`).join(`, `);
+    whereConditions.push(`employee_id IN (${placeholders})`);
+    queryParams.push(...employeeIds);
   }
 
   // Build ORDER BY clause

@@ -69,7 +69,7 @@ export const fetchAppointments = createAsyncThunk(
     try {
       const state = thunkAPI.getState();
       const {
-        startDate, status, sortRule, sortDirection, calendar, employeeId,
+        startDate, status, sortRule, sortDirection, calendar, employeeIds,
       } = state.appointments;
 
       // Respect active tab: only send endDate for calendar view
@@ -82,7 +82,7 @@ export const fetchAppointments = createAsyncThunk(
         sortRule,
         sortDirection,
         endDate,
-        employeeId,
+        employeeIds,
       );
       return data;
     } catch (error) {
@@ -102,7 +102,7 @@ const getInitialState = () => {
     sortDirection: SORT_DIRECTION.ASC,
     startDate: null,
     status: appointmentStatusEnum.active,
-    employeeId: null,
+    employeeIds: [],
     calendar: {
       view: `timeGridDay`,
       endDate: null,
@@ -119,7 +119,7 @@ const getInitialState = () => {
       sortDirection: savedFilters.sortDirection || defaultState.sortDirection,
       startDate: savedFilters.startDate || defaultState.startDate,
       status: savedFilters.status !== undefined ? savedFilters.status : defaultState.status,
-      employeeId: savedFilters.employeeId || defaultState.employeeId,
+      employeeIds: savedFilters.employeeIds || defaultState.employeeIds,
       calendar: loadCalendarFromStorage() || defaultState.calendar,
     };
   }
@@ -144,7 +144,7 @@ const appointmentsSlice = createSlice({
         sortDirection: state.sortDirection,
         startDate: state.startDate,
         status: state.status,
-        employeeId: state.employeeId,
+        employeeIds: state.employeeIds,
       });
     },
     setStartDate: (state, action) => {
@@ -156,7 +156,7 @@ const appointmentsSlice = createSlice({
         sortDirection: state.sortDirection,
         startDate: state.startDate,
         status: state.status,
-        employeeId: state.employeeId,
+        employeeIds: state.employeeIds,
       });
     },
     setStatus: (state, action) => {
@@ -168,11 +168,11 @@ const appointmentsSlice = createSlice({
         sortDirection: state.sortDirection,
         startDate: state.startDate,
         status: state.status,
-        employeeId: state.employeeId,
+        employeeIds: state.employeeIds,
       });
     },
-    setEmployeeId: (state, action) => {
-      state.employeeId = action.payload.employeeId;
+    setEmployeeIds: (state, action) => {
+      state.employeeIds = action.payload.employeeIds;
 
       // Save filters to sessionStorage
       saveFiltersToStorage({
@@ -180,7 +180,7 @@ const appointmentsSlice = createSlice({
         sortDirection: state.sortDirection,
         startDate: state.startDate,
         status: state.status,
-        employeeId: state.employeeId,
+        employeeIds: state.employeeIds,
       });
     },
     setCalendarState: (state, action) => {
@@ -211,7 +211,7 @@ export const {
   setSortingRule,
   setStartDate,
   setStatus,
-  setEmployeeId,
+  setEmployeeIds,
   resetAppointmentsData,
   setCalendarState,
 } = appointmentsSlice.actions;

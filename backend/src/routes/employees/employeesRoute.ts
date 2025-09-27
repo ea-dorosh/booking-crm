@@ -470,7 +470,7 @@ router.get(`/:id/appointments`, async (request: CustomRequestType, response: Cus
       startDate,
       endDate,
       status,
-      employeeId,
+      employeeIds: [employeeId],
       sortBy,
       sortOrder,
     });

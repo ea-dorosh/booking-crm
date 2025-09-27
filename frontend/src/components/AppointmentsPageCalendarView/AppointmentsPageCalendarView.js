@@ -22,6 +22,7 @@ import {
 } from 'react-redux';
 import CalendarFiltersMenu from './CalendarFiltersMenu/CalendarFiltersMenu';
 import CalendarMenu from './CalendarMenu/CalendarMenu';
+import ActiveFiltersIndicator from '@/components/ActiveFiltersIndicator/ActiveFiltersIndicator';
 import AppointmentEventMenu from '@/components/AppointmentEventMenu/AppointmentEventMenu';
 import { appointmentStatusEnum } from '@/enums/enums';
 import {
@@ -111,7 +112,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
   };
 
   return (
-    <Box sx={{ mt: 1.5 }}>
+    <Box sx={{ mt: `6px` }}>
       <Stack
         direction={{
           xs: `column`,
@@ -122,7 +123,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           xs: `stretch`,
           sm: `center`,
         }}
-        sx={{ mb: 2 }}
+        sx={{ mb: `4px` }}
       >
         <Box
           sx={{
@@ -157,12 +158,23 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
             Today
           </Button>
 
-
-
           <Stack
             direction="row"
             spacing={0.5}
+            alignItems="center"
           >
+            <CalendarMenu
+              anchorEl={anchorEl}
+              open={openSettings}
+              onClose={() => setAnchorEl(null)}
+            />
+
+            <CalendarFiltersMenu
+              anchorEl={filtersAnchorEl}
+              open={openFilters}
+              onClose={() => setFiltersAnchorEl(null)}
+            />
+
             <IconButton
               size="small"
               onClick={(event) => setFiltersAnchorEl(event.currentTarget)}
@@ -172,6 +184,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
             >
               <FilterIcon fontSize="small" />
             </IconButton>
+
             <IconButton
               size="small"
               onClick={(event) => setAnchorEl(event.currentTarget)}
@@ -190,6 +203,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           sx={{
             ml: { sm: `auto` },
             justifyContent: `space-between`,
+            mt: `6px !important`,
           }}
         >
           <ToggleButton
@@ -243,19 +257,17 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
             ▶
           </ToggleButton>
         </Stack>
+
+        <Box
+          sx={{
+            mt: `6px !important`,
+          }}
+        >
+          <ActiveFiltersIndicator />
+        </Box>
       </Stack>
 
-      <CalendarMenu
-        anchorEl={anchorEl}
-        open={openSettings}
-        onClose={() => setAnchorEl(null)}
-      />
 
-      <CalendarFiltersMenu
-        anchorEl={filtersAnchorEl}
-        open={openFilters}
-        onClose={() => setFiltersAnchorEl(null)}
-      />
 
       <Box
         sx={{
