@@ -1,13 +1,10 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
 import { appendFormData } from '@/utils/formData';
 
-const getServices = async (statuses) => {
+const getServices = async () => {
   try {
-    const params = {};
-    if (Array.isArray(statuses) && statuses.length) {
-      params.status = statuses.join(`,`);
-    }
-    const response = await axios.get(`/services`, { params });
+    // Always fetch all services - filtering will be done on frontend
+    const response = await axios.get(`/services`);
 
     return response.data;
   } catch (error) {
@@ -15,13 +12,10 @@ const getServices = async (statuses) => {
   }
 };
 
-const getServiceSubCategories = async (statuses) => {
+const getServiceSubCategories = async () => {
   try {
-    const params = {};
-    if (Array.isArray(statuses) && statuses.length) {
-      params.status = statuses.join(`,`);
-    }
-    const response = await axios.get(`/services/sub-categories`, { params });
+    // Always fetch all sub-categories - filtering will be done on frontend
+    const response = await axios.get(`/services/sub-categories`);
 
     return response.data;
   } catch (error) {
@@ -29,15 +23,10 @@ const getServiceSubCategories = async (statuses) => {
   }
 };
 
-const getServiceCategories = async (statuses) => {
+const getServiceCategories = async () => {
   try {
-    const params = {};
-    if (Array.isArray(statuses) && statuses.length) {
-      // send as comma-separated string to avoid status[] format
-      params.status = statuses.join(`,`);
-    }
-
-    const response = await axios.get(`/services/categories`, { params });
+    // Always fetch all categories - filtering will be done on frontend
+    const response = await axios.get(`/services/categories`);
 
     return response.data;
   } catch (error) {

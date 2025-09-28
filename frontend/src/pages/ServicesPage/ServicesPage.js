@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import ServicesContainer from "@/components/ServicesContainer/ServicesContainer";
-import { categoryStatusEnum, subCategoryStatusEnum, serviceStatusEnum } from '@/enums/enums';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
 import { fetchServices } from '@/features/services/servicesSlice';
@@ -19,23 +18,19 @@ export default function ServicesPage() {
     const promises = [];
 
     if (!services) {
-      const storedServiceStatus = sessionStorage.getItem(`servicesStatusFilter`);
-      const statuses = storedServiceStatus ? [storedServiceStatus] : [serviceStatusEnum.active];
-      promises.push(dispatch(fetchServices(statuses)));
+      // Always fetch all services - filtering will be done on frontend
+      promises.push(dispatch(fetchServices()));
     }
     if (!employees || employees.length === 0) {
       promises.push(dispatch(fetchEmployees()));
     }
     if (!serviceSubCategories) {
-      const storedStatus = sessionStorage.getItem(`subCategoriesStatusFilter`);
-      const statuses = storedStatus ? [storedStatus] : [subCategoryStatusEnum.active];
-      promises.push(dispatch(fetchServiceSubCategories(statuses)));
+      // Always fetch all sub-categories - filtering will be done on frontend
+      promises.push(dispatch(fetchServiceSubCategories()));
     }
     if (!serviceCategories) {
-      const storedStatus = sessionStorage.getItem(`categoriesStatusFilter`);
-
-      const statuses = storedStatus ? [storedStatus] : [categoryStatusEnum.active];
-      promises.push(dispatch(fetchServiceCategories(statuses)));
+      // Always fetch all categories - filtering will be done on frontend
+      promises.push(dispatch(fetchServiceCategories()));
     }
 
     Promise.all(promises);
@@ -48,8 +43,6 @@ export default function ServicesPage() {
       {services && employees && serviceSubCategories && serviceCategories && (
         <ServicesContainer
           employees={employees}
-          subCategories={serviceSubCategories}
-          categories={serviceCategories}
         />
       )}
     </PageContainer>

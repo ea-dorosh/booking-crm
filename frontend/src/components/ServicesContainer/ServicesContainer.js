@@ -1,7 +1,7 @@
 import { Business, Category, List } from "@mui/icons-material";
 import { Box, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Tabs from '../Tabs/Tabs';
 import CategoriesList from './CategoriesList';
@@ -10,10 +10,9 @@ import ServicesList from './ServicesList';
 import SubCategoriesList from './SubCategoriesList';
 import AddButton from '@/components/common/AddButton';
 import { categoryStatusEnum, subCategoryStatusEnum, serviceStatusEnum } from '@/enums/enums';
-import { fetchServiceCategories } from '@/features/serviceCategories/serviceCategoriesSlice';
-import { selectFilteredServices } from '@/features/services/servicesSelectors';
-import { fetchServices } from '@/features/services/servicesSlice';
-import { fetchServiceSubCategories } from '@/features/serviceSubCategories/serviceSubCategoriesSlice';
+import { selectCategoriesByStatus } from '@/features/serviceCategories/serviceCategoriesSelectors';
+import { selectFilteredServicesByStatus } from '@/features/services/servicesSelectors';
+import { selectSubCategoriesByStatus } from '@/features/serviceSubCategories/serviceSubCategoriesSelectors';
 
 const SERVICES = `services`;
 const SUB_CATEGORIES = `sub-categories`;
@@ -43,19 +42,16 @@ const TABS = {
   },
 };
 
-export default function ServicesContainer({
-  employees,
-  subCategories,
-  categories,
-}) {
-  const dispatch = useDispatch();
+export default function ServicesContainer({ employees }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(TABS[SERVICES].value);
   const [categoryStatusFilter, setCategoryStatusFilter] = useState(categoryStatusEnum.active);
   const [subCategoryStatusFilter, setSubCategoryStatusFilter] = useState(subCategoryStatusEnum.active);
   const [serviceStatusFilter, setServiceStatusFilter] = useState(serviceStatusEnum.active);
-  const filteredServices = useSelector(selectFilteredServices);
+  const filteredServices = useSelector(state => selectFilteredServicesByStatus(state, serviceStatusFilter));
+  const filteredCategories = useSelector(state => selectCategoriesByStatus(state, categoryStatusFilter));
+  const filteredSubCategories = useSelector(state => selectSubCategoriesByStatus(state, subCategoryStatusFilter));
 
   // Get active tab from URL query parameter
   useEffect(() => {
@@ -92,29 +88,23 @@ export default function ServicesContainer({
     navigate(`${location.pathname}?${urlParams.toString()}`, { replace: true });
   };
 
-  // Handlers for status filters (persist + fetch)
+  // Handlers for status filters (persist only - no backend requests)
   const handleCategoryStatusChange = (value) => {
     if (!value) return;
     setCategoryStatusFilter(value);
     sessionStorage.setItem(`categoriesStatusFilter`, value);
-
-    dispatch(fetchServiceCategories([value]));
   };
 
   const handleSubCategoryStatusChange = (value) => {
     if (!value) return;
     setSubCategoryStatusFilter(value);
     sessionStorage.setItem(`subCategoriesStatusFilter`, value);
-
-    dispatch(fetchServiceSubCategories([value]));
   };
 
   const handleServiceStatusChange = (value) => {
     if (!value) return;
     setServiceStatusFilter(value);
     sessionStorage.setItem(`servicesStatusFilter`, value);
-
-    dispatch(fetchServices([value]));
   };
 
   const renderContent = () => {
@@ -124,22 +114,22 @@ export default function ServicesContainer({
         <ServicesList
           services={filteredServices}
           employees={employees}
-          categories={categories}
+          categories={filteredCategories}
           statusFilter={serviceStatusFilter}
         />
       );
     case TABS[SUB_CATEGORIES].value:
       return (
         <SubCategoriesList
-          subCategories={subCategories}
-          categories={categories}
+          subCategories={filteredSubCategories}
+          categories={filteredCategories}
           statusFilter={subCategoryStatusFilter}
         />
       );
     case TABS[CATEGORIES].value:
       return (
         <CategoriesList
-          categories={categories}
+          categories={filteredCategories}
           statusFilter={categoryStatusFilter}
         />
       );
@@ -148,7 +138,7 @@ export default function ServicesContainer({
         <ServicesList
           services={filteredServices}
           employees={employees}
-          categories={categories}
+          categories={filteredCategories}
           statusFilter={serviceStatusFilter}
         />
       );
@@ -207,8 +197,8 @@ export default function ServicesContainer({
           {activeTab === TABS[SERVICES].value && (
             <FilterButton
               employees={employees}
-              categories={categories}
-              subCategories={subCategories}
+              categories={filteredCategories}
+              subCategories={filteredSubCategories}
               sx={{ mr: `auto` }}
             />
           )}

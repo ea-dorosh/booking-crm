@@ -23,7 +23,7 @@ export default function ServicesList({
     const grouped = {};
 
     services.forEach(service => {
-      const category = categories.find(cat => cat.id === service.categoryId);
+      const category = categories.find(category => category.id === service.categoryId);
       const categoryName = category?.name || `Category ${service.categoryId}`;
 
       if (!grouped[service.categoryId]) {

@@ -196,7 +196,75 @@ async function getServices(dbPool: Pool, statuses?: string[]): Promise<ServiceDa
   return services;
 }
 
+async function getAllServices(dbPool: Pool): Promise<ServiceData[]> {
+  const subCategoriesData = await getAllServiceSubCategories(dbPool);
 
+  // Always fetch all services regardless of status - for admin interface
+  const servicesQuery = `
+    SELECT
+      s.id,
+      s.name,
+      s.sub_category_id,
+      s.category_id,
+      s.duration_time,
+      s.buffer_time,
+      s.booking_note,
+      s.status,
+      sep.employee_id,
+      sep.price
+    FROM Services s
+    LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
+  `;
+
+  const [servicesResults] = await dbPool.query<ServiceRow[]>(servicesQuery);
+
+  const servicesMap = new Map<number, ServiceData>();
+
+  for (const row of servicesResults) {
+    const {
+      id,
+      name,
+      sub_category_id,
+      category_id,
+      duration_time,
+      buffer_time,
+      booking_note,
+      status,
+      employee_id,
+      price,
+    } = row;
+
+    if (!servicesMap.has(id)) {
+      const subCategory = subCategoriesData.find(subCategory => subCategory.id === sub_category_id);
+
+      servicesMap.set(id, {
+        id,
+        name,
+        categoryId: category_id,
+        subCategoryId: sub_category_id,
+        subCategoryName: subCategory ? subCategory.name : ``,
+        durationTime: duration_time,
+        bufferTime: buffer_time,
+        bookingNote: booking_note,
+        status,
+        employeePrices: [],
+      });
+    }
+
+    if (employee_id !== null) {
+      const service = servicesMap.get(id);
+      if (service) {
+        service.employeePrices.push({
+          employeeId: employee_id, price,
+        });
+      }
+    }
+  }
+
+  const services = Array.from(servicesMap.values());
+
+  return services;
+}
 
 async function getService(dbPool: Pool, serviceId: number): Promise<ServiceDetailsDataType> {
   const serviceQuery = `
@@ -251,6 +319,26 @@ async function getServiceSubCategories(dbPool: Pool, statuses?: string[]): Promi
   return subCategoriesData;
 }
 
+async function getAllServiceSubCategories(dbPool: Pool): Promise<SubCategoryData[]> {
+  // Always fetch all sub-categories regardless of status - for admin interface
+  const subCategoriesSql = `
+    SELECT c.id, c.name, c.img, c.status, c.category_id
+    FROM ServiceSubCategories c
+  `;
+
+  const [subCategoriesResult] = await dbPool.query<SubCategoryRow[]>(subCategoriesSql);
+
+  const subCategoriesData: SubCategoryData[] = subCategoriesResult.map((row) => ({
+    id: row.id,
+    name: row.name,
+    image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+    status: row.status,
+    categoryId: row.category_id,
+  }));
+
+  return subCategoriesData;
+}
+
 async function getServiceCategories(dbPool: Pool, statuses?: string[]): Promise<CategoryData[]> {
   const allowedStatuses = new Set<string>([
     CategoryStatusEnum.Active,
@@ -272,6 +360,28 @@ async function getServiceCategories(dbPool: Pool, statuses?: string[]): Promise<
   `;
 
   const [categoriesResult] = await dbPool.query<CategoryRow[]>(categoriesSql, [finalStatuses]);
+
+  const categoriesData: CategoryData[] = categoriesResult.map((row) => ({
+    id: row.id,
+    name: row.name,
+    image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+
+  return categoriesData;
+}
+
+async function getAllServiceCategories(dbPool: Pool): Promise<CategoryData[]> {
+  // Always fetch all categories regardless of status - for admin interface
+  const categoriesSql = `
+    SELECT c.id, c.name, c.img, c.status, c.created_at, c.updated_at
+    FROM ServiceCategories c
+    ORDER BY c.name
+  `;
+
+  const [categoriesResult] = await dbPool.query<CategoryRow[]>(categoriesSql);
 
   const categoriesData: CategoryData[] = categoriesResult.map((row) => ({
     id: row.id,
@@ -765,8 +875,11 @@ export {
   createServiceSubCategory,
   getService,
   getServiceCategories,
+  getAllServiceCategories,
   getServices,
+  getAllServices,
   getServiceSubCategories,
+  getAllServiceSubCategories,
   updateService,
   updateServiceCategory,
   updateServiceCategoryStatus,

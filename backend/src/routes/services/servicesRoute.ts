@@ -2,9 +2,9 @@ import express from 'express';
 import {
   createService,
   createServiceSubCategory,
-  getServices,
-  getServiceSubCategories,
-  getServiceCategories,
+  getAllServices,
+  getAllServiceSubCategories,
+  getAllServiceCategories,
   createServiceCategory,
   updateServiceCategory,
   updateServiceCategoryStatus,
@@ -34,16 +34,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
-    // support query param status similar to categories and subcategories
-    let statuses: string[] | undefined = undefined;
-    const { status } = req.query as { status?: string | string[] };
-    if (Array.isArray(status)) {
-      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
-    } else if (typeof status === `string`) {
-      statuses = status.split(`,`).map(s => s.trim());
-    }
-
-    const services = await getServices(req.dbPool, statuses);
+    // Always return all services - filtering will be done on frontend
+    const services = await getAllServices(req.dbPool);
 
     res.json(services);
 
@@ -64,16 +56,8 @@ router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponse
   }
 
   try {
-    // support query param status similar to categories
-    let statuses: string[] | undefined = undefined;
-    const { status } = req.query as { status?: string | string[] };
-    if (Array.isArray(status)) {
-      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
-    } else if (typeof status === `string`) {
-      statuses = status.split(`,`).map(s => s.trim());
-    }
-
-    const subCategories = await getServiceSubCategories(req.dbPool, statuses);
+    // Always return all sub-categories - filtering will be done on frontend
+    const subCategories = await getAllServiceSubCategories(req.dbPool);
 
     res.json(subCategories);
 
@@ -94,16 +78,8 @@ router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType
   }
 
   try {
-    // support query param status=active&status=archived etc or status=active,archived
-    let statuses: string[] | undefined = undefined;
-    const { status } = req.query as { status?: string | string[] };
-    if (Array.isArray(status)) {
-      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
-    } else if (typeof status === `string`) {
-      statuses = status.split(`,`).map(s => s.trim());
-    }
-
-    const categories = await getServiceCategories(req.dbPool, statuses);
+    // Always return all categories - filtering will be done on frontend
+    const categories = await getAllServiceCategories(req.dbPool);
 
     res.json(categories);
 
