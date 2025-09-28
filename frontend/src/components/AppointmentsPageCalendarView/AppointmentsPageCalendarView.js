@@ -386,7 +386,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
               info.el.style.boxShadow = `0 2px 6px rgba(66, 133, 244, 0.3)`;
               info.el.style.fontStyle = `italic`;
               info.el.style.opacity = `0.85`;
-              
+
               // Add Google Calendar indicator
               const titleElement = info.el.querySelector(`.fc-event-title`);
               if (titleElement) {

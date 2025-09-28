@@ -66,6 +66,7 @@ interface GetAppointmentsOptions {
   employeeIds?: number[] | null;
   sortBy?: AppointmentSortField;
   sortOrder?: SortDirection;
+  includeGoogleEvents?: boolean;
 }
 
 interface CombinedAppointmentData extends AppointmentDataType {
@@ -81,11 +82,12 @@ async function getAppointments(
   const finalOptions: GetAppointmentsOptions = {
     sortBy: DEFAULT_APPOINTMENT_SORT_FIELD,
     sortOrder: `asc`,
+    includeGoogleEvents: false,
     ...options,
   };
 
   const {
-    startDate, endDate, status, employeeIds, sortBy, sortOrder,
+    startDate, endDate, status, employeeIds, sortBy, sortOrder, includeGoogleEvents,
   } = finalOptions;
 
   // Build dynamic WHERE clause
@@ -155,8 +157,8 @@ async function getAppointments(
     appointment.employee.lastName = employees.find((employee) => employee.employeeId === appointment.employee.id)?.lastName;
   });
 
-  // Add Google Calendar events if exactly one employee is selected
-  if (employeeIds && employeeIds.length === 1 && endDate) {
+  // Add Google Calendar events if exactly one employee is selected and includeGoogleEvents is true
+  if (includeGoogleEvents && employeeIds && employeeIds.length === 1 && endDate) {
     try {
       const googleEvents = await getEmployeeGoogleCalendarEvents(
         dbPool,
@@ -175,32 +177,40 @@ async function getAppointments(
       // Convert Google Calendar events to appointment format
       const googleAppointments: CombinedAppointmentData[] = googleEvents
         .filter(googleEvent => !appointmentGoogleEventIds.has(googleEvent.id))
-        .map(googleEvent => ({
-          id: 0, // Google events don't have internal IDs
-          date: googleEvent.start.split(`T`)[0],
-          createdDate: new Date().toISOString(),
-          serviceName: googleEvent.summary,
-          timeStart: googleEvent.start,
-          timeEnd: googleEvent.end,
-          serviceDuration: 0,
-          customerLastName: ``,
-          customerFirstName: ``,
-          status: AppointmentStatusEnum.Active,
-          customer: {
-            id: 0,
-            firstName: ``,
-            lastName: ``,
-            isCustomerNew: false,
-          },
-          employee: {
-            id: employeeIds[0],
-            firstName: employees.find(emp => emp.employeeId === employeeIds[0])?.firstName || ``,
-            lastName: employees.find(emp => emp.employeeId === employeeIds[0])?.lastName || ``,
-          },
-          isGoogleEvent: true,
-          googleEventId: googleEvent.id,
-          orderMessage: googleEvent.description || null,
-        }));
+        .map(googleEvent => {
+          // Calculate duration in seconds (to match database format)
+          const startTime = new Date(googleEvent.start);
+          const endTime = new Date(googleEvent.end);
+          const durationMs = endTime.getTime() - startTime.getTime();
+          const serviceDuration = Math.floor(durationMs / 1000); // Convert to seconds
+
+          return {
+            id: 0, // Google events don't have internal IDs
+            date: googleEvent.start.split(`T`)[0],
+            createdDate: new Date().toISOString(),
+            serviceName: googleEvent.summary,
+            timeStart: googleEvent.start,
+            timeEnd: googleEvent.end,
+            serviceDuration,
+            customerLastName: ``,
+            customerFirstName: ``,
+            status: AppointmentStatusEnum.Active,
+            customer: {
+              id: 0,
+              firstName: ``,
+              lastName: ``,
+              isCustomerNew: false,
+            },
+            employee: {
+              id: employeeIds[0],
+              firstName: employees.find(emp => emp.employeeId === employeeIds[0])?.firstName || ``,
+              lastName: employees.find(emp => emp.employeeId === employeeIds[0])?.lastName || ``,
+            },
+            isGoogleEvent: true,
+            googleEventId: googleEvent.id,
+            orderMessage: googleEvent.description || null,
+          };
+        });
 
       // Combine appointments and Google events
       const combinedData = [...appointmentsData, ...googleAppointments];

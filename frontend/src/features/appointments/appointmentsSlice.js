@@ -75,6 +75,7 @@ export const fetchAppointments = createAsyncThunk(
       // Respect active tab: only send endDate for calendar view
       const activeTab = loadActiveTabFromStorage();
       const endDate = activeTab === `calendar` ? calendar?.endDate : undefined;
+      const includeGoogleEvents = activeTab === `calendar`;
 
       const data = await appointmentsService.getAppointments(
         startDate,
@@ -83,6 +84,7 @@ export const fetchAppointments = createAsyncThunk(
         sortDirection,
         endDate,
         employeeIds,
+        includeGoogleEvents,
       );
       return data;
     } catch (error) {

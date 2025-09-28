@@ -41,7 +41,7 @@ export const formatIsoDate = (dateString) => {
     month: `short`,
     year: `2-digit`,
     day: `2-digit`,
-    timeZone: `Europe/Berlin`, 
+    timeZone: `Europe/Berlin`,
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
@@ -60,7 +60,7 @@ export const getDay = (dateString) => {
     month: `short`,
     year: `2-digit`,
     day: `2-digit`,
-    timeZone: `Europe/Berlin`, 
+    timeZone: `Europe/Berlin`,
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
@@ -77,7 +77,7 @@ export const getDayOfWeek = (dateString) => {
   const date = new Date(dateString);
   const options = {
     weekday: `short`,
-    timeZone: `Europe/Berlin`, 
+    timeZone: `Europe/Berlin`,
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
 
@@ -95,7 +95,7 @@ export const getMonth = (dateString) => {
     month: `short`,
     year: `2-digit`,
     day: `2-digit`,
-    timeZone: `Europe/Berlin`, 
+    timeZone: `Europe/Berlin`,
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);
@@ -125,12 +125,23 @@ export const formatCreatedDate = (createdDate) => {
 };
 
 /**
- * Formats a time string into a more readable format with hours and minutes.
- * @param {string} timeStr - The time string in 'HH:MM:SS' format to format.
+ * Formats a time string or duration in seconds into a more readable format with hours and minutes.
+ * @param {string|number} timeStr - The time string in 'HH:MM:SS' format or duration in seconds.
  * @returns {string} - The formatted time string, e.g., '1 Stunde 15 Min.' or '45 Sek.' if no hours or minutes.
  */
 export const formatTimeToString = (timeStr) => {
-  const [hours, minutes, seconds] = timeStr.split(`:`).map(Number);
+  let hours, minutes, seconds;
+
+  if (typeof timeStr === `number`) {
+    // If it's a number, treat it as total seconds
+    const totalSeconds = timeStr;
+    hours = Math.floor(totalSeconds / 3600);
+    minutes = Math.floor((totalSeconds % 3600) / 60);
+    seconds = totalSeconds % 60;
+  } else {
+    // If it's a string, parse it as HH:MM:SS
+    [hours, minutes, seconds] = timeStr.split(`:`).map(Number);
+  }
 
   let formattedTime = ``;
 
@@ -161,7 +172,7 @@ export const formatFromDateTimeToStringDate = (dateString) => {
     month: `short`,
     year: `2-digit`,
     day: `2-digit`,
-    timeZone: `Europe/Berlin`, 
+    timeZone: `Europe/Berlin`,
   };
   const formattedDate = date.toLocaleDateString(`en-GB`, options);
   const [day, month, year] = formattedDate.split(` `);

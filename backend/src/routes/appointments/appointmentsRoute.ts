@@ -46,6 +46,8 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
     employeeIds = employeeIdsString.split(`,`).map(id => Number(id.trim())).filter(id => !isNaN(id));
   }
 
+  const includeGoogleEvents = request.query?.includeGoogleEvents === `true`;
+
   const sortBy = (request.query?.sortBy as AppointmentSortField) || DEFAULT_APPOINTMENT_SORT_FIELD;
   const sortOrder = (request.query?.sortOrder as SortDirection) || DEFAULT_SORT_DIRECTION;
 
@@ -62,6 +64,7 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
       employeeIds,
       sortBy,
       sortOrder,
+      includeGoogleEvents,
     });
 
     response.json(appointmentsData);
