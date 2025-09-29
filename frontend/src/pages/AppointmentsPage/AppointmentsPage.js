@@ -37,6 +37,7 @@ export default function AppointmentsPage() {
       // ignore
     }
     // Trigger fresh fetch to respect list vs calendar params (endDate)
+    dispatch(setStartDate({ startDate: dayjs(new Date()).format(`YYYY-MM-DD`) }));
     dispatch(fetchAppointments());
   };
 
