@@ -2,7 +2,6 @@ import {
   createSlice,
   createAsyncThunk,
 } from '@reduxjs/toolkit';
-import { employeeStatusEnum } from '@/enums/enums';
 import employeesService from "@/services/employees.service";
 
 export const fetchEmployees = createAsyncThunk(
