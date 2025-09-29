@@ -4,6 +4,7 @@ import {
   CustomResponseType,
 } from '@/@types/expressTypes.js';
 import { getEmployees } from '@/services/employees/employeesService.js';
+import { EmployeeStatusEnum } from '@/enums/enums.js';
 
 const router = express.Router();
 
@@ -18,7 +19,8 @@ router.get(`/`, async (request: CustomRequestType, response: CustomResponseType)
   }
 
   try {
-    const employees = await getEmployees(request.dbPool);
+    // For public routes, only return active employees
+    const employees = await getEmployees(request.dbPool, [EmployeeStatusEnum.Active]);
 
     response.json(employees);
 

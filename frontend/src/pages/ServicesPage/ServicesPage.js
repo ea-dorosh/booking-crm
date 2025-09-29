@@ -22,6 +22,7 @@ export default function ServicesPage() {
       promises.push(dispatch(fetchServices()));
     }
     if (!employees || employees.length === 0) {
+      // Always fetch all employees - filtering will be done on frontend
       promises.push(dispatch(fetchEmployees()));
     }
     if (!serviceSubCategories) {

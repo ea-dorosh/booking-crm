@@ -45,16 +45,8 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   }
 
   try {
-    // support query param status similar to services - can handle multiple statuses via comma
-    let statuses: string[] | undefined = undefined;
-    const { status } = req.query as { status?: string | string[] };
-    if (Array.isArray(status)) {
-      statuses = status.flatMap(s => s.split(`,`)).map(s => s.trim());
-    } else if (typeof status === `string`) {
-      statuses = status.split(`,`).map(s => s.trim());
-    }
-
-    const employees = await getEmployees(req.dbPool, statuses);
+    // Always return all employees - filtering will be done on frontend
+    const employees = await getEmployees(req.dbPool);
 
     res.json(employees);
 
@@ -98,8 +90,8 @@ router.get(`/working-times-range`, async (req: CustomRequestType, res: CustomRes
         .map(value => Number(value))
         .filter(num => Number.isFinite(num));
     } else {
-      const activeEmployees = await getEmployees(req.dbPool, [ `active` ]);
-      employeeIdList = activeEmployees.map(e => e.employeeId);
+      const activeEmployees = await getEmployees(req.dbPool, [`active`]);
+      employeeIdList = activeEmployees.map((employee) => employee.employeeId);
     }
 
     const days = await getEmployeesWorkingTimesRange(

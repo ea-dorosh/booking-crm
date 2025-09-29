@@ -2,9 +2,9 @@ import express from 'express';
 import {
   createService,
   createServiceSubCategory,
-  getAllServices,
-  getAllServiceSubCategories,
-  getAllServiceCategories,
+  getServices,
+  getServiceSubCategories,
+  getServiceCategories,
   createServiceCategory,
   updateServiceCategory,
   updateServiceCategoryStatus,
@@ -35,7 +35,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
 
   try {
     // Always return all services - filtering will be done on frontend
-    const services = await getAllServices(req.dbPool);
+    const services = await getServices(req.dbPool);
 
     res.json(services);
 
@@ -57,7 +57,7 @@ router.get(`/sub-categories`, async (req: CustomRequestType, res: CustomResponse
 
   try {
     // Always return all sub-categories - filtering will be done on frontend
-    const subCategories = await getAllServiceSubCategories(req.dbPool);
+    const subCategories = await getServiceSubCategories(req.dbPool);
 
     res.json(subCategories);
 
@@ -79,7 +79,7 @@ router.get(`/categories`, async (req: CustomRequestType, res: CustomResponseType
 
   try {
     // Always return all categories - filtering will be done on frontend
-    const categories = await getAllServiceCategories(req.dbPool);
+    const categories = await getServiceCategories(req.dbPool);
 
     res.json(categories);
 

@@ -4,11 +4,10 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { SubCategoryRow } from '@/@types/categoriesTypes.js';
 import { getEmployees } from '@/services/employees/employeesService.js';
-import { getServiceCategories } from '@/services/service/serviceService.js';
+import { getServiceCategories, getServiceSubCategories } from '@/services/service/serviceService.js';
 import { RowDataPacket } from 'mysql2';
-import { CategoryStatusEnum } from '@/enums/enums.js';
+import { CategoryStatusEnum, EmployeeStatusEnum } from '@/enums/enums.js';
 
 const router = express.Router();
 
@@ -22,25 +21,17 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
   try {
     // get service categories (only active)
     const categoriesData = await getServiceCategories(req.dbPool, [CategoryStatusEnum.Active]);
-    console.log(`categoriesData`, categoriesData);
 
     // get service sub categories (only active)
-    const subCategoriesSql = `
-      SELECT c.id, c.name, c.img
-      FROM ServiceSubCategories c
-      WHERE c.status = '${CategoryStatusEnum.Active}'
-    `;
+    const subCategoriesDataRaw = await getServiceSubCategories(req.dbPool, [CategoryStatusEnum.Active]);
 
-    const [subCategoriesResult] = await req.dbPool.query<SubCategoryRow[]>(subCategoriesSql);
-    console.log(`subCategoriesResult`, subCategoriesResult);
-
-    const subCategoriesData = subCategoriesResult.map((row) => ({
-      id: row.id,
-      name: row.name,
-      image: row.img ? `${process.env.SERVER_API_URL}/images/${row.img}` : null,
+    const subCategoriesData = subCategoriesDataRaw.map((subCategory) => ({
+      id: subCategory.id,
+      name: subCategory.name,
+      image: subCategory.image,
     }));
 
-    const employeesData = await getEmployees(req.dbPool);
+    const employeesData = await getEmployees(req.dbPool, [EmployeeStatusEnum.Active]);
 
     // get all services and map with sub categories and employee prices
     // (only active services with active categories and active subcategories)

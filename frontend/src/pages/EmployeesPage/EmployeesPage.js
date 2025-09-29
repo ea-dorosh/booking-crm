@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import EmployeesContainer from "@/components/EmployeesContainer/EmployeesContainer";
 import PageContainer from '@/components/PageContainer/PageContainer';
 import { employeeStatusEnum } from '@/enums/enums';
+import { selectEmployeesByStatus } from '@/features/employees/employeesSelectors';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 
 export default function EmployeesPage() {
@@ -11,30 +12,25 @@ export default function EmployeesPage() {
   const [statusFilter, setStatusFilter] = useState(() => {
     return sessionStorage.getItem(`employeesStatusFilter`) || employeeStatusEnum.active;
   });
+  const filteredEmployees = useSelector(state => selectEmployeesByStatus(state, statusFilter));
 
   useEffect(() => {
-    fetchUpdatedEmployees();
+    if (!employees || employees.length === 0) {
+      // Always fetch all employees - filtering will be done on frontend
+      dispatch(fetchEmployees());
+    }
   }, []);
-
-  const fetchUpdatedEmployees = async () => {
-    const storedStatus = sessionStorage.getItem(`employeesStatusFilter`) || employeeStatusEnum.active;
-    const statuses = storedStatus === `all` ? [employeeStatusEnum.active, employeeStatusEnum.archived, employeeStatusEnum.disabled] : [storedStatus];
-    await dispatch(fetchEmployees(statuses));
-  }
 
   const handleStatusChange = (value) => {
     if (!value) return;
     setStatusFilter(value);
     sessionStorage.setItem(`employeesStatusFilter`, value);
-
-    const statuses = value === `all` ? [employeeStatusEnum.active, employeeStatusEnum.archived, employeeStatusEnum.disabled] : [value];
-    dispatch(fetchEmployees(statuses));
   };
 
   return (
     <PageContainer pageTitle="Team Members">
       <EmployeesContainer
-        employees={employees}
+        employees={filteredEmployees}
         statusFilter={statusFilter}
         onStatusChange={handleStatusChange}
       />

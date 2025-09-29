@@ -52,6 +52,7 @@ export default function ServicesContainer({ employees }) {
   const filteredServices = useSelector(state => selectFilteredServicesByStatus(state, serviceStatusFilter));
   const filteredCategories = useSelector(state => selectCategoriesByStatus(state, categoryStatusFilter));
   const filteredSubCategories = useSelector(state => selectSubCategoriesByStatus(state, subCategoryStatusFilter));
+  const allCategories = useSelector(state => selectCategoriesByStatus(state, `all`));
 
   // Get active tab from URL query parameter
   useEffect(() => {
@@ -116,6 +117,7 @@ export default function ServicesContainer({ employees }) {
           employees={employees}
           categories={filteredCategories}
           statusFilter={serviceStatusFilter}
+          allCategories={allCategories}
         />
       );
     case TABS[SUB_CATEGORIES].value:
@@ -124,6 +126,7 @@ export default function ServicesContainer({ employees }) {
           subCategories={filteredSubCategories}
           categories={filteredCategories}
           statusFilter={subCategoryStatusFilter}
+          allCategories={allCategories}
         />
       );
     case TABS[CATEGORIES].value:

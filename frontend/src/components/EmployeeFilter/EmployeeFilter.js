@@ -13,19 +13,21 @@ import {
   setEmployeeIds,
   fetchAppointments,
 } from '@/features/appointments/appointmentsSlice';
+import { selectEmployeesByStatus } from '@/features/employees/employeesSelectors';
 import { fetchEmployees } from '@/features/employees/employeesSlice';
 
 export default function EmployeeFilter() {
   const dispatch = useDispatch();
 
   const employees = useSelector((state) => state.employees.data);
+  const activeEmployees = useSelector((state) => selectEmployeesByStatus(state, employeeStatusEnum.active));
   const selectedEmployeeIds = useSelector((state) => state.appointments.employeeIds);
   const isEmployeesLoading = useSelector((state) => state.employees.isCustomersDataRequestPending);
 
   useEffect(() => {
     // Load employees if not already loaded
     if (!employees || employees.length === 0) {
-      dispatch(fetchEmployees([employeeStatusEnum.active]));
+      dispatch(fetchEmployees());
     }
   }, [dispatch, employees]);
 
@@ -40,13 +42,13 @@ export default function EmployeeFilter() {
   };
 
   const handleSelectAll = () => {
-    const allEmployeeIds = employees?.map(employee => employee.employeeId) || [];
+    const allEmployeeIds = activeEmployees?.map(employee => employee.employeeId) || [];
     dispatch(setEmployeeIds({ employeeIds: allEmployeeIds }));
     dispatch(fetchAppointments());
   };
 
   const selectedCount = selectedEmployeeIds?.length || 0;
-  const totalCount = employees?.length || 0;
+  const totalCount = activeEmployees?.length || 0;
 
   return (
     <>
@@ -79,7 +81,7 @@ export default function EmployeeFilter() {
       </Box>
 
       <FormGroup>
-        {employees?.map((employee) => (
+        {activeEmployees?.map((employee) => (
           <FormControlLabel
             key={employee.employeeId}
             control={

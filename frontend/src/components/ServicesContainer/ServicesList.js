@@ -15,7 +15,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { serviceStatusEnum } from '@/enums/enums';
 
 export default function ServicesList({
-  services, employees, categories,
+  services, employees, categories, allCategories,
 }) {
   const groupedServices = useMemo(() => {
     if (!services || !categories) return {};
@@ -23,7 +23,7 @@ export default function ServicesList({
     const grouped = {};
 
     services.forEach(service => {
-      const category = categories.find(category => category.id === service.categoryId);
+      const category = allCategories.find(category => category.id === service.categoryId);
       const categoryName = category?.name || `Category ${service.categoryId}`;
 
       if (!grouped[service.categoryId]) {
@@ -45,6 +45,7 @@ export default function ServicesList({
 
     return grouped;
   }, [services, categories]);
+
 
   const getEmployeeName = (employeeId) => {
     if (!employees) return ``;

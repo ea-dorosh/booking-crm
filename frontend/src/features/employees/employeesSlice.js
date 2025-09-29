@@ -7,18 +7,10 @@ import employeesService from "@/services/employees.service";
 
 export const fetchEmployees = createAsyncThunk(
   `employees/fetchEmployees`,
-  async (statuses, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
-      let statusesToFetch = statuses;
-      if (statuses?.[0] === `all`) {
-        statusesToFetch = [
-          employeeStatusEnum.active,
-          employeeStatusEnum.archived,
-          employeeStatusEnum.disabled,
-        ];
-      }
-
-      const data = await employeesService.getEmployees(statusesToFetch);
+      // Always fetch all employees - filtering will be done on frontend
+      const data = await employeesService.getEmployees();
 
       return data;
     } catch (error) {

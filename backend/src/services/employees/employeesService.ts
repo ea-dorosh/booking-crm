@@ -30,33 +30,55 @@ interface CheckEmployeeAvailabilityResult {
 }
 
 async function getEmployees(dbPool: Pool, statuses?: string[]): Promise<EmployeeDetailDataType[]> {
-  const allowedStatuses = new Set<string>([
-    EmployeeStatusEnum.Active,
-    EmployeeStatusEnum.Archived,
-    EmployeeStatusEnum.Disabled,
-  ]);
-  const filterStatuses = (Array.isArray(statuses) && statuses.length > 0 ? statuses : [EmployeeStatusEnum.Active])
-    .map(s => String(s).toLowerCase())
-    .filter(s => allowedStatuses.has(s));
+  let sql: string;
+  let queryParams: any[] = [];
 
-  const finalStatuses = filterStatuses.length > 0 ? filterStatuses : [EmployeeStatusEnum.Active];
+  if (Array.isArray(statuses) && statuses.length > 0) {
+    // Filter by specific statuses
+    const allowedStatuses = new Set<string>([
+      EmployeeStatusEnum.Active,
+      EmployeeStatusEnum.Archived,
+      EmployeeStatusEnum.Disabled,
+    ]);
+    const filterStatuses = statuses
+      .map(status => String(status).toLowerCase())
+      .filter(status => allowedStatuses.has(status));
 
-  const sql = `
-    SELECT
-      employee_id,
-      first_name,
-      last_name,
-      email,
-      phone,
-      image,
-      status,
-      advance_booking_time,
-      timeslot_interval
-    FROM Employees
-    WHERE status IN (?)
-  `;
+    const finalStatuses = filterStatuses.length > 0 ? filterStatuses : [EmployeeStatusEnum.Active];
 
-  const [results] = await dbPool.query<EmployeeDetailRowType[]>(sql, [finalStatuses]);
+    sql = `
+      SELECT
+        employee_id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        image,
+        status,
+        advance_booking_time,
+        timeslot_interval
+      FROM Employees
+      WHERE status IN (?)
+    `;
+    queryParams = [finalStatuses];
+  } else {
+    // No statuses provided - return all employees
+    sql = `
+      SELECT
+        employee_id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        image,
+        status,
+        advance_booking_time,
+        timeslot_interval
+      FROM Employees
+    `;
+  }
+
+  const [results] = await dbPool.query<EmployeeDetailRowType[]>(sql, queryParams);
 
   const employees: EmployeeDetailDataType[] = results.map((row) => ({
     employeeId: row.employee_id,
@@ -112,9 +134,6 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, {
   const mysqlTimeStart = fromDayjsToMySQLDateTime(timeStart); // in UTC
   const mysqlTimeEnd = fromDayjsToMySQLDateTime(timeEnd); // in UTC
 
-  console.log(`mysqlTimeStart: `, mysqlTimeStart);
-  console.log(`mysqlTimeEnd: `, mysqlTimeEnd);
-
   const checkAvailabilityQuery = `
     SELECT * FROM SavedAppointments
     WHERE employee_id = ?
@@ -165,8 +184,6 @@ async function checkEmployeeTimeNotOverlap(dbPool: Pool, {
 
   return { isEmployeeAvailable: !(hasDbConflict || hasGoogleCalendarConflict) };
 }
-
-// Legacy EmployeeAvailability functions removed
 
 async function updateEmployeeStatus(dbPool: Pool, employeeId: number, status: string): Promise<UpdateEmployeeResult> {
   // basic validation for status

@@ -199,7 +199,7 @@ export default function EmployeeDetailPage() {
       status: nextStatus,
     }));
 
-    await dispatch(fetchEmployees([`all`]));
+    await dispatch(fetchEmployees());
   };
 
   const handleDeactivateToggle = async () => {
@@ -212,7 +212,7 @@ export default function EmployeeDetailPage() {
       status: nextStatus,
     }));
 
-    await dispatch(fetchEmployees([`all`]));
+    await dispatch(fetchEmployees());
   };
 
   // Determine content to render

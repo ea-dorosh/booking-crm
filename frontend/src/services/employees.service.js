@@ -1,13 +1,10 @@
 import axios, { handleAxiosError } from '@/services/axios.service';
 import { appendFormData } from '@/utils/formData';
 
-const getEmployees = async (statuses) => {
+const getEmployees = async () => {
   try {
-    const params = {};
-    if (Array.isArray(statuses) && statuses.length) {
-      params.status = statuses.join(`,`);
-    }
-    const response = await axios.get(`/employees`, { params });
+    // Always fetch all employees - filtering will be done on frontend
+    const response = await axios.get(`/employees`);
 
     return response.data;
   } catch (error) {
