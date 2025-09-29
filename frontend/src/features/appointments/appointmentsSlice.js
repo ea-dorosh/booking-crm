@@ -197,6 +197,7 @@ const appointmentsSlice = createSlice({
     builder
       .addCase(fetchAppointments.pending, (state) => {
         state.isPending = true;
+        state.data = null;
       })
       .addCase(fetchAppointments.fulfilled, (state, action) => {
         state.isPending = false;
