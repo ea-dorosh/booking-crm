@@ -13,6 +13,7 @@ export default function InfiniteScrollCalendar({
   maxHour = 20,
   visibleDays = 1,
   onEventClick,
+  onTodayRef,
 }) {
   const scrollContainerRef = useRef(null);
   const headerRef = useRef(null);
@@ -23,10 +24,13 @@ export default function InfiniteScrollCalendar({
     return date;
   });
   const [containerWidth, setContainerWidth] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const [, setScrollLeft] = useState(0);
   const isInitialized = useRef(false);
   const scrollEndTimer = useRef(null);
   const lastLoadTime = useRef(0);
+  const lastScrollPosition = useRef(0);
+  const isScrolling = useRef(false);
+  const isProgrammaticScroll = useRef(false);
 
   // Calculate column width based on container width and visible days
   const columnWidth = useMemo(() => {
@@ -46,17 +50,6 @@ export default function InfiniteScrollCalendar({
       date.setDate(date.getDate() + index);
       dates.push(date);
     }
-
-    const totalCalendarWidth = DAYS_TO_RENDER * columnWidth;
-    console.log(`Visible Date Range:`, JSON.stringify({
-      startDate: startDate.toISOString().slice(0, 10),
-      endDate: dates[dates.length - 1]?.toISOString().slice(0, 10),
-      visibleDays,
-      totalDaysToRender: DAYS_TO_RENDER,
-      columnWidth,
-      totalCalendarWidth,
-      containerWidth,
-    }, null, 2));
 
     return dates;
   }, [startDate, visibleDays, columnWidth, containerWidth]);
@@ -80,11 +73,22 @@ export default function InfiniteScrollCalendar({
     const newScrollLeft = container.scrollLeft;
     const clientWidth = container.clientWidth;
 
-    console.log(`Scroll Event:`, JSON.stringify({
-      scrollLeft: newScrollLeft,
-      clientWidth,
-      columnWidth,
-    }, null, 2));
+    // Ignore programmatic scroll events
+    if (isProgrammaticScroll.current) {
+      console.log(`⏭️ Ignoring programmatic scroll:`, newScrollLeft);
+      return;
+    }
+
+    // Track when scrolling starts (user-initiated only)
+    if (!isScrolling.current) {
+      isScrolling.current = true;
+      lastScrollPosition.current = newScrollLeft;
+      console.log(`🟢 Scroll START:`, JSON.stringify({
+        startPosition: newScrollLeft,
+        columnWidth,
+        visibleDays,
+      }, null, 2));
+    }
 
     // Clear previous snap timer
     if (scrollEndTimer.current) {
@@ -106,13 +110,6 @@ export default function InfiniteScrollCalendar({
 
     const scrolledDays = Math.floor(newScrollLeft / columnWidth);
     const remainingDays = DAYS_TO_RENDER - scrolledDays - visibleDays;
-
-    console.log(`Scroll Calculation:`, JSON.stringify({
-      scrolledDays,
-      remainingDays,
-      threshold: PRELOAD_THRESHOLD,
-      shouldLoadMore: remainingDays < PRELOAD_THRESHOLD,
-    }, null, 2));
 
     // Load more days when approaching the end (with sliding window approach)
     if (remainingDays < PRELOAD_THRESHOLD) {
@@ -139,14 +136,7 @@ export default function InfiniteScrollCalendar({
           const newStartDate = new Date(startDate);
           newStartDate.setDate(newStartDate.getDate() + slideAmount);
 
-          console.log(`Sliding Window:`, JSON.stringify({
-            currentScrollDays,
-            currentViewDate: currentViewDate.toISOString().slice(0, 10),
-            oldStartDate: startDate.toISOString().slice(0, 10),
-            newStartDate: newStartDate.toISOString().slice(0, 10),
-            slideAmount,
-            remainingDays,
-          }, null, 2));
+          // Sliding window logic without excessive logging
 
           // Adjust scroll position to maintain current view
           const scrollAdjustment = slideAmount * columnWidth;
@@ -161,27 +151,10 @@ export default function InfiniteScrollCalendar({
               scrollContainerRef.current.scrollLeft = adjustedScrollLeft;
               headerRef.current.scrollLeft = adjustedScrollLeft;
 
-              console.log(`Scroll Adjustment:`, JSON.stringify({
-                oldScroll: newScrollLeft,
-                adjustment: scrollAdjustment,
-                newScroll: adjustedScrollLeft,
-              }, null, 2));
             }
           }, 50);
 
-        } else {
-          console.log(`Max Date Reached:`, JSON.stringify({
-            currentViewDate: currentViewDate.toISOString().slice(0, 10),
-            maxAllowedDate: maxAllowedDate.toISOString().slice(0, 10),
-            reason: `reached 2 month limit`,
-          }, null, 2));
         }
-      } else {
-        console.log(`Load Throttled:`, JSON.stringify({
-          timeSinceLastLoad,
-          minInterval: MIN_LOAD_INTERVAL,
-          remainingCooldown: MIN_LOAD_INTERVAL - timeSinceLastLoad,
-        }, null, 2));
       }
     }
 
@@ -196,12 +169,6 @@ export default function InfiniteScrollCalendar({
       const rangeEnd = new Date(rangeStart);
       rangeEnd.setDate(rangeEnd.getDate() + visibleDays);
 
-      console.log(`Date Range Change:`, JSON.stringify({
-        centerDay: centerDay.toISOString().slice(0, 10),
-        rangeStart: rangeStart.toISOString().slice(0, 10),
-        rangeEnd: rangeEnd.toISOString().slice(0, 10),
-      }, null, 2));
-
       // Simple debounce - only call if day actually changed
       const currentDayKey = centerDay.toISOString().slice(0, 10);
       if (currentDayKey !== handleScroll.lastDayKey) {
@@ -211,39 +178,87 @@ export default function InfiniteScrollCalendar({
     }
   }, [startDate, columnWidth, visibleDays, onDateRangeChange]);
 
-  // Handle scroll end - snap to nearest column
+  // Handle scroll end - snap to nearest column with limit
   const handleScrollEnd = useCallback(() => {
     if (!scrollContainerRef.current || columnWidth === 0) return;
 
     const container = scrollContainerRef.current;
     const currentScrollLeft = container.scrollLeft;
-    const nearestColumnIndex = Math.round(currentScrollLeft / columnWidth);
-    const targetScrollLeft = nearestColumnIndex * columnWidth;
 
-    console.log(`Snap to Column:`, JSON.stringify({
-      currentScrollLeft,
+    // Calculate how far we scrolled from the last position
+    const scrollDelta = currentScrollLeft - lastScrollPosition.current;
+    const scrolledColumns = Math.abs(scrollDelta) / columnWidth;
+
+    console.log(`🔴 Scroll END:`, JSON.stringify({
+      lastPosition: lastScrollPosition.current,
+      currentPosition: currentScrollLeft,
+      scrollDelta,
+      scrolledColumns,
+      visibleDays,
       columnWidth,
-      nearestColumnIndex,
-      targetScrollLeft,
-      willSnap: Math.abs(currentScrollLeft - targetScrollLeft) > 1,
+      willLimit: scrolledColumns > visibleDays,
+    }, null, 2));
+
+    // Limit scroll to maximum 1 view (visibleDays) per swipe - like Google Calendar
+    let targetScrollLeft;
+
+    if (scrolledColumns > visibleDays) {
+      // If scrolled more than one view, limit it to one view
+      const maxScroll = visibleDays * columnWidth;
+      const direction = scrollDelta > 0 ? 1 : -1;
+      const limitedScrollLeft = lastScrollPosition.current + (maxScroll * direction);
+
+      // Snap to nearest column from limited position
+      const nearestColumnIndex = Math.round(limitedScrollLeft / columnWidth);
+      targetScrollLeft = nearestColumnIndex * columnWidth;
+
+      console.log(`⚠️ LIMIT Applied:`, JSON.stringify({
+        maxScroll,
+        direction: direction > 0 ? `forward` : `backward`,
+        limitedScrollLeft,
+        nearestColumnIndex,
+        targetScrollLeft,
+      }, null, 2));
+    } else {
+      // Normal snap to nearest column
+      const nearestColumnIndex = Math.round(currentScrollLeft / columnWidth);
+      targetScrollLeft = nearestColumnIndex * columnWidth;
+
+      console.log(`✅ Normal Snap:`, JSON.stringify({
+        nearestColumnIndex,
+        targetScrollLeft,
+      }, null, 2));
+    }
+
+    // Update last scroll position
+    lastScrollPosition.current = targetScrollLeft;
+    isScrolling.current = false;
+
+    console.log(`🎯 Final Snap:`, JSON.stringify({
+      from: currentScrollLeft,
+      to: targetScrollLeft,
+      difference: Math.abs(currentScrollLeft - targetScrollLeft),
+      willScroll: Math.abs(currentScrollLeft - targetScrollLeft) > 1,
     }, null, 2));
 
     // Only snap if there's a significant difference
     if (Math.abs(currentScrollLeft - targetScrollLeft) > 1) {
+      // Set flag to ignore programmatic scroll events
+      isProgrammaticScroll.current = true;
+
+      // Only scroll the main container - header will sync via handleScroll event
       container.scrollTo({
         left: targetScrollLeft,
         behavior: `smooth`,
       });
 
-      // Sync header
-      if (headerRef.current) {
-        headerRef.current.scrollTo({
-          left: targetScrollLeft,
-          behavior: `smooth`,
-        });
-      }
+      // Clear flag after animation completes (smooth scroll takes ~300-500ms)
+      setTimeout(() => {
+        isProgrammaticScroll.current = false;
+        console.log(`✅ Programmatic scroll complete, re-enabled user scroll`);
+      }, 600);
     }
-  }, [columnWidth]);
+  }, [columnWidth, visibleDays]);
 
   // Measure container width from actual scroll container
   useEffect(() => {
@@ -281,44 +296,13 @@ export default function InfiniteScrollCalendar({
       const todayIndex = Math.floor(DAYS_TO_RENDER / 2);
       const initialScrollLeft = todayIndex * columnWidth;
 
-      // Measure actual container sizes
-      const wrapperRect = wrapperRef.current?.getBoundingClientRect();
-      const scrollRect = scrollContainerRef.current?.getBoundingClientRect();
-      const headerRect = headerRef.current?.getBoundingClientRect();
-
-      console.log(`Container Sizes:`, JSON.stringify({
-        wrapper: wrapperRect ? {
-          width: wrapperRect.width,
-          height: wrapperRect.height,
-        } : null,
-        scrollContainer: scrollRect ? {
-          width: scrollRect.width,
-          height: scrollRect.height,
-        } : null,
-        header: headerRect ? {
-          width: headerRect.width,
-          height: headerRect.height,
-        } : null,
-        scrollWidth: scrollContainerRef.current?.scrollWidth,
-        clientWidth: scrollContainerRef.current?.clientWidth,
-      }, null, 2));
-
-      console.log(`Initialize Scroll:`, JSON.stringify({
-        todayIndex,
-        columnWidth,
-        initialScrollLeft,
-        DAYS_TO_RENDER,
-      }, null, 2));
-
       // Sync both containers
       scrollContainerRef.current.scrollLeft = initialScrollLeft;
       headerRef.current.scrollLeft = initialScrollLeft;
       setScrollLeft(initialScrollLeft);
 
-      console.log(`Initialize Sync:`, JSON.stringify({
-        mainScrollLeft: scrollContainerRef.current.scrollLeft,
-        headerScrollLeft: headerRef.current.scrollLeft,
-      }, null, 2));
+      // Set initial scroll position for limit tracking
+      lastScrollPosition.current = initialScrollLeft;
 
       isInitialized.current = true;
     }
@@ -331,6 +315,60 @@ export default function InfiniteScrollCalendar({
     date.setDate(date.getDate() - Math.floor(DAYS_TO_RENDER / 2));
     setStartDate(date);
   }, [visibleDays]);
+
+  // Function to scroll to today
+  const scrollToToday = useCallback(() => {
+    const today = new Date();
+    const todayDateString = today.toISOString().slice(0, 10);
+
+    // Find today's index in current visible range
+    let todayIndex = -1;
+    for (let i = 0; i < DAYS_TO_RENDER; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      if (date.toISOString().slice(0, 10) === todayDateString) {
+        todayIndex = i;
+        break;
+      }
+    }
+
+    if (todayIndex === -1) {
+      // Today is not in current range, reset the date range
+      const newStartDate = new Date(today);
+      newStartDate.setDate(newStartDate.getDate() - Math.floor(DAYS_TO_RENDER / 2));
+      setStartDate(newStartDate);
+
+      // After state update, scroll to center
+      setTimeout(() => {
+        const centerIndex = Math.floor(DAYS_TO_RENDER / 2);
+        const targetScrollLeft = centerIndex * columnWidth;
+        if (scrollContainerRef.current) {
+          // Only scroll main container - header will sync via handleScroll event
+          scrollContainerRef.current.scrollTo({
+            left: targetScrollLeft,
+            behavior: `smooth`,
+          });
+        }
+      }, 100);
+    } else {
+      // Today is in current range, just scroll to it
+      const targetScrollLeft = todayIndex * columnWidth;
+      if (scrollContainerRef.current) {
+        // Only scroll main container - header will sync via handleScroll event
+        scrollContainerRef.current.scrollTo({
+          left: targetScrollLeft,
+          behavior: `smooth`,
+        });
+      }
+    }
+  }, [startDate, columnWidth]);
+
+  // Expose scrollToToday function to parent
+  useEffect(() => {
+    if (onTodayRef) {
+      onTodayRef.current = scrollToToday;
+    }
+  }, [scrollToToday, onTodayRef]);
 
   // Force measurement after initial render
   useEffect(() => {
@@ -385,8 +423,9 @@ export default function InfiniteScrollCalendar({
           ref={headerRef}
           sx={{
             display: `flex`,
-            overflowX: `auto`,
+            overflowX: `auto`, // Allow scrolling for sync
             flex: 1,
+            pointerEvents: `none`, // Disable user interaction
             '&::-webkit-scrollbar': {
               display: `none`,
             },
@@ -438,6 +477,8 @@ export default function InfiniteScrollCalendar({
           display: `flex`,
           WebkitOverflowScrolling: `touch`,
           width: `100%`,
+          scrollSnapType: `x mandatory`, // Enable snap scrolling
+          scrollPaddingLeft: `60px`, // Account for sticky time column
           '&::-webkit-scrollbar': {
             height: `8px`,
           },
@@ -489,23 +530,8 @@ export default function InfiniteScrollCalendar({
 
         {/* Days columns */}
         <Box
-          ref={(el) => {
-            if (el) {
-              const rect = el.getBoundingClientRect();
-              const computedStyle = window.getComputedStyle(el);
-              console.log(`Days Container Size:`, JSON.stringify({
-                actualWidth: rect.width,
-                actualHeight: rect.height,
-                computedWidth: computedStyle.width,
-                computedMinWidth: computedStyle.minWidth,
-                computedDisplay: computedStyle.display,
-                computedPosition: computedStyle.position,
-                scrollWidth: el.scrollWidth,
-                clientWidth: el.clientWidth,
-                offsetWidth: el.offsetWidth,
-                childrenCount: el.children.length,
-              }, null, 2));
-            }
+          ref={() => {
+            // Days container size measured
           }}
           sx={{
             display: `flex`,
@@ -520,34 +546,6 @@ export default function InfiniteScrollCalendar({
 
             const dayRef = useRef(null);
 
-            // Measure actual day column size after render
-            useEffect(() => {
-              if (dayRef.current) {
-                const rect = dayRef.current.getBoundingClientRect();
-                const computedStyle = window.getComputedStyle(dayRef.current);
-                console.log(`Day Column ${dayIndex} Actual Size:`, JSON.stringify({
-                  dateKey,
-                  expectedWidth: columnWidth,
-                  actualWidth: rect.width,
-                  actualHeight: rect.height,
-                  computedWidth: computedStyle.width,
-                  computedMinWidth: computedStyle.minWidth,
-                  computedMaxWidth: computedStyle.maxWidth,
-                  computedFlexShrink: computedStyle.flexShrink,
-                  computedOverflow: computedStyle.overflow,
-                  scrollWidth: dayRef.current.scrollWidth,
-                  clientWidth: dayRef.current.clientWidth,
-                  offsetWidth: dayRef.current.offsetWidth,
-                }, null, 2));
-              }
-            }, [dayIndex, columnWidth, dateKey]);
-
-            console.log(`Day Column ${dayIndex} Setup:`, JSON.stringify({
-              dateKey,
-              columnWidth,
-              isToday,
-              appointmentsCount: dayAppointments.length,
-            }, null, 2));
 
             return (
               <Box
@@ -562,6 +560,7 @@ export default function InfiniteScrollCalendar({
                   backgroundColor: isToday ? `rgba(25, 118, 210, 0.02)` : `transparent`,
                   overflow: `hidden`,
                   flexShrink: 0,
+                  scrollSnapAlign: `start`, // Enable snap to column
                 }}
               >
                 {/* Time slots grid */}

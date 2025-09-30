@@ -10,6 +10,7 @@ import {
 import {
   useState,
   useCallback,
+  useRef,
 } from 'react';
 import {
   useDispatch,
@@ -37,6 +38,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
   const openFilters = Boolean(filtersAnchorEl);
   const [eventAnchor, setEventAnchor] = useState(null);
   const [selectedAppt, setSelectedAppt] = useState(null);
+  const todayRef = useRef(null);
 
   const handleViewChange = (_event, newView) => {
     if (!newView) return;
@@ -66,16 +68,22 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
 
   // Handle "Today" button click
   const handleTodayClick = useCallback(() => {
-    const today = new Date();
-    const startIso = today.toISOString().slice(0, 10);
-    const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + getVisibleDaysCount());
-    const endIso = endDate.toISOString().slice(0, 10);
+    // Use the calendar's scrollToToday function if available
+    if (todayRef.current) {
+      todayRef.current();
+    } else {
+      // Fallback to original logic
+      const today = new Date();
+      const startIso = today.toISOString().slice(0, 10);
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + getVisibleDaysCount());
+      const endIso = endDate.toISOString().slice(0, 10);
 
-    dispatch(setStartDate({ startDate: startIso }));
-    dispatch(setCalendarState({ endDate: endIso }));
-    dispatch(fetchAppointments());
-  }, [dispatch, view, calendar?.showSunday]);
+      dispatch(setStartDate({ startDate: startIso }));
+      dispatch(setCalendarState({ endDate: endIso }));
+      dispatch(fetchAppointments());
+    }
+  }, [dispatch, getVisibleDaysCount]);
 
   // Handle event click
   const handleEventClick = useCallback((appointment, anchorElement) => {
@@ -211,6 +219,7 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
           maxHour={calendar?.maxHour || 20}
           visibleDays={getVisibleDaysCount()}
           onEventClick={handleEventClick}
+          onTodayRef={todayRef}
         />
       </Box>
 
