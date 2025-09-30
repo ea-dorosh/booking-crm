@@ -310,6 +310,15 @@ export default function AppointmentsPageCalendarView({ appointments = [] }) {
             color: `rgba(0,0,0,0.68)`,
             fontWeight: 500,
           },
+          // Highlight today's column header
+          '& .fc-day-today.fc-col-header-cell': {
+            backgroundColor: `rgba(25, 118, 210, 0.08)`,
+            borderBottom: `3px solid #1976d2`,
+          },
+          '& .fc-day-today.fc-col-header-cell .fc-col-header-cell-cushion': {
+            color: `#1976d2`,
+            fontWeight: 700,
+          },
           '& .fc .fc-timegrid-event .fc-event-main-frame': {
             display: `flex`,
             flexDirection: `column`,
