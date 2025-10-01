@@ -31,6 +31,12 @@ export default function InfiniteScrollCalendar({
   const lastScrollPosition = useRef(0);
   const isScrolling = useRef(false);
   const isProgrammaticScroll = useRef(false);
+  const touchStartRef = useRef({
+    x: 0,
+    y: 0,
+    scrollLeft: 0,
+  });
+  const isTouchScrolling = useRef(false);
 
   // Calculate column width based on container width and visible days
   const columnWidth = useMemo(() => {
@@ -178,6 +184,120 @@ export default function InfiniteScrollCalendar({
     }
   }, [startDate, columnWidth, visibleDays, onDateRangeChange]);
 
+  // Handle touch start - record initial position
+  const handleTouchStart = useCallback((event) => {
+    const touch = event.touches?.[0];
+    if (!touch || !scrollContainerRef.current) return;
+
+    isTouchScrolling.current = true;
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      scrollLeft: scrollContainerRef.current.scrollLeft,
+    };
+
+    console.log(`👆 Touch START:`, JSON.stringify({
+      x: touch.clientX,
+      y: touch.clientY,
+      scrollLeft: scrollContainerRef.current.scrollLeft,
+    }, null, 2));
+  }, []);
+
+  // Handle touch move - prevent default to control scroll
+  const handleTouchMove = useCallback((event) => {
+    if (!isTouchScrolling.current) return;
+
+    const touch = event.touches?.[0];
+    if (!touch || !scrollContainerRef.current) return;
+
+    const deltaX = touchStartRef.current.x - touch.clientX;
+    const deltaY = touchStartRef.current.y - touch.clientY;
+
+    // Only handle horizontal scrolling
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Prevent default to stop browser's native scroll
+      event.preventDefault();
+
+      // Update scroll position manually
+      const newScrollLeft = touchStartRef.current.scrollLeft + deltaX;
+      scrollContainerRef.current.scrollLeft = newScrollLeft;
+
+      // Sync header
+      if (headerRef.current) {
+        headerRef.current.scrollLeft = newScrollLeft;
+      }
+    }
+  }, []);
+
+  // Handle touch end - snap to exact visibleDays
+  const handleTouchEnd = useCallback((event) => {
+    if (!isTouchScrolling.current || !scrollContainerRef.current) return;
+
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+
+    const deltaX = touchStartRef.current.x - touch.clientX;
+    const deltaY = touchStartRef.current.y - touch.clientY;
+
+    console.log(`👇 Touch END:`, JSON.stringify({
+      deltaX,
+      deltaY,
+      startScrollLeft: touchStartRef.current.scrollLeft,
+      currentScrollLeft: scrollContainerRef.current.scrollLeft,
+    }, null, 2));
+
+    // Check if it's a horizontal swipe
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      const minSwipeThreshold = 30; // Minimum 30px to trigger navigation
+
+      if (Math.abs(deltaX) > minSwipeThreshold) {
+        // Swipe detected - move exactly visibleDays
+        const direction = deltaX > 0 ? 1 : -1; // Positive deltaX = swipe left = forward
+        const currentColumn = Math.round(touchStartRef.current.scrollLeft / columnWidth);
+        const targetColumn = currentColumn + (visibleDays * direction);
+        const targetScrollLeft = Math.max(0, targetColumn * columnWidth);
+
+        console.log(`➡️ Swipe Navigation:`, JSON.stringify({
+          direction: direction > 0 ? `forward` : `backward`,
+          currentColumn,
+          targetColumn,
+          targetScrollLeft,
+          visibleDays,
+        }, null, 2));
+
+        // Animate to target
+        isProgrammaticScroll.current = true;
+        scrollContainerRef.current.scrollTo({
+          left: targetScrollLeft,
+          behavior: `smooth`,
+        });
+
+        // Update last position
+        lastScrollPosition.current = targetScrollLeft;
+
+        setTimeout(() => {
+          isProgrammaticScroll.current = false;
+        }, 600);
+      } else {
+        // Small movement - snap back to current position
+        const currentColumn = Math.round(touchStartRef.current.scrollLeft / columnWidth);
+        const snapScrollLeft = currentColumn * columnWidth;
+
+        console.log(`↩️ Snap back:`, JSON.stringify({
+          currentColumn,
+          snapScrollLeft,
+        }, null, 2));
+
+        scrollContainerRef.current.scrollTo({
+          left: snapScrollLeft,
+          behavior: `smooth`,
+        });
+      }
+    }
+
+    isTouchScrolling.current = false;
+  }, [columnWidth, visibleDays]);
+
   // Handle scroll end - snap to nearest column with limit
   const handleScrollEnd = useCallback(() => {
     if (!scrollContainerRef.current || columnWidth === 0) return;
@@ -196,35 +316,39 @@ export default function InfiniteScrollCalendar({
       scrolledColumns,
       visibleDays,
       columnWidth,
-      willLimit: scrolledColumns > visibleDays,
     }, null, 2));
 
-    // Limit scroll to maximum 1 view (visibleDays) per swipe - like Google Calendar
+    // ALWAYS move exactly by visibleDays (1 day, 3 days, or week), regardless of swipe strength
     let targetScrollLeft;
 
-    if (scrolledColumns > visibleDays) {
-      // If scrolled more than one view, limit it to one view
-      const maxScroll = visibleDays * columnWidth;
-      const direction = scrollDelta > 0 ? 1 : -1;
-      const limitedScrollLeft = lastScrollPosition.current + (maxScroll * direction);
+    // Determine scroll direction
+    const direction = scrollDelta > 0 ? 1 : -1;
 
-      // Snap to nearest column from limited position
-      const nearestColumnIndex = Math.round(limitedScrollLeft / columnWidth);
-      targetScrollLeft = nearestColumnIndex * columnWidth;
+    // Check if user scrolled at least a minimum threshold (e.g., 10% of one column)
+    const minScrollThreshold = columnWidth * 0.1;
 
-      console.log(`⚠️ LIMIT Applied:`, JSON.stringify({
-        maxScroll,
+    if (Math.abs(scrollDelta) > minScrollThreshold) {
+      // User swiped - move exactly by visibleDays in the direction of the swipe
+      const moveAmount = visibleDays * columnWidth * direction;
+      targetScrollLeft = lastScrollPosition.current + moveAmount;
+
+      // Ensure we snap to column boundaries
+      targetScrollLeft = Math.round(targetScrollLeft / columnWidth) * columnWidth;
+
+      // Ensure we don't go negative
+      targetScrollLeft = Math.max(0, targetScrollLeft);
+
+      console.log(`➡️ Swipe detected - moving exactly ${visibleDays} day(s):`, JSON.stringify({
         direction: direction > 0 ? `forward` : `backward`,
-        limitedScrollLeft,
-        nearestColumnIndex,
+        moveAmount,
         targetScrollLeft,
       }, null, 2));
     } else {
-      // Normal snap to nearest column
+      // Minimal scroll - just snap back to nearest column (probably accidental touch)
       const nearestColumnIndex = Math.round(currentScrollLeft / columnWidth);
       targetScrollLeft = nearestColumnIndex * columnWidth;
 
-      console.log(`✅ Normal Snap:`, JSON.stringify({
+      console.log(`↩️ Minimal scroll - snapping to nearest:`, JSON.stringify({
         nearestColumnIndex,
         targetScrollLeft,
       }, null, 2));
@@ -467,9 +591,9 @@ export default function InfiniteScrollCalendar({
       <Box
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        onScrollEnd={handleScrollEnd}
-        onTouchEnd={handleScrollEnd}
-        onMouseUp={handleScrollEnd}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         sx={{
           flex: 1,
           overflowX: `auto`,
@@ -477,7 +601,7 @@ export default function InfiniteScrollCalendar({
           display: `flex`,
           WebkitOverflowScrolling: `touch`,
           width: `100%`,
-          scrollSnapType: `x mandatory`, // Enable snap scrolling
+          touchAction: `pan-y`, // Allow vertical scroll, control horizontal
           scrollPaddingLeft: `60px`, // Account for sticky time column
           '&::-webkit-scrollbar': {
             height: `8px`,
@@ -560,7 +684,6 @@ export default function InfiniteScrollCalendar({
                   backgroundColor: isToday ? `rgba(25, 118, 210, 0.02)` : `transparent`,
                   overflow: `hidden`,
                   flexShrink: 0,
-                  scrollSnapAlign: `start`, // Enable snap to column
                 }}
               >
                 {/* Time slots grid */}
