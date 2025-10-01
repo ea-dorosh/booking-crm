@@ -1,11 +1,9 @@
 import { Add, ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -28,6 +26,10 @@ import {
   deleteSchedulePeriodDay,
   deleteSchedulePeriod,
 } from '@/features/employees/employeeSchedulePeriodsSlice';
+import {
+  showSuccess,
+  showError,
+} from '@/features/notifications/notificationsSlice';
 import { formatIsoDate } from '@/utils/formatters';
 import { formattedTime } from '@/utils/formatters';
 
@@ -379,20 +381,6 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
   const [editFrom, setEditFrom] = useState(``);
   const [editUntil, setEditUntil] = useState(``);
   const [dateError, setDateError] = useState(``);
-  const [toast, setToast] = useState({
-    open: false,
-    severity: `info`,
-    message: ``,
-  });
-  const showToast = (severity, message) => setToast({
-    open: true,
-    severity,
-    message,
-  });
-  const closeToast = () => setToast(prev => ({
-    ...prev,
-    open: false,
-  }));
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newFrom, setNewFrom] = useState(``);
   const [newUntil, setNewUntil] = useState(``);
@@ -513,12 +501,12 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
         body,
       })).unwrap();
       setDateError(``);
-      showToast(`success`, `Dates saved`);
+      dispatch(showSuccess(`Dates saved`));
       dispatch(fetchEmployeeSchedulePeriods(employeeId));
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
       setDateError(msg);
-      showToast(`error`, msg);
+      dispatch(showError(msg));
 
       // rollback UI to last valid value
       setEditFrom(period.validFrom);
@@ -538,12 +526,12 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
       };
       await dispatch(updateSchedulePeriodDates(body)).unwrap();
       setDateError(``);
-      showToast(`success`, `Dates saved`);
+      dispatch(showSuccess(`Dates saved`));
       dispatch(fetchEmployeeSchedulePeriods(employeeId));
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
       setDateError(msg);
-      showToast(`error`, msg);
+      dispatch(showError(msg));
       // rollback UI to last valid value
       setEditUntil(period.validUntil);
     }
@@ -557,14 +545,14 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
         periodId: period.id,
         repeatCycle: Number(value),
       })).unwrap();
-      showToast(`success`, `Repeat cycle updated`);
+      dispatch(showSuccess(`Repeat cycle updated`));
       dispatch(fetchEmployeeSchedulePeriods(employeeId));
     } catch (e) {
       const raw = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
       const friendly = /Existing week numbers exceed new repeat_cycle/i.test(raw)
         ? `Cannot reduce repeat cycle because some scheduled weeks exceed the new cycle. Remove or move those weeks first, then try again.`
         : raw;
-      showToast(`error`, friendly);
+      dispatch(showError(friendly));
     }
   };
 
@@ -573,17 +561,17 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
     try {
       const action = await dispatch(deleteSchedulePeriod(period.id));
       if (deleteSchedulePeriod.fulfilled.match(action)) {
-        showToast(`success`, `Period deleted`);
+        dispatch(showSuccess(`Period deleted`));
         const newIndex = Math.max(0, periodIndex - 1);
         setPeriodIndex(newIndex);
         dispatch(fetchEmployeeSchedulePeriods(employeeId));
       } else {
         const msg = action.payload || action.error?.message;
-        showToast(`error`, typeof msg === `string` ? msg : JSON.stringify(msg));
+        dispatch(showError(typeof msg === `string` ? msg : JSON.stringify(msg)));
       }
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
-      showToast(`error`, msg);
+      dispatch(showError(msg));
     }
   };
 
@@ -602,11 +590,11 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
       })).unwrap();
 
       setIsCreateOpen(false);
-      showToast(`success`, `Period created`);
+      dispatch(showSuccess(`Period created`));
       setTimeout(() => dispatch(fetchEmployeeSchedulePeriods(employeeId)), 200);
     } catch (e) {
       const msg = typeof e === `string` ? e : (e?.message || JSON.stringify(e));
-      showToast(`error`, msg);
+      dispatch(showError(msg));
     }
   };
 
@@ -988,24 +976,6 @@ export default function EmployeeSchedulePeriods({ employeeId }) {
           </Grid>
         </Box>
       )}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={2500}
-        onClose={closeToast}
-        anchorOrigin={{
-          vertical: `bottom`,
-          horizontal: `center`,
-        }}
-      >
-        <Alert
-          onClose={closeToast}
-          severity={toast.severity}
-          variant="filled"
-          sx={{ width: `100%` }}
-        >
-          {toast.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import AppointmentFilters from "@/components/EmployeeAppointments/AppointmentFilters";
 import EmployeeAppointments from "@/components/EmployeeAppointments/EmployeeAppointments";
+import EmployeeBlockedTimes from "@/components/EmployeeBlockedTimes/EmployeeBlockedTimes";
 import EmployeeGoogleCalenderSection from '@/components/EmployeeGoogleCalenderSection/EmployeeGoogleCalenderSection';
 import EmployeeSchedulePeriods from "@/components/EmployeeSchedulePeriods/EmployeeSchedulePeriods";
 import { employeeStatusEnum } from '@/enums/enums';
@@ -278,6 +279,26 @@ export default function EmployeeDetails({
           </Typography>
 
           <EmployeeSchedulePeriods employeeId={employee.employeeId} />
+        </CardContent>
+      </Card>
+
+      {/* Blocked Times */}
+      <Card
+        sx={{
+          marginTop: 2,
+          borderRadius: 2,
+          boxShadow: `0 2px 8px rgba(0,0,0,0.08)`,
+        }}
+      >
+        <CardContent
+          sx={{
+            paddingTop: 2.5,
+            paddingBottom: 2,
+            paddingLeft: 1.1,
+            paddingRight: 1.1,
+          }}
+        >
+          <EmployeeBlockedTimes employeeId={employee.employeeId} />
         </CardContent>
       </Card>
 

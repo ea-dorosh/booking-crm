@@ -174,6 +174,45 @@ const getEmployeesWorkingTimesRange = async (startDate, endDate, employeeIds = [
   }
 };
 
+// Blocked Times API
+const getEmployeeBlockedTimes = async (employeeId, fromDate) => {
+  try {
+    const response = await axios.get(`/employees/${employeeId}/blocked-times`, {
+      params: { fromDate },
+    });
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const createEmployeeBlockedTime = async (employeeId, blockedTimeData) => {
+  try {
+    const response = await axios.post(`/employees/${employeeId}/blocked-times`, blockedTimeData);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const updateEmployeeBlockedTime = async (blockedTimeId, blockedTimeData) => {
+  try {
+    const response = await axios.put(`/employees/blocked-times/${blockedTimeId}`, blockedTimeData);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
+const deleteEmployeeBlockedTime = async (blockedTimeId) => {
+  try {
+    const response = await axios.delete(`/employees/blocked-times/${blockedTimeId}`);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const adminService = {
   createEmployee,
   createEmployeeSchedulePeriod,
@@ -190,6 +229,10 @@ const adminService = {
   updateRepeatCycle,
   upsertEmployeePeriodDay,
   getEmployeesWorkingTimesRange,
+  getEmployeeBlockedTimes,
+  createEmployeeBlockedTime,
+  updateEmployeeBlockedTime,
+  deleteEmployeeBlockedTime,
 };
 
 export default adminService;

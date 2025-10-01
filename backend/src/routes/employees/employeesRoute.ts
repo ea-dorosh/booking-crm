@@ -16,6 +16,12 @@ import {
   deleteEmployeePeriod,
 } from '@/services/employees/employeesScheduleService.js';
 import {
+  getEmployeeBlockedTimes,
+  createEmployeeBlockedTime,
+  updateEmployeeBlockedTime,
+  deleteEmployeeBlockedTime,
+} from '@/services/employees/employeesBlockedTimesService.js';
+import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
@@ -536,6 +542,96 @@ router.put(`/:employeeId/status`, async (request: CustomRequestType, response: C
       errorMessage: `Error updating employee status`,
       message: (error as Error).message,
     });
+  }
+});
+
+// --- Blocked Times API ---
+router.get(`/:employeeId/blocked-times`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const employeeId = Number(request.params.employeeId);
+  const fromDate = (request.query.fromDate as string) || new Date().toISOString().split(`T`)[0];
+
+  try {
+    const blockedTimes = await getEmployeeBlockedTimes(request.dbPool, employeeId, fromDate as any);
+    response.json(blockedTimes);
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    response.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.post(`/:employeeId/blocked-times`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const employeeId = Number(request.params.employeeId);
+  const {
+    blockedDate, startTime, endTime, isAllDay,
+  } = request.body;
+
+  try {
+    const blockedTimeId = await createEmployeeBlockedTime(request.dbPool, {
+      employeeId,
+      blockedDate,
+      startTime,
+      endTime,
+      isAllDay,
+    });
+    response.json({
+      id: blockedTimeId,
+      message: `Blocked time created successfully`,
+    });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    response.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.put(`/blocked-times/:blockedTimeId`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const blockedTimeId = Number(request.params.blockedTimeId);
+  const {
+    blockedDate, startTime, endTime, isAllDay,
+  } = request.body;
+
+  try {
+    await updateEmployeeBlockedTime(request.dbPool, blockedTimeId, {
+      blockedDate,
+      startTime,
+      endTime,
+      isAllDay,
+    });
+    response.json({ message: `Blocked time updated successfully` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    response.status(status).json({ message: (error as Error).message });
+  }
+});
+
+router.delete(`/blocked-times/:blockedTimeId`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const blockedTimeId = Number(request.params.blockedTimeId);
+
+  try {
+    await deleteEmployeeBlockedTime(request.dbPool, blockedTimeId);
+    response.json({ message: `Blocked time deleted successfully` });
+  } catch (error) {
+    const status = (error as any).statusCode || 500;
+    response.status(status).json({ message: (error as Error).message });
   }
 });
 

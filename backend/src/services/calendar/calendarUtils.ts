@@ -265,12 +265,12 @@ function getPeriodWithDaysAndEmployeeAvailability(
               employeeId: employee.id,
 
               /**
-             * in DB we store time in German time zone
-             * so we need to convert it to UTC here not in the Service
-             * because in the service we don't know calendar day (summer/winter time)
-             * First we calculate time in german time zone for real calendar date "indexDay"
-             * and then convert it to UTC for next calculations
-             */
+               * in DB we store time in German time zone
+               * so we need to convert it to UTC here not in the Service
+               * because in the service we don't know calendar day (summer/winter time)
+               * First we calculate time in german time zone for real calendar date "indexDay"
+               * and then convert it to UTC for next calculations
+               */
               startWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.startTime}`, `Europe/Berlin`).utc(),
               endWorkingTime: dayjs.tz(`${indexDay.format(DATE_FORMAT)} ${employee.endTime}`, `Europe/Berlin`).utc(),
               pauseTimes,
