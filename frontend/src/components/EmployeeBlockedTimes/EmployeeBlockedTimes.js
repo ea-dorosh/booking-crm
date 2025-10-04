@@ -62,6 +62,9 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     isSaving,
   } = useSelector((state) => state.employeeBlockedTimes);
 
+  // Show form state
+  const [showAddForm, setShowAddForm] = useState(false);
+
   // Form state
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [startTime, setStartTime] = useState(`07:00`);
@@ -82,6 +85,14 @@ export default function EmployeeBlockedTimes({ employeeId }) {
       fromDate: today,
     }));
   }, [employeeId, dispatch]);
+
+  const handleCancelAdd = () => {
+    setShowAddForm(false);
+    setSelectedDate(dayjs());
+    setStartTime(`07:00`);
+    setEndTime(`18:00`);
+    setIsAllDay(false);
+  };
 
   const handleAddBlockedTime = async () => {
     if (!selectedDate) {
@@ -117,6 +128,7 @@ export default function EmployeeBlockedTimes({ employeeId }) {
       setStartTime(`07:00`);
       setEndTime(`18:00`);
       setIsAllDay(false);
+      setShowAddForm(false);
 
       // Reload blocked times
       const today = dayjs().format(`YYYY-MM-DD`);
@@ -227,111 +239,139 @@ export default function EmployeeBlockedTimes({ employeeId }) {
           Blocked Times
         </Typography>
 
-        {/* Add New Blocked Time Form */}
-        <Card
-          variant="outlined"
-          sx={{
-            marginBottom: 3,
-            backgroundColor: `grey.50`,
-          }}
-        >
-          <CardContent>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                marginBottom: 2,
-                fontWeight: 600,
-              }}
-            >
-              Add New Blocked Time
-            </Typography>
-
-            <Stack spacing={2}>
-              <DatePicker
-                label="Date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                minDate={dayjs()}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: `small`,
-                  },
+        {/* Add New Blocked Time Button/Form */}
+        {!showAddForm ? (
+          <Button
+            variant="contained"
+            onClick={() => setShowAddForm(true)}
+            sx={{ marginBottom: 3 }}
+          >
+            Add Blocked Time
+          </Button>
+        ) : (
+          <Card
+            variant="outlined"
+            sx={{
+              marginBottom: 3,
+              backgroundColor: `grey.50`,
+            }}
+          >
+            <CardContent>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  marginBottom: 2,
+                  fontWeight: 600,
                 }}
-              />
+              >
+                Add New Blocked Time
+              </Typography>
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isAllDay}
-                    onChange={(event) => setIsAllDay(event.target.checked)}
-                  />
-                }
-                label="Block all day"
-              />
+              <Stack spacing={2}>
+                <DatePicker
+                  label="Date"
+                  value={selectedDate}
+                  onChange={(newValue) => setSelectedDate(newValue)}
+                  minDate={dayjs()}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: `small`,
+                    },
+                  }}
+                />
 
-              {!isAllDay && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isAllDay}
+                      onChange={(event) => setIsAllDay(event.target.checked)}
+                    />
+                  }
+                  label="Block all day"
+                />
+
+                {!isAllDay && (
+                  <Box
+                    sx={{
+                      display: `flex`,
+                      gap: 2,
+                    }}
+                  >
+                    <FormControl
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel>Start Time</InputLabel>
+                      <Select
+                        value={startTime}
+                        label="Start Time"
+                        onChange={(event) => setStartTime(event.target.value)}
+                      >
+                        {TIME_SLOTS.map((slot) => (
+                          <MenuItem
+                            key={`start-${slot}`}
+                            value={slot}
+                          >
+                            {slot}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl
+                      fullWidth
+                      size="small"
+                    >
+                      <InputLabel>End Time</InputLabel>
+                      <Select
+                        value={endTime}
+                        label="End Time"
+                        onChange={(event) => setEndTime(event.target.value)}
+                      >
+                        {TIME_SLOTS.map((slot) => (
+                          <MenuItem
+                            key={`end-${slot}`}
+                            value={slot}
+                          >
+                            {slot}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                )}
+
                 <Box
                   sx={{
                     display: `flex`,
-                    gap: 2,
+                    gap: `20px`,
+                    justifyContent: `flex-end`,
+                    marginLeft: `auto !important`,
                   }}
                 >
-                  <FormControl
-                    fullWidth
+                  <Button
+                    variant="outlined"
+                    onClick={handleCancelAdd}
+                    disabled={isSaving}
                     size="small"
                   >
-                    <InputLabel>Start Time</InputLabel>
-                    <Select
-                      value={startTime}
-                      label="Start Time"
-                      onChange={(event) => setStartTime(event.target.value)}
-                    >
-                      {TIME_SLOTS.map((slot) => (
-                        <MenuItem
-                          key={`start-${slot}`}
-                          value={slot}
-                        >
-                          {slot}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                    Cancel
+                  </Button>
 
-                  <FormControl
-                    fullWidth
+                  <Button
+                    variant="contained"
                     size="small"
+                    onClick={handleAddBlockedTime}
+                    disabled={isSaving || !selectedDate}
                   >
-                    <InputLabel>End Time</InputLabel>
-                    <Select
-                      value={endTime}
-                      label="End Time"
-                      onChange={(event) => setEndTime(event.target.value)}
-                    >
-                      {TIME_SLOTS.map((slot) => (
-                        <MenuItem
-                          key={`end-${slot}`}
-                          value={slot}
-                        >
-                          {slot}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                    {isSaving ? <CircularProgress size={24} /> : `Add Blocked Time`}
+                  </Button>
                 </Box>
-              )}
-
-              <Button
-                variant="contained"
-                onClick={handleAddBlockedTime}
-                disabled={isSaving || !selectedDate}
-                fullWidth
-              >
-                {isSaving ? <CircularProgress size={24} /> : `Add Blocked Time`}
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
 
         {/* List of Blocked Times */}
         <Typography
@@ -529,6 +569,7 @@ export default function EmployeeBlockedTimes({ employeeId }) {
                           >
                             <Edit fontSize="small" />
                           </IconButton>
+
                           <IconButton
                             size="small"
                             color="error"
