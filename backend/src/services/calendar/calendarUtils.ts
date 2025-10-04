@@ -3,6 +3,7 @@ import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 import { ADVANCE_BOOKING_NEXT_DAY, TimeslotIntervalEnum } from '@/enums/enums.js';
+import { EmployeeBlockedTimeData } from '@/services/employees/employeesBlockedTimesService.js';
 
 const TIME_FORMAT = `HH:mm:ss`;
 const DATE_FORMAT = `YYYY-MM-DD`;
@@ -316,9 +317,9 @@ function normalizeGoogleCalendarEvents(
  */
 function normalizeGoogleEventsForEmployees(
   googleCalendarEvents: { start: string; end: string; summary: string }[],
-  periodWithDaysAndEmployeeAvailability: any[],
-): any[] {
-  const normalizedGoogleEvents: any[] = [];
+  periodWithDaysAndEmployeeAvailability: PeriodWithEmployeeWorkingTimeType[],
+): NormalizedAppointmentData[] {
+  const normalizedGoogleEvents: NormalizedAppointmentData[] = [];
 
   if (periodWithDaysAndEmployeeAvailability.length === 0) {
     return normalizedGoogleEvents;
@@ -326,8 +327,8 @@ function normalizeGoogleEventsForEmployees(
 
   // Create employee dates map for normalization
   const employeeDatesMapForNormalization = new Map<number, string[]>();
-  periodWithDaysAndEmployeeAvailability.forEach(dayData => {
-    dayData.employees.forEach((employee: any) => {
+  periodWithDaysAndEmployeeAvailability.forEach((dayData) => {
+    dayData.employees.forEach((employee) => {
       if (!employeeDatesMapForNormalization.has(employee.employeeId)) {
         employeeDatesMapForNormalization.set(employee.employeeId, []);
       }
@@ -376,6 +377,70 @@ function normalizePauseTimesForEmployees(
   }
 
   return normalizedPauseTimes;
+}
+
+/**
+ * Normalize employee blocked times from database into generic normalized appointments
+ * so they are handled as blocked times downstream
+ */
+function normalizeBlockedTimesForEmployees(
+  blockedTimesFromDB: EmployeeBlockedTimeData[],
+  periodWithDaysAndEmployeeAvailability: PeriodWithEmployeeWorkingTimeType[],
+): NormalizedAppointmentData[] {
+  const normalizedBlockedTimes: NormalizedAppointmentData[] = [];
+
+  for (const blockedTime of blockedTimesFromDB) {
+    if (blockedTime.isAllDay) {
+      // Find working hours for this employee on this day
+      // Format blockedDate to YYYY-MM-DD for comparison
+      const blockedDateStr = dayjs(blockedTime.blockedDate).format(DATE_FORMAT);
+      const dayData = periodWithDaysAndEmployeeAvailability.find(
+        (day) => day.day === blockedDateStr,
+      );
+
+      if (!dayData) continue;
+
+      const employee = dayData.employees.find(
+        (emp) => emp.employeeId === blockedTime.employeeId,
+      );
+
+      if (!employee) continue;
+
+      // Block entire working day
+      normalizedBlockedTimes.push({
+        date: blockedDateStr,
+        timeStart: employee.startWorkingTime.toISOString(),
+        timeEnd: employee.endWorkingTime.toISOString(),
+        employeeId: blockedTime.employeeId,
+      });
+    } else {
+      // Block specific time range
+      if (!blockedTime.startTime || !blockedTime.endTime) continue;
+
+      // Ensure blockedDate is in correct format (YYYY-MM-DD)
+      const dateStr = dayjs(blockedTime.blockedDate).format(DATE_FORMAT);
+
+      // Convert from Europe/Berlin timezone to UTC
+      const startDateTime = dayjs.tz(
+        `${dateStr} ${blockedTime.startTime}`,
+        `Europe/Berlin`,
+      ).utc();
+
+      const endDateTime = dayjs.tz(
+        `${dateStr} ${blockedTime.endTime}`,
+        `Europe/Berlin`,
+      ).utc();
+
+      normalizedBlockedTimes.push({
+        date: dateStr,
+        timeStart: startDateTime.toISOString(),
+        timeEnd: endDateTime.toISOString(),
+        employeeId: blockedTime.employeeId,
+      });
+    }
+  }
+
+  return normalizedBlockedTimes;
 }
 
 function combinePeriodWithNormalizedAppointments(
@@ -751,4 +816,5 @@ export {
   normalizeSavedAppointments,
   normalizeGoogleEventsForEmployees,
   normalizePauseTimesForEmployees,
+  normalizeBlockedTimesForEmployees,
 };

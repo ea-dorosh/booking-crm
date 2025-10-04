@@ -11,7 +11,9 @@ import {
   PeriodWithEmployeeWorkingTimeType,
   EmployeeWithWorkingTimesType,
   normalizePauseTimesForEmployees,
+  normalizeBlockedTimesForEmployees,
 } from '@/services/calendar/calendarUtils.js';
+import { getEmployeeBlockedTimesForDates } from '@/services/employees/employeesBlockedTimesService.js';
 import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { Date_ISO_Type } from '@/@types/utilTypes.js';
@@ -76,6 +78,13 @@ const getGroupedTimeSlots = async (
       periodWithDaysAndEmployeeAvailability,
     );
 
+    // Get employee blocked times
+    const blockedTimes = await getEmployeeBlockedTimesForDates(
+      dbPool,
+      employeeIds,
+      periodWithDaysAndEmployeeAvailability.map((day) => day.day),
+    );
+
     // Normalize all appointments
     const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
     const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(
@@ -84,10 +93,15 @@ const getGroupedTimeSlots = async (
     );
 
     const normalizedPauseTimes = normalizePauseTimesForEmployees(periodWithDaysAndEmployeeAvailability);
+    const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(
+      blockedTimes,
+      periodWithDaysAndEmployeeAvailability,
+    );
     const allNormalizedAppointments = [
       ...normalizedSavedAppointments,
       ...normalizedGoogleEvents,
       ...normalizedPauseTimes,
+      ...normalizedBlockedTimes,
     ];
 
     // Calculate available time slots

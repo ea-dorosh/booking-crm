@@ -6,6 +6,7 @@ import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
 import { ADVANCE_BOOKING_NEXT_DAY, TimeslotIntervalEnum } from '@/enums/enums.js';
+import { EmployeeBlockedTimeData } from '@/services/employees/employeesBlockedTimesService.js';
 import {
   calculateAdjustedEndTime,
   calculateAvailableTimes,
@@ -16,6 +17,7 @@ import {
   generateTimeSlotsFromAvailableTimes,
   PeriodWithEmployeeWorkingTimeType,
   combinePeriodWithNormalizedAppointments,
+  normalizeBlockedTimesForEmployees,
 } from './calendarUtils';
 
 jest.mock(`dayjs`, () => {
@@ -2200,6 +2202,427 @@ describe(`generateTimeSlotsFromAvailableTimes`, () => {
       // Third slot: 19:00-20:00 (60min)
       expect(employee2Slots[2].startTime.format(`HH:mm:ss`)).toBe(`19:00:00`);
       expect(employee2Slots[2].endTime.format(`HH:mm:ss`)).toBe(`20:00:00`);
+    });
+  });
+});
+
+describe(`normalizeBlockedTimesForEmployees`, () => {
+  // Helper function to create blocked time with required fields
+  // Note: blockedDate comes from MySQL as Date object (midnight UTC), not as string
+  const createBlockedTime = (overrides: Partial<EmployeeBlockedTimeData>): EmployeeBlockedTimeData => ({
+    id: 1,
+    employeeId: 101,
+    blockedDate: `2024-01-14T23:00:00.000Z` as any, // MySQL DATE becomes Date object at midnight (2024-01-15 in Berlin)
+    startTime: null,
+    endTime: null,
+    isAllDay: true,
+    createdAt: `2024-01-01T00:00:00.000Z`,
+    updatedAt: `2024-01-01T00:00:00.000Z`,
+    ...overrides,
+  });
+
+  describe(`All-day blocking`, () => {
+    it(`should block entire working day when isAllDay is true`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          isAllDay: true,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        date: `2024-01-15`,
+        employeeId: 101,
+      });
+      // Should match employee's working hours in UTC
+      expect(result[0].timeStart).toBe(dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc().toISOString());
+      expect(result[0].timeEnd).toBe(dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc().toISOString());
+    });
+
+    it(`should skip all-day blocking if employee not found for that day`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          employeeId: 999, // Non-existent employee
+          isAllDay: true,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it(`should skip all-day blocking if day not found in period`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          blockedDate: `2024-01-19T23:00:00.000Z` as any, // 2024-01-20 in Berlin (different day)
+          isAllDay: true,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe(`Specific time blocking`, () => {
+    it(`should block specific time range when isAllDay is false`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          startTime: `10:00:00` as Time_HH_MM_SS_Type,
+          endTime: `12:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        date: `2024-01-15`,
+        employeeId: 101,
+      });
+      // Should be converted from Europe/Berlin to UTC
+      expect(result[0].timeStart).toBe(dayjs.tz(`2024-01-15 10:00:00`, `Europe/Berlin`).utc().toISOString());
+      expect(result[0].timeEnd).toBe(dayjs.tz(`2024-01-15 12:00:00`, `Europe/Berlin`).utc().toISOString());
+    });
+
+    it(`should handle timezone conversion correctly (winter time)`, () => {
+      // In winter, Europe/Berlin is UTC+1
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          blockedDate: `2024-01-15` as Date_ISO_Type, // Winter
+          startTime: `14:00:00` as Time_HH_MM_SS_Type,
+          endTime: `16:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      // 14:00 Berlin time in winter = 13:00 UTC
+      const expectedStart = dayjs.tz(`2024-01-15 14:00:00`, `Europe/Berlin`).utc();
+      const expectedEnd = dayjs.tz(`2024-01-15 16:00:00`, `Europe/Berlin`).utc();
+
+      expect(result[0].timeStart).toBe(expectedStart.toISOString());
+      expect(result[0].timeEnd).toBe(expectedEnd.toISOString());
+    });
+
+    it(`should handle timezone conversion correctly (summer time)`, () => {
+      // In summer, Europe/Berlin is UTC+2
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          blockedDate: `2024-07-14T22:00:00.000Z` as any, // 2024-07-15 in Berlin (summer)
+          startTime: `14:00:00` as Time_HH_MM_SS_Type,
+          endTime: `16:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-07-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-07-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-07-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      // 14:00 Berlin time in summer = 12:00 UTC
+      const expectedStart = dayjs.tz(`2024-07-15 14:00:00`, `Europe/Berlin`).utc();
+      const expectedEnd = dayjs.tz(`2024-07-15 16:00:00`, `Europe/Berlin`).utc();
+
+      expect(result[0].timeStart).toBe(expectedStart.toISOString());
+      expect(result[0].timeEnd).toBe(expectedEnd.toISOString());
+    });
+
+    it(`should skip specific time blocking if startTime or endTime is null`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          startTime: `10:00:00` as Time_HH_MM_SS_Type,
+          endTime: null,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(0);
+    });
+  });
+
+  describe(`Multiple blocked times`, () => {
+    it(`should handle multiple blocked times for different employees`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          id: 1,
+          employeeId: 101,
+          startTime: `10:00:00` as Time_HH_MM_SS_Type,
+          endTime: `12:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+        createBlockedTime({
+          id: 2,
+          employeeId: 102,
+          startTime: `14:00:00` as Time_HH_MM_SS_Type,
+          endTime: `16:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+            {
+              employeeId: 102,
+              startWorkingTime: dayjs.tz(`2024-01-15 09:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 17:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].employeeId).toBe(101);
+      expect(result[1].employeeId).toBe(102);
+    });
+
+    it(`should handle mix of all-day and specific time blocks`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          id: 1,
+          employeeId: 101,
+          isAllDay: true,
+        }),
+        createBlockedTime({
+          id: 2,
+          employeeId: 102,
+          startTime: `10:00:00` as Time_HH_MM_SS_Type,
+          endTime: `12:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+            {
+              employeeId: 102,
+              startWorkingTime: dayjs.tz(`2024-01-15 09:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 17:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(2);
+
+      // First should be all-day (employee 101)
+      const allDayBlock = result.find((r: any) => r.employeeId === 101);
+      expect(allDayBlock?.timeStart).toBe(
+        dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc().toISOString(),
+      );
+      expect(allDayBlock?.timeEnd).toBe(
+        dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc().toISOString(),
+      );
+
+      // Second should be specific time (employee 102)
+      const specificBlock = result.find((r: any) => r.employeeId === 102);
+      expect(specificBlock?.timeStart).toBe(
+        dayjs.tz(`2024-01-15 10:00:00`, `Europe/Berlin`).utc().toISOString(),
+      );
+      expect(specificBlock?.timeEnd).toBe(
+        dayjs.tz(`2024-01-15 12:00:00`, `Europe/Berlin`).utc().toISOString(),
+      );
+    });
+
+    it(`should handle same employee with multiple blocked times on same day`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          id: 1,
+          employeeId: 101,
+          startTime: `10:00:00` as Time_HH_MM_SS_Type,
+          endTime: `11:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+        createBlockedTime({
+          id: 2,
+          employeeId: 101,
+          startTime: `14:00:00` as Time_HH_MM_SS_Type,
+          endTime: `15:00:00` as Time_HH_MM_SS_Type,
+          isAllDay: false,
+        }),
+      ];
+
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [
+        {
+          day: `2024-01-15` as Date_ISO_Type,
+          employees: [
+            {
+              employeeId: 101,
+              startWorkingTime: dayjs.tz(`2024-01-15 08:00:00`, `Europe/Berlin`).utc(),
+              endWorkingTime: dayjs.tz(`2024-01-15 18:00:00`, `Europe/Berlin`).utc(),
+              pauseTimes: [],
+              advanceBookingTime: `00:30:00`,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
+            },
+          ],
+        },
+      ];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].employeeId).toBe(101);
+      expect(result[1].employeeId).toBe(101);
+      // Times should be different
+      expect(result[0].timeStart).not.toBe(result[1].timeStart);
+    });
+  });
+
+  describe(`Edge cases`, () => {
+    it(`should return empty array when no blocked times provided`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [];
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toEqual([]);
+    });
+
+    it(`should handle empty period data gracefully`, () => {
+      const blockedTimes: EmployeeBlockedTimeData[] = [
+        createBlockedTime({
+          isAllDay: true,
+        }),
+      ];
+      const periodWithDays: PeriodWithEmployeeWorkingTimeType[] = [];
+
+      const result = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDays);
+
+      expect(result).toEqual([]);
     });
   });
 });

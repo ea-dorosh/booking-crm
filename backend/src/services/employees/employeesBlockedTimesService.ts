@@ -77,6 +77,48 @@ async function getEmployeeBlockedTimes(
 }
 
 /**
+ * Get blocked times for multiple employees and specific dates
+ * Used by calendar service to filter out blocked time slots
+ */
+async function getEmployeeBlockedTimesForDates(
+  dbPool: Pool,
+  employeeIds: number[],
+  dates: Date_ISO_Type[],
+): Promise<EmployeeBlockedTimeData[]> {
+  if (employeeIds.length === 0 || dates.length === 0) {
+    return [];
+  }
+
+  const sql = `
+    SELECT
+      id,
+      employee_id,
+      blocked_date,
+      start_time,
+      end_time,
+      is_all_day,
+      created_at,
+      updated_at
+    FROM EmployeeBlockedTimes
+    WHERE employee_id IN (?) AND blocked_date IN (?)
+    ORDER BY employee_id ASC, blocked_date ASC, start_time ASC
+  `;
+
+  const [rows] = await dbPool.query<EmployeeBlockedTimeRow[]>(sql, [employeeIds, dates]);
+
+  return rows.map((row) => ({
+    id: row.id,
+    employeeId: row.employee_id,
+    blockedDate: row.blocked_date as Date_ISO_Type,
+    startTime: row.start_time as Time_HH_MM_SS_Type | null,
+    endTime: row.end_time as Time_HH_MM_SS_Type | null,
+    isAllDay: Boolean(row.is_all_day),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+/**
  * Get a specific blocked time by ID
  */
 async function getBlockedTimeById(
@@ -266,6 +308,7 @@ async function deleteEmployeeBlockedTime(
 
 export {
   getEmployeeBlockedTimes,
+  getEmployeeBlockedTimesForDates,
   getBlockedTimeById,
   createEmployeeBlockedTime,
   updateEmployeeBlockedTime,
