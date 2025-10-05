@@ -16,7 +16,7 @@ interface EmployeeBlockedTimeRow extends RowDataPacket {
 export interface EmployeeBlockedTimeData {
   id: number;
   employeeId: number;
-  blockedDate: Date_ISO_Type;
+  blockedDate: Date_ISO_Type; // Formatted as YYYY-MM-DD string
   startTime: Time_HH_MM_SS_Type | null;
   endTime: Time_HH_MM_SS_Type | null;
   isAllDay: boolean;
@@ -67,7 +67,7 @@ async function getEmployeeBlockedTimes(
   return rows.map((row) => ({
     id: row.id,
     employeeId: row.employee_id,
-    blockedDate: row.blocked_date as Date_ISO_Type,
+    blockedDate: dayjs(row.blocked_date).format(`YYYY-MM-DD`) as Date_ISO_Type,
     startTime: row.start_time as Time_HH_MM_SS_Type | null,
     endTime: row.end_time as Time_HH_MM_SS_Type | null,
     isAllDay: Boolean(row.is_all_day),
@@ -109,7 +109,7 @@ async function getEmployeeBlockedTimesForDates(
   return rows.map((row) => ({
     id: row.id,
     employeeId: row.employee_id,
-    blockedDate: row.blocked_date as Date_ISO_Type,
+    blockedDate: dayjs(row.blocked_date).format(`YYYY-MM-DD`) as Date_ISO_Type,
     startTime: row.start_time as Time_HH_MM_SS_Type | null,
     endTime: row.end_time as Time_HH_MM_SS_Type | null,
     isAllDay: Boolean(row.is_all_day),
@@ -149,7 +149,7 @@ async function getBlockedTimeById(
   return {
     id: row.id,
     employeeId: row.employee_id,
-    blockedDate: row.blocked_date as Date_ISO_Type,
+    blockedDate: dayjs(row.blocked_date).format(`YYYY-MM-DD`) as Date_ISO_Type,
     startTime: row.start_time as Time_HH_MM_SS_Type | null,
     endTime: row.end_time as Time_HH_MM_SS_Type | null,
     isAllDay: Boolean(row.is_all_day),

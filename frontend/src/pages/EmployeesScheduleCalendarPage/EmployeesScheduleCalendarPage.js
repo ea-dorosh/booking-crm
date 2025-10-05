@@ -32,6 +32,7 @@ export default function EmployeesScheduleCalendarPage() {
     startIso: ``,
     endIso: ``,
   });
+  const [blockedTimesMap, setBlockedTimesMap] = useState(new Map()); // employeeId -> array of blocked times
   const [settingsAnchorEl, setSettingsAnchorEl] = useState(null);
   const isSettingsOpen = Boolean(settingsAnchorEl);
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
@@ -77,19 +78,77 @@ export default function EmployeesScheduleCalendarPage() {
       startIso,
       endIso,
     } = getRange();
+
     if (!startIso || !endIso) return;
-    if (lastRangeRef.current.startIso === startIso && lastRangeRef.current.endIso === endIso) return;
+
+    if (lastRangeRef.current.startIso === startIso && lastRangeRef.current.endIso === endIso) {
+      return;
+    }
+
     lastRangeRef.current = {
       startIso,
       endIso,
     };
+
     try {
       const data = await adminService.getEmployeesWorkingTimesRange(startIso, endIso);
+
       setLastWorkingData(data);
       setEvents(buildEventsFromData(data));
-    } catch (e) {
+
+      // Fetch blocked times for all employees
+      await fetchBlockedTimes(data, startIso, endIso);
+    } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(`Failed to load working times`, e);
+      console.error(`Failed to load working times`, error);
+    }
+  };
+
+  const fetchBlockedTimes = async (workingData, startIso) => {
+    try {
+      // Get unique employee IDs
+      const employeeIds = [...new Set(
+        workingData.flatMap((day) =>
+          (day.employees || []).map((emp) => emp.employeeId),
+        ),
+      )];
+
+      if (employeeIds.length === 0) return;
+
+      // Fetch blocked times for each employee
+      const blockedTimesPromises = employeeIds.map((employeeId) =>
+        adminService.getEmployeeBlockedTimes(employeeId, startIso)
+          .then((times) => {
+            return {
+              employeeId,
+              times,
+            };
+          })
+          .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error(`[fetchBlockedTimes] Employee ${employeeId}: failed`, error);
+            return {
+              employeeId,
+              times: [],
+            };
+          }),
+      );
+
+      const results = await Promise.all(blockedTimesPromises);
+
+      // Create a map: employeeId -> blocked times
+      const newBlockedTimesMap = new Map();
+      results.forEach(({
+        employeeId, times,
+      }) => {
+        newBlockedTimesMap.set(employeeId, times);
+      });
+
+      setBlockedTimesMap(newBlockedTimesMap);
+      // Note: useEffect will trigger re-render when blockedTimesMap changes
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to load blocked times`, error);
     }
   };
 
@@ -125,12 +184,15 @@ export default function EmployeesScheduleCalendarPage() {
   };
 
   const buildEventsFromData = (data) => {
+    // Add timestamp to force re-render when blockedTimesMap changes
+    const timestamp = Date.now();
+
     return data.flatMap((day) => {
       const dayStart = day.date;
       return (day.employees || [])
         .filter((emp) => doesEmployeePassFilters(emp.employeeId))
         .map((emp) => ({
-          id: `${dayStart}-${emp.employeeId}`,
+          id: `${dayStart}-${emp.employeeId}-${timestamp}`,
           title: getEmployeeName(emp.employeeId),
           start: `${dayStart}T${emp.startTime}`,
           end: `${dayStart}T${emp.endTime}`,
@@ -144,7 +206,7 @@ export default function EmployeesScheduleCalendarPage() {
   useEffect(() => {
     if (!lastWorkingData || !Array.isArray(lastWorkingData)) return;
     setEvents(buildEventsFromData(lastWorkingData));
-  }, [selectedFilters, lastWorkingData, employeeNameMap]);
+  }, [selectedFilters, lastWorkingData, employeeNameMap, blockedTimesMap]);
 
   useEffect(() => {
     // Load services meta once for filters/mapping
@@ -183,9 +245,9 @@ export default function EmployeesScheduleCalendarPage() {
           }
         }
         employeeServicesMapRef.current = map;
-      } catch (e) {
+      } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Failed to load services meta`, e);
+        console.error(`Failed to load services meta`, error);
       }
     };
     const loadEmployees = async () => {
@@ -199,9 +261,9 @@ export default function EmployeesScheduleCalendarPage() {
           });
         }
         setEmployeeNameMap(m);
-      } catch (e) {
+      } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Failed to load employees`, e);
+        console.error(`Failed to load employees`, error);
       }
     };
     loadMeta();
@@ -296,9 +358,9 @@ export default function EmployeesScheduleCalendarPage() {
         .filter((node) => node.subCategories.length > 0 || node.services.length > 0);
 
       setEmployeeCategoryTree(tree);
-    } catch (e) {
+    } catch (error) {
       // eslint-disable-next-line no-console
-      console.error(`Failed to load employee services`, e);
+      console.error(`Failed to load employee services`, error);
     } finally {
       setDrawerLoading(false);
     }
@@ -316,24 +378,28 @@ export default function EmployeesScheduleCalendarPage() {
     y: 0,
     t: 0,
   });
-  const onTouchStart = (e) => {
-    const t = e.touches?.[0];
-    if (!t) return;
+  const onTouchStart = (error) => {
+    const touch = error.touches?.[0];
+    if (!touch) return;
+
     touchStart.current = {
-      x: t.clientX,
-      y: t.clientY,
+      x: touch.clientX,
+      y: touch.clientY,
       t: Date.now(),
     };
   };
-  const onTouchEnd = (ev) => {
-    const t = ev?.changedTouches?.[0];
-    if (!t) return;
-    const dx = t.clientX - touchStart.current.x;
-    const dy = t.clientY - touchStart.current.y;
+
+  const onTouchEnd = (event) => {
+    const touch = event?.changedTouches?.[0];
+    if (!touch) return;
+
+    const dx = touch.clientX - touchStart.current.x;
+    const dy = touch.clientY - touchStart.current.y;
     const dt = Date.now() - touchStart.current.t;
     if (Math.abs(dx) > 50 && Math.abs(dy) < 60 && dt < 800) {
       const api = calendarRef.current?.getApi();
       if (!api) return;
+
       if (dx < 0) api.next(); else api.prev();
     }
   };
@@ -381,14 +447,14 @@ export default function EmployeesScheduleCalendarPage() {
         >
           <IconButton
             size="small"
-            onClick={(e) => setSettingsAnchorEl(e.currentTarget)}
+            onClick={(error) => setSettingsAnchorEl(error.currentTarget)}
           >
             <SettingsIcon fontSize="small" />
           </IconButton>
 
           <IconButton
             size="small"
-            onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+            onClick={(error) => setFilterAnchorEl(error.currentTarget)}
           >
             <FilterListIcon fontSize="small" />
           </IconButton>
@@ -504,9 +570,9 @@ export default function EmployeesScheduleCalendarPage() {
           control={(
             <Checkbox
               checked={Boolean(calendarSettings.showSunday)}
-              onChange={(e) => setCalendarSettings((s) => ({
-                ...s,
-                showSunday: e.target.checked,
+              onChange={(error) => setCalendarSettings((settings) => ({
+                ...settings,
+                showSunday: error.target.checked,
               }))}
               size="small"
             />
@@ -721,6 +787,77 @@ export default function EmployeesScheduleCalendarPage() {
               info.el.style.color = color.text;
               info.el.style.boxShadow = `0 2px 8px rgba(0,0,0,0.08)`;
               info.el.style.borderRadius = `6px`;
+            }
+
+            // Draw blocked time overlays
+            const blockedTimes = blockedTimesMap.get(employeeId) || [];
+
+            if (blockedTimes.length > 0) {
+              const eventStart = info.event.start;
+              const eventEnd = info.event.end;
+              const eventDate = info.event.start.toISOString().split(`T`)[0]; // YYYY-MM-DD
+
+              blockedTimes.forEach((blockedTime) => {
+                if (blockedTime.blockedDate !== eventDate) {
+                  return; // Different day
+                }
+
+                let blockStart, blockEnd;
+
+                if (blockedTime.isAllDay) {
+                  // Block entire working time
+                  blockStart = eventStart;
+                  blockEnd = eventEnd;
+                } else {
+                  // Block specific time range
+                  const blockStartStr = `${blockedTime.blockedDate}T${blockedTime.startTime}`;
+                  const blockEndStr = `${blockedTime.blockedDate}T${blockedTime.endTime}`;
+                  blockStart = new Date(blockStartStr);
+                  blockEnd = new Date(blockEndStr);
+
+                  // Only draw if blocked time overlaps with event time
+                  if (blockEnd <= eventStart || blockStart >= eventEnd) return;
+
+                  // Trim to event boundaries
+                  if (blockStart < eventStart) blockStart = eventStart;
+                  if (blockEnd > eventEnd) blockEnd = eventEnd;
+                }
+
+                // Calculate position and height
+                const eventDuration = eventEnd - eventStart;
+                const blockOffsetFromStart = blockStart - eventStart;
+                const blockDuration = blockEnd - blockStart;
+
+                const topPercent = (blockOffsetFromStart / eventDuration) * 100;
+                const heightPercent = (blockDuration / eventDuration) * 100;
+
+                // Create overlay element
+                const overlay = document.createElement(`div`);
+                overlay.style.position = `absolute`;
+                overlay.style.top = `${topPercent}%`;
+                overlay.style.height = `${heightPercent}%`;
+                overlay.style.left = `0`;
+                overlay.style.right = `0`;
+                overlay.style.backgroundColor = `rgba(244, 67, 54, 0.35)`;
+                overlay.style.borderTop = `2px dashed #f44336`;
+                overlay.style.borderBottom = `2px dashed #f44336`;
+                overlay.style.backgroundImage = `repeating-linear-gradient(
+                  45deg,
+                  transparent,
+                  transparent 10px,
+                  rgba(244, 67, 54, 0.2) 10px,
+                  rgba(244, 67, 54, 0.2) 20px
+                )`;
+                overlay.style.pointerEvents = `none`;
+                overlay.style.zIndex = `5`;
+
+                // Add to event element
+                const eventMain = info.el.querySelector(`.fc-event-main`);
+                if (eventMain) {
+                  eventMain.style.position = `relative`;
+                  eventMain.appendChild(overlay);
+                }
+              });
             }
           }}
           datesSet={() => fetchWorkingTimes()}
