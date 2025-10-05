@@ -190,16 +190,28 @@ export default function EmployeesScheduleCalendarPage() {
     return data.flatMap((day) => {
       const dayStart = day.date;
       return (day.employees || [])
-        .filter((emp) => doesEmployeePassFilters(emp.employeeId))
-        .map((emp) => ({
-          id: `${dayStart}-${emp.employeeId}-${timestamp}`,
-          title: getEmployeeName(emp.employeeId),
-          start: `${dayStart}T${emp.startTime}`,
-          end: `${dayStart}T${emp.endTime}`,
-          extendedProps: {
-            employeeId: emp.employeeId,
-          },
-        }));
+        .filter((employee) => doesEmployeePassFilters(employee.employeeId))
+        .map((employee) => {
+          const extendedProps = {
+            employeeId: employee.employeeId,
+          };
+
+          // Add pause time if exists
+          if (employee.blockStartTimeFirst && employee.blockEndTimeFirst) {
+            extendedProps.pauseTime = {
+              start: employee.blockStartTimeFirst,
+              end: employee.blockEndTimeFirst,
+            };
+          }
+
+          return {
+            id: `${dayStart}-${employee.employeeId}-${timestamp}`,
+            title: getEmployeeName(employee.employeeId),
+            start: `${dayStart}T${employee.startTime}`,
+            end: `${dayStart}T${employee.endTime}`,
+            extendedProps,
+          };
+        });
     });
   };
 
@@ -780,6 +792,7 @@ export default function EmployeesScheduleCalendarPage() {
           }}
           eventDidMount={(info) => {
             const employeeId = info.event.extendedProps?.employeeId;
+            const pauseTime = info.event.extendedProps?.pauseTime;
             const color = getEmployeeColor(employeeId);
             if (color) {
               info.el.style.backgroundColor = color.bg;
@@ -787,6 +800,60 @@ export default function EmployeesScheduleCalendarPage() {
               info.el.style.color = color.text;
               info.el.style.boxShadow = `0 2px 8px rgba(0,0,0,0.08)`;
               info.el.style.borderRadius = `6px`;
+            }
+
+            // Draw pause time overlay first (if exists)
+            if (pauseTime && pauseTime.start && pauseTime.end) {
+              const eventStart = info.event.start;
+              const eventEnd = info.event.end;
+              const eventDate = info.event.start.toISOString().split(`T`)[0]; // YYYY-MM-DD
+
+              const pauseStartStr = `${eventDate}T${pauseTime.start}`;
+              const pauseEndStr = `${eventDate}T${pauseTime.end}`;
+              const pauseStart = new Date(pauseStartStr);
+              const pauseEnd = new Date(pauseEndStr);
+
+              // Only draw if pause time overlaps with event time
+              if (pauseEnd > eventStart && pauseStart < eventEnd) {
+                // Trim to event boundaries
+                const actualStart = pauseStart < eventStart ? eventStart : pauseStart;
+                const actualEnd = pauseEnd > eventEnd ? eventEnd : pauseEnd;
+
+                // Calculate position and height
+                const eventDuration = eventEnd - eventStart;
+                const pauseOffsetFromStart = actualStart - eventStart;
+                const pauseDuration = actualEnd - actualStart;
+
+                const topPercent = (pauseOffsetFromStart / eventDuration) * 100;
+                const heightPercent = (pauseDuration / eventDuration) * 100;
+
+                // Create pause overlay element (orange/yellow for lunch break)
+                const overlay = document.createElement(`div`);
+                overlay.style.position = `absolute`;
+                overlay.style.top = `${topPercent}%`;
+                overlay.style.height = `${heightPercent}%`;
+                overlay.style.left = `0`;
+                overlay.style.right = `0`;
+                overlay.style.backgroundColor = `rgba(255, 152, 0, 0.25)`;
+                overlay.style.borderTop = `2px dashed #FF9800`;
+                overlay.style.borderBottom = `2px dashed #FF9800`;
+                overlay.style.backgroundImage = `repeating-linear-gradient(
+                  45deg,
+                  transparent,
+                  transparent 10px,
+                  rgba(255, 152, 0, 0.15) 10px,
+                  rgba(255, 152, 0, 0.15) 20px
+                )`;
+                overlay.style.pointerEvents = `none`;
+                overlay.style.zIndex = `4`;
+
+                // Add to event element
+                const eventMain = info.el.querySelector(`.fc-event-main`);
+                if (eventMain) {
+                  eventMain.style.position = `relative`;
+                  eventMain.appendChild(overlay);
+                }
+              }
             }
 
             // Draw blocked time overlays
@@ -987,12 +1054,12 @@ function getEmployeeColor(employeeId) {
 
 function getDayHeaderText(dateLike, weekdayLength = `short`) {
   try {
-    const d = new Date(dateLike.valueOf ? dateLike.valueOf() : dateLike);
+    const date = new Date(dateLike.valueOf ? dateLike.valueOf() : dateLike);
     const weekday = new Intl.DateTimeFormat(`de-DE`, { weekday: weekdayLength })
-      .format(d)
+      .format(date)
       .replace(/\.$/, ``);
-    const day = String(d.getDate());
-    const month = String(d.getMonth() + 1).padStart(2, `0`);
+    const day = String(date.getDate());
+    const month = String(date.getMonth() + 1).padStart(2, `0`);
     return `${weekday} ${day}.${month}`;
   } catch {
     return ``;
