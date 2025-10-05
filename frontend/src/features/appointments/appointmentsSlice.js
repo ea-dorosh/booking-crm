@@ -9,53 +9,53 @@ import {
 import { appointmentStatusEnum  } from '@/enums/enums';
 import appointmentsService from "@/services/appointments.service";
 
-// SessionStorage key for filters
+// LocalStorage key for filters
 const APPOINTMENTS_FILTERS_KEY = `appointmentsFilters`;
 const APPOINTMENTS_CALENDAR_KEY = `appointmentsCalendarState`;
 const APPOINTMENTS_ACTIVE_TAB_KEY = `appointmentsActiveTab`;
 
-// Helper functions for sessionStorage
+// Helper functions for localStorage
 const saveFiltersToStorage = (filters) => {
   try {
-    sessionStorage.setItem(APPOINTMENTS_FILTERS_KEY, JSON.stringify(filters));
+    localStorage.setItem(APPOINTMENTS_FILTERS_KEY, JSON.stringify(filters));
   } catch (error) {
-    console.warn(`Failed to save appointment filters to sessionStorage:`, error);
+    console.warn(`Failed to save appointment filters to localStorage:`, error);
   }
 };
 
 const loadFiltersFromStorage = () => {
   try {
-    const savedFilters = sessionStorage.getItem(APPOINTMENTS_FILTERS_KEY);
+    const savedFilters = localStorage.getItem(APPOINTMENTS_FILTERS_KEY);
     if (savedFilters) {
       return JSON.parse(savedFilters);
     }
   } catch (error) {
-    console.warn(`Failed to load appointment filters from sessionStorage:`, error);
+    console.warn(`Failed to load appointment filters from localStorage:`, error);
   }
   return null;
 };
 
 const saveCalendarToStorage = (calendarState) => {
   try {
-    sessionStorage.setItem(APPOINTMENTS_CALENDAR_KEY, JSON.stringify(calendarState));
+    localStorage.setItem(APPOINTMENTS_CALENDAR_KEY, JSON.stringify(calendarState));
   } catch (error) {
-    console.warn(`Failed to save calendar state to sessionStorage:`, error);
+    console.warn(`Failed to save calendar state to localStorage:`, error);
   }
 };
 
 const loadCalendarFromStorage = () => {
   try {
-    const saved = sessionStorage.getItem(APPOINTMENTS_CALENDAR_KEY);
+    const saved = localStorage.getItem(APPOINTMENTS_CALENDAR_KEY);
     if (saved) return JSON.parse(saved);
   } catch (error) {
-    console.warn(`Failed to load calendar state from sessionStorage:`, error);
+    console.warn(`Failed to load calendar state from localStorage:`, error);
   }
   return null;
 };
 
 const loadActiveTabFromStorage = () => {
   try {
-    const saved = sessionStorage.getItem(APPOINTMENTS_ACTIVE_TAB_KEY);
+    const saved = localStorage.getItem(APPOINTMENTS_ACTIVE_TAB_KEY);
     if (saved) return saved;
   } catch (error) {
     // ignore
@@ -108,7 +108,7 @@ const getInitialState = () => {
     calendar: {
       view: `timeGridDay`,
       endDate: null,
-      minHour: 9,
+      minHour: 10,
       maxHour: 20,
       showSunday: false,
     },

@@ -2,27 +2,88 @@ import deLocale from '@fullcalendar/core/locales/de';
 import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import { Settings as SettingsIcon, FilterList as FilterListIcon } from '@mui/icons-material';
+import {
+  Settings as SettingsIcon,
+  FilterList as FilterListIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Stack,
   ToggleButtonGroup,
   ToggleButton,
-  Button,
   IconButton,
-  Menu,
-  MenuItem,
-  FormControlLabel,
-  Checkbox,
+  Button,
+  Badge,
   SwipeableDrawer,
   Typography,
   Divider,
   Chip,
 } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import CalendarFiltersMenu from '@/components/CalendarFiltersMenu/CalendarFiltersMenu';
+import CalendarSettingsMenu from '@/components/CalendarSettingsMenu/CalendarSettingsMenu';
 import PageContainer from '@/components/PageContainer/PageContainer';
 import adminService from '@/services/employees.service';
 import serviceService from '@/services/services.service';
+
+// LocalStorage keys
+const TEAM_SCHEDULE_SETTINGS_KEY = `teamScheduleCalendarSettings`;
+const TEAM_SCHEDULE_FILTERS_KEY = `teamScheduleFilters`;
+
+// Helper functions for localStorage
+const saveSettingsToStorage = (settings) => {
+  try {
+    localStorage.setItem(TEAM_SCHEDULE_SETTINGS_KEY, JSON.stringify(settings));
+  } catch (error) {
+    console.warn(`Failed to save team schedule settings to localStorage:`, error);
+  }
+};
+
+const loadSettingsFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(TEAM_SCHEDULE_SETTINGS_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (error) {
+    console.warn(`Failed to load team schedule settings from localStorage:`, error);
+  }
+  return null;
+};
+
+const saveFiltersToStorage = (filters) => {
+  try {
+    // Convert Sets to Arrays for JSON serialization
+    const filtersToSave = {
+      categories: Array.from(filters.categories),
+      subCategories: Array.from(filters.subCategories),
+      services: Array.from(filters.services),
+      employees: Array.from(filters.employees),
+    };
+    localStorage.setItem(TEAM_SCHEDULE_FILTERS_KEY, JSON.stringify(filtersToSave));
+  } catch (error) {
+    console.warn(`Failed to save team schedule filters to localStorage:`, error);
+  }
+};
+
+const loadFiltersFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(TEAM_SCHEDULE_FILTERS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Convert Arrays back to Sets
+      return {
+        categories: new Set(parsed.categories || []),
+        subCategories: new Set(parsed.subCategories || []),
+        services: new Set(parsed.services || []),
+        employees: new Set(parsed.employees || []),
+      };
+    }
+  } catch (error) {
+    console.warn(`Failed to load team schedule filters from localStorage:`, error);
+  }
+  return null;
+};
 
 export default function EmployeesScheduleCalendarPage() {
   const [events, setEvents] = useState([]);
@@ -37,10 +98,15 @@ export default function EmployeesScheduleCalendarPage() {
   const isSettingsOpen = Boolean(settingsAnchorEl);
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const isFilterOpen = Boolean(filterAnchorEl);
-  const [calendarSettings, setCalendarSettings] = useState({
-    minHour: 10,
-    maxHour: 20,
-    showSunday: false,
+
+  // Load settings from localStorage or use defaults
+  const [calendarSettings, setCalendarSettings] = useState(() => {
+    const savedSettings = loadSettingsFromStorage();
+    return savedSettings || {
+      minHour: 10,
+      maxHour: 20,
+      showSunday: false,
+    };
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerLoading, setDrawerLoading] = useState(false);
@@ -55,10 +121,21 @@ export default function EmployeesScheduleCalendarPage() {
     services: [],
   });
   const employeeServicesMapRef = useRef(new Map());
-  const [selectedFilters, setSelectedFilters] = useState({
-    categories: new Set(),
-    subCategories: new Set(),
-    services: new Set(),
+
+  // Load filters from localStorage or use defaults
+  const [selectedFilters, setSelectedFilters] = useState(() => {
+    const savedFilters = loadFiltersFromStorage();
+    return savedFilters || {
+      categories: new Set(),
+      subCategories: new Set(),
+      services: new Set(),
+      employees: new Set(),
+    };
+  });
+
+  const [expandedSections, setExpandedSections] = useState({
+    services: false,
+    employees: false,
   });
   const [lastWorkingData, setLastWorkingData] = useState([]);
   const [employeeNameMap, setEmployeeNameMap] = useState(new Map());
@@ -170,16 +247,35 @@ export default function EmployeesScheduleCalendarPage() {
   const doesEmployeePassFilters = (employeeId) => {
     const hasAny = selectedFilters.categories.size > 0
       || selectedFilters.subCategories.size > 0
-      || selectedFilters.services.size > 0;
+      || selectedFilters.services.size > 0
+      || selectedFilters.employees.size > 0;
+
     if (!hasAny) return true;
+
+    // Check employee filter first (most specific)
+    if (selectedFilters.employees.size > 0) {
+      const passesEmployeeFilter = selectedFilters.employees.has(Number(employeeId));
+      if (!passesEmployeeFilter) return false;
+
+      // If only employee filter is set, pass
+      if (selectedFilters.categories.size === 0
+        && selectedFilters.subCategories.size === 0
+        && selectedFilters.services.size === 0) {
+        return true;
+      }
+    }
+
+    // Check service filters
     const entry = employeeServicesMapRef.current.get(Number(employeeId));
     if (!entry) return false;
+
     const matchService = selectedFilters.services.size > 0
       && intersects(entry.serviceIds, selectedFilters.services);
     const matchSub = selectedFilters.subCategories.size > 0
       && intersects(entry.subCategoryIds, selectedFilters.subCategories);
     const matchCat = selectedFilters.categories.size > 0
       && intersects(entry.categoryIds, selectedFilters.categories);
+
     return matchService || matchSub || matchCat;
   };
 
@@ -293,6 +389,7 @@ export default function EmployeesScheduleCalendarPage() {
       categories: toggleIdInSet(prev.categories, id),
       subCategories: new Set(prev.subCategories),
       services: new Set(prev.services),
+      employees: new Set(prev.employees),
     }));
   };
   const toggleSubCategory = (id) => {
@@ -300,6 +397,7 @@ export default function EmployeesScheduleCalendarPage() {
       categories: new Set(prev.categories),
       subCategories: toggleIdInSet(prev.subCategories, id),
       services: new Set(prev.services),
+      employees: new Set(prev.employees),
     }));
   };
   const toggleService = (id) => {
@@ -307,14 +405,40 @@ export default function EmployeesScheduleCalendarPage() {
       categories: new Set(prev.categories),
       subCategories: new Set(prev.subCategories),
       services: toggleIdInSet(prev.services, id),
+      employees: new Set(prev.employees),
     }));
   };
+
+  const toggleEmployee = (id) => {
+    setSelectedFilters((prev) => ({
+      categories: new Set(prev.categories),
+      subCategories: new Set(prev.subCategories),
+      services: new Set(prev.services),
+      employees: toggleIdInSet(prev.employees, id),
+    }));
+  };
+
   const clearFilters = () => {
     setSelectedFilters({
       categories: new Set(),
       subCategories: new Set(),
       services: new Set(),
+      employees: new Set(),
     });
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const getActiveFiltersCount = () => {
+    return selectedFilters.categories.size
+      + selectedFilters.subCategories.size
+      + selectedFilters.services.size
+      + selectedFilters.employees.size;
   };
 
   const openEmployeeDrawer = async (employeeId) => {
@@ -377,6 +501,16 @@ export default function EmployeesScheduleCalendarPage() {
       setDrawerLoading(false);
     }
   };
+
+  // Save calendar settings to localStorage whenever they change
+  useEffect(() => {
+    saveSettingsToStorage(calendarSettings);
+  }, [calendarSettings]);
+
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    saveFiltersToStorage(selectedFilters);
+  }, [selectedFilters]);
 
   useEffect(() => {
     const api = calendarRef.current?.getApi();
@@ -464,12 +598,43 @@ export default function EmployeesScheduleCalendarPage() {
             <SettingsIcon fontSize="small" />
           </IconButton>
 
-          <IconButton
-            size="small"
-            onClick={(error) => setFilterAnchorEl(error.currentTarget)}
+          <Box
+            sx={{
+              display: `flex`,
+              gap: 0.5,
+              alignItems: `center`,
+            }}
           >
-            <FilterListIcon fontSize="small" />
-          </IconButton>
+            <Badge
+              badgeContent={getActiveFiltersCount()}
+              color="primary"
+              max={99}
+            >
+              <Button
+                size="small"
+                variant={isFilterOpen ? `contained` : `outlined`}
+                startIcon={<FilterListIcon />}
+                onClick={(error) => setFilterAnchorEl(isFilterOpen ? null : error.currentTarget)}
+              >
+                Filters
+              </Button>
+            </Badge>
+
+            {getActiveFiltersCount() > 0 && (
+              <Button
+                size="small"
+                variant="text"
+                color="inherit"
+                onClick={clearFilters}
+                sx={{
+                  minWidth: `auto`,
+                  px: 1,
+                }}
+              >
+                Clear
+              </Button>
+            )}
+          </Box>
         </Box>
       </Box>
 
@@ -506,194 +671,29 @@ export default function EmployeesScheduleCalendarPage() {
         </ToggleButton>
       </Stack>
 
-      <Menu
-        anchorEl={settingsAnchorEl}
+      <CalendarSettingsMenu
         open={isSettingsOpen}
+        anchorEl={settingsAnchorEl}
         onClose={() => setSettingsAnchorEl(null)}
-      >
-        <MenuItem disabled>Time range</MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCalendarSettings((s) => ({
-              ...s,
-              minHour: 8,
-            }));
-            setSettingsAnchorEl(null);
-          }}
-        >Start: 08:00
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCalendarSettings((s) => ({
-              ...s,
-              minHour: 9,
-            }));
-            setSettingsAnchorEl(null);
-          }}
-        >Start: 09:00
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCalendarSettings((s) => ({
-              ...s,
-              minHour: 10,
-            }));
-            setSettingsAnchorEl(null);
-          }}
-        >Start: 10:00
-        </MenuItem>
-        <MenuItem divider />
-        <MenuItem
-          onClick={() => {
-            setCalendarSettings((s) => ({
-              ...s,
-              maxHour: 18,
-            }));
-            setSettingsAnchorEl(null);
-          }}
-        >End: 18:00
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCalendarSettings((s) => ({
-              ...s,
-              maxHour: 20,
-            }));
-            setSettingsAnchorEl(null);
-          }}
-        >End: 20:00
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setCalendarSettings((s) => ({
-              ...s,
-              maxHour: 22,
-            }));
-            setSettingsAnchorEl(null);
-          }}
-        >End: 22:00
-        </MenuItem>
-        <MenuItem divider />
-        <FormControlLabel
-          sx={{
-            pl: 1,
-            pr: 2,
-          }}
-          control={(
-            <Checkbox
-              checked={Boolean(calendarSettings.showSunday)}
-              onChange={(error) => setCalendarSettings((settings) => ({
-                ...settings,
-                showSunday: error.target.checked,
-              }))}
-              size="small"
-            />
-          )}
-          label="Show Sunday in week view"
-        />
-      </Menu>
+        settings={calendarSettings}
+        onSettingsChange={setCalendarSettings}
+      />
 
-      <Menu
-        anchorEl={filterAnchorEl}
+      <CalendarFiltersMenu
         open={isFilterOpen}
+        anchorEl={filterAnchorEl}
         onClose={() => setFilterAnchorEl(null)}
-        PaperProps={{
-          sx: {
-            maxHeight: 480,
-            width: 320,
-          },
-        }}
-      >
-        <MenuItem disabled>Filters</MenuItem>
-        <Box
-          sx={{
-            px: 2,
-            py: 1.5,
-          }}
-        >
-          {(servicesMeta.categories || []).map((cat) => (
-            <Box
-              key={cat.id}
-              sx={{ mb: 1 }}
-            >
-              <FormControlLabel
-                control={(
-                  <Checkbox
-                    checked={selectedFilters.categories.has(cat.id)}
-                    onChange={() => toggleCategory(cat.id)}
-                    size="small"
-                  />
-                )}
-                label={cat.name}
-              />
-              <Box sx={{ pl: 2 }}>
-                {(servicesMeta.subCategories || [])
-                  .filter((s) => s.categoryId === cat.id)
-                  .map((sub) => (
-                    <Box
-                      key={sub.id}
-                      sx={{ mb: 0.5 }}
-                    >
-                      <FormControlLabel
-                        control={(
-                          <Checkbox
-                            checked={selectedFilters.subCategories.has(sub.id)}
-                            onChange={() => toggleSubCategory(sub.id)}
-                            size="small"
-                          />
-                        )}
-                        label={sub.name}
-                      />
-                      <Box
-                        sx={{ pl: 2 }}
-                      >
-                        {(servicesMeta.services || [])
-                          .filter((svc) => svc.subCategoryId === sub.id)
-                          .map((svc) => (
-                            <FormControlLabel
-                              key={svc.id}
-                              control={(
-                                <Checkbox
-                                  checked={selectedFilters.services.has(svc.id)}
-                                  onChange={() => toggleService(svc.id)}
-                                  size="small"
-                                />
-                              )}
-                              label={svc.name}
-                            />
-                          ))}
-                      </Box>
-                    </Box>
-                  ))}
-
-                {(servicesMeta.services || [])
-                  .filter((svc) => svc.categoryId === cat.id && (svc.subCategoryId == null))
-                  .map((svc) => (
-                    <FormControlLabel
-                      key={svc.id}
-                      control={(
-                        <Checkbox
-                          checked={selectedFilters.services.has(svc.id)}
-                          onChange={() => toggleService(svc.id)}
-                          size="small"
-                        />
-                      )}
-                      label={svc.name}
-                    />
-                  ))}
-              </Box>
-            </Box>
-          ))}
-          <Divider sx={{ my: 1 }} />
-          <Button
-            size="small"
-            color="inherit"
-            onClick={clearFilters}
-          >
-            Clear filters
-          </Button>
-        </Box>
-      </Menu>
+        selectedFilters={selectedFilters}
+        expandedSections={expandedSections}
+        servicesMeta={servicesMeta}
+        employeeNameMap={employeeNameMap}
+        onToggleCategory={toggleCategory}
+        onToggleSubCategory={toggleSubCategory}
+        onToggleService={toggleService}
+        onToggleEmployee={toggleEmployee}
+        onClearFilters={clearFilters}
+        onToggleSection={toggleSection}
+      />
 
       <Box
         sx={{

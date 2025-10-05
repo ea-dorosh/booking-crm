@@ -19,11 +19,11 @@ export default function AppointmentsPage() {
     isPending,
   } = useSelector((state) => state.appointments);
 
-  // Tabs state with session persistence
+  // Tabs state with localStorage persistence
   const STORAGE_KEY = `appointmentsActiveTab`;
   const [activeTab, setActiveTab] = useState(() => {
     try {
-      return sessionStorage.getItem(STORAGE_KEY) || `list`;
+      return localStorage.getItem(STORAGE_KEY) || `list`;
     } catch (e) {
       return `list`;
     }
@@ -32,7 +32,7 @@ export default function AppointmentsPage() {
   const handleTabChange = (newValue) => {
     setActiveTab(newValue);
     try {
-      sessionStorage.setItem(STORAGE_KEY, newValue);
+      localStorage.setItem(STORAGE_KEY, newValue);
     } catch (e) {
       // ignore
     }
