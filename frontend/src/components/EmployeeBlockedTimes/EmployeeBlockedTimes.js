@@ -79,7 +79,7 @@ export default function EmployeeBlockedTimes({ employeeId }) {
   const [editStartTime, setEditStartTime] = useState(``);
   const [editEndTime, setEditEndTime] = useState(``);
   const [editIsAllDay, setEditIsAllDay] = useState(false);
-  const [editGroupId, setEditGroupId] = useState(null);
+  const [editGroupId, setEditGroupId] = useState(null); // eslint-disable-line
 
   useEffect(() => {
     const today = dayjs().format(`YYYY-MM-DD`);
