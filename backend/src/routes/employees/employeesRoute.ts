@@ -546,6 +546,39 @@ router.put(`/:employeeId/status`, async (request: CustomRequestType, response: C
 });
 
 // --- Blocked Times API ---
+// DEBUG: Check appointments in DB
+router.get(`/:employeeId/debug-appointments`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  const employeeId = Number(request.params.employeeId);
+  const { date } = request.query;
+
+  try {
+    const [rows] = await request.dbPool.query<any[]>(
+      `SELECT
+        id,
+        employee_id,
+        time_start,
+        time_end,
+        DATE(time_start) as date,
+        TIME(time_start) as start_time,
+        TIME(time_end) as end_time,
+        status
+      FROM SavedAppointments
+      WHERE employee_id = ?
+        AND DATE(time_start) = ?
+      ORDER BY time_start`,
+      [employeeId, date],
+    );
+    response.json(rows);
+  } catch (error) {
+    response.status(500).json({ message: (error as Error).message });
+  }
+});
+
 router.get(`/:employeeId/blocked-times`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
     response.status(500).json({ message: `Database connection not initialized` });
@@ -572,20 +605,28 @@ router.post(`/:employeeId/blocked-times`, async (request: CustomRequestType, res
 
   const employeeId = Number(request.params.employeeId);
   const {
-    blockedDate, startTime, endTime, isAllDay,
+    blockedDate, endDate, startTime, endTime, isAllDay,
   } = request.body;
 
   try {
-    const blockedTimeId = await createEmployeeBlockedTime(request.dbPool, {
+    const result = await createEmployeeBlockedTime(request.dbPool, {
       employeeId,
       blockedDate,
+      endDate, // Optional: for date ranges
       startTime,
       endTime,
       isAllDay,
     });
+
+    // Result can be a single ID or array of IDs (for date ranges)
+    const isMultiple = Array.isArray(result);
     response.json({
-      id: blockedTimeId,
-      message: `Blocked time created successfully`,
+      id: isMultiple ? result[0] : result,
+      ids: isMultiple ? result : undefined,
+      count: isMultiple ? result.length : 1,
+      message: isMultiple
+        ? `Blocked time range created successfully (${result.length} days)`
+        : `Blocked time created successfully`,
     });
   } catch (error) {
     const status = (error as any).statusCode || 500;
@@ -601,17 +642,31 @@ router.put(`/blocked-times/:blockedTimeId`, async (request: CustomRequestType, r
 
   const blockedTimeId = Number(request.params.blockedTimeId);
   const {
-    blockedDate, startTime, endTime, isAllDay,
+    blockedDate, endDate, startTime, endTime, isAllDay,
   } = request.body;
 
   try {
-    await updateEmployeeBlockedTime(request.dbPool, blockedTimeId, {
+    const result = await updateEmployeeBlockedTime(request.dbPool, blockedTimeId, {
       blockedDate,
+      endDate,
       startTime,
       endTime,
       isAllDay,
     });
-    response.json({ message: `Blocked time updated successfully` });
+
+    // Generate response message
+    let message = `Blocked time updated successfully`;
+    if (Array.isArray(result)) {
+      const dayCount = result.length;
+      message = `Blocked time range updated successfully (${dayCount} ${dayCount === 1 ? `day` : `days`})`;
+    }
+
+    response.json({
+      message,
+      id: Array.isArray(result) ? result[0] : result,
+      ids: Array.isArray(result) ? result : [result],
+      count: Array.isArray(result) ? result.length : 1,
+    });
   } catch (error) {
     const status = (error as any).statusCode || 500;
     response.status(status).json({ message: (error as Error).message });

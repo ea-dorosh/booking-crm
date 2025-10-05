@@ -509,8 +509,6 @@ function combinePeriodWithNormalizedAppointments(
         serviceDurationWithBuffer,
       );
 
-
-
       return {
         ...employee,
         blockedTimes,

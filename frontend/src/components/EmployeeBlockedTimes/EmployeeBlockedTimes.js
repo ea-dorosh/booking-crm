@@ -67,6 +67,7 @@ export default function EmployeeBlockedTimes({ employeeId }) {
 
   // Form state
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedEndDate, setSelectedEndDate] = useState(dayjs());
   const [startTime, setStartTime] = useState(`07:00`);
   const [endTime, setEndTime] = useState(`18:00`);
   const [isAllDay, setIsAllDay] = useState(false);
@@ -74,9 +75,11 @@ export default function EmployeeBlockedTimes({ employeeId }) {
   // Edit mode state
   const [editingId, setEditingId] = useState(null);
   const [editDate, setEditDate] = useState(null);
+  const [editEndDate, setEditEndDate] = useState(null);
   const [editStartTime, setEditStartTime] = useState(``);
   const [editEndTime, setEditEndTime] = useState(``);
   const [editIsAllDay, setEditIsAllDay] = useState(false);
+  const [editGroupId, setEditGroupId] = useState(null);
 
   useEffect(() => {
     const today = dayjs().format(`YYYY-MM-DD`);
@@ -86,9 +89,24 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     }));
   }, [employeeId, dispatch]);
 
+  // Auto-update endDate when selectedDate changes
+  useEffect(() => {
+    if (selectedDate) {
+      setSelectedEndDate(selectedDate);
+    }
+  }, [selectedDate]);
+
+  // Auto-update editEndDate when editDate changes
+  useEffect(() => {
+    if (editDate && (!editEndDate || editEndDate.isBefore(editDate, `day`))) {
+      setEditEndDate(editDate);
+    }
+  }, [editDate, editEndDate]);
+
   const handleCancelAdd = () => {
     setShowAddForm(false);
     setSelectedDate(dayjs());
+    setSelectedEndDate(dayjs());
     setStartTime(`07:00`);
     setEndTime(`18:00`);
     setIsAllDay(false);
@@ -108,6 +126,7 @@ export default function EmployeeBlockedTimes({ employeeId }) {
 
     const payload = {
       blockedDate: selectedDate.format(`YYYY-MM-DD`),
+      endDate: selectedEndDate.format(`YYYY-MM-DD`),
       isAllDay,
       startTime: isAllDay ? null : `${startTime}:00`,
       endTime: isAllDay ? null : `${endTime}:00`,
@@ -121,10 +140,12 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     if (result.error) {
       dispatch(showError(result.payload || `Failed to add blocked time`));
     } else {
-      dispatch(showSuccess(`Blocked time added successfully`));
+      const message = result.payload?.message || `Blocked time added successfully`;
+      dispatch(showSuccess(message));
 
       // Reset form
       setSelectedDate(dayjs());
+      setSelectedEndDate(dayjs());
       setStartTime(`07:00`);
       setEndTime(`18:00`);
       setIsAllDay(false);
@@ -139,20 +160,30 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     }
   };
 
-  const handleEditClick = (blockedTime) => {
-    setEditingId(blockedTime.id);
-    setEditDate(dayjs(blockedTime.blockedDate));
-    setEditStartTime(blockedTime.startTime ? blockedTime.startTime.slice(0, 5) : `07:00`);
-    setEditEndTime(blockedTime.endTime ? blockedTime.endTime.slice(0, 5) : `18:00`);
-    setEditIsAllDay(blockedTime.isAllDay);
+  const handleEditClick = (group) => {
+    // group is an array of blocked times (can be single or multiple for grouped entries)
+    const firstEntry = group[0];
+    const lastEntry = group[group.length - 1];
+
+    setEditingId(firstEntry.id);
+    setEditGroupId(firstEntry.groupId);
+    setEditDate(dayjs(firstEntry.blockedDate));
+    setEditEndDate(dayjs(lastEntry.blockedDate));
+
+    // For grouped entries, use the first entry's start time and last entry's end time
+    setEditStartTime(firstEntry.startTime ? firstEntry.startTime.slice(0, 5) : `07:00`);
+    setEditEndTime(lastEntry.endTime ? lastEntry.endTime.slice(0, 5) : `18:00`);
+    setEditIsAllDay(firstEntry.isAllDay);
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditDate(null);
+    setEditEndDate(null);
     setEditStartTime(``);
     setEditEndTime(``);
     setEditIsAllDay(false);
+    setEditGroupId(null);
   };
 
   const handleSaveEdit = async (blockedTimeId) => {
@@ -162,8 +193,15 @@ export default function EmployeeBlockedTimes({ employeeId }) {
       return;
     }
 
+    // Validate date range
+    if (editEndDate && editEndDate.isBefore(editDate, `day`)) {
+      dispatch(showError(`End date must be after or equal to start date`));
+      return;
+    }
+
     const payload = {
       blockedDate: editDate.format(`YYYY-MM-DD`),
+      endDate: editEndDate ? editEndDate.format(`YYYY-MM-DD`) : editDate.format(`YYYY-MM-DD`),
       isAllDay: editIsAllDay,
       startTime: editIsAllDay ? null : `${editStartTime}:00`,
       endTime: editIsAllDay ? null : `${editEndTime}:00`,
@@ -177,7 +215,8 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     if (result.error) {
       dispatch(showError(result.payload || `Failed to update blocked time`));
     } else {
-      dispatch(showSuccess(`Blocked time updated successfully`));
+      const message = result.payload?.message || `Blocked time updated successfully`;
+      dispatch(showSuccess(message));
       handleCancelEdit();
 
       // Reload blocked times
@@ -210,16 +249,56 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     }
   };
 
-  const formatBlockedTimeDisplay = (blockedTime) => {
-    const date = dayjs(blockedTime.blockedDate).format(`DD.MM.YYYY`);
+  // Group blocked times by groupId
+  const groupedBlockedTimes = () => {
+    if (!blockedTimes || blockedTimes.length === 0) return [];
 
-    if (blockedTime.isAllDay) {
-      return `${date} - All Day`;
+    const groups = {};
+
+    blockedTimes.forEach((blockedTime) => {
+      const key = blockedTime.groupId || `single-${blockedTime.id}`;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(blockedTime);
+    });
+
+    return Object.values(groups).map((group) => {
+      // Sort group by date
+      group.sort((a, b) => new Date(a.blockedDate) - new Date(b.blockedDate));
+      return group;
+    });
+  };
+
+  const formatBlockedTimeDisplay = (group) => {
+    if (group.length === 1) {
+      // Single day
+      const blockedTime = group[0];
+      const date = dayjs(blockedTime.blockedDate).format(`DD.MM.YYYY`);
+
+      if (blockedTime.isAllDay) {
+        return `${date} - All Day`;
+      }
+
+      const start = blockedTime.startTime ? blockedTime.startTime.slice(0, 5) : ``;
+      const end = blockedTime.endTime ? blockedTime.endTime.slice(0, 5) : ``;
+      return `${date} - ${start} to ${end}`;
     }
 
-    const start = blockedTime.startTime ? blockedTime.startTime.slice(0, 5) : ``;
-    const end = blockedTime.endTime ? blockedTime.endTime.slice(0, 5) : ``;
-    return `${date} - ${start} to ${end}`;
+    // Multi-day range
+    const firstDay = group[0];
+    const lastDay = group[group.length - 1];
+    const startDate = dayjs(firstDay.blockedDate).format(`DD.MM.YYYY`);
+    const endDate = dayjs(lastDay.blockedDate).format(`DD.MM.YYYY`);
+
+    // Check if all days or specific times
+    if (firstDay.isAllDay && lastDay.isAllDay) {
+      return `${startDate} - ${endDate} (${group.length} days, All Day)`;
+    }
+
+    const firstStart = firstDay.startTime ? firstDay.startTime.slice(0, 5) : ``;
+    const lastEnd = lastDay.endTime ? lastDay.endTime.slice(0, 5) : ``;
+    return `${startDate} ${firstStart} - ${endDate} ${lastEnd} (${group.length} days)`;
   };
 
   return (
@@ -269,10 +348,23 @@ export default function EmployeeBlockedTimes({ employeeId }) {
 
               <Stack spacing={2}>
                 <DatePicker
-                  label="Date"
+                  label="Start Date"
                   value={selectedDate}
                   onChange={(newValue) => setSelectedDate(newValue)}
                   minDate={dayjs()}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: `small`,
+                    },
+                  }}
+                />
+
+                <DatePicker
+                  label="End Date"
+                  value={selectedEndDate}
+                  onChange={(newValue) => setSelectedEndDate(newValue)}
+                  minDate={selectedDate || dayjs()}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -408,183 +500,210 @@ export default function EmployeeBlockedTimes({ employeeId }) {
           </Box>
         ) : (
           <List sx={{ padding: 0 }}>
-            {blockedTimes.map((blockedTime) => (
-              <Card
-                key={blockedTime.id}
-                variant="outlined"
-                sx={{ marginBottom: 1 }}
-              >
-                <ListItem
-                  sx={{
-                    display: `flex`,
-                    flexDirection: `column`,
-                    alignItems: `stretch`,
-                    padding: 2,
-                  }}
+            {groupedBlockedTimes().map((group) => {
+              const blockedTime = group[0]; // Use first item for edit/delete
+              return (
+                <Card
+                  key={blockedTime.id}
+                  variant="outlined"
+                  sx={{ marginBottom: 1 }}
                 >
-                  {editingId === blockedTime.id ? (
+                  <ListItem
+                    sx={{
+                      display: `flex`,
+                      flexDirection: `column`,
+                      alignItems: `stretch`,
+                      padding: 2,
+                    }}
+                  >
+                    {editingId === blockedTime.id ? (
                     // Edit Mode
-                    <Stack
-                      spacing={2}
-                      sx={{ width: `100%` }}
-                    >
-                      <DatePicker
-                        label="Date"
-                        value={editDate}
-                        onChange={(newValue) => setEditDate(newValue)}
-                        minDate={dayjs()}
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            size: `small`,
-                          },
-                        }}
-                      />
+                      <Stack
+                        spacing={2}
+                        sx={{ width: `100%` }}
+                      >
+                        <DatePicker
+                          label="Start Date"
+                          value={editDate}
+                          onChange={(newValue) => setEditDate(newValue)}
+                          minDate={dayjs()}
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              size: `small`,
+                            },
+                          }}
+                        />
 
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={editIsAllDay}
-                            onChange={(event) => setEditIsAllDay(event.target.checked)}
-                          />
-                        }
-                        label="Block all day"
-                      />
+                        <DatePicker
+                          label="End Date"
+                          value={editEndDate}
+                          onChange={(newValue) => setEditEndDate(newValue)}
+                          minDate={editDate || dayjs()}
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              size: `small`,
+                            },
+                          }}
+                        />
 
-                      {!editIsAllDay && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={editIsAllDay}
+                              onChange={(event) => setEditIsAllDay(event.target.checked)}
+                            />
+                          }
+                          label="Block all day"
+                        />
+
+                        {!editIsAllDay && (
+                          <Box
+                            sx={{
+                              display: `flex`,
+                              gap: 2,
+                            }}
+                          >
+                            <FormControl
+                              fullWidth
+                              size="small"
+                            >
+                              <InputLabel>Start Time</InputLabel>
+                              <Select
+                                value={editStartTime}
+                                label="Start Time"
+                                onChange={(event) => setEditStartTime(event.target.value)}
+                              >
+                                {TIME_SLOTS.map((slot) => (
+                                  <MenuItem
+                                    key={`edit-start-${slot}`}
+                                    value={slot}
+                                  >
+                                    {slot}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+
+                            <FormControl
+                              fullWidth
+                              size="small"
+                            >
+                              <InputLabel>End Time</InputLabel>
+                              <Select
+                                value={editEndTime}
+                                label="End Time"
+                                onChange={(event) => setEditEndTime(event.target.value)}
+                              >
+                                {TIME_SLOTS.map((slot) => (
+                                  <MenuItem
+                                    key={`edit-end-${slot}`}
+                                    value={slot}
+                                  >
+                                    {slot}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        )}
+
                         <Box
                           sx={{
                             display: `flex`,
-                            gap: 2,
+                            gap: 1,
+                            justifyContent: `flex-end`,
                           }}
                         >
-                          <FormControl
-                            fullWidth
+                          <Button
                             size="small"
+                            startIcon={<Cancel />}
+                            onClick={handleCancelEdit}
+                            disabled={isSaving}
                           >
-                            <InputLabel>Start Time</InputLabel>
-                            <Select
-                              value={editStartTime}
-                              label="Start Time"
-                              onChange={(event) => setEditStartTime(event.target.value)}
-                            >
-                              {TIME_SLOTS.map((slot) => (
-                                <MenuItem
-                                  key={`edit-start-${slot}`}
-                                  value={slot}
-                                >
-                                  {slot}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-
-                          <FormControl
-                            fullWidth
-                            size="small"
-                          >
-                            <InputLabel>End Time</InputLabel>
-                            <Select
-                              value={editEndTime}
-                              label="End Time"
-                              onChange={(event) => setEditEndTime(event.target.value)}
-                            >
-                              {TIME_SLOTS.map((slot) => (
-                                <MenuItem
-                                  key={`edit-end-${slot}`}
-                                  value={slot}
-                                >
-                                  {slot}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      )}
-
-                      <Box
-                        sx={{
-                          display: `flex`,
-                          gap: 1,
-                          justifyContent: `flex-end`,
-                        }}
-                      >
-                        <Button
-                          size="small"
-                          startIcon={<Cancel />}
-                          onClick={handleCancelEdit}
-                          disabled={isSaving}
-                        >
                           Cancel
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          startIcon={<Save />}
-                          onClick={() => handleSaveEdit(blockedTime.id)}
-                          disabled={isSaving}
-                        >
-                          Save
-                        </Button>
-                      </Box>
-                    </Stack>
-                  ) : (
-                    // View Mode
-                    <>
-                      <Box
-                        sx={{
-                          display: `flex`,
-                          justifyContent: `space-between`,
-                          alignItems: `center`,
-                        }}
-                      >
-                        <Box sx={{ flex: 1 }}>
-                          <Typography
-                            variant="body1"
-                            sx={{ fontWeight: 500 }}
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            startIcon={<Save />}
+                            onClick={() => handleSaveEdit(blockedTime.id)}
+                            disabled={isSaving}
                           >
-                            {formatBlockedTimeDisplay(blockedTime)}
-                          </Typography>
-                          {blockedTime.isAllDay && (
-                            <Chip
-                              label="All Day"
+                          Save
+                          </Button>
+                        </Box>
+                      </Stack>
+                    ) : (
+                    // View Mode
+                      <>
+                        <Box
+                          sx={{
+                            display: `flex`,
+                            justifyContent: `space-between`,
+                            alignItems: `center`,
+                          }}
+                        >
+                          <Box sx={{ flex: 1 }}>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {formatBlockedTimeDisplay(group)}
+                            </Typography>
+                            {group.length > 1 && (
+                              <Chip
+                                label={`${group.length} Days`}
+                                size="small"
+                                color="secondary"
+                                sx={{
+                                  marginTop: 0.5,
+                                  marginRight: 0.5,
+                                }}
+                              />
+                            )}
+                            {blockedTime.isAllDay && (
+                              <Chip
+                                label="All Day"
+                                size="small"
+                                color="primary"
+                                sx={{ marginTop: 0.5 }}
+                              />
+                            )}
+                          </Box>
+
+                          <Box
+                            sx={{
+                              display: `flex`,
+                              gap: 0.5,
+                            }}
+                          >
+                            <IconButton
                               size="small"
                               color="primary"
-                              sx={{ marginTop: 0.5 }}
-                            />
-                          )}
-                        </Box>
+                              onClick={() => handleEditClick(group)}
+                              disabled={isSaving}
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
 
-                        <Box
-                          sx={{
-                            display: `flex`,
-                            gap: 0.5,
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => handleEditClick(blockedTime)}
-                            disabled={isSaving}
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleDeleteBlockedTime(blockedTime.id)}
-                            disabled={isSaving}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteBlockedTime(blockedTime.id)}
+                              disabled={isSaving}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Box>
                         </Box>
-                      </Box>
-                    </>
-                  )}
-                </ListItem>
-              </Card>
-            ))}
+                      </>
+                    )}
+                  </ListItem>
+                </Card>
+              );
+            })}
           </List>
         )}
       </Box>
