@@ -34,7 +34,7 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     const employeesData = await getEmployees(req.dbPool, [EmployeeStatusEnum.Active]);
 
     // get all services and map with sub categories and employee prices
-    // (only active services with active categories and active subcategories)
+    // (only active services with active categories, active subcategories, and active employees)
     const sql = `
       SELECT
         s.id,
@@ -48,10 +48,12 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
         sep.price
       FROM Services s
       LEFT JOIN ServiceEmployeePrice sep ON s.id = sep.service_id
+      LEFT JOIN Employees e ON sep.employee_id = e.employee_id AND e.status = '${EmployeeStatusEnum.Active}'
       INNER JOIN ServiceCategories sc ON s.category_id = sc.id AND sc.status = '${CategoryStatusEnum.Active}'
       LEFT JOIN ServiceSubCategories ssc ON s.sub_category_id = ssc.id
       WHERE s.status = '${CategoryStatusEnum.Active}'
         AND (s.sub_category_id IS NULL OR ssc.status = '${CategoryStatusEnum.Active}')
+        AND (sep.employee_id IS NULL OR e.employee_id IS NOT NULL)
     `;
 
     const [results] = await req.dbPool.query<RowDataPacket[]>(sql);
@@ -102,10 +104,13 @@ router.get(`/`, async (req: CustomRequestType, res: CustomResponseType) => {
     // Convert Map values to an array of services
     const services = Array.from(servicesMap.values());
 
+    // Filter out services that have no active employees
+    const servicesWithActiveEmployees = services.filter(service => service.employees.length > 0);
+
     // Group services by category. If category has no subcategories at all (all services have null subCategoryId),
     // return services directly with a flag. Otherwise, group by subcategories and set the flag.
     const groupedData = categoriesData.map(category => {
-      const categoryServices = services.filter(service => service.categoryId === category.id);
+      const categoryServices = servicesWithActiveEmployees.filter(service => service.categoryId === category.id);
 
       const hasAnySubcategory = categoryServices.some(service => service.subCategoryId !== null);
 
