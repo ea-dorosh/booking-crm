@@ -10,18 +10,18 @@
 // calendarService.ts (текущая версия)
 const getGroupedTimeSlots = async (...) => {
   // ❌ Использует старые impure функции
-  const periodWithDaysAndEmployeeAvailability = 
+  const periodWithDaysAndEmployeeAvailability =
     getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedByDay);
-  
-  const normalizedSavedAppointments = 
+
+  const normalizedSavedAppointments =
     normalizeSavedAppointments(savedAppointments);
-  
-  const periodWithClearedDays = 
+
+  const periodWithClearedDays =
     combinePeriodWithNormalizedAppointments(...);
-  
-  const timeSlotsData = 
+
+  const timeSlotsData =
     generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
-  
+
   return generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsData);
 };
 ```
@@ -117,14 +117,14 @@ const getGroupedTimeSlotsForSingleService = async (
 
 ```typescript
 // До:
-const periodWithDaysAndEmployeeAvailability = 
+const periodWithDaysAndEmployeeAvailability =
   getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedByDay);
 
 // После:
-import { getPeriodWithDaysAndEmployeeAvailabilityPure } 
+import { getPeriodWithDaysAndEmployeeAvailabilityPure }
   from '@/services/calendar/calendarUtils.adapter.js';
 
-const periodWithDaysAndEmployeeAvailability = 
+const periodWithDaysAndEmployeeAvailability =
   getPeriodWithDaysAndEmployeeAvailabilityPure(
     paramDate,
     groupedByDay,
@@ -136,7 +136,7 @@ const periodWithDaysAndEmployeeAvailability =
 
 ```typescript
 // До:
-import { 
+import {
   normalizeSavedAppointments,
   normalizeGoogleEventsForEmployees,
   normalizePauseTimesForEmployees,
@@ -144,7 +144,7 @@ import {
 } from '@/services/calendar/calendarUtils.js';
 
 // После:
-import { 
+import {
   normalizeSavedAppointments,
   normalizeGoogleEventsForEmployees,
   normalizePauseTimesForEmployees,
@@ -169,7 +169,7 @@ const periodWithClearedDays = combinePeriodWithNormalizedAppointments(
 const timeSlotsData = generateTimeSlotsFromAvailableTimes(periodWithClearedDays);
 
 // После:
-import { 
+import {
   processPeriodAvailability,
   generateTimeSlotsFromDayAvailability,
 } from '@/services/calendar/calendarUtils.adapter.js';
@@ -218,7 +218,7 @@ const getGroupedTimeSlotsPure = async (
   const { serviceId, employeeIds } = serviceData;
 
   // Все async операции (DB queries)
-  const [service, groupedByDay, savedAppointments, googleEvents, blockedTimes] = 
+  const [service, groupedByDay, savedAppointments, googleEvents, blockedTimes] =
     await Promise.all([
       getService(dbPool, serviceId),
       buildGroupedAvailabilityForWeek(dbPool, paramDate, employeeIds),
@@ -303,9 +303,9 @@ const getGroupedTimeSlotsForTwoServices = async (
   const [firstServiceResult, secondServiceResult] = await Promise.all(
     servicesData.map(async (serviceData) => {
       const { serviceId, employeeIds } = serviceData;
-      
+
       // ... get service details, appointments, etc.
-      
+
       return calculateAvailableTimeSlots(
         paramDate,
         groupedByDay,
@@ -336,13 +336,13 @@ describe('calendarService', () => {
   it('should calculate time slots', async () => {
     // Mock dayjs
     jest.spyOn(dayjs, 'utc').mockReturnValue(...);
-    
+
     // Mock DB calls
     const mockPool = createMockPool();
-    
+
     // Complex setup
     const result = await getGroupedTimeSlots(mockPool, date, services);
-    
+
     expect(result).toBeDefined();
   });
 });
@@ -352,17 +352,17 @@ describe('calendarService.pure', () => {
   it('should calculate time slots', async () => {
     // No mocks needed for pure functions!
     const currentTime = dayjs.utc('2024-01-15 10:00:00').valueOf();
-    
+
     // Only mock DB calls (side effects)
     const mockPool = createMockPool();
-    
+
     const result = await getGroupedTimeSlotsPure(
       mockPool,
       date,
       serviceData,
       currentTime, // Explicit time = reproducible test
     );
-    
+
     // Easy to assert specific values
     expect(result.groupedTimeSlots[0].availableTimeslots).toHaveLength(10);
     expect(result.groupedTimeSlots[0].availableTimeslots[0].startTime).toBe('10:00:00');

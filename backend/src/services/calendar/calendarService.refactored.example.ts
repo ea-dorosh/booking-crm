@@ -1,9 +1,9 @@
 /**
  * EXAMPLE: Refactored calendarService using pure functions
- * 
+ *
  * This is an example showing how to migrate calendarService to use pure functions.
  * This file demonstrates the migration for single service case.
- * 
+ *
  * Benefits of this approach:
  * - Easier to test (explicit currentTime parameter)
  * - Predictable behavior (no hidden dependencies)
@@ -103,13 +103,13 @@ function convertToOldFormat(
 
 /**
  * Get grouped time slots for ONE service (pure function approach)
- * 
+ *
  * @param dbPool - Database connection pool
  * @param paramDate - Date to get time slots for
  * @param serviceData - Service data (serviceId and employeeIds)
  * @param currentTimeMs - Optional: current time in milliseconds (for testing)
  * @returns Promise with grouped time slots
- * 
+ *
  * @example
  * // Production use (uses real current time)
  * const slots = await getGroupedTimeSlotsForSingleService(
@@ -117,7 +117,7 @@ function convertToOldFormat(
  *   '2024-01-15',
  *   { serviceId: 1, employeeIds: [1, 2, 3] }
  * );
- * 
+ *
  * @example
  * // Testing use (fixed time)
  * const slots = await getGroupedTimeSlotsForSingleService(
@@ -134,7 +134,7 @@ export const getGroupedTimeSlotsForSingleService = async (
   currentTimeMs?: number, // Optional for testing
 ): Promise<GroupedTimeSlotsResult[]> => {
   const {
-    serviceId, employeeIds, 
+    serviceId, employeeIds,
   } = serviceData;
 
   // Side effect: Get current time at service boundary
@@ -225,7 +225,7 @@ export const getGroupedTimeSlotsForSingleService = async (
 
 /**
  * SIMPLIFIED VERSION: Using the full pipeline adapter
- * 
+ *
  * This is even simpler - uses the convenience function from adapter
  */
 export const getGroupedTimeSlotsSimplified = async (
@@ -235,7 +235,7 @@ export const getGroupedTimeSlotsSimplified = async (
   currentTimeMs?: number,
 ): Promise<GroupedTimeSlotsResult[]> => {
   const {
-    serviceId, employeeIds, 
+    serviceId, employeeIds,
   } = serviceData;
   const now = currentTimeMs ?? dayjs().utc().valueOf();
 
