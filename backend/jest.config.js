@@ -8,8 +8,9 @@ export default {
 
   moduleDirectories: [`node_modules`, `src`],
   moduleNameMapper: {
-    [`^@/(.*)\\.js$`]: `<rootDir>/src/$1.ts`,
+    [`^@/(.*)\\.js$`]: `<rootDir>/src/$1`,
     [`^@/(.*)$`]: `<rootDir>/src/$1`,
+    [`^\\./(.+)\\.js$`]: `./$1`,
   },
 
   // ESM-friendly settings for ts-jest in an ESM project
