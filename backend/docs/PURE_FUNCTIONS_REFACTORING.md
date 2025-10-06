@@ -159,7 +159,7 @@ export const calculateAdvanceBookingBlockedTime = (
 ```typescript
 function getPeriodWithDaysAndEmployeeAvailability(...) {
   const today = dayjs().utc().startOf(`day`);  // ❌ Side effect!
-  
+
   if (indexDay.isAfter(today) || indexDay.isSame(today, `day`)) {
     // ...
   }
@@ -202,10 +202,10 @@ export const generateDateRange = (
 it('should calculate availability', () => {
   // Need to mock dayjs()
   jest.spyOn(dayjs, 'utc').mockReturnValue(...);
-  
+
   // Need to mock timezone
   jest.spyOn(dayjs, 'tz').mockReturnValue(...);
-  
+
   // Complex test setup
 });
 ```
@@ -216,14 +216,14 @@ it('should calculate availability', () => {
   // No mocking needed!
   const currentTimeMs = dayjs.utc('2024-01-15 10:00:00').valueOf();
   const startWorkingMs = dayjs.utc('2024-01-15 08:00:00').valueOf();
-  
+
   const result = calculateAvailableTimesMs(
     startWorkingMs,
     endWorkingMs,
     blockedTimes,
     serviceDuration,
   );
-  
+
   expect(result).toEqual(expected);
 });
 ```

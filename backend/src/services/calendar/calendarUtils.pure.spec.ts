@@ -443,7 +443,7 @@ describe(`calendarUtils.pure`, () => {
       // 2024-01-15 is Monday
       const dateMs = dayjs.utc(`2024-01-15`).valueOf();
       const result = getStartOfWeek(dateMs);
-      
+
       // Start of week (Monday 2024-01-15 00:00:00 in dayjs default locale)
       const expected = dayjs.utc(`2024-01-15 00:00:00`).valueOf();
       expect(result).toBe(expected);
@@ -462,7 +462,7 @@ describe(`calendarUtils.pure`, () => {
       // 2024-01-15 is Monday
       const dateMs = dayjs.utc(`2024-01-15`).valueOf();
       const result = getEndOfWeek(dateMs);
-      
+
       // End of week (Sunday 2024-01-21 23:59:59.999 in dayjs default locale)
       const expected = dayjs.utc(`2024-01-21`).endOf(`day`).valueOf();
       expect(result).toBe(expected);
@@ -646,11 +646,11 @@ import {
 } from '@/services/calendar/calendarUtils.pure.js';
 
 describe(`calendarUtils.pure - Advanced Functions`, () => {
-  
+
   // ============================================================================
   // Normalization Functions
   // ============================================================================
-  
+
   describe(`normalizeAppointment`, () => {
     it(`should normalize appointment data`, () => {
       const result = normalizeAppointment(
@@ -673,7 +673,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
         `2024-01-15T11:00:00.000Z`,
         123,
       );
-      
+
       const result2 = normalizeAppointment(
         `2024-01-15`,
         `2024-01-15T10:00:00.000Z`,
@@ -796,7 +796,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
   // ============================================================================
   // Advance Booking Time Functions
   // ============================================================================
-  
+
   describe(`parseAdvanceBookingTime`, () => {
     it(`should parse HH:MM:SS format`, () => {
       const result = parseAdvanceBookingTime(`01:30:00`);
@@ -819,7 +819,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
       const currentTimeMs = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
       const startWorkingMs = dayjs.utc(`2024-01-15 08:00:00`).valueOf();
       const endWorkingMs = dayjs.utc(`2024-01-15 17:00:00`).valueOf();
-      
+
       const result = calculateAdvanceBookingBlockedTime(
         currentTimeMs,
         `next_day`,
@@ -839,7 +839,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
       const advanceTimeMs = 2 * 60 * 60 * 1000; // 2 hours
       const startWorkingMs = dayjs.utc(`2024-01-15 08:00:00`).valueOf();
       const endWorkingMs = dayjs.utc(`2024-01-15 17:00:00`).valueOf();
-      
+
       const result = calculateAdvanceBookingBlockedTime(
         currentTimeMs,
         advanceTimeMs,
@@ -859,7 +859,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
       const currentTimeMs = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
       const startWorkingMs = dayjs.utc(`2024-01-16 08:00:00`).valueOf();
       const endWorkingMs = dayjs.utc(`2024-01-16 17:00:00`).valueOf();
-      
+
       const result = calculateAdvanceBookingBlockedTime(
         currentTimeMs,
         `next_day`,
@@ -877,7 +877,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
       const advanceTimeMs = 10 * 60 * 60 * 1000; // 10 hours
       const startWorkingMs = dayjs.utc(`2024-01-15 08:00:00`).valueOf();
       const endWorkingMs = dayjs.utc(`2024-01-15 17:00:00`).valueOf();
-      
+
       const result = calculateAdvanceBookingBlockedTime(
         currentTimeMs,
         advanceTimeMs,
@@ -896,12 +896,12 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
   // ============================================================================
   // Period Generation Functions
   // ============================================================================
-  
+
   describe(`generateDateRange`, () => {
     it(`should generate range of dates`, () => {
       const start = dayjs.utc(`2024-01-15`).valueOf();
       const end = dayjs.utc(`2024-01-17`).valueOf();
-      
+
       const result = generateDateRange(start, end);
 
       expect(result).toHaveLength(3);
@@ -912,7 +912,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
 
     it(`should handle single day range`, () => {
       const date = dayjs.utc(`2024-01-15`).valueOf();
-      
+
       const result = generateDateRange(date, date);
 
       expect(result).toHaveLength(1);
@@ -922,7 +922,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
     it(`should normalize times to start of day`, () => {
       const start = dayjs.utc(`2024-01-15 14:30:00`).valueOf();
       const end = dayjs.utc(`2024-01-16 16:45:00`).valueOf();
-      
+
       const result = generateDateRange(start, end);
 
       expect(result).toHaveLength(2);
@@ -935,14 +935,14 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
     it(`should return true for future date`, () => {
       const today = dayjs.utc(`2024-01-15`).valueOf();
       const futureDate = dayjs.utc(`2024-01-20`).valueOf();
-      
+
       expect(isDateTodayOrFuture(futureDate, today)).toBe(true);
     });
 
     it(`should return true for today`, () => {
       const today = dayjs.utc(`2024-01-15`).valueOf();
       const sameDay = dayjs.utc(`2024-01-15 14:30:00`).valueOf();
-      
+
       expect(isDateTodayOrFuture(sameDay, today)).toBe(true);
     });
 
@@ -953,5 +953,331 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
       expect(isDateTodayOrFuture(pastDate, today)).toBe(false);
     });
   });
+
+  // ============================================================================
+  // Time Slot Generation Functions
+  // ============================================================================
+
+  describe(`calculateFirstSlotEndTime`, () => {
+    it(`should add 15 minutes for 15-minute interval`, () => {
+      const startTime = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
+      const result = calculateFirstSlotEndTime(startTime, 15);
+      expect(result).toBe(dayjs.utc(`2024-01-15 10:15:00`).valueOf());
+    });
+
+    it(`should add 30 minutes for 30-minute interval at :00`, () => {
+      const startTime = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
+      const result = calculateFirstSlotEndTime(startTime, 30);
+      expect(result).toBe(dayjs.utc(`2024-01-15 10:30:00`).valueOf());
+    });
+
+    it(`should add 15 minutes for 30-minute interval at :15`, () => {
+      const startTime = dayjs.utc(`2024-01-15 10:15:00`).valueOf();
+      const result = calculateFirstSlotEndTime(startTime, 30);
+      expect(result).toBe(dayjs.utc(`2024-01-15 10:30:00`).valueOf());
+    });
+
+    it(`should add 60 minutes for 60-minute interval at :00`, () => {
+      const startTime = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
+      const result = calculateFirstSlotEndTime(startTime, 60);
+      expect(result).toBe(dayjs.utc(`2024-01-15 11:00:00`).valueOf());
+    });
+
+    it(`should round to next hour for 60-minute interval at :15`, () => {
+      const startTime = dayjs.utc(`2024-01-15 10:15:00`).valueOf();
+      const result = calculateFirstSlotEndTime(startTime, 60);
+      expect(result).toBe(dayjs.utc(`2024-01-15 11:00:00`).valueOf());
+    });
+  });
+
+  describe(`generateTimeSlotsFromRange`, () => {
+    it(`should generate slots for 30-minute interval`, () => {
+      const minStart = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
+      const maxStart = dayjs.utc(`2024-01-15 11:00:00`).valueOf();
+      
+      const result = generateTimeSlotsFromRange(minStart, maxStart, 30);
+
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].startTimeMs).toBe(minStart);
+    });
+
+    it(`should generate slots for 15-minute interval`, () => {
+      const minStart = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
+      const maxStart = dayjs.utc(`2024-01-15 10:30:00`).valueOf();
+      
+      const result = generateTimeSlotsFromRange(minStart, maxStart, 15);
+
+      expect(result.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it(`should round start time to 15-minute boundary`, () => {
+      const minStart = dayjs.utc(`2024-01-15 10:07:00`).valueOf();
+      const maxStart = dayjs.utc(`2024-01-15 11:00:00`).valueOf();
+      
+      const result = generateTimeSlotsFromRange(minStart, maxStart, 30);
+
+      // Should start at 10:15 (rounded up)
+      expect(result[0].startTimeMs).toBe(dayjs.utc(`2024-01-15 10:15:00`).valueOf());
+    });
+  });
+
+  describe(`generateEmployeeTimeSlots`, () => {
+    it(`should generate slots from multiple available times`, () => {
+      const availableTimes: AvailableTimePure[] = [
+        {
+          minPossibleStartTimeMs: dayjs.utc(`2024-01-15 08:00:00`).valueOf(),
+          maxPossibleStartTimeMs: dayjs.utc(`2024-01-15 10:00:00`).valueOf(),
+        },
+        {
+          minPossibleStartTimeMs: dayjs.utc(`2024-01-15 14:00:00`).valueOf(),
+          maxPossibleStartTimeMs: dayjs.utc(`2024-01-15 16:00:00`).valueOf(),
+        },
+      ];
+
+      const result = generateEmployeeTimeSlots(availableTimes, 30);
+
+      expect(result.length).toBeGreaterThan(0);
+      // Should have slots from both ranges
+      const hasSlotInFirstRange = result.some(
+        slot => slot.startTimeMs >= availableTimes[0].minPossibleStartTimeMs &&
+                slot.startTimeMs <= availableTimes[0].maxPossibleStartTimeMs,
+      );
+      const hasSlotInSecondRange = result.some(
+        slot => slot.startTimeMs >= availableTimes[1].minPossibleStartTimeMs &&
+                slot.startTimeMs <= availableTimes[1].maxPossibleStartTimeMs,
+      );
+      expect(hasSlotInFirstRange).toBe(true);
+      expect(hasSlotInSecondRange).toBe(true);
+    });
+
+    it(`should return empty array for empty available times`, () => {
+      const result = generateEmployeeTimeSlots([], 30);
+      expect(result).toEqual([]);
+    });
+  });
+
+  // ============================================================================
+  // Pause Time Functions
+  // ============================================================================
+
+  describe(`createPauseTime`, () => {
+    it(`should create pause time with timezone conversion`, () => {
+      const result = createPauseTime(
+        `2024-01-15` as Date_ISO_Type,
+        `12:00:00` as Time_HH_MM_SS_Type,
+        `13:00:00` as Time_HH_MM_SS_Type,
+        `Europe/Berlin`,
+      );
+
+      // Berlin is UTC+1 in January
+      expect(result.startPauseTimeMs).toBe(dayjs.utc(`2024-01-15 11:00:00`).valueOf());
+      expect(result.endPauseTimeMs).toBe(dayjs.utc(`2024-01-15 12:00:00`).valueOf());
+    });
+  });
+
+  describe(`pauseTimesToBlockedTimes`, () => {
+    it(`should convert pause times to blocked times`, () => {
+      const pauseTimes: PauseTimePure[] = [
+        {
+          startPauseTimeMs: 1000,
+          endPauseTimeMs: 2000,
+        },
+        {
+          startPauseTimeMs: 3000,
+          endPauseTimeMs: 4000,
+        },
+      ];
+
+      const result = pauseTimesToBlockedTimes(pauseTimes);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].startBlockedTimeMs).toBe(1000);
+      expect(result[0].endBlockedTimeMs).toBe(2000);
+      expect(result[1].startBlockedTimeMs).toBe(3000);
+      expect(result[1].endBlockedTimeMs).toBe(4000);
+    });
+  });
+
+  // ============================================================================
+  // Complete Day Processing
+  // ============================================================================
+
+  describe(`calculateEmployeeDayAvailability`, () => {
+    it(`should calculate availability with all blocking sources`, () => {
+      const employee: EmployeeWorkingDayPure = {
+        employeeId: 1,
+        startWorkingTimeMs: dayjs.utc(`2024-01-15 08:00:00`).valueOf(),
+        endWorkingTimeMs: dayjs.utc(`2024-01-15 17:00:00`).valueOf(),
+        pauseTimes: [
+          {
+            startPauseTimeMs: dayjs.utc(`2024-01-15 12:00:00`).valueOf(),
+            endPauseTimeMs: dayjs.utc(`2024-01-15 13:00:00`).valueOf(),
+          },
+        ],
+        advanceBookingTime: `00:00:00`,
+        timeslotInterval: 30,
+      };
+
+      const appointments: NormalizedAppointmentPure[] = [
+        {
+          dateISO: `2024-01-15` as Date_ISO_Type,
+          startTimeMs: dayjs.utc(`2024-01-15 10:00:00`).valueOf(),
+          endTimeMs: dayjs.utc(`2024-01-15 11:00:00`).valueOf(),
+          employeeId: 1,
+        },
+      ];
+
+      const currentTimeMs = dayjs.utc(`2024-01-15 07:00:00`).valueOf();
+      const todayDateISO = `2024-01-15` as Date_ISO_Type;
+      const workingDayDateISO = `2024-01-15` as Date_ISO_Type;
+      const serviceDuration = `01:00:00` as Time_HH_MM_SS_Type;
+
+      const result = calculateEmployeeDayAvailability(
+        employee,
+        appointments,
+        currentTimeMs,
+        todayDateISO,
+        workingDayDateISO,
+        serviceDuration,
+      );
+
+      expect(result.employeeId).toBe(1);
+      expect(result.blockedTimes.length).toBeGreaterThan(0);
+      expect(result.availableTimes.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe(`calculateDayAvailability`, () => {
+    it(`should calculate availability for all employees`, () => {
+      const workingDay: WorkingDayPure = {
+        dateISO: `2024-01-15` as Date_ISO_Type,
+        employees: [
+          {
+            employeeId: 1,
+            startWorkingTimeMs: dayjs.utc(`2024-01-15 08:00:00`).valueOf(),
+            endWorkingTimeMs: dayjs.utc(`2024-01-15 17:00:00`).valueOf(),
+            pauseTimes: [],
+            advanceBookingTime: `00:00:00`,
+            timeslotInterval: 30,
+          },
+          {
+            employeeId: 2,
+            startWorkingTimeMs: dayjs.utc(`2024-01-15 09:00:00`).valueOf(),
+            endWorkingTimeMs: dayjs.utc(`2024-01-15 18:00:00`).valueOf(),
+            pauseTimes: [],
+            advanceBookingTime: `00:00:00`,
+            timeslotInterval: 30,
+          },
+        ],
+      };
+
+      const appointments: NormalizedAppointmentPure[] = [];
+      const currentTimeMs = dayjs.utc(`2024-01-15 07:00:00`).valueOf();
+      const todayDateISO = `2024-01-15` as Date_ISO_Type;
+      const serviceDuration = `01:00:00` as Time_HH_MM_SS_Type;
+
+      const result = calculateDayAvailability(
+        workingDay,
+        appointments,
+        currentTimeMs,
+        todayDateISO,
+        serviceDuration,
+      );
+
+      expect(result.dateISO).toBe(`2024-01-15`);
+      expect(result.employees).toHaveLength(2);
+      expect(result.employees[0].employeeId).toBe(1);
+      expect(result.employees[1].employeeId).toBe(2);
+    });
+  });
+
+  // ============================================================================
+  // Time Slot Grouping
+  // ============================================================================
+
+  describe(`groupTimeSlotsByStartTime`, () => {
+    it(`should group slots by start time across employees`, () => {
+      const employeesWithSlots: EmployeeWithTimeSlotsPure[] = [
+        {
+          employeeId: 1,
+          timeSlots: [
+            {
+              startTimeMs: dayjs.utc(`2024-01-15 10:00:00`).valueOf(),
+              endTimeMs: dayjs.utc(`2024-01-15 10:30:00`).valueOf(),
+            },
+            {
+              startTimeMs: dayjs.utc(`2024-01-15 11:00:00`).valueOf(),
+              endTimeMs: dayjs.utc(`2024-01-15 11:30:00`).valueOf(),
+            },
+          ],
+        },
+        {
+          employeeId: 2,
+          timeSlots: [
+            {
+              startTimeMs: dayjs.utc(`2024-01-15 10:00:00`).valueOf(),
+              endTimeMs: dayjs.utc(`2024-01-15 10:30:00`).valueOf(),
+            },
+            {
+              startTimeMs: dayjs.utc(`2024-01-15 12:00:00`).valueOf(),
+              endTimeMs: dayjs.utc(`2024-01-15 12:30:00`).valueOf(),
+            },
+          ],
+        },
+      ];
+
+      const result = groupTimeSlotsByStartTime(employeesWithSlots, `Europe/Berlin`);
+
+      // Should have 3 unique time slots
+      expect(result.length).toBeGreaterThanOrEqual(3);
+
+      // Find the 10:00 slot (11:00 in Berlin = 10:00 UTC in winter)
+      const tenOClockSlot = result.find(slot => slot.startTime === `11:00:00`);
+      expect(tenOClockSlot).toBeDefined();
+      expect(tenOClockSlot?.employeeIds).toContain(1);
+      expect(tenOClockSlot?.employeeIds).toContain(2);
+    });
+
+    it(`should sort slots by start time`, () => {
+      const employeesWithSlots: EmployeeWithTimeSlotsPure[] = [
+        {
+          employeeId: 1,
+          timeSlots: [
+            {
+              startTimeMs: dayjs.utc(`2024-01-15 14:00:00`).valueOf(),
+              endTimeMs: dayjs.utc(`2024-01-15 14:30:00`).valueOf(),
+            },
+            {
+              startTimeMs: dayjs.utc(`2024-01-15 10:00:00`).valueOf(),
+              endTimeMs: dayjs.utc(`2024-01-15 10:30:00`).valueOf(),
+            },
+          ],
+        },
+      ];
+
+      const result = groupTimeSlotsByStartTime(employeesWithSlots, `UTC`);
+
+      // Should be sorted
+      for (let index = 1; index < result.length; index++) {
+        expect(result[index].startTime >= result[index - 1].startTime).toBe(true);
+      }
+    });
+  });
 });
+
+// Import additional functions for the new tests
+import {
+  calculateFirstSlotEndTime,
+  generateTimeSlotsFromRange,
+  generateEmployeeTimeSlots,
+  createPauseTime,
+  pauseTimesToBlockedTimes,
+  calculateEmployeeDayAvailability,
+  calculateDayAvailability,
+  groupTimeSlotsByStartTime,
+  PauseTimePure,
+  EmployeeWorkingDayPure,
+  WorkingDayPure,
+  EmployeeWithTimeSlotsPure,
+} from '@/services/calendar/calendarUtils.pure.js';
 

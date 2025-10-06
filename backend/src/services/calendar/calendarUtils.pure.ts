@@ -346,7 +346,7 @@ export const isTimestampBefore = (timestampMs: number, referenceMs: number): boo
 /**
  * Get start of day for a timestamp
  * Pure function - deterministic
- * 
+ *
  * @param timestampMs - timestamp in milliseconds
  * @returns timestamp at start of day (00:00:00) in UTC
  */
@@ -368,7 +368,7 @@ export interface NormalizedAppointmentPure {
 /**
  * Normalize appointment data to standard format
  * Pure function - simple data transformation
- * 
+ *
  * @param date - date in YYYY-MM-DD format
  * @param timeStart - start time as ISO string or timestamp
  * @param timeEnd - end time as ISO string or timestamp
@@ -392,7 +392,7 @@ export const normalizeAppointment = (
 /**
  * Filter appointments by date
  * Pure function - simple array filtering
- * 
+ *
  * @param appointments - array of normalized appointments
  * @param dateISO - date to filter by
  * @returns filtered appointments
@@ -407,7 +407,7 @@ export const filterAppointmentsByDate = (
 /**
  * Filter appointments by employee
  * Pure function - simple array filtering
- * 
+ *
  * @param appointments - array of normalized appointments
  * @param employeeId - employee ID to filter by
  * @returns filtered appointments
@@ -422,7 +422,7 @@ export const filterAppointmentsByEmployee = (
 /**
  * Convert normalized appointments to blocked times
  * Pure function - simple data transformation
- * 
+ *
  * @param appointments - array of normalized appointments
  * @returns array of blocked times
  */
@@ -442,7 +442,7 @@ export const appointmentsToBlockedTimes = (
 /**
  * Parse advance booking time string to milliseconds
  * Pure function - string parsing
- * 
+ *
  * @param advanceBookingTime - time in HH:MM:SS format or 'next_day'
  * @returns duration in milliseconds or special value for next_day
  */
@@ -450,7 +450,7 @@ export const parseAdvanceBookingTime = (advanceBookingTime: string): number | `n
   if (advanceBookingTime === `next_day`) {
     return `next_day`;
   }
-  
+
   const [hours, minutes, seconds] = advanceBookingTime.split(`:`).map(Number);
   return ((hours * 60 + minutes) * 60 + seconds) * 1000;
 };
@@ -458,7 +458,7 @@ export const parseAdvanceBookingTime = (advanceBookingTime: string): number | `n
 /**
  * Calculate blocked time for advance booking
  * Pure function - deterministic calculation
- * 
+ *
  * @param currentTimeMs - current timestamp in milliseconds (UTC)
  * @param advanceBookingTime - advance booking time (ms or 'next_day')
  * @param startWorkingTimeMs - start of working hours in milliseconds (UTC)
@@ -517,7 +517,7 @@ export const calculateAdvanceBookingBlockedTime = (
 /**
  * Generate array of dates between start and end (inclusive)
  * Pure function - deterministic date generation
- * 
+ *
  * @param startDateMs - start date timestamp
  * @param endDateMs - end date timestamp
  * @returns array of date timestamps (all at 00:00:00 UTC)
@@ -538,7 +538,7 @@ export const generateDateRange = (startDateMs: number, endDateMs: number): numbe
 /**
  * Check if date is today or in the future
  * Pure function - simple comparison
- * 
+ *
  * @param dateMs - date timestamp to check
  * @param todayMs - today's date timestamp
  * @returns true if date is today or later
@@ -547,5 +547,363 @@ export const isDateTodayOrFuture = (dateMs: number, todayMs: number): boolean =>
   const dateStartOfDay = getStartOfDay(dateMs);
   const todayStartOfDay = getStartOfDay(todayMs);
   return dateStartOfDay >= todayStartOfDay;
+};
+
+// ============================================================================
+// PURE FUNCTIONS - Time Slot Generation
+// ============================================================================
+
+export interface TimeSlotPure {
+  startTimeMs: number; // UTC timestamp
+  endTimeMs: number; // UTC timestamp
+}
+
+export interface EmployeeWithTimeSlotsPure {
+  employeeId: number;
+  timeSlots: TimeSlotPure[];
+}
+
+/**
+ * Calculate first time slot end time based on interval
+ * Pure function - deterministic calculation
+ *
+ * @param startTimeMs - start time timestamp
+ * @param intervalMinutes - timeslot interval (15, 30, or 60)
+ * @returns end time timestamp
+ */
+export const calculateFirstSlotEndTime = (
+  startTimeMs: number,
+  intervalMinutes: number,
+): number => {
+  const currentMinutes = dayjs(startTimeMs).utc().minute();
+
+  if (intervalMinutes === 15) {
+    // For 15-minute intervals, all boundaries are valid - just add 15 minutes
+    return startTimeMs + 15 * 60 * 1000;
+  }
+
+  if (intervalMinutes === 30) {
+    // For 30-minute intervals
+    if (currentMinutes === 15 || currentMinutes === 45) {
+      // First slot is short (until next :00 or :30)
+      const minutesToAdd = currentMinutes === 15 ? 15 : 15;
+      return startTimeMs + minutesToAdd * 60 * 1000;
+    }
+    // First slot is full 30 minutes (starts at :00 or :30)
+    return startTimeMs + 30 * 60 * 1000;
+  }
+
+  if (intervalMinutes === 60) {
+    // For 60-minute intervals, only :00 is proper boundary
+    if (currentMinutes === 0) {
+      return startTimeMs + 60 * 60 * 1000;
+    }
+    // Not on hour boundary, make short slot to next hour
+    const minutesToNextHour = 60 - currentMinutes;
+    return startTimeMs + minutesToNextHour * 60 * 1000;
+  }
+
+  // Fallback
+  return startTimeMs + intervalMinutes * 60 * 1000;
+};
+
+/**
+ * Generate time slots from available time range
+ * Pure function - deterministic slot generation
+ *
+ * @param minPossibleStartTimeMs - earliest possible start time
+ * @param maxPossibleStartTimeMs - latest possible start time
+ * @param intervalMinutes - timeslot interval (15, 30, or 60)
+ * @returns array of time slots
+ */
+export const generateTimeSlotsFromRange = (
+  minPossibleStartTimeMs: number,
+  maxPossibleStartTimeMs: number,
+  intervalMinutes: number,
+): TimeSlotPure[] => {
+  const slots: TimeSlotPure[] = [];
+
+  // Round start time to next 15-minute interval
+  let currentTimeMs = roundTimestampToFifteenMinutes(minPossibleStartTimeMs);
+
+  let isFirstSlot = true;
+
+  while (currentTimeMs <= maxPossibleStartTimeMs) {
+    let slotEndTimeMs: number;
+
+    if (isFirstSlot) {
+      slotEndTimeMs = calculateFirstSlotEndTime(currentTimeMs, intervalMinutes);
+      isFirstSlot = false;
+    } else {
+      slotEndTimeMs = currentTimeMs + intervalMinutes * 60 * 1000;
+    }
+
+    // Add slot if it starts at or before max possible start time
+    if (currentTimeMs <= maxPossibleStartTimeMs) {
+      slots.push({
+        startTimeMs: currentTimeMs,
+        endTimeMs: slotEndTimeMs,
+      });
+    }
+
+    currentTimeMs = slotEndTimeMs;
+  }
+
+  return slots;
+};
+
+/**
+ * Generate all time slots for an employee based on their available times
+ * Pure function - combines available times into slots
+ *
+ * @param availableTimes - array of available time ranges
+ * @param intervalMinutes - timeslot interval
+ * @returns array of time slots
+ */
+export const generateEmployeeTimeSlots = (
+  availableTimes: AvailableTimePure[],
+  intervalMinutes: number,
+): TimeSlotPure[] => {
+  const allSlots: TimeSlotPure[] = [];
+
+  for (const availableTime of availableTimes) {
+    const slots = generateTimeSlotsFromRange(
+      availableTime.minPossibleStartTimeMs,
+      availableTime.maxPossibleStartTimeMs,
+      intervalMinutes,
+    );
+    allSlots.push(...slots);
+  }
+
+  return allSlots;
+};
+
+// ============================================================================
+// PURE FUNCTIONS - Employee Working Day Data
+// ============================================================================
+
+export interface PauseTimePure {
+  startPauseTimeMs: number; // UTC timestamp
+  endPauseTimeMs: number; // UTC timestamp
+}
+
+export interface EmployeeWorkingDayPure {
+  employeeId: number;
+  startWorkingTimeMs: number; // UTC timestamp
+  endWorkingTimeMs: number; // UTC timestamp
+  pauseTimes: PauseTimePure[];
+  advanceBookingTime: string; // HH:MM:SS or 'next_day'
+  timeslotInterval: number; // minutes (15, 30, 60)
+}
+
+export interface WorkingDayPure {
+  dateISO: Date_ISO_Type;
+  employees: EmployeeWorkingDayPure[];
+}
+
+/**
+ * Create pause time from time strings and date
+ * Pure function - timezone conversion
+ *
+ * @param dateISO - date in YYYY-MM-DD format
+ * @param startTime - start time in HH:mm:ss format
+ * @param endTime - end time in HH:mm:ss format
+ * @param timezone - IANA timezone string
+ * @returns pause time object
+ */
+export const createPauseTime = (
+  dateISO: Date_ISO_Type,
+  startTime: Time_HH_MM_SS_Type,
+  endTime: Time_HH_MM_SS_Type,
+  timezone: string,
+): PauseTimePure => {
+  return {
+    startPauseTimeMs: combineDateTimeInTimezone(dateISO, startTime, timezone),
+    endPauseTimeMs: combineDateTimeInTimezone(dateISO, endTime, timezone),
+  };
+};
+
+/**
+ * Convert pause times to blocked times
+ * Pure function - simple data transformation
+ *
+ * @param pauseTimes - array of pause times
+ * @returns array of blocked times
+ */
+export const pauseTimesToBlockedTimes = (
+  pauseTimes: PauseTimePure[],
+): BlockedTimePure[] => {
+  return pauseTimes.map(pause => ({
+    startBlockedTimeMs: pause.startPauseTimeMs,
+    endBlockedTimeMs: pause.endPauseTimeMs,
+  }));
+};
+
+// ============================================================================
+// PURE FUNCTIONS - Complete Day Processing
+// ============================================================================
+
+export interface EmployeeDayAvailabilityPure {
+  employeeId: number;
+  startWorkingTimeMs: number;
+  endWorkingTimeMs: number;
+  blockedTimes: BlockedTimePure[];
+  availableTimes: AvailableTimePure[];
+  timeslotInterval: number;
+}
+
+export interface DayAvailabilityPure {
+  dateISO: Date_ISO_Type;
+  employees: EmployeeDayAvailabilityPure[];
+}
+
+/**
+ * Calculate complete availability for one employee on one day
+ * Pure function - combines all blocking sources
+ *
+ * @param employee - employee working day data
+ * @param appointments - appointments for this employee on this day
+ * @param currentTimeMs - current timestamp for advance booking
+ * @param todayDateISO - today's date for advance booking comparison
+ * @param serviceDuration - service duration for availability calculation
+ * @returns employee day availability
+ */
+export const calculateEmployeeDayAvailability = (
+  employee: EmployeeWorkingDayPure,
+  appointments: NormalizedAppointmentPure[],
+  currentTimeMs: number,
+  todayDateISO: Date_ISO_Type,
+  workingDayDateISO: Date_ISO_Type,
+  serviceDuration: Time_HH_MM_SS_Type,
+): EmployeeDayAvailabilityPure => {
+  // Convert appointments to blocked times
+  const appointmentBlocks = appointmentsToBlockedTimes(appointments);
+
+  // Convert pause times to blocked times
+  const pauseBlocks = pauseTimesToBlockedTimes(employee.pauseTimes);
+
+  // Calculate advance booking blocked time
+  const advanceBookingParsed = parseAdvanceBookingTime(employee.advanceBookingTime);
+  const advanceBookingBlock = calculateAdvanceBookingBlockedTime(
+    currentTimeMs,
+    advanceBookingParsed,
+    employee.startWorkingTimeMs,
+    employee.endWorkingTimeMs,
+    todayDateISO,
+    workingDayDateISO,
+  );
+
+  // Combine all blocked times
+  const allBlockedTimes: BlockedTimePure[] = [
+    ...appointmentBlocks,
+    ...pauseBlocks,
+  ];
+
+  if (advanceBookingBlock) {
+    allBlockedTimes.push(advanceBookingBlock);
+  }
+
+  // Calculate available times
+  const availableTimes = calculateAvailableTimesMs(
+    employee.startWorkingTimeMs,
+    employee.endWorkingTimeMs,
+    allBlockedTimes,
+    serviceDuration,
+  );
+
+  return {
+    employeeId: employee.employeeId,
+    startWorkingTimeMs: employee.startWorkingTimeMs,
+    endWorkingTimeMs: employee.endWorkingTimeMs,
+    blockedTimes: allBlockedTimes,
+    availableTimes,
+    timeslotInterval: employee.timeslotInterval,
+  };
+};
+
+/**
+ * Calculate availability for all employees on one day
+ * Pure function - processes full day
+ *
+ * @param workingDay - working day data with all employees
+ * @param appointments - all appointments for this day
+ * @param currentTimeMs - current timestamp
+ * @param todayDateISO - today's date
+ * @param serviceDuration - service duration
+ * @returns day availability with calculated slots
+ */
+export const calculateDayAvailability = (
+  workingDay: WorkingDayPure,
+  appointments: NormalizedAppointmentPure[],
+  currentTimeMs: number,
+  todayDateISO: Date_ISO_Type,
+  serviceDuration: Time_HH_MM_SS_Type,
+): DayAvailabilityPure => {
+  const employees = workingDay.employees.map(employee => {
+    // Filter appointments for this employee
+    const employeeAppointments = filterAppointmentsByEmployee(appointments, employee.employeeId);
+
+    return calculateEmployeeDayAvailability(
+      employee,
+      employeeAppointments,
+      currentTimeMs,
+      todayDateISO,
+      workingDay.dateISO,
+      serviceDuration,
+    );
+  });
+
+  return {
+    dateISO: workingDay.dateISO,
+    employees,
+  };
+};
+
+// ============================================================================
+// PURE FUNCTIONS - Time Slot Grouping
+// ============================================================================
+
+export interface GroupedTimeSlotPure {
+  startTime: Time_HH_MM_SS_Type; // in specified timezone
+  employeeIds: number[];
+}
+
+/**
+ * Group time slots by start time across employees
+ * Pure function - aggregates slots
+ *
+ * @param employeesWithSlots - array of employees with their time slots
+ * @param timezone - timezone for output (e.g., 'Europe/Berlin')
+ * @returns array of grouped time slots
+ */
+export const groupTimeSlotsByStartTime = (
+  employeesWithSlots: EmployeeWithTimeSlotsPure[],
+  timezone: string,
+): GroupedTimeSlotPure[] => {
+  const slotMap = new Map<string, number[]>();
+
+  for (const employee of employeesWithSlots) {
+    for (const slot of employee.timeSlots) {
+      // Convert UTC timestamp to timezone-specific time string
+      const timeString = formatTimestampToTimeInTimezone(slot.startTimeMs, timezone);
+
+      if (!slotMap.has(timeString)) {
+        slotMap.set(timeString, []);
+      }
+
+      const employeeIds = slotMap.get(timeString)!;
+      if (!employeeIds.includes(employee.employeeId)) {
+        employeeIds.push(employee.employeeId);
+      }
+    }
+  }
+
+  // Convert map to sorted array
+  const grouped = Array.from(slotMap.entries()).map(([startTime, employeeIds]) => ({
+    startTime: startTime as Time_HH_MM_SS_Type,
+    employeeIds: [...employeeIds].sort((a, b) => a - b),
+  }));
+
+  return grouped.sort((a, b) => a.startTime.localeCompare(b.startTime));
 };
 
