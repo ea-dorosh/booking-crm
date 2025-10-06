@@ -30,6 +30,7 @@ import {
   isTimestampBefore,
   getStartOfDay,
   BlockedTimePure,
+  AvailableTimePure,
 } from '@/services/calendar/calendarUtils.pure.js';
 import { Time_HH_MM_SS_Type, Date_ISO_Type } from '@/@types/utilTypes.js';
 
@@ -949,7 +950,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
     it(`should return false for past date`, () => {
       const today = dayjs.utc(`2024-01-15`).valueOf();
       const pastDate = dayjs.utc(`2024-01-10`).valueOf();
-      
+
       expect(isDateTodayOrFuture(pastDate, today)).toBe(false);
     });
   });
@@ -994,7 +995,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
     it(`should generate slots for 30-minute interval`, () => {
       const minStart = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
       const maxStart = dayjs.utc(`2024-01-15 11:00:00`).valueOf();
-      
+
       const result = generateTimeSlotsFromRange(minStart, maxStart, 30);
 
       expect(result.length).toBeGreaterThan(0);
@@ -1004,7 +1005,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
     it(`should generate slots for 15-minute interval`, () => {
       const minStart = dayjs.utc(`2024-01-15 10:00:00`).valueOf();
       const maxStart = dayjs.utc(`2024-01-15 10:30:00`).valueOf();
-      
+
       const result = generateTimeSlotsFromRange(minStart, maxStart, 15);
 
       expect(result.length).toBeGreaterThanOrEqual(2);
@@ -1013,7 +1014,7 @@ describe(`calendarUtils.pure - Advanced Functions`, () => {
     it(`should round start time to 15-minute boundary`, () => {
       const minStart = dayjs.utc(`2024-01-15 10:07:00`).valueOf();
       const maxStart = dayjs.utc(`2024-01-15 11:00:00`).valueOf();
-      
+
       const result = generateTimeSlotsFromRange(minStart, maxStart, 30);
 
       // Should start at 10:15 (rounded up)

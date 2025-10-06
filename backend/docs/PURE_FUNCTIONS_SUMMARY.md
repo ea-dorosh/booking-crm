@@ -31,7 +31,7 @@ backend/docs/
 // ❌ Side effect - gets current time internally
 const calculateAvailableTimes = (startTime, endTime, blockedTimes) => {
   const today = dayjs().utc();  // Side effect!
-  
+
   // Works with mutable Dayjs objects
   if (indexDay.isAfter(today)) {
     // Complex logic with implicit dependencies
@@ -122,7 +122,7 @@ calendarUtils.adapter.ts
 import { calculateAvailableTimeSlots } from './calendarUtils.adapter';
 
 // Drop-in replacement for old functions
-const { period, dayAvailability, groupedTimeSlots } = 
+const { period, dayAvailability, groupedTimeSlots } =
   calculateAvailableTimeSlots(
     date,
     employees,

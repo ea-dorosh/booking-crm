@@ -1,12 +1,12 @@
 /**
  * Adapter functions for integrating pure calendar utilities with existing service
- * 
+ *
  * These adapters bridge between the existing calendarService API and the new pure functions.
  * They handle:
  * 1. Getting current time (side effect) at the boundary
  * 2. Converting between old and new data structures
  * 3. Maintaining backward compatibility
- * 
+ *
  * The adapters allow gradual migration from old to new functions.
  */
 
@@ -38,6 +38,16 @@ import {
   EmployeeWithTimeSlotsPure,
   GroupedTimeSlotPure,
 } from './calendarUtils.pure.js';
+
+// Re-export types for convenience
+export type {
+  NormalizedAppointmentPure,
+  WorkingDayPure,
+  EmployeeWorkingDayPure,
+  DayAvailabilityPure,
+  EmployeeWithTimeSlotsPure,
+  GroupedTimeSlotPure,
+};
 
 const TIMEZONE = `Europe/Berlin`;
 
@@ -157,7 +167,7 @@ export const normalizeBlockedTimesForEmployees = (
 
   for (const blockedTime of blockedTimesFromDB) {
     const blockedDateStr = dayjs(blockedTime.blockedDate).format(`YYYY-MM-DD`);
-    
+
     if (blockedTime.isAllDay) {
       // Find working hours for this employee on this day
       const dayData = periodWithDaysAndEmployeeAvailability.find(
@@ -246,7 +256,7 @@ export const getPeriodWithDaysAndEmployeeAvailabilityPure = (
     if (dayAvailability) {
       const employees: EmployeeWorkingDayPure[] = dayAvailability.employees.map(employee => {
         const pauseTimes = [];
-        
+
         if (employee.blockStartTimeFirst && employee.blockEndTimeFirst) {
           pauseTimes.push(
             createPauseTime(
@@ -305,7 +315,7 @@ export const processPeriodAvailability = (
 
   return period.map(workingDay => {
     const dayAppointments = filterAppointmentsByDate(normalizedAppointments, workingDay.dateISO);
-    
+
     return calculateDayAvailability(
       workingDay,
       dayAppointments,
