@@ -98,7 +98,7 @@ function convertToOldFormat(
     day: dates[index] || dates[0],
     availableTimeslots: (daySlots || []).map(slot => ({
       ...slot,
-      serviceId: serviceId || slot.serviceId,
+      serviceId: serviceId,
     })),
   }));
 }
@@ -202,7 +202,7 @@ async function processSingleService(
   );
 
   // ✅ Pure function: Generate time slots
-  const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability);
+  const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
 
   // Flatten time slots per day into single array
   const employeeTimeSlots = employeeTimeSlotsPerDay.flat();
@@ -363,8 +363,10 @@ const getGroupedTimeSlots = async (
 
   // ✅ Get current time at service boundary (side effect)
   const currentTimeMs = dayjs().utc().valueOf();
-  console.log('🔍 DEBUG: Current time:', dayjs(currentTimeMs).format('YYYY-MM-DD HH:mm:ss'));
-  console.log('🔍 DEBUG: Test date:', paramDate);
+  console.log(`🔍 DEBUG: Current time:`, dayjs(currentTimeMs).format(`YYYY-MM-DD HH:mm:ss`));
+  console.log(`🔍 DEBUG: Test date:`, paramDate);
+  console.log(`🔍 DEBUG: Current time UTC:`, dayjs(currentTimeMs).utc().format(`YYYY-MM-DD HH:mm:ss`));
+  console.log(`🔍 DEBUG: Current time Berlin:`, dayjs(currentTimeMs).tz(`Europe/Berlin`).format(`YYYY-MM-DD HH:mm:ss`));
 
   // Process single service
   if (servicesData.length === 1) {

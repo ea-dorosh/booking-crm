@@ -331,13 +331,25 @@ export const processPeriodAvailability = (
  */
 export const generateTimeSlotsFromDayAvailability = (
   dayAvailability: DayAvailabilityPure[],
+  currentTimeMs?: number, // Optional current time for filtering
 ): EmployeeWithTimeSlotsPure[][] => {
   return dayAvailability.map(day => {
+    // Only filter by current time for today's date
+    const dayDateMs = dayjs.utc(day.dateISO).valueOf();
+    const todayStartMs = dayjs().utc().startOf(`day`).valueOf();
+    const todayEndMs = dayjs().utc().endOf(`day`).valueOf();
+    
+    // If this is today's date, filter by current time
+    // If this is a future date, don't filter by current time
+    const shouldFilterByTime = dayDateMs >= todayStartMs && dayDateMs <= todayEndMs;
+    const filterTime = shouldFilterByTime ? currentTimeMs : undefined;
+    
     return day.employees.map(employee => ({
       employeeId: employee.employeeId,
       timeSlots: generateEmployeeTimeSlots(
         employee.availableTimes,
         employee.timeslotInterval,
+        filterTime, // Only filter for today
       ),
     }));
   });

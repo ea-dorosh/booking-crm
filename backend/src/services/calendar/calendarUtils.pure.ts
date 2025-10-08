@@ -663,6 +663,7 @@ export const generateTimeSlotsFromRange = (
 export const generateEmployeeTimeSlots = (
   availableTimes: AvailableTimePure[],
   intervalMinutes: number,
+  currentTimeMs?: number, // Optional current time for filtering
 ): TimeSlotPure[] => {
   const allSlots: TimeSlotPure[] = [];
 
@@ -673,6 +674,11 @@ export const generateEmployeeTimeSlots = (
       intervalMinutes,
     );
     allSlots.push(...slots);
+  }
+
+  // Filter out past slots if current time is provided
+  if (currentTimeMs !== undefined) {
+    return allSlots.filter(slot => slot.startTimeMs >= currentTimeMs);
   }
 
   return allSlots;
