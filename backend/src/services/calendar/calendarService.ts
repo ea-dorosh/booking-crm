@@ -363,6 +363,8 @@ const getGroupedTimeSlots = async (
 
   // ✅ Get current time at service boundary (side effect)
   const currentTimeMs = dayjs().utc().valueOf();
+  console.log('🔍 DEBUG: Current time:', dayjs(currentTimeMs).format('YYYY-MM-DD HH:mm:ss'));
+  console.log('🔍 DEBUG: Test date:', paramDate);
 
   // Process single service
   if (servicesData.length === 1) {
