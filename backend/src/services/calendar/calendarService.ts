@@ -1,6 +1,6 @@
 /**
  * Calendar Service - Refactored to use pure functions
- * 
+ *
  * This service now uses pure functions from calendarUtils.adapter.ts
  * Benefits:
  * - Easier to test (explicit currentTime parameter)
@@ -288,7 +288,7 @@ function convertCombinedSlotsToGroupedFormat(
 ): PeriodWithGroupedTimeslotsType[] {
   // Group by date (we'll use first date for now, can be improved)
   const timezone = `Europe/Berlin`;
-  
+
   // Group by first service start time
   const groupedByTime = new Map<string, {
     firstServiceEmployeeIds: Set<number>;
@@ -338,7 +338,7 @@ function convertCombinedSlotsToGroupedFormat(
 /**
  * Get grouped time slots for one or two services
  * NOW USING PURE FUNCTIONS! 🎉
- * 
+ *
  * @param dbPool - Database connection pool
  * @param paramDate - Date to get time slots for
  * @param servicesData - Array of service data (serviceId and employeeIds)
@@ -379,7 +379,7 @@ const getGroupedTimeSlots = async (
     // Convert to old format - include all dates even if no slots
     const dates = result.period.map(day => day.dateISO);
     const converted = convertToOldFormat(groupedTimeSlots, dates);
-    
+
     // Ensure all dates from period are in result (even with empty slots)
     const resultMap = new Map(converted.map(item => [item.day, item]));
     return dates.map(date => resultMap.get(date) || {
