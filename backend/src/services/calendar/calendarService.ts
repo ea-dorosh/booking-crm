@@ -92,10 +92,14 @@ async function getGoogleCalendarEventsForEmployees(
 function convertToOldFormat(
   groupedTimeSlots: GroupedTimeSlotPure[][],
   dates: Date_ISO_Type[],
+  serviceId?: number,
 ): PeriodWithGroupedTimeslotsType[] {
   return groupedTimeSlots.map((daySlots, index) => ({
     day: dates[index] || dates[0],
-    availableTimeslots: daySlots || [],
+    availableTimeslots: (daySlots || []).map(slot => ({
+      ...slot,
+      serviceId: serviceId || slot.serviceId,
+    })),
   }));
 }
 
@@ -378,7 +382,7 @@ const getGroupedTimeSlots = async (
 
     // Convert to old format - include all dates even if no slots
     const dates = result.period.map(day => day.dateISO);
-    const converted = convertToOldFormat(groupedTimeSlots, dates);
+    const converted = convertToOldFormat(groupedTimeSlots, dates, result.serviceId);
 
     // Ensure all dates from period are in result (even with empty slots)
     const resultMap = new Map(converted.map(item => [item.day, item]));
