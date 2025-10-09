@@ -185,10 +185,6 @@ async function processSingleService(
     periodWithDaysAndEmployeeAvailability,
   );
 
-  // 🔍 DEBUG: Log normalized appointments
-  console.log(`🔍 DEBUG: Saved appointments:`, JSON.stringify(savedAppointments, null, 2));
-  console.log(`🔍 DEBUG: Normalized saved appointments:`, JSON.stringify(normalizedSavedAppointments, null, 2));
-
   // ✅ Pure function: Combine all normalized appointments
   const allNormalizedAppointments = [
     ...normalizedSavedAppointments,
@@ -197,18 +193,12 @@ async function processSingleService(
     ...normalizedBlockedTimes,
   ];
 
-  // ✅ Pure function: Calculate availability
-  console.log(`🔍 DEBUG: All normalized appointments:`, JSON.stringify(allNormalizedAppointments, null, 2));
-  console.log(`🔍 DEBUG: Period with days:`, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 2));
-
   const dayAvailability = processPeriodAvailability(
     periodWithDaysAndEmployeeAvailability,
     allNormalizedAppointments,
     serviceDurationWithBuffer,
     currentTimeMs,
   );
-
-  console.log(`🔍 DEBUG: Day availability:`, JSON.stringify(dayAvailability, null, 2));
 
   // ✅ Pure function: Generate time slots
   const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
@@ -372,10 +362,6 @@ const getGroupedTimeSlots = async (
 
   // ✅ Get current time at service boundary (side effect)
   const currentTimeMs = dayjs().utc().valueOf();
-  console.log(`🔍 DEBUG: Current time:`, dayjs(currentTimeMs).format(`YYYY-MM-DD HH:mm:ss`));
-  console.log(`🔍 DEBUG: Test date:`, paramDate);
-  console.log(`🔍 DEBUG: Current time UTC:`, dayjs(currentTimeMs).utc().format(`YYYY-MM-DD HH:mm:ss`));
-  console.log(`🔍 DEBUG: Current time Berlin:`, dayjs(currentTimeMs).tz(`Europe/Berlin`).format(`YYYY-MM-DD HH:mm:ss`));
 
   // Process single service
   if (servicesData.length === 1) {
