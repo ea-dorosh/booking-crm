@@ -411,31 +411,98 @@ const getGroupedTimeSlots = async (
     });
   }
 
-  // Process two services
-  const [firstServiceResult, secondServiceResult] = await Promise.all([
-    processSingleService(dbPool, paramDate, servicesData[0], currentTimeMs),
-    processSingleService(dbPool, paramDate, servicesData[1], currentTimeMs),
-  ]);
+  // For two services, use original logic from calendarUtils
+  // Import original functions
+  const {
+    combinePeriodWithNormalizedAppointments,
+    normalizeSavedAppointments,
+    normalizeGoogleEventsForEmployees,
+    generateTimeSlotsFromAvailableTimes,
+    combineAndFilterTimeSlotsDataFromTwoServices,
+    generateGroupedTimeSlotsForTwoServices,
+    normalizePauseTimesForEmployees,
+    normalizeBlockedTimesForEmployees,
+    getPeriodWithDaysAndEmployeeAvailability,
+  } = await import(`@/services/calendar/calendarUtils.js`);
 
-  if (firstServiceResult.period.length === 0 || secondServiceResult.period.length === 0) {
-    return [];
+  let periodWithClearedDaysForFirstService: any[] = [];
+  let periodWithClearedDaysForSecondService: any[] = [];
+
+  // Process each service using original logic
+  for (const [index, serviceData] of servicesData.entries()) {
+    const {
+      serviceId, employeeIds, 
+    } = serviceData;
+
+    // Get service details and employee availability
+    const service = await getService(dbPool, serviceId);
+    const serviceDurationWithBuffer = getServiceDuration(service.durationTime, service.bufferTime);
+
+    const groupedByDay = await buildGroupedAvailabilityForWeek(dbPool, paramDate, employeeIds);
+    const periodWithDaysAndEmployeeAvailability = getPeriodWithDaysAndEmployeeAvailability(paramDate, groupedByDay);
+
+    // Get saved appointments if there are working days
+    let savedAppointments: any[] = [];
+    if (periodWithDaysAndEmployeeAvailability.length > 0) {
+      savedAppointments = await getAppointmentsForCalendar(
+        dbPool,
+        periodWithDaysAndEmployeeAvailability.map(dayInPeriod => dayInPeriod.day),
+        employeeIds,
+        AppointmentStatusEnum.Active,
+      );
+    }
+
+    // Get Google Calendar events
+    const googleCalendarEvents = await getGoogleCalendarEventsForEmployees(dbPool, periodWithDaysAndEmployeeAvailability);
+
+    // Get employee blocked times
+    const blockedTimes = await getEmployeeBlockedTimesForDates(
+      dbPool,
+      employeeIds,
+      periodWithDaysAndEmployeeAvailability.map((day) => day.day),
+    );
+
+    // Normalize all appointments
+    const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
+    const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(googleCalendarEvents, periodWithDaysAndEmployeeAvailability);
+    const normalizedPauseTimes = normalizePauseTimesForEmployees(periodWithDaysAndEmployeeAvailability);
+    const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(blockedTimes, periodWithDaysAndEmployeeAvailability);
+    const allNormalizedAppointments = [
+      ...normalizedSavedAppointments,
+      ...normalizedGoogleEvents,
+      ...normalizedPauseTimes,
+      ...normalizedBlockedTimes,
+    ];
+
+    // Calculate available time slots
+    const periodWithClearedDays = combinePeriodWithNormalizedAppointments(
+      periodWithDaysAndEmployeeAvailability,
+      allNormalizedAppointments,
+      serviceDurationWithBuffer,
+      service.durationTime,
+      serviceId,
+    );
+
+    // Store cleared days for each service
+    if (index === 0) {
+      periodWithClearedDaysForFirstService = periodWithClearedDays;
+    } else {
+      periodWithClearedDaysForSecondService = periodWithClearedDays;
+    }
   }
 
-  // ✅ Combine time slots from two services
-  const combinations = combineTimeSlotsForTwoServices(
-    firstServiceResult.employeeTimeSlots.flat(1),
-    secondServiceResult.employeeTimeSlots.flat(1),
-    firstServiceResult.serviceDuration,
+  // Generate time slots
+  const timeSlotsDataForFirstService = generateTimeSlotsFromAvailableTimes(periodWithClearedDaysForFirstService);
+  const timeSlotsDataForSecondService = generateTimeSlotsFromAvailableTimes(periodWithClearedDaysForSecondService);
+
+  // Combine two services
+  const filteredTimeSlotsDataForTwoServices = combineAndFilterTimeSlotsDataFromTwoServices(
+    timeSlotsDataForFirstService,
+    timeSlotsDataForSecondService,
   );
 
-  // Convert to grouped format
-  const dates = firstServiceResult.period.map(day => day.dateISO);
-  return convertCombinedSlotsToGroupedFormat(
-    combinations,
-    firstServiceResult.serviceId,
-    secondServiceResult.serviceId,
-    dates,
-  );
+  // Group and return final result
+  return generateGroupedTimeSlotsForTwoServices(filteredTimeSlotsDataForTwoServices);
 };
 
 export { getGroupedTimeSlots };
