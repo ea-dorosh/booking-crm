@@ -381,8 +381,11 @@ export const normalizeAppointment = (
   timeEnd: string,
   employeeId: number,
 ): NormalizedAppointmentPure => {
+  // Extract date part only (YYYY-MM-DD) from the date string
+  const dateOnly = dayjs(date).format(`YYYY-MM-DD`);
+
   return {
-    dateISO: date as Date_ISO_Type,
+    dateISO: dateOnly as Date_ISO_Type,
     startTimeMs: dayjs(timeStart).utc().valueOf(),
     endTimeMs: dayjs(timeEnd).utc().valueOf(),
     employeeId,
@@ -401,7 +404,11 @@ export const filterAppointmentsByDate = (
   appointments: NormalizedAppointmentPure[],
   dateISO: Date_ISO_Type,
 ): NormalizedAppointmentPure[] => {
-  return appointments.filter(appointment => appointment.dateISO === dateISO);
+  console.log(`🔍 DEBUG: filterAppointmentsByDate - dateISO: ${dateISO}, appointments: ${appointments.length}`);
+  const result = appointments.filter(appointment => appointment.dateISO === dateISO);
+  console.log(`🔍 DEBUG: filterAppointmentsByDate - filtered: ${result.length}`);
+  console.log(`🔍 DEBUG: filterAppointmentsByDate - appointment dates:`, appointments.map(a => a.dateISO));
+  return result;
 };
 
 /**
@@ -416,7 +423,9 @@ export const filterAppointmentsByEmployee = (
   appointments: NormalizedAppointmentPure[],
   employeeId: number,
 ): NormalizedAppointmentPure[] => {
-  return appointments.filter(appointment => appointment.employeeId === employeeId);
+  const result = appointments.filter(appointment => appointment.employeeId === employeeId);
+  console.log(`🔍 DEBUG: filterAppointmentsByEmployee - employeeId: ${employeeId}, appointments: ${appointments.length}, filtered: ${result.length}`);
+  return result;
 };
 
 /**
@@ -429,10 +438,13 @@ export const filterAppointmentsByEmployee = (
 export const appointmentsToBlockedTimes = (
   appointments: NormalizedAppointmentPure[],
 ): BlockedTimePure[] => {
-  return appointments.map(appointment => ({
+  console.log(`🔍 DEBUG: appointmentsToBlockedTimes - input appointments:`, JSON.stringify(appointments, null, 2));
+  const result = appointments.map(appointment => ({
     startBlockedTimeMs: appointment.startTimeMs,
     endBlockedTimeMs: appointment.endTimeMs,
   }));
+  console.log(`🔍 DEBUG: appointmentsToBlockedTimes - output blocked times:`, JSON.stringify(result, null, 2));
+  return result;
 };
 
 // ============================================================================
