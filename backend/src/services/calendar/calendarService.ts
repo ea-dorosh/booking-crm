@@ -97,7 +97,8 @@ function convertToOldFormat(
   return groupedTimeSlots.map((daySlots, index) => ({
     day: dates[index] || dates[0],
     availableTimeslots: (daySlots || []).map(slot => ({
-      ...slot,
+      startTime: slot.startTime,
+      employeeIds: slot.employeeIds,
       serviceId: serviceId,
     })),
   }));
@@ -183,22 +184,12 @@ async function processSingleService(
     periodWithDaysAndEmployeeAvailability,
   );
 
-  console.log(`🔍 DEBUG: savedAppointments:`, savedAppointments.length);
-  console.log(`🔍 DEBUG: googleCalendarEvents:`, googleCalendarEvents.length);
-  console.log(`🔍 DEBUG: blockedTimes:`, blockedTimes.length);
-  console.log(`🔍 DEBUG: normalizedSavedAppointments:`, normalizedSavedAppointments.length);
-  console.log(`🔍 DEBUG: normalizedGoogleEvents:`, normalizedGoogleEvents.length);
-  console.log(`🔍 DEBUG: normalizedBlockedTimes:`, normalizedBlockedTimes.length);
-
   // ✅ Pure function: Combine all normalized appointments (NO pause times - they're in employee.pauseTimes)
   const allNormalizedAppointments = [
     ...normalizedSavedAppointments,
     ...normalizedGoogleEvents,
     ...normalizedBlockedTimes,
   ];
-
-  console.log(`🔍 DEBUG: allNormalizedAppointments:`, allNormalizedAppointments.length);
-  console.log(`🔍 DEBUG: periodWithDaysAndEmployeeAvailability:`, periodWithDaysAndEmployeeAvailability.length);
 
   const dayAvailability = processPeriodAvailability(
     periodWithDaysAndEmployeeAvailability,
@@ -207,34 +198,14 @@ async function processSingleService(
     currentTimeMs,
   );
 
-  console.log(`🔍 DEBUG: dayAvailability:`, JSON.stringify(dayAvailability.map(day => ({
-    dateISO: day.dateISO,
-    employees: day.employees.map(emp => ({
-      employeeId: emp.employeeId,
-      startWorkingTimeMs: new Date(emp.startWorkingTimeMs).toISOString(),
-      endWorkingTimeMs: new Date(emp.endWorkingTimeMs).toISOString(),
-      blockedTimes: emp.blockedTimes.map(bt => ({
-        startBlockedTimeMs: new Date(bt.startBlockedTimeMs).toISOString(),
-        endBlockedTimeMs: new Date(bt.endBlockedTimeMs).toISOString(),
-      })),
-      availableTimes: emp.availableTimes.map(at => ({
-        minPossibleStartTimeMs: new Date(at.minPossibleStartTimeMs).toISOString(),
-        maxPossibleStartTimeMs: new Date(at.maxPossibleStartTimeMs).toISOString(),
-      })),
-      timeslotInterval: emp.timeslotInterval,
-    })),
-  })), null, 2));
 
   // ✅ Pure function: Generate time slots
   const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
 
-  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay:`, employeeTimeSlotsPerDay.length);
-  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay[0]:`, employeeTimeSlotsPerDay[0]?.length);
 
   // Flatten time slots per day into single array
   const employeeTimeSlots = employeeTimeSlotsPerDay.flat();
 
-  console.log(`🔍 DEBUG: employeeTimeSlots:`, employeeTimeSlots.length);
 
   return {
     period: periodWithDaysAndEmployeeAvailability,

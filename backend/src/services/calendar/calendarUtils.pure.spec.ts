@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
+import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import {
   normalizeAppointment,
   filterAppointmentsByDate,
@@ -9,7 +10,6 @@ import {
   appointmentsToBlockedTimes,
   calculateEmployeeDayAvailability,
   generateEmployeeTimeSlots,
-  type Time_HH_MM_SS_Type,
 } from './calendarUtils.pure';
 import { generateTimeSlotsFromDayAvailability } from './calendarUtils.adapter';
 

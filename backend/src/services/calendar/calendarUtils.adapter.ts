@@ -338,20 +338,24 @@ export const generateTimeSlotsFromDayAvailability = (
     const dayDateMs = dayjs.utc(day.dateISO).valueOf();
     const todayStartMs = dayjs().utc().startOf(`day`).valueOf();
     const todayEndMs = dayjs().utc().endOf(`day`).valueOf();
-    
+
     // If this is today's date, filter by current time
     // If this is a future date, don't filter by current time
     const shouldFilterByTime = dayDateMs >= todayStartMs && dayDateMs <= todayEndMs;
     const filterTime = shouldFilterByTime ? currentTimeMs : undefined;
-    
-    return day.employees.map(employee => ({
-      employeeId: employee.employeeId,
-      timeSlots: generateEmployeeTimeSlots(
+
+    return day.employees.map(employee => {
+      const timeSlots = generateEmployeeTimeSlots(
         employee.availableTimes,
         employee.timeslotInterval,
         filterTime, // Only filter for today
-      ),
-    }));
+      );
+
+      return {
+        employeeId: employee.employeeId,
+        timeSlots,
+      };
+    });
   });
 };
 
@@ -363,8 +367,8 @@ export const groupTimeSlotsForPeriod = (
   timezone: string = TIMEZONE,
 ): GroupedTimeSlotPure[][] => {
   return employeeTimeSlotsPerDay.map(employeesForDay =>
-    [groupTimeSlotsByStartTime(employeesForDay, timezone)],
-  ).flat();
+    groupTimeSlotsByStartTime(employeesForDay, timezone),
+  );
 };
 
 // ============================================================================
