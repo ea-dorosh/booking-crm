@@ -123,6 +123,14 @@ export const calculateAvailableTimesMs = (
   blockedTimes: BlockedTimePure[],
   serviceDuration: Time_HH_MM_SS_Type,
 ): AvailableTimePure[] => {
+  console.log(`🔍 DEBUG: calculateAvailableTimesMs - startWorkingTimeMs:`, new Date(startWorkingTimeMs).toISOString());
+  console.log(`🔍 DEBUG: calculateAvailableTimesMs - endWorkingTimeMs:`, new Date(endWorkingTimeMs).toISOString());
+  console.log(`🔍 DEBUG: calculateAvailableTimesMs - blockedTimes:`, JSON.stringify(blockedTimes.map(bt => ({
+    start: new Date(bt.startBlockedTimeMs).toISOString(),
+    end: new Date(bt.endBlockedTimeMs).toISOString(),
+  })), null, 2));
+  console.log(`🔍 DEBUG: calculateAvailableTimesMs - serviceDuration:`, serviceDuration);
+
   const availableTimes: AvailableTimePure[] = [];
 
   // If no blocked times, the entire working period is potentially available
@@ -139,17 +147,32 @@ export const calculateAvailableTimesMs = (
   }
 
   const sortedBlockedTimes = sortBlockedTimes(blockedTimes);
+  console.log(`🔍 DEBUG: sortedBlockedTimes:`, JSON.stringify(sortedBlockedTimes.map(bt => ({
+    start: new Date(bt.startBlockedTimeMs).toISOString(),
+    end: new Date(bt.endBlockedTimeMs).toISOString(),
+  })), null, 2));
   let currentTimeMs = startWorkingTimeMs;
 
   // Find available slots between blocked times
   for (const blockedTime of sortedBlockedTimes) {
     if (blockedTime.startBlockedTimeMs > currentTimeMs) {
-      const adjustedEndTimeMs = calculateAdjustedEndTimeMs(blockedTime.startBlockedTimeMs, serviceDuration);
+      // Available time ends at the start of the blocked time
+      const availableEndTimeMs = blockedTime.startBlockedTimeMs;
 
-      if (adjustedEndTimeMs >= currentTimeMs) {
+      // Calculate the latest possible start time for the service
+      // Service can start at most (availableEndTimeMs - serviceDuration) to finish before blocked time
+      const serviceDurationMs = parseDurationToMilliseconds(serviceDuration);
+      const maxPossibleStartTimeMs = availableEndTimeMs - serviceDurationMs;
+
+      // Check if there's enough time for the service
+      const availableDurationMs = availableEndTimeMs - currentTimeMs;
+
+      if (availableDurationMs >= serviceDurationMs) {
+        // Use the smaller of maxPossibleStartTimeMs or availableEndTimeMs
+        const actualMaxPossibleStartTimeMs = Math.min(maxPossibleStartTimeMs, availableEndTimeMs);
         availableTimes.push({
           minPossibleStartTimeMs: currentTimeMs,
-          maxPossibleStartTimeMs: adjustedEndTimeMs,
+          maxPossibleStartTimeMs: actualMaxPossibleStartTimeMs,
         });
       }
     }
@@ -169,6 +192,11 @@ export const calculateAvailableTimesMs = (
       });
     }
   }
+
+  console.log(`🔍 DEBUG: calculateAvailableTimesMs - returning availableTimes:`, JSON.stringify(availableTimes.map(at => ({
+    minPossibleStartTimeMs: new Date(at.minPossibleStartTimeMs).toISOString(),
+    maxPossibleStartTimeMs: new Date(at.maxPossibleStartTimeMs).toISOString(),
+  })), null, 2));
 
   return availableTimes;
 };
@@ -787,9 +815,11 @@ export const calculateEmployeeDayAvailability = (
 ): EmployeeDayAvailabilityPure => {
   // Convert appointments to blocked times
   const appointmentBlocks = appointmentsToBlockedTimes(appointments);
+  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - employeeId: ${employee.employeeId}, appointments: ${appointments.length}, appointmentBlocks: ${appointmentBlocks.length}`);
 
   // Convert pause times to blocked times
   const pauseBlocks = pauseTimesToBlockedTimes(employee.pauseTimes);
+  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - pauseBlocks: ${pauseBlocks.length}`);
 
   // Calculate advance booking blocked time
   const advanceBookingParsed = parseAdvanceBookingTime(employee.advanceBookingTime);
@@ -812,19 +842,31 @@ export const calculateEmployeeDayAvailability = (
     allBlockedTimes.push(advanceBookingBlock);
   }
 
+  // Sort blocked times by start time before calculating available times
+  const sortedAllBlockedTimes = sortBlockedTimes(allBlockedTimes);
+  console.log(`🔍 DEBUG: sortedAllBlockedTimes:`, JSON.stringify(sortedAllBlockedTimes.map(bt => ({
+    start: new Date(bt.startBlockedTimeMs).toISOString(),
+    end: new Date(bt.endBlockedTimeMs).toISOString(),
+  })), null, 2));
+
   // Calculate available times
   const availableTimes = calculateAvailableTimesMs(
     employee.startWorkingTimeMs,
     employee.endWorkingTimeMs,
-    allBlockedTimes,
+    sortedAllBlockedTimes,
     serviceDuration,
   );
+
+  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - returning availableTimes:`, JSON.stringify(availableTimes.map(at => ({
+    minPossibleStartTimeMs: new Date(at.minPossibleStartTimeMs).toISOString(),
+    maxPossibleStartTimeMs: new Date(at.maxPossibleStartTimeMs).toISOString(),
+  })), null, 2));
 
   return {
     employeeId: employee.employeeId,
     startWorkingTimeMs: employee.startWorkingTimeMs,
     endWorkingTimeMs: employee.endWorkingTimeMs,
-    blockedTimes: allBlockedTimes,
+    blockedTimes: sortedAllBlockedTimes,
     availableTimes,
     timeslotInterval: employee.timeslotInterval,
   };
