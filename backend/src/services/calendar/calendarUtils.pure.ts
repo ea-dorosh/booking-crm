@@ -126,6 +126,8 @@ export const calculateAvailableTimesMs = (
 
   const availableTimes: AvailableTimePure[] = [];
 
+  // Debug logs removed for production
+
   // If no blocked times, the entire working period is potentially available
   if (blockedTimes.length === 0) {
     const adjustedEndTimeMs = calculateAdjustedEndTimeMs(endWorkingTimeMs, serviceDuration);
@@ -182,6 +184,8 @@ export const calculateAvailableTimesMs = (
     }
   }
 
+
+  // Debug logs removed for production
 
   return availableTimes;
 };
@@ -397,10 +401,24 @@ export const normalizeAppointment = (
   // Extract date part only (YYYY-MM-DD) from the date string
   const dateOnly = dayjs(date).format(`YYYY-MM-DD`);
 
+  // Handle both ISO strings and time-only strings
+  let startDateTime: dayjs.Dayjs;
+  let endDateTime: dayjs.Dayjs;
+
+  if (timeStart.includes(`T`)) {
+    // Full ISO string - parse directly
+    startDateTime = dayjs(timeStart).tz(`Europe/Berlin`).utc();
+    endDateTime = dayjs(timeEnd).tz(`Europe/Berlin`).utc();
+  } else {
+    // Time-only string - combine with date
+    startDateTime = dayjs(`${dateOnly}T${timeStart}`).tz(`Europe/Berlin`).utc();
+    endDateTime = dayjs(`${dateOnly}T${timeEnd}`).tz(`Europe/Berlin`).utc();
+  }
+
   return {
     dateISO: dateOnly as Date_ISO_Type,
-    startTimeMs: dayjs(timeStart).utc().valueOf(),
-    endTimeMs: dayjs(timeEnd).utc().valueOf(),
+    startTimeMs: startDateTime.valueOf(),
+    endTimeMs: endDateTime.valueOf(),
     employeeId,
   };
 };
@@ -637,6 +655,9 @@ export const generateTimeSlotsFromRange = (
   maxPossibleStartTimeMs: number,
   intervalMinutes: number,
 ): TimeSlotPure[] => {
+  console.log(`🔍 DEBUG: generateTimeSlotsFromRange - minPossibleStartTimeMs:`, new Date(minPossibleStartTimeMs).toISOString());
+  console.log(`🔍 DEBUG: generateTimeSlotsFromRange - maxPossibleStartTimeMs:`, new Date(maxPossibleStartTimeMs).toISOString());
+  console.log(`🔍 DEBUG: generateTimeSlotsFromRange - intervalMinutes:`, intervalMinutes);
 
   const slots: TimeSlotPure[] = [];
 
@@ -802,6 +823,7 @@ export const calculateEmployeeDayAvailability = (
 ): EmployeeDayAvailabilityPure => {
   // Convert appointments to blocked times
   const appointmentBlocks = appointmentsToBlockedTimes(appointments);
+  // Debug logs removed for testing
 
   // Convert pause times to blocked times
   const pauseBlocks = pauseTimesToBlockedTimes(employee.pauseTimes);
@@ -908,6 +930,9 @@ export const groupTimeSlotsByStartTime = (
   employeesWithSlots: EmployeeWithTimeSlotsPure[],
   timezone: string,
 ): GroupedTimeSlotPure[] => {
+  console.log(`🔍 DEBUG: groupTimeSlotsByStartTime - employeesWithSlots.length:`, employeesWithSlots.length);
+  console.log(`🔍 DEBUG: groupTimeSlotsByStartTime - timezone:`, timezone);
+
   const slotMap = new Map<string, number[]>();
 
   for (const employee of employeesWithSlots) {

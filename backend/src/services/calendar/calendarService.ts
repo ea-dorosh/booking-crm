@@ -94,6 +94,15 @@ function convertToOldFormat(
   dates: Date_ISO_Type[],
   serviceId?: number,
 ): PeriodWithGroupedTimeslotsType[] {
+  console.log(`🔍 DEBUG: convertToOldFormat - groupedTimeSlots.length:`, groupedTimeSlots.length);
+  console.log(`🔍 DEBUG: convertToOldFormat - dates:`, dates);
+  console.log(`🔍 DEBUG: convertToOldFormat - serviceId:`, serviceId);
+  console.log(`🔍 DEBUG: convertToOldFormat - groupedTimeSlots:`, JSON.stringify(groupedTimeSlots.map((daySlots, index) => ({
+    day: dates[index] || dates[0],
+    slotsCount: daySlots?.length || 0,
+    slots: daySlots?.map(slot => slot.startTime) || [],
+  })), null, 2));
+
   return groupedTimeSlots.map((daySlots, index) => ({
     day: dates[index] || dates[0],
     availableTimeslots: (daySlots || []).map(slot => ({
@@ -117,7 +126,7 @@ async function processSingleService(
   currentTimeMs: number,
 ): Promise<{
   period: WorkingDayPure[];
-  employeeTimeSlots: EmployeeWithTimeSlotsPure[];
+  employeeTimeSlots: EmployeeWithTimeSlotsPure[][];
   serviceDuration: Time_HH_MM_SS_Type;
   serviceId: number;
 }> {
@@ -191,6 +200,10 @@ async function processSingleService(
     ...normalizedBlockedTimes,
   ];
 
+  console.log(`🔍 DEBUG: savedAppointments:`, savedAppointments.length);
+  console.log(`🔍 DEBUG: normalizedSavedAppointments:`, JSON.stringify(normalizedSavedAppointments, null, 2));
+  console.log(`🔍 DEBUG: allNormalizedAppointments:`, allNormalizedAppointments.length);
+
   const dayAvailability = processPeriodAvailability(
     periodWithDaysAndEmployeeAvailability,
     allNormalizedAppointments,
@@ -202,14 +215,20 @@ async function processSingleService(
   // ✅ Pure function: Generate time slots
   const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
 
-
-  // Flatten time slots per day into single array
-  const employeeTimeSlots = employeeTimeSlotsPerDay.flat();
+  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay.length:`, employeeTimeSlotsPerDay.length);
+  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay:`, employeeTimeSlotsPerDay.map((day, index) => ({
+    day: index,
+    employeesCount: day.length,
+    employees: day.map(emp => ({
+      employeeId: emp.employeeId,
+      slotsCount: emp.timeSlots.length,
+    })),
+  })));
 
 
   return {
     period: periodWithDaysAndEmployeeAvailability,
-    employeeTimeSlots,
+    employeeTimeSlots: employeeTimeSlotsPerDay,
     serviceDuration: service.durationTime,
     serviceId,
   };
@@ -378,7 +397,7 @@ const getGroupedTimeSlots = async (
     }
 
     // ✅ Pure function: Group time slots
-    const groupedTimeSlots = groupTimeSlotsForPeriod([result.employeeTimeSlots]);
+    const groupedTimeSlots = groupTimeSlotsForPeriod(result.employeeTimeSlots);
 
     // Convert to old format - include all dates even if no slots
     const dates = result.period.map(day => day.dateISO);
@@ -404,8 +423,8 @@ const getGroupedTimeSlots = async (
 
   // ✅ Combine time slots from two services
   const combinations = combineTimeSlotsForTwoServices(
-    firstServiceResult.employeeTimeSlots,
-    secondServiceResult.employeeTimeSlots,
+    firstServiceResult.employeeTimeSlots.flat(1),
+    secondServiceResult.employeeTimeSlots.flat(1),
     firstServiceResult.serviceDuration,
   );
 

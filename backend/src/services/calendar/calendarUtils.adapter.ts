@@ -333,30 +333,69 @@ export const generateTimeSlotsFromDayAvailability = (
   dayAvailability: DayAvailabilityPure[],
   currentTimeMs?: number, // Optional current time for filtering
 ): EmployeeWithTimeSlotsPure[][] => {
-  return dayAvailability.map(day => {
+  console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - currentTimeMs:`, currentTimeMs ? new Date(currentTimeMs).toISOString() : `undefined`);
+  console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - dayAvailability.length:`, dayAvailability.length);
+
+  const result = dayAvailability.map((day, dayIndex) => {
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - day ${dayIndex}:`, day.dateISO);
+
     // Only filter by current time for today's date
     const dayDateMs = dayjs.utc(day.dateISO).valueOf();
     const todayStartMs = dayjs().utc().startOf(`day`).valueOf();
     const todayEndMs = dayjs().utc().endOf(`day`).valueOf();
+
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - day.dateISO:`, day.dateISO);
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - dayDateMs:`, new Date(dayDateMs).toISOString());
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - todayStartMs:`, new Date(todayStartMs).toISOString());
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - todayEndMs:`, new Date(todayEndMs).toISOString());
 
     // If this is today's date, filter by current time
     // If this is a future date, don't filter by current time
     const shouldFilterByTime = dayDateMs >= todayStartMs && dayDateMs <= todayEndMs;
     const filterTime = shouldFilterByTime ? currentTimeMs : undefined;
 
-    return day.employees.map(employee => {
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - shouldFilterByTime:`, shouldFilterByTime);
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - filterTime:`, filterTime ? new Date(filterTime).toISOString() : `undefined`);
+
+    const employeesForDay = day.employees.map(employee => {
+      console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - employee.availableTimes:`, JSON.stringify(employee.availableTimes.map(at => ({
+        minPossibleStartTimeMs: new Date(at.minPossibleStartTimeMs).toISOString(),
+        maxPossibleStartTimeMs: new Date(at.maxPossibleStartTimeMs).toISOString(),
+      })), null, 2));
+
       const timeSlots = generateEmployeeTimeSlots(
         employee.availableTimes,
         employee.timeslotInterval,
         filterTime, // Only filter for today
       );
 
+      console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - timeSlots.length:`, timeSlots.length);
+      console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - timeSlots:`, JSON.stringify(timeSlots.map(slot => ({
+        startTimeMs: new Date(slot.startTimeMs).toISOString(),
+        endTimeMs: new Date(slot.endTimeMs).toISOString(),
+      })), null, 2));
+
       return {
         employeeId: employee.employeeId,
         timeSlots,
       };
     });
+
+    console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - day ${dayIndex} employees:`, employeesForDay.length);
+    return employeesForDay;
   });
+
+  console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - result.length:`, result.length);
+  console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - result:`, result.map((day, index) => ({
+    day: index,
+    employeesCount: day.length,
+    employees: day.map(emp => ({
+      employeeId: emp.employeeId,
+      slotsCount: emp.timeSlots.length,
+    })),
+  })));
+
+  return result;
 };
 
 /**
@@ -366,9 +405,30 @@ export const groupTimeSlotsForPeriod = (
   employeeTimeSlotsPerDay: EmployeeWithTimeSlotsPure[][],
   timezone: string = TIMEZONE,
 ): GroupedTimeSlotPure[][] => {
-  return employeeTimeSlotsPerDay.map(employeesForDay =>
-    groupTimeSlotsByStartTime(employeesForDay, timezone),
-  );
+  console.log(`🔍 DEBUG: groupTimeSlotsForPeriod - employeeTimeSlotsPerDay.length:`, employeeTimeSlotsPerDay.length);
+  console.log(`🔍 DEBUG: groupTimeSlotsForPeriod - timezone:`, timezone);
+
+  const result = employeeTimeSlotsPerDay.map((employeesForDay, dayIndex) => {
+    console.log(`🔍 DEBUG: groupTimeSlotsForPeriod - day ${dayIndex}:`, employeesForDay.length, `employees`);
+    console.log(`🔍 DEBUG: groupTimeSlotsForPeriod - day ${dayIndex} slots:`, employeesForDay.map(emp => ({
+      employeeId: emp.employeeId,
+      slotsCount: emp.timeSlots.length,
+      slots: emp.timeSlots.map(slot => new Date(slot.startTimeMs).toISOString()),
+    })));
+
+    const grouped = groupTimeSlotsByStartTime(employeesForDay, timezone);
+    console.log(`🔍 DEBUG: groupTimeSlotsForPeriod - day ${dayIndex} grouped:`, grouped.length, `slots`);
+
+    return grouped;
+  });
+
+  console.log(`🔍 DEBUG: groupTimeSlotsForPeriod - result:`, result.map((daySlots, index) => ({
+    day: index,
+    slotsCount: daySlots.length,
+    slots: daySlots.map(slot => slot.startTime),
+  })));
+
+  return result;
 };
 
 // ============================================================================
