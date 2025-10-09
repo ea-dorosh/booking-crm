@@ -404,11 +404,7 @@ export const filterAppointmentsByDate = (
   appointments: NormalizedAppointmentPure[],
   dateISO: Date_ISO_Type,
 ): NormalizedAppointmentPure[] => {
-  console.log(`🔍 DEBUG: filterAppointmentsByDate - dateISO: ${dateISO}, appointments: ${appointments.length}`);
-  const result = appointments.filter(appointment => appointment.dateISO === dateISO);
-  console.log(`🔍 DEBUG: filterAppointmentsByDate - filtered: ${result.length}`);
-  console.log(`🔍 DEBUG: filterAppointmentsByDate - appointment dates:`, appointments.map(a => a.dateISO));
-  return result;
+  return appointments.filter(appointment => appointment.dateISO === dateISO);
 };
 
 /**
@@ -423,9 +419,7 @@ export const filterAppointmentsByEmployee = (
   appointments: NormalizedAppointmentPure[],
   employeeId: number,
 ): NormalizedAppointmentPure[] => {
-  const result = appointments.filter(appointment => appointment.employeeId === employeeId);
-  console.log(`🔍 DEBUG: filterAppointmentsByEmployee - employeeId: ${employeeId}, appointments: ${appointments.length}, filtered: ${result.length}`);
-  return result;
+  return appointments.filter(appointment => appointment.employeeId === employeeId);
 };
 
 /**
@@ -438,13 +432,10 @@ export const filterAppointmentsByEmployee = (
 export const appointmentsToBlockedTimes = (
   appointments: NormalizedAppointmentPure[],
 ): BlockedTimePure[] => {
-  console.log(`🔍 DEBUG: appointmentsToBlockedTimes - input appointments:`, JSON.stringify(appointments, null, 2));
-  const result = appointments.map(appointment => ({
+  return appointments.map(appointment => ({
     startBlockedTimeMs: appointment.startTimeMs,
     endBlockedTimeMs: appointment.endTimeMs,
   }));
-  console.log(`🔍 DEBUG: appointmentsToBlockedTimes - output blocked times:`, JSON.stringify(result, null, 2));
-  return result;
 };
 
 // ============================================================================
