@@ -258,14 +258,15 @@ export const getPeriodWithDaysAndEmployeeAvailabilityPure = (
         const pauseTimes = [];
 
         if (employee.blockStartTimeFirst && employee.blockEndTimeFirst) {
-          pauseTimes.push(
-            createPauseTime(
-              dateISO,
-              employee.blockStartTimeFirst as Time_HH_MM_SS_Type,
-              employee.blockEndTimeFirst as Time_HH_MM_SS_Type,
-              TIMEZONE,
-            ),
+          const pauseTime = createPauseTime(
+            dateISO,
+            employee.blockStartTimeFirst as Time_HH_MM_SS_Type,
+            employee.blockEndTimeFirst as Time_HH_MM_SS_Type,
+            TIMEZONE,
           );
+          console.log(`🔍 DEBUG: createPauseTime - dateISO: ${dateISO}, startTime: ${employee.blockStartTimeFirst}, endTime: ${employee.blockEndTimeFirst}`);
+          console.log(`🔍 DEBUG: createPauseTime - pauseTime:`, pauseTime);
+          pauseTimes.push(pauseTime);
         }
 
         return {

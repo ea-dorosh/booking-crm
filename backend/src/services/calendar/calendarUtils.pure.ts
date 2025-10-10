@@ -826,7 +826,9 @@ export const calculateEmployeeDayAvailability = (
   // Debug logs removed for testing
 
   // Convert pause times to blocked times
+  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - employee.pauseTimes:`, employee.pauseTimes);
   const pauseBlocks = pauseTimesToBlockedTimes(employee.pauseTimes);
+  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - pauseBlocks:`, pauseBlocks);
 
   // Calculate advance booking blocked time
   const advanceBookingParsed = parseAdvanceBookingTime(employee.advanceBookingTime);

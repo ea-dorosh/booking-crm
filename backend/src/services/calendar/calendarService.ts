@@ -56,14 +56,18 @@ async function getGoogleCalendarEventsForEmployees(
 
   // Create employee dates map
   const employeeDatesMap = new Map<number, string[]>();
+  console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - periodWithDaysAndEmployeeAvailability:`, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 2));
   periodWithDaysAndEmployeeAvailability.forEach(dayData => {
+    console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - dayData:`, dayData);
     dayData.employees.forEach((employee: any) => {
       if (!employeeDatesMap.has(employee.employeeId)) {
         employeeDatesMap.set(employee.employeeId, []);
       }
-      employeeDatesMap.get(employee.employeeId)!.push(dayData.dateISO);
+      console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - pushing dateISO:`, dayData.day);
+      employeeDatesMap.get(employee.employeeId)!.push(dayData.day);
     });
   });
+  console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - employeeDatesMap:`, employeeDatesMap);
 
   // Get events for each employee
   for (const [employeeId, dates] of employeeDatesMap) {
@@ -201,6 +205,8 @@ async function processSingleService(
 
   console.log(`🔍 DEBUG: savedAppointments:`, savedAppointments.length);
   console.log(`🔍 DEBUG: normalizedSavedAppointments:`, JSON.stringify(normalizedSavedAppointments, null, 2));
+  console.log(`🔍 DEBUG: googleCalendarEvents:`, googleCalendarEvents.length);
+  console.log(`🔍 DEBUG: normalizedGoogleEvents:`, JSON.stringify(normalizedGoogleEvents, null, 2));
   console.log(`🔍 DEBUG: allNormalizedAppointments:`, allNormalizedAppointments.length);
 
   const dayAvailability = processPeriodAvailability(
