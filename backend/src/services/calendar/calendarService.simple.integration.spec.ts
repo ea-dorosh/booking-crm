@@ -6,11 +6,10 @@ import timezone from 'dayjs/plugin/timezone';
 import {
   calculateAvailableTimeSlots,
 } from './calendarUtils.adapter';
-import type {
-  GroupedAvailabilityDayType,
-  AppointmentDataType,
-  EmployeeBlockedTimeData,
-} from '../calendarService';
+import { EmployeeBlockedTimeData } from '@/services/employees/employeesBlockedTimesService.js';
+import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
+import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
+import { TimeslotIntervalEnum } from '@/enums/enums.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -39,7 +38,7 @@ describe(`Calendar Service Simple Integration Tests`, () => {
               blockStartTimeFirst: null, // No pause time
               blockEndTimeFirst: null,
               advanceBookingTime: `00:00:00`,
-              timeslotInterval: 30,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -99,7 +98,7 @@ describe(`Calendar Service Simple Integration Tests`, () => {
               blockStartTimeFirst: null,
               blockEndTimeFirst: null,
               advanceBookingTime: `00:00:00`,
-              timeslotInterval: 30,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },

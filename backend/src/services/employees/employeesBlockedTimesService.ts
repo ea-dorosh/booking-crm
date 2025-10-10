@@ -318,10 +318,13 @@ async function createEmployeeBlockedTime(
   }
 
   // If not all day, validate that start time is before end time
+  // Allow end time to be before start time if end date is after start date (crossing midnight)
   if (!isAllDay && startTime && endTime) {
     const start = dayjs(`2000-01-01 ${startTime}`);
     const end = dayjs(`2000-01-01 ${endTime}`);
-    if (end.isSameOrBefore(start)) {
+
+    // Only validate time if dates are the same
+    if (dayjs(blockedDate).isSame(dayjs(actualEndDate), `day`) && end.isSameOrBefore(start)) {
       throw new Error(`End time must be after start time`);
     }
   }
@@ -535,7 +538,9 @@ async function updateEmployeeBlockedTime(
     if (finalStartTime && finalEndTime) {
       const start = dayjs(`2000-01-01 ${finalStartTime}`);
       const end = dayjs(`2000-01-01 ${finalEndTime}`);
-      if (end.isSameOrBefore(start)) {
+
+      // Only validate time if dates are the same
+      if (dayjs(blockedDate).isSame(dayjs(endDate), `day`) && end.isSameOrBefore(start)) {
         throw new Error(`End time must be after start time`);
       }
     }

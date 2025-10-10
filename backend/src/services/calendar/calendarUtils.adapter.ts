@@ -371,8 +371,8 @@ export const generateTimeSlotsFromDayAvailability = (
 
       console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - timeSlots.length:`, timeSlots.length);
       console.log(`🔍 DEBUG: generateTimeSlotsFromDayAvailability - timeSlots:`, JSON.stringify(timeSlots.map(slot => ({
-        startTimeMs: new Date(slot.startTimeMs).toISOString(),
-        endTimeMs: new Date(slot.endTimeMs).toISOString(),
+        startTimeMs: isNaN(slot.startTimeMs) ? `INVALID` : new Date(slot.startTimeMs).toISOString(),
+        endTimeMs: isNaN(slot.endTimeMs) ? `INVALID` : new Date(slot.endTimeMs).toISOString(),
       })), null, 2));
 
       return {

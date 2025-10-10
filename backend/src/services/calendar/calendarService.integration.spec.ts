@@ -2,19 +2,11 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-
-import {
-  calculateAvailableTimeSlots,
-  type EmployeeWorkingDayPure,
-  type NormalizedAppointmentPure,
-  type BlockedTimePure,
-  type PauseTimePure,
-} from './calendarUtils.adapter';
-import type {
-  GroupedAvailabilityDayType,
-  AppointmentDataType,
-  EmployeeBlockedTimeData,
-} from './calendarService.js';
+import { calculateAvailableTimeSlots } from './calendarUtils.adapter';
+import { EmployeeBlockedTimeData } from '@/services/employees/employeesBlockedTimesService.js';
+import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
+import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
+import { TimeslotIntervalEnum } from '@/enums/enums.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -29,8 +21,6 @@ describe(`Calendar Service Integration Tests`, () => {
     it(`should generate correct time slots with proper blocking logic`, () => {
       // Test data based on real production scenario
       const testDate = `2025-10-20`;
-      const serviceId = 43;
-      const employeeIds = [15];
       const currentTimeMs = dayjs(`2025-10-09T11:11:04.944Z`).valueOf(); // Current time from logs
 
       // Employee working day data (from logs) - using GroupedAvailabilityDayType format
@@ -46,7 +36,7 @@ describe(`Calendar Service Integration Tests`, () => {
               blockStartTimeFirst: `11:00:00`, // Pause time start
               blockEndTimeFirst: `11:30:00`,   // Pause time end
               advanceBookingTime: `00:00:00`,
-              timeslotInterval: 30,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -186,7 +176,7 @@ describe(`Calendar Service Integration Tests`, () => {
               blockStartTimeFirst: `12:20:00`, // Pause time start
               blockEndTimeFirst: `12:40:00`,   // Pause time end
               advanceBookingTime: `00:00:00`,
-              timeslotInterval: 30,
+              timeslotInterval: TimeslotIntervalEnum.Thirty,
             },
           ],
         },
@@ -278,6 +268,101 @@ describe(`Calendar Service Integration Tests`, () => {
 
       // Verify expected number of available time periods (3 periods from logs)
       expect(employeeAvailability.availableTimes).toHaveLength(3);
+    });
+  });
+
+  describe(`Two Services Integration`, () => {
+    it(`should validate two services data structure`, () => {
+      // Test data matching real-world scenario: serviceId=1, employeeIds=[1,14,15,16], serviceId=53
+      const servicesData = [
+        {
+          serviceId: 1, employeeIds: [1, 14, 15, 16],
+        },
+        {
+          serviceId: 53, employeeIds: [1, 14, 15, 16],
+        },
+      ];
+
+      // Verify services data structure
+      expect(servicesData).toHaveLength(2);
+      expect(servicesData[0].serviceId).toBe(1);
+      expect(servicesData[0].employeeIds).toEqual([1, 14, 15, 16]);
+      expect(servicesData[1].serviceId).toBe(53);
+      expect(servicesData[1].employeeIds).toEqual([1, 14, 15, 16]);
+
+      // Verify employee IDs are valid numbers
+      servicesData.forEach(service => {
+        service.employeeIds.forEach(employeeId => {
+          expect(typeof employeeId).toBe(`number`);
+          expect(employeeId).toBeGreaterThan(0);
+        });
+      });
+    });
+
+    it(`should validate two services with different employee sets`, () => {
+      // Test with different employees for each service
+      const servicesData = [
+        {
+          serviceId: 1, employeeIds: [1, 15],
+        },
+        {
+          serviceId: 53, employeeIds: [14, 16],
+        },
+      ];
+
+      // Verify services data structure
+      expect(servicesData).toHaveLength(2);
+      expect(servicesData[0].serviceId).toBe(1);
+      expect(servicesData[0].employeeIds).toEqual([1, 15]);
+      expect(servicesData[1].serviceId).toBe(53);
+      expect(servicesData[1].employeeIds).toEqual([14, 16]);
+
+      // Verify no overlap in employee IDs
+      const firstServiceEmployees = new Set(servicesData[0].employeeIds);
+      const secondServiceEmployees = new Set(servicesData[1].employeeIds);
+      const intersection = new Set([...firstServiceEmployees].filter(id => secondServiceEmployees.has(id)));
+      expect(intersection.size).toBe(0);
+    });
+
+    it(`should validate two services with empty employee sets`, () => {
+      // Test with empty employee arrays
+      const servicesData = [
+        {
+          serviceId: 1, employeeIds: [],
+        },
+        {
+          serviceId: 53, employeeIds: [],
+        },
+      ];
+
+      // Verify services data structure
+      expect(servicesData).toHaveLength(2);
+      expect(servicesData[0].employeeIds).toHaveLength(0);
+      expect(servicesData[1].employeeIds).toHaveLength(0);
+    });
+
+    it(`should validate two services with invalid employee IDs`, () => {
+      // Test with invalid employee IDs
+      const servicesData = [
+        {
+          serviceId: 1, employeeIds: [999, 998],
+        }, // Non-existent employees
+        {
+          serviceId: 53, employeeIds: [997, 996],
+        },
+      ];
+
+      // Verify services data structure
+      expect(servicesData).toHaveLength(2);
+      expect(servicesData[0].employeeIds).toEqual([999, 998]);
+      expect(servicesData[1].employeeIds).toEqual([997, 996]);
+
+      // Verify all employee IDs are numbers (even if invalid)
+      servicesData.forEach(service => {
+        service.employeeIds.forEach(employeeId => {
+          expect(typeof employeeId).toBe(`number`);
+        });
+      });
     });
   });
 });

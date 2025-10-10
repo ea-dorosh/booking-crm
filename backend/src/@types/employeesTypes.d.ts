@@ -63,7 +63,7 @@ export interface EmployeeAvailabilityDataType {
   blockEndTimeFirst: Time_HH_MM_SS_Type;
 }
 
-interface GroupedAvailabilityDayType {
+export interface GroupedAvailabilityDayType {
   dayId: number;
   employees: Array<{
     id: number;

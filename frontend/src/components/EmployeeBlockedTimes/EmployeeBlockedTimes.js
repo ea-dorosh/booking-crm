@@ -119,7 +119,9 @@ export default function EmployeeBlockedTimes({ employeeId }) {
     }
 
     // Validate time range if not all day
-    if (!isAllDay && startTime >= endTime) {
+    // Allow creation if end time is on the same day (startTime >= endTime means same day)
+    // Or if end date is after start date (crossing midnight is allowed)
+    if (!isAllDay && startTime > endTime && selectedDate.isSame(selectedEndDate, `day`)) {
       dispatch(showError(`End time must be after start time`));
       return;
     }

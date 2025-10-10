@@ -12,7 +12,6 @@ import {
   getPeriodWithDaysAndEmployeeAvailabilityPure,
   normalizeSavedAppointments,
   normalizeGoogleEventsForEmployees,
-  normalizePauseTimesForEmployees,
   normalizeBlockedTimesForEmployees,
   processPeriodAvailability,
   generateTimeSlotsFromDayAvailability,
@@ -47,7 +46,7 @@ export interface PeriodWithGroupedTimeslotsType {
  */
 async function getGoogleCalendarEventsForEmployees(
   dbPool: Pool,
-  periodWithDaysAndEmployeeAvailability: WorkingDayPure[],
+  periodWithDaysAndEmployeeAvailability: any[],
 ): Promise<{ start: string; end: string; summary: string }[]> {
   const googleCalendarEvents: { start: string; end: string; summary: string }[] = [];
 
@@ -58,7 +57,7 @@ async function getGoogleCalendarEventsForEmployees(
   // Create employee dates map
   const employeeDatesMap = new Map<number, string[]>();
   periodWithDaysAndEmployeeAvailability.forEach(dayData => {
-    dayData.employees.forEach(employee => {
+    dayData.employees.forEach((employee: any) => {
       if (!employeeDatesMap.has(employee.employeeId)) {
         employeeDatesMap.set(employee.employeeId, []);
       }
@@ -431,7 +430,7 @@ const getGroupedTimeSlots = async (
   // Process each service using original logic
   for (const [index, serviceData] of servicesData.entries()) {
     const {
-      serviceId, employeeIds, 
+      serviceId, employeeIds,
     } = serviceData;
 
     // Get service details and employee availability
