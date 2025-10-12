@@ -962,3 +962,218 @@ export const groupTimeSlotsByStartTime = (
   return grouped.sort((a, b) => a.startTime.localeCompare(b.startTime));
 };
 
+// ============================================================================
+// TWO SERVICES PURE FUNCTIONS
+// ============================================================================
+
+/**
+ * Interface for combined time slots from two services
+ */
+export interface CombinedTimeSlotPure {
+  firstServiceEmployeeId: number;
+  firstServiceStartTime: number;
+  firstServiceEndTime: number;
+  secondServiceEmployeeId: number;
+  secondServiceStartTime: number;
+  secondServiceEndTime: number;
+}
+
+/**
+ * Interface for filtered time slots data for two services
+ */
+export interface FilteredTimeSlotsDataForTwoServicesPure {
+  day: Date_ISO_Type;
+  availableTimeSlots: CombinedTimeSlotPure[];
+}
+
+/**
+ * Interface for grouped time slots for two services
+ */
+export interface PeriodWithGroupedTimeslotsForTwoServicesPure {
+  day: Date_ISO_Type;
+  availableTimeslots: {
+    startTime: Time_HH_MM_SS_Type;
+    employeeIds: number[];
+    serviceId: number;
+    secondService: {
+      startTime: Time_HH_MM_SS_Type;
+      employeeIds: number[];
+      serviceId: number;
+    };
+  }[];
+}
+
+/**
+ * Combine time slots from two services
+ * Pure function that takes two sets of employee time slots and combines them
+ */
+export const combineTimeSlotsForTwoServices = (
+  firstServiceSlots: EmployeeWithTimeSlotsPure[],
+  secondServiceSlots: EmployeeWithTimeSlotsPure[],
+  firstServiceDuration: Time_HH_MM_SS_Type,
+  _timezone: string = `Europe/Berlin`,
+): CombinedTimeSlotPure[] => {
+  const combinations: CombinedTimeSlotPure[] = [];
+
+  // Parse first service duration
+  const durationMs = parseDurationToMilliseconds(firstServiceDuration);
+
+  // For each first service slot
+  for (const firstEmployee of firstServiceSlots) {
+    for (const firstSlot of firstEmployee.timeSlots) {
+      const firstServiceEndTimeMs = firstSlot.startTimeMs + durationMs;
+
+      // Find matching second service slots
+      for (const secondEmployee of secondServiceSlots) {
+        for (const secondSlot of secondEmployee.timeSlots) {
+          // Check if second service can start right after first (within 30 min window)
+          if (
+            secondSlot.startTimeMs >= firstServiceEndTimeMs &&
+            secondSlot.startTimeMs <= firstServiceEndTimeMs + 30 * 60 * 1000
+          ) {
+            combinations.push({
+              firstServiceEmployeeId: firstEmployee.employeeId,
+              firstServiceStartTime: firstSlot.startTimeMs,
+              firstServiceEndTime: firstServiceEndTimeMs,
+              secondServiceEmployeeId: secondEmployee.employeeId,
+              secondServiceStartTime: secondSlot.startTimeMs,
+              secondServiceEndTime: secondSlot.endTimeMs,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return combinations;
+};
+
+/**
+ * Convert combined slots to grouped format for two services
+ * Pure function that groups combinations by start time and employee IDs
+ */
+export const convertCombinedSlotsToGroupedFormat = (
+  combinations: CombinedTimeSlotPure[],
+  firstServiceId: number,
+  secondServiceId: number,
+  dates: Date_ISO_Type[],
+  _timezone: string = `Europe/Berlin`,
+): PeriodWithGroupedTimeslotsForTwoServicesPure[] => {
+  // Group by first service start time
+  const groupedByTime = new Map<string, {
+    firstServiceEmployeeIds: Set<number>;
+    secondServiceEmployeeIds: Set<number>;
+    secondServiceStartTime: string;
+  }>();
+
+  for (const combo of combinations) {
+    const startTimeStr = dayjs(combo.firstServiceStartTime).tz(_timezone).format(TIME_FORMAT);
+    const secondStartTimeStr = dayjs(combo.secondServiceStartTime).tz(_timezone).format(TIME_FORMAT);
+
+    if (!groupedByTime.has(startTimeStr)) {
+      groupedByTime.set(startTimeStr, {
+        firstServiceEmployeeIds: new Set(),
+        secondServiceEmployeeIds: new Set(),
+        secondServiceStartTime: secondStartTimeStr,
+      });
+    }
+
+    const group = groupedByTime.get(startTimeStr)!;
+    group.firstServiceEmployeeIds.add(combo.firstServiceEmployeeId);
+    group.secondServiceEmployeeIds.add(combo.secondServiceEmployeeId);
+  }
+
+  // Convert to result format
+  const availableTimeslots = Array.from(groupedByTime.entries())
+    .map(([startTime, group]) => ({
+      startTime: startTime as Time_HH_MM_SS_Type,
+      employeeIds: Array.from(group.firstServiceEmployeeIds).sort((a, b) => a - b),
+      serviceId: firstServiceId,
+      secondService: {
+        startTime: group.secondServiceStartTime as Time_HH_MM_SS_Type,
+        employeeIds: Array.from(group.secondServiceEmployeeIds).sort((a, b) => a - b),
+        serviceId: secondServiceId,
+      },
+    }))
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  return [
+    {
+      day: dates[0] || (`2024-01-01` as Date_ISO_Type),
+      availableTimeslots,
+    },
+  ];
+};
+
+/**
+ * Calculate available time slots for two services
+ * High-level pure function that orchestrates the two-service logic
+ */
+export const calculateAvailableTimeSlotsForTwoServices = (
+  firstServiceData: {
+    period: WorkingDayPure[];
+    dayAvailability: DayAvailabilityPure[];
+    groupedTimeSlots: GroupedTimeSlotPure[][];
+    serviceId: number;
+    serviceDuration: Time_HH_MM_SS_Type;
+  },
+  secondServiceData: {
+    period: WorkingDayPure[];
+    dayAvailability: DayAvailabilityPure[];
+    groupedTimeSlots: GroupedTimeSlotPure[][];
+    serviceId: number;
+    serviceDuration: Time_HH_MM_SS_Type;
+  },
+  _timezone: string = `Europe/Berlin`,
+): PeriodWithGroupedTimeslotsForTwoServicesPure[] => {
+  const result: PeriodWithGroupedTimeslotsForTwoServicesPure[] = [];
+
+  // Process each day
+  for (let dayIndex = 0; dayIndex < firstServiceData.period.length; dayIndex++) {
+    const firstDay = firstServiceData.dayAvailability[dayIndex];
+    const secondDay = secondServiceData.dayAvailability[dayIndex];
+
+    if (!firstDay || !secondDay) {
+      continue;
+    }
+
+    // Convert available times to time slots for each employee
+    const firstServiceSlots: EmployeeWithTimeSlotsPure[] = firstDay.employees.map(employee => ({
+      employeeId: employee.employeeId,
+      timeSlots: employee.availableTimes.map(availableTime => ({
+        startTimeMs: availableTime.minPossibleStartTimeMs,
+        endTimeMs: availableTime.maxPossibleStartTimeMs,
+      })),
+    }));
+
+    const secondServiceSlots: EmployeeWithTimeSlotsPure[] = secondDay.employees.map(employee => ({
+      employeeId: employee.employeeId,
+      timeSlots: employee.availableTimes.map(availableTime => ({
+        startTimeMs: availableTime.minPossibleStartTimeMs,
+        endTimeMs: availableTime.maxPossibleStartTimeMs,
+      })),
+    }));
+
+    // Combine time slots
+    const combinations = combineTimeSlotsForTwoServices(
+      firstServiceSlots,
+      secondServiceSlots,
+      firstServiceData.serviceDuration,
+      _timezone,
+    );
+
+    // Convert to grouped format
+    const groupedSlots = convertCombinedSlotsToGroupedFormat(
+      combinations,
+      firstServiceData.serviceId,
+      secondServiceData.serviceId,
+      [firstDay.dateISO],
+      _timezone,
+    );
+
+    result.push(...groupedSlots);
+  }
+
+  return result;
+};
+

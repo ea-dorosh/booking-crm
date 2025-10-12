@@ -6,10 +6,8 @@ import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
 import {
   normalizeAppointment,
   filterAppointmentsByDate,
-  filterAppointmentsByEmployee,
   appointmentsToBlockedTimes,
   calculateEmployeeDayAvailability,
-  generateEmployeeTimeSlots,
 } from './calendarUtils.pure';
 import { generateTimeSlotsFromDayAvailability } from './calendarUtils.adapter';
 
