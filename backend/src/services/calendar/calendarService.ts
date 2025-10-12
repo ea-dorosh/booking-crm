@@ -207,12 +207,6 @@ async function processSingleService(
     ...normalizedBlockedTimes,
   ];
 
-  console.log(`🔍 DEBUG: savedAppointments:`, savedAppointments.length);
-  console.log(`🔍 DEBUG: normalizedSavedAppointments:`, JSON.stringify(normalizedSavedAppointments, null, 2));
-  console.log(`🔍 DEBUG: googleCalendarEvents:`, googleCalendarEvents.length);
-  console.log(`🔍 DEBUG: normalizedGoogleEvents:`, JSON.stringify(normalizedGoogleEvents, null, 2));
-  console.log(`🔍 DEBUG: allNormalizedAppointments:`, allNormalizedAppointments.length);
-
   const dayAvailability = processPeriodAvailability(
     periodWithDaysAndEmployeeAvailability,
     allNormalizedAppointments,
@@ -223,17 +217,6 @@ async function processSingleService(
 
   // ✅ Pure function: Generate time slots
   const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
-
-  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay.length:`, employeeTimeSlotsPerDay.length);
-  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay:`, employeeTimeSlotsPerDay.map((day: EmployeeWithTimeSlotsPure[], index: number) => ({
-    day: index,
-    employeesCount: day.length,
-    employees: day.map((emp: EmployeeWithTimeSlotsPure) => ({
-      employeeId: emp.employeeId,
-      slotsCount: emp.timeSlots.length,
-    })),
-  })));
-
 
   return {
     period: periodWithDaysAndEmployeeAvailability,
@@ -328,6 +311,7 @@ const getGroupedTimeSlots = async (
       const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
       const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(googleCalendarEvents, firstServiceResult.period);
       const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(blockedTimes, firstServiceResult.period);
+      // NOTE: pause times are already in employee.pauseTimes and processed by processPeriodAvailability
 
       const allNormalizedAppointments = [
         ...normalizedSavedAppointments,
@@ -369,6 +353,7 @@ const getGroupedTimeSlots = async (
       const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
       const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(googleCalendarEvents, secondServiceResult.period);
       const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(blockedTimes, secondServiceResult.period);
+      // NOTE: pause times are already in employee.pauseTimes and processed by processPeriodAvailability
 
       const allNormalizedAppointments = [
         ...normalizedSavedAppointments,
