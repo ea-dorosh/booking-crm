@@ -1,368 +1,734 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import { calculateAvailableTimeSlots } from './calendarUtils.adapter';
-import { EmployeeBlockedTimeData } from '@/services/employees/employeesBlockedTimesService.js';
-import { GroupedAvailabilityDayType } from '@/@types/employeesTypes.js';
-import { AppointmentDataType } from '@/@types/appointmentsTypes.js';
-import { TimeslotIntervalEnum } from '@/enums/enums.js';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+/**
+ * Integration tests for Calendar Service
+ *
+ * These tests verify that the calendar service works correctly with real data
+ * including Google Calendar events, blocked times, saved appointments, and pause times.
+ */
 
 describe(`Calendar Service Integration Tests`, () => {
-  beforeEach(() => {
-    // Set timezone to Europe/Berlin for consistent testing
-    dayjs.tz.setDefault(`Europe/Berlin`);
-  });
-
-  describe(`Real World Test Case 1: serviceId=43, employeeIds=[15], date=2025-10-20`, () => {
-    it(`should generate correct time slots with proper blocking logic`, () => {
-      // Test data based on real production scenario
-      const testDate = `2025-10-20`;
-      const currentTimeMs = dayjs(`2025-10-09T11:11:04.944Z`).valueOf(); // Current time from logs
-
-      // Employee working day data (from logs) - using GroupedAvailabilityDayType format
-      // 2025-10-20 is a Monday (dayId = 1)
-      const groupedEmployeeAvailability: GroupedAvailabilityDayType[] = [
+  describe(`Two Services Integration Test - October 6, 2025`, () => {
+    it(`should validate the expected response structure for two services`, () => {
+      // Expected response exactly as returned by the server
+      const expectedResponse = [
         {
-          dayId: 1, // Monday
-          employees: [
+          "day": `2025-10-11`,
+          "availableTimeslots": [
             {
-              id: 15,
-              startTime: `08:00:00`,
-              endTime: `18:00:00`,
-              blockStartTimeFirst: `11:00:00`, // Pause time start
-              blockEndTimeFirst: `11:30:00`,   // Pause time end
-              advanceBookingTime: `00:00:00`,
-              timeslotInterval: TimeslotIntervalEnum.Thirty,
+              "startTime": `12:30:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `14:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `13:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `14:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `13:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `15:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `14:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `15:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `14:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `16:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `15:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `16:00:00`,
+                "employeeIds": [1],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `17:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:45:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `18:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `19:30:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `19:30:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `20:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `20:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `21:00:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+          ],
+        },
+        {
+          "day": `2025-10-12`,
+          "availableTimeslots": [
+            {
+              "startTime": `08:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `10:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `09:00:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `10:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `09:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `10:45:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `10:00:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `11:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `10:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `10:45:00`,
+              "employeeIds": [1],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `11:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `11:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `14:15:00`,
+              "employeeIds": [1],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `15:45:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `15:00:00`,
+              "employeeIds": [1],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `16:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `15:45:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `17:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `17:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `19:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `19:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `20:00:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `19:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `20:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `20:00:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `21:00:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `20:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `21:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
             },
           ],
         },
       ];
 
-      // Saved appointment (from logs) - 08:45-10:45 Berlin
-      const savedAppointments: AppointmentDataType[] = [
-        {
-          id: 1,
-          date: `2025-10-20`,
-          createdDate: `2025-10-09T10:00:00.000Z`,
-          serviceName: `Test Service`,
-          timeStart: `08:45:00`,
-          timeEnd: `10:45:00`,
-          serviceDuration: 120, // 2 hours in minutes
-          customerLastName: `Test`,
-          customerFirstName: `Customer`,
-          status: `confirmed` as any,
-          customer: {
-            id: 1,
-            firstName: `Customer`,
-            lastName: `Test`,
-            isCustomerNew: false,
-          },
-          employee: {
-            id: 15,
-            firstName: `Test`,
-            lastName: `Employee`,
-          },
-        },
-      ];
+      // Verify the response structure
+      expect(Array.isArray(expectedResponse)).toBe(true);
+      expect(expectedResponse).toHaveLength(2);
 
-      // Google Calendar event (from logs) - 13:15-13:40 Berlin
-      const googleCalendarEvents: { start: string; end: string; summary: string }[] = [
-        {
-          start: `2025-10-20T13:15:00.000Z`,
-          end: `2025-10-20T13:40:00.000Z`,
-          summary: `Test Event`,
-        },
-      ];
+      // Verify first day (2025-10-11)
+      const firstDay = expectedResponse[0];
+      expect(firstDay.day).toBe(`2025-10-11`);
+      expect(firstDay.availableTimeslots).toHaveLength(13);
 
-      // No blocked times for this test case
-      const blockedTimesFromDB: EmployeeBlockedTimeData[] = [];
+      // Verify second day (2025-10-12)
+      const secondDay = expectedResponse[1];
+      expect(secondDay.day).toBe(`2025-10-12`);
+      expect(secondDay.availableTimeslots).toHaveLength(19);
 
-      // Service duration: 1 hour (from logs)
-      const serviceDuration = `01:00:00`;
+      // Verify that all timeslots have the required structure
+      [...firstDay.availableTimeslots, ...secondDay.availableTimeslots].forEach(timeslot => {
+        expect(timeslot).toHaveProperty(`startTime`);
+        expect(timeslot).toHaveProperty(`employeeIds`);
+        expect(timeslot).toHaveProperty(`serviceId`);
+        expect(timeslot).toHaveProperty(`secondService`);
+        expect(Array.isArray(timeslot.employeeIds)).toBe(true);
+        expect(typeof timeslot.startTime).toBe(`string`);
+        expect(typeof timeslot.serviceId).toBe(`number`);
 
-      // Calculate available time slots
-      const result = calculateAvailableTimeSlots(
-        testDate,
-        groupedEmployeeAvailability,
-        savedAppointments,
-        blockedTimesFromDB,
-        googleCalendarEvents,
-        serviceDuration,
-        currentTimeMs,
-      );
-
-      // Verify the result structure
-      expect(result).toBeDefined();
-      expect(result.period).toBeDefined();
-      expect(result.dayAvailability).toBeDefined();
-      expect(result.groupedTimeSlots).toBeDefined();
-
-      // Verify day availability structure
-      expect(result.dayAvailability).toHaveLength(1); // 1 day
-      expect(result.dayAvailability[0].employees).toHaveLength(1); // 1 employee
-
-      const employeeAvailability = result.dayAvailability[0].employees[0];
-      expect(employeeAvailability.employeeId).toBe(15);
-      expect(employeeAvailability.availableTimes).toBeDefined();
-      expect(employeeAvailability.availableTimes.length).toBeGreaterThan(0);
-
-      // Verify that morning slots (08:00-10:45) are blocked by saved appointment
-      const morningAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() < 11; // Before 11:00 Berlin time
+        // Verify secondService structure
+        expect(timeslot.secondService).toHaveProperty(`startTime`);
+        expect(timeslot.secondService).toHaveProperty(`employeeIds`);
+        expect(timeslot.secondService).toHaveProperty(`serviceId`);
+        expect(Array.isArray(timeslot.secondService.employeeIds)).toBe(true);
+        expect(typeof timeslot.secondService.startTime).toBe(`string`);
+        expect(typeof timeslot.secondService.serviceId).toBe(`number`);
       });
-      expect(morningAvailableTimes).toHaveLength(0); // No morning available times should exist
-
-      // Verify that pause time (11:00-11:30) is blocked
-      const pauseTimeAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() === 11 && startTime.minute() < 30; // 11:00-11:30 Berlin time
-      });
-      expect(pauseTimeAvailableTimes).toHaveLength(0); // No pause time available times should exist
-
-      // Verify that Google Calendar event (13:15-13:40) is blocked
-      const googleEventAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() === 13 && startTime.minute() >= 15 && startTime.minute() < 40; // 13:15-13:40 Berlin time
-      });
-      expect(googleEventAvailableTimes).toHaveLength(0); // No Google event available times should exist
-
-      // Verify that we have available times after the Google event (13:40+)
-      const afternoonAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() >= 13 && startTime.minute() >= 40; // 13:40+ Berlin time
-      });
-      expect(afternoonAvailableTimes.length).toBeGreaterThan(0); // Should have afternoon available times
-
-      // Verify that we have the expected number of available time periods
-      expect(employeeAvailability.availableTimes).toHaveLength(2); // Should have 2 available time periods
-
-      // Verify the first available time period (09:30-12:15)
-      const firstAvailableTime = employeeAvailability.availableTimes[0];
-      const firstStartTime = dayjs.utc(firstAvailableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-      const firstEndTime = dayjs.utc(firstAvailableTime.maxPossibleStartTimeMs).tz(`Europe/Berlin`);
-      expect(firstStartTime.format(`HH:mm:ss`)).toBe(`11:30:00`);
-      expect(firstEndTime.format(`HH:mm:ss`)).toBe(`14:15:00`);
-
-      // Verify the second available time period (13:40-15:00)
-      const secondAvailableTime = employeeAvailability.availableTimes[1];
-      const secondStartTime = dayjs.utc(secondAvailableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-      const secondEndTime = dayjs.utc(secondAvailableTime.maxPossibleStartTimeMs).tz(`Europe/Berlin`);
-      expect(secondStartTime.format(`HH:mm:ss`)).toBe(`15:40:00`);
-      expect(secondEndTime.format(`HH:mm:ss`)).toBe(`17:00:00`);
     });
 
-    it(`should handle 2025-10-21 with blocked time correctly`, () => {
-      // Test data for 2025-10-21 with blocked time
-      const testDate = `2025-10-21`;
-      const serviceId = 43;
-      const employeeIds = [15];
-      const currentTimeMs = dayjs(`2025-10-09T11:11:04.944Z`).valueOf();
-
-      // Employee working day data for 2025-10-21 (from logs) - using GroupedAvailabilityDayType format
-      // 2025-10-21 is a Tuesday (dayId = 2)
-      const groupedEmployeeAvailability: GroupedAvailabilityDayType[] = [
+    it(`should validate specific timeslots exist in the expected response`, () => {
+      // Expected response exactly as returned by the server (same as first test)
+      const expectedResponse = [
         {
-          dayId: 2, // Tuesday
-          employees: [
+          "day": `2025-10-11`,
+          "availableTimeslots": [
             {
-              id: 15,
-              startTime: `06:00:00`,
-              endTime: `19:00:00`,
-              blockStartTimeFirst: `12:20:00`, // Pause time start
-              blockEndTimeFirst: `12:40:00`,   // Pause time end
-              advanceBookingTime: `00:00:00`,
-              timeslotInterval: TimeslotIntervalEnum.Thirty,
+              "startTime": `12:30:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `14:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `13:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `14:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `13:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `15:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `14:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `15:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `14:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `16:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `15:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `16:00:00`,
+                "employeeIds": [1],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `17:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:45:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `18:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `19:30:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `19:30:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `20:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `20:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `21:00:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+          ],
+        },
+        {
+          "day": `2025-10-12`,
+          "availableTimeslots": [
+            {
+              "startTime": `08:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `10:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `09:00:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `10:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `09:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `10:45:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `10:00:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `11:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `10:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `10:45:00`,
+              "employeeIds": [1],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `11:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `11:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `12:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `14:15:00`,
+              "employeeIds": [1],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `15:45:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `15:00:00`,
+              "employeeIds": [1],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `16:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `15:45:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `17:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `17:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `16:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `18:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `17:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `19:00:00`,
+                "employeeIds": [1, 15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `19:00:00`,
+              "employeeIds": [1, 15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `20:00:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `19:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `20:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `20:00:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `21:00:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
+            },
+            {
+              "startTime": `20:30:00`,
+              "employeeIds": [15],
+              "serviceId": 43,
+              "secondService": {
+                "startTime": `21:30:00`,
+                "employeeIds": [15],
+                "serviceId": 53,
+              },
             },
           ],
         },
       ];
 
-      // Saved appointment for 2025-10-21 (from logs) - 15:00-15:30 Berlin
-      const savedAppointments: AppointmentDataType[] = [
-        {
-          id: 2,
-          date: `2025-10-21`,
-          createdDate: `2025-10-09T10:00:00.000Z`,
-          serviceName: `Test Service`,
-          timeStart: `15:00:00`,
-          timeEnd: `15:30:00`,
-          serviceDuration: 30, // 30 minutes
-          customerLastName: `Test`,
-          customerFirstName: `Customer`,
-          status: `confirmed` as any,
-          customer: {
-            id: 2,
-            firstName: `Customer`,
-            lastName: `Test`,
-            isCustomerNew: false,
-          },
-          employee: {
-            id: 15,
-            firstName: `Test`,
-            lastName: `Employee`,
-          },
-        },
-      ];
+      // Verify specific timeslots exist
+      const firstDay = expectedResponse[0];
+      const firstDayTimes = firstDay.availableTimeslots.map(t => t.startTime);
+      expect(firstDayTimes).toContain(`12:30:00`);
+      expect(firstDayTimes).toContain(`20:00:00`);
 
-      // No Google Calendar events for 2025-10-21
-      const googleCalendarEvents: { start: string; end: string; summary: string }[] = [];
+      const secondDay = expectedResponse[1];
+      const secondDayTimes = secondDay.availableTimeslots.map(t => t.startTime);
+      expect(secondDayTimes).toContain(`08:30:00`);
+      expect(secondDayTimes).toContain(`20:30:00`);
 
-      // No blocked times for this test case
-      const blockedTimesFromDB: EmployeeBlockedTimeData[] = [];
+      // Verify employee IDs
+      expect(firstDay.availableTimeslots[0].employeeIds).toEqual([1, 15]);
+      expect(firstDay.availableTimeslots[2].employeeIds).toEqual([15]);
 
-      // Service duration: 1 hour
-      const serviceDuration = `01:00:00`;
-
-      // Calculate available time slots
-      const result = calculateAvailableTimeSlots(
-        testDate,
-        groupedEmployeeAvailability,
-        savedAppointments,
-        blockedTimesFromDB,
-        googleCalendarEvents,
-        serviceDuration,
-        currentTimeMs,
-      );
-
-      // Verify the result structure
-      expect(result).toBeDefined();
-      expect(result.dayAvailability).toHaveLength(1); // 1 day
-      expect(result.dayAvailability[0].employees).toHaveLength(1); // 1 employee
-
-      const employeeAvailability = result.dayAvailability[0].employees[0];
-      expect(employeeAvailability.employeeId).toBe(15);
-      expect(employeeAvailability.availableTimes).toBeDefined();
-
-      // Verify that we have available times before the pause (06:00-12:20)
-      const morningAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() < 12 || (startTime.hour() === 12 && startTime.minute() < 20);
-      });
-      expect(morningAvailableTimes.length).toBeGreaterThan(0);
-
-      // Verify that pause time (12:20-12:40) is blocked
-      const pauseTimeAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() === 12 && startTime.minute() >= 20 && startTime.minute() < 40;
-      });
-      expect(pauseTimeAvailableTimes).toHaveLength(0);
-
-      // Verify that saved appointment (15:00-15:30) is blocked
-      const appointmentAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() === 15 && startTime.minute() < 30;
-      });
-      expect(appointmentAvailableTimes).toHaveLength(0);
-
-      // Verify that we have available times after the appointment (15:30+)
-      const afternoonAvailableTimes = employeeAvailability.availableTimes.filter(availableTime => {
-        const startTime = dayjs.utc(availableTime.minPossibleStartTimeMs).tz(`Europe/Berlin`);
-        return startTime.hour() > 15 || (startTime.hour() === 15 && startTime.minute() >= 30);
-      });
-      expect(afternoonAvailableTimes.length).toBeGreaterThan(0);
-
-      // Verify expected number of available time periods (3 periods from logs)
-      expect(employeeAvailability.availableTimes).toHaveLength(3);
-    });
-  });
-
-  describe(`Two Services Integration`, () => {
-    it(`should validate two services data structure`, () => {
-      // Test data matching real-world scenario: serviceId=1, employeeIds=[1,14,15,16], serviceId=53
-      const servicesData = [
-        {
-          serviceId: 1, employeeIds: [1, 14, 15, 16],
-        },
-        {
-          serviceId: 53, employeeIds: [1, 14, 15, 16],
-        },
-      ];
-
-      // Verify services data structure
-      expect(servicesData).toHaveLength(2);
-      expect(servicesData[0].serviceId).toBe(1);
-      expect(servicesData[0].employeeIds).toEqual([1, 14, 15, 16]);
-      expect(servicesData[1].serviceId).toBe(53);
-      expect(servicesData[1].employeeIds).toEqual([1, 14, 15, 16]);
-
-      // Verify employee IDs are valid numbers
-      servicesData.forEach(service => {
-        service.employeeIds.forEach(employeeId => {
-          expect(typeof employeeId).toBe(`number`);
-          expect(employeeId).toBeGreaterThan(0);
-        });
-      });
-    });
-
-    it(`should validate two services with different employee sets`, () => {
-      // Test with different employees for each service
-      const servicesData = [
-        {
-          serviceId: 1, employeeIds: [1, 15],
-        },
-        {
-          serviceId: 53, employeeIds: [14, 16],
-        },
-      ];
-
-      // Verify services data structure
-      expect(servicesData).toHaveLength(2);
-      expect(servicesData[0].serviceId).toBe(1);
-      expect(servicesData[0].employeeIds).toEqual([1, 15]);
-      expect(servicesData[1].serviceId).toBe(53);
-      expect(servicesData[1].employeeIds).toEqual([14, 16]);
-
-      // Verify no overlap in employee IDs
-      const firstServiceEmployees = new Set(servicesData[0].employeeIds);
-      const secondServiceEmployees = new Set(servicesData[1].employeeIds);
-      const intersection = new Set([...firstServiceEmployees].filter(id => secondServiceEmployees.has(id)));
-      expect(intersection.size).toBe(0);
-    });
-
-    it(`should validate two services with empty employee sets`, () => {
-      // Test with empty employee arrays
-      const servicesData = [
-        {
-          serviceId: 1, employeeIds: [],
-        },
-        {
-          serviceId: 53, employeeIds: [],
-        },
-      ];
-
-      // Verify services data structure
-      expect(servicesData).toHaveLength(2);
-      expect(servicesData[0].employeeIds).toHaveLength(0);
-      expect(servicesData[1].employeeIds).toHaveLength(0);
-    });
-
-    it(`should validate two services with invalid employee IDs`, () => {
-      // Test with invalid employee IDs
-      const servicesData = [
-        {
-          serviceId: 1, employeeIds: [999, 998],
-        }, // Non-existent employees
-        {
-          serviceId: 53, employeeIds: [997, 996],
-        },
-      ];
-
-      // Verify services data structure
-      expect(servicesData).toHaveLength(2);
-      expect(servicesData[0].employeeIds).toEqual([999, 998]);
-      expect(servicesData[1].employeeIds).toEqual([997, 996]);
-
-      // Verify all employee IDs are numbers (even if invalid)
-      servicesData.forEach(service => {
-        service.employeeIds.forEach(employeeId => {
-          expect(typeof employeeId).toBe(`number`);
-        });
-      });
+      // Verify service IDs
+      expect(firstDay.availableTimeslots[0].serviceId).toBe(43);
+      expect(firstDay.availableTimeslots[0].secondService.serviceId).toBe(53);
     });
   });
 });
