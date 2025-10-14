@@ -1137,44 +1137,28 @@ export const calculateAvailableTimeSlotsForTwoServices = (
       continue;
     }
 
-    // Generate actual time slots from available time windows for each employee
-    const firstServiceSlots: EmployeeWithTimeSlotsPure[] = firstDay.employees.map(employee => {
-      const timeSlots: TimeSlotPure[] = [];
-
-      // Generate slots for each available time window
-      employee.availableTimes.forEach(availableTime => {
-        const slots = generateTimeSlotsFromRange(
+    // Convert availableTimes to actual time slots for each employee
+    const firstServiceSlots = firstDay.employees.map(employee => ({
+      employeeId: employee.employeeId,
+      timeSlots: employee.availableTimes.flatMap(availableTime =>
+        generateTimeSlotsFromRange(
           availableTime.minPossibleStartTimeMs,
           availableTime.maxPossibleStartTimeMs,
-          employee.timeslotInterval,
-        );
-        timeSlots.push(...slots);
-      });
+          Number(employee.timeslotInterval),
+        ),
+      ),
+    }));
 
-      return {
-        employeeId: employee.employeeId,
-        timeSlots,
-      };
-    });
-
-    const secondServiceSlots: EmployeeWithTimeSlotsPure[] = secondDay.employees.map(employee => {
-      const timeSlots: TimeSlotPure[] = [];
-
-      // Generate slots for each available time window
-      employee.availableTimes.forEach(availableTime => {
-        const slots = generateTimeSlotsFromRange(
+    const secondServiceSlots = secondDay.employees.map(employee => ({
+      employeeId: employee.employeeId,
+      timeSlots: employee.availableTimes.flatMap(availableTime =>
+        generateTimeSlotsFromRange(
           availableTime.minPossibleStartTimeMs,
           availableTime.maxPossibleStartTimeMs,
-          employee.timeslotInterval,
-        );
-        timeSlots.push(...slots);
-      });
-
-      return {
-        employeeId: employee.employeeId,
-        timeSlots,
-      };
-    });
+          Number(employee.timeslotInterval),
+        ),
+      ),
+    }));
 
     // Combine time slots
     const combinations = combineTimeSlotsForTwoServices(

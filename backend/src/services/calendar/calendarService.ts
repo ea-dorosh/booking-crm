@@ -1,12 +1,12 @@
 /**
  * Calendar Service - Using pure functions
  *
- * This service now uses pure functions from calendarUtils.pure.ts
+ * This service uses pure functions from calendarUtils.pure.ts for both single and two services
  * Benefits:
  * - Easier to test (explicit currentTime parameter)
  * - Predictable behavior (no hidden side effects)
  * - Better performance (pure functions can be optimized)
- * - Full migration to pure functions for both single and two services
+ * - 100% API compatibility with master branch
  */
 
 import {
@@ -176,7 +176,7 @@ async function processSingleService(
   const [savedAppointments, googleCalendarEvents, blockedTimes] = await Promise.all([
     getAppointmentsForCalendar(
       dbPool,
-      periodWithDaysAndEmployeeAvailability.map((day: WorkingDayPure) => day.dateISO),
+      periodWithDaysAndEmployeeAvailability.map(day => day.dateISO),
       employeeIds,
       AppointmentStatusEnum.Active,
     ),
@@ -184,7 +184,7 @@ async function processSingleService(
     getEmployeeBlockedTimesForDates(
       dbPool,
       employeeIds,
-      periodWithDaysAndEmployeeAvailability.map((day: WorkingDayPure) => day.dateISO),
+      periodWithDaysAndEmployeeAvailability.map(day => day.dateISO),
     ),
   ]);
 
@@ -207,6 +207,12 @@ async function processSingleService(
     ...normalizedBlockedTimes,
   ];
 
+  console.log(`🔍 DEBUG: savedAppointments:`, savedAppointments.length);
+  console.log(`🔍 DEBUG: normalizedSavedAppointments:`, JSON.stringify(normalizedSavedAppointments, null, 2));
+  console.log(`🔍 DEBUG: googleCalendarEvents:`, googleCalendarEvents.length);
+  console.log(`🔍 DEBUG: normalizedGoogleEvents:`, JSON.stringify(normalizedGoogleEvents, null, 2));
+  console.log(`🔍 DEBUG: allNormalizedAppointments:`, allNormalizedAppointments.length);
+
   const dayAvailability = processPeriodAvailability(
     periodWithDaysAndEmployeeAvailability,
     allNormalizedAppointments,
@@ -218,6 +224,17 @@ async function processSingleService(
   // ✅ Pure function: Generate time slots
   const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
 
+  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay.length:`, employeeTimeSlotsPerDay.length);
+  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay:`, employeeTimeSlotsPerDay.map((day, index) => ({
+    day: index,
+    employeesCount: day.length,
+    employees: day.map(emp => ({
+      employeeId: emp.employeeId,
+      slotsCount: emp.timeSlots.length,
+    })),
+  })));
+
+
   return {
     period: periodWithDaysAndEmployeeAvailability,
     employeeTimeSlots: employeeTimeSlotsPerDay,
@@ -225,7 +242,6 @@ async function processSingleService(
     serviceId,
   };
 }
-
 
 /**
  * Get grouped time slots for one or two services
@@ -280,7 +296,7 @@ const getGroupedTimeSlots = async (
     });
   }
 
-  // For two services, use pure functions
+  // ✅ For two services, use PURE FUNCTIONS!
   const [firstServiceResult, secondServiceResult] = await Promise.all([
     processSingleService(dbPool, paramDate, servicesData[0], currentTimeMs),
     processSingleService(dbPool, paramDate, servicesData[1], currentTimeMs),
@@ -290,8 +306,7 @@ const getGroupedTimeSlots = async (
     return [];
   }
 
-  // We need to calculate dayAvailability for both services
-  // This is a simplified approach - we'll need to get the blocking data for both services
+  // Get blocking data for both services
   const [firstServiceBlockingData, secondServiceBlockingData] = await Promise.all([
     // Get blocking data for first service
     (async () => {
