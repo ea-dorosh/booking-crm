@@ -81,6 +81,17 @@ export const calculateAppointmentEndTimeMs = (
   return addDuration(startTimeMs, durationMs);
 };
 
+/**
+ * Legacy wrapper for backward compatibility
+ * Wraps pure function for code that still uses Dayjs objects
+ * @deprecated Use calculateAppointmentEndTimeMs for new code
+ */
+export const getAppointmentEndTime = (startTime: dayjs.Dayjs, serviceDuration: Time_HH_MM_SS_Type): dayjs.Dayjs => {
+  const startTimeMs = startTime.valueOf();
+  const endTimeMs = calculateAppointmentEndTimeMs(startTimeMs, serviceDuration);
+  return dayjs(endTimeMs).utc();
+};
+
 // ============================================================================
 // TYPES FOR PURE FUNCTIONS
 // ============================================================================

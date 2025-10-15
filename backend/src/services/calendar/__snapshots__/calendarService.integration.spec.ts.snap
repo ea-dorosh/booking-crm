@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Calendar Service Integration Tests ✅ Regression Test: Snapshot current behavior should maintain consistent slot calculation (regression protection): regression-test-slot-count 1`] = `3`;

@@ -51,7 +51,7 @@ import {
 } from '@/services/customer/customerService.js';
 import { validateCustomerData } from '@/validators/customersValidators.js';
 import { dayjs } from '@/services/dayjs/dayjsService.js';
-import { getAppointmentEndTime } from '@/services/calendar/calendarUtils.js';
+import { getAppointmentEndTime } from '@/services/calendar/calendarUtils.pure.js';
 import {
   formatName,
   formatPhone,

@@ -1,0 +1,62 @@
+🔍 DEBUG [FEATURE] Service 43 - Employee IDs: 1,14,15,16
+📅 Saved Appointments (2):
+  - Employee 15: 2025-10-14 2025-10-14T10:00:00.000Z - 2025-10-14T12:00:00.000Z
+  - Employee 15: 2025-10-15 2025-10-15T06:30:00.000Z - 2025-10-15T07:30:00.000Z
+📅 Google Events (0):
+⏸️ Pause Times (from employee.pauseTimes):
+  - Employee 1: 2025-10-14 2025-10-14T12:20:00.000Z - 2025-10-14T12:40:00.000Z
+  - Employee 15: 2025-10-14 2025-10-14T12:20:00.000Z - 2025-10-14T12:40:00.000Z
+  - Employee 1: 2025-10-15 2025-10-15T12:42:00.000Z - 2025-10-15T13:55:00.000Z
+  - Employee 14: 2025-10-15 (no pause times)
+  - Employee 15: 2025-10-15 2025-10-15T11:05:00.000Z - 2025-10-15T11:35:00.000Z
+  - Employee 16: 2025-10-15 (no pause times)
+  - Employee 1: 2025-10-16 2025-10-16T10:13:00.000Z - 2025-10-16T11:12:00.000Z
+  - Employee 15: 2025-10-16 (no pause times)
+  - Employee 16: 2025-10-16 (no pause times)
+  - Employee 1: 2025-10-17 (no pause times)
+  - Employee 16: 2025-10-17 2025-10-17T09:44:00.000Z - 2025-10-17T10:43:00.000Z
+  - Employee 1: 2025-10-18 2025-10-18T19:20:00.000Z - 2025-10-18T19:22:00.000Z
+  - Employee 15: 2025-10-18 2025-10-18T14:05:00.000Z - 2025-10-18T14:35:00.000Z
+  - Employee 1: 2025-10-19 2025-10-19T08:30:00.000Z - 2025-10-19T08:40:00.000Z
+  - Employee 15: 2025-10-19 2025-10-19T13:15:00.000Z - 2025-10-19T13:35:00.000Z
+🚫 Blocked Times (3):
+  - Employee 15: 2025-10-14 2025-10-13T22:00:00.000Z - 2025-10-14T08:30:00.000Z
+  - Employee 15: 2025-10-14 2025-10-14T14:00:00.000Z - 2025-10-14T14:30:00.000Z
+  - Employee 15: 2025-10-15 2025-10-15T16:30:00.000Z - 2025-10-15T17:00:00.000Z
+
+🔍 DEBUG [FEATURE] Service 53 - Employee IDs: 1,14,15,16
+📅 Saved Appointments (2):
+  - Employee 15: 2025-10-14 2025-10-14T10:00:00.000Z - 2025-10-14T12:00:00.000Z
+  - Employee 15: 2025-10-15 2025-10-15T06:30:00.000Z - 2025-10-15T07:30:00.000Z
+📅 Google Events (0):
+⏸️ Pause Times (from employee.pauseTimes):
+  (same as Service 43)
+🚫 Blocked Times (3):
+  (same as Service 43)
+
+🔍 DEBUG [FEATURE] Combining slots for 2025-10-14
+  👤 Employee 1 has 0 slots
+  👤 Employee 15 has 1 slots
+
+🔍 DEBUG [FEATURE] Combining slots for 2025-10-15
+  👤 Employee 1 has 13 slots
+  👤 Employee 14 has 15 slots
+  👤 Employee 15 has 46 slots
+  👤 Employee 16 has 45 slots
+
+🔍 DEBUG [FEATURE] Combining slots for 2025-10-16
+  👤 Employee 1 has 12 slots
+  👤 Employee 15 has 63 slots
+  👤 Employee 16 has 37 slots
+
+🔍 DEBUG [FEATURE] Combining slots for 2025-10-17
+  👤 Employee 1 has 10 slots
+  👤 Employee 16 has 41 slots
+
+🔍 DEBUG [FEATURE] Combining slots for 2025-10-18
+  👤 Employee 1 has 12 slots
+  👤 Employee 15 has 48 slots
+
+🔍 DEBUG [FEATURE] Combining slots for 2025-10-19
+  👤 Employee 1 has 10 slots
+  👤 Employee 15 has 54 slots
