@@ -1199,3 +1199,292 @@ export const calculateAvailableTimeSlotsForTwoServices = (
   return result;
 };
 
+// ============================================================================
+// CONVENIENCE WRAPPERS - Used by calendarService.ts
+// ============================================================================
+
+/**
+ * Normalize saved appointments from AppointmentDataType format
+ */
+export const normalizeSavedAppointmentsPure = (
+  savedAppointments: any[], // AppointmentDataType[]
+): NormalizedAppointmentPure[] => {
+  return savedAppointments.map(appointment =>
+    normalizeAppointment(
+      appointment.date,
+      appointment.timeStart,
+      appointment.timeEnd,
+      appointment.employee.id,
+    ),
+  );
+};
+
+/**
+ * Normalize Google Calendar events for employees
+ */
+export const normalizeGoogleEventsForEmployeesPure = (
+  googleCalendarEvents: { start: string; end: string; summary: string }[],
+  periodWithDaysAndEmployeeAvailability: WorkingDayPure[],
+): NormalizedAppointmentPure[] => {
+  const normalizedGoogleEvents: NormalizedAppointmentPure[] = [];
+
+  if (periodWithDaysAndEmployeeAvailability.length === 0) {
+    return normalizedGoogleEvents;
+  }
+
+  // Create employee dates map
+  const employeeDatesMap = new Map<number, string[]>();
+  periodWithDaysAndEmployeeAvailability.forEach((dayData) => {
+    dayData.employees.forEach((employee) => {
+      if (!employeeDatesMap.has(employee.employeeId)) {
+        employeeDatesMap.set(employee.employeeId, []);
+      }
+      employeeDatesMap.get(employee.employeeId)!.push(dayData.dateISO);
+    });
+  });
+
+  // Normalize events for each employee
+  for (const [employeeId, dates] of employeeDatesMap) {
+    const employeeGoogleEvents = googleCalendarEvents.filter(event => {
+      const eventDate = dayjs(event.start).format(`YYYY-MM-DD`);
+      return dates.includes(eventDate);
+    });
+
+    if (employeeGoogleEvents.length > 0) {
+      employeeGoogleEvents.forEach(event => {
+        normalizedGoogleEvents.push(
+          normalizeAppointment(
+            dayjs(event.start).format(`YYYY-MM-DD`),
+            event.start,
+            event.end,
+            employeeId,
+          ),
+        );
+      });
+    }
+  }
+
+  return normalizedGoogleEvents;
+};
+
+/**
+ * Normalize pause times from employee working days
+ */
+export const normalizePauseTimesForEmployeesPure = (
+  periodWithDaysAndEmployeeAvailability: WorkingDayPure[],
+): NormalizedAppointmentPure[] => {
+  const normalizedPauseTimes: NormalizedAppointmentPure[] = [];
+
+  for (const dayData of periodWithDaysAndEmployeeAvailability) {
+    for (const employee of dayData.employees) {
+      if (!employee.pauseTimes || employee.pauseTimes.length === 0) continue;
+
+      for (const pause of employee.pauseTimes) {
+        normalizedPauseTimes.push({
+          dateISO: dayData.dateISO,
+          startTimeMs: pause.startPauseTimeMs,
+          endTimeMs: pause.endPauseTimeMs,
+          employeeId: employee.employeeId,
+        });
+      }
+    }
+  }
+
+  return normalizedPauseTimes;
+};
+
+/**
+ * Normalize blocked times from database
+ */
+export const normalizeBlockedTimesForEmployeesPure = (
+  blockedTimesFromDB: any[], // EmployeeBlockedTimeData[]
+  periodWithDaysAndEmployeeAvailability: WorkingDayPure[],
+): NormalizedAppointmentPure[] => {
+  const normalizedBlockedTimes: NormalizedAppointmentPure[] = [];
+
+  for (const blockedTime of blockedTimesFromDB) {
+    const blockedDateStr = dayjs(blockedTime.blockedDate).format(`YYYY-MM-DD`);
+
+    if (blockedTime.isAllDay) {
+      const dayData = periodWithDaysAndEmployeeAvailability.find(
+        (day) => day.dateISO === blockedDateStr,
+      );
+
+      if (!dayData) continue;
+
+      const employee = dayData.employees.find(
+        (emp) => emp.employeeId === blockedTime.employeeId,
+      );
+
+      if (!employee) continue;
+
+      normalizedBlockedTimes.push({
+        dateISO: blockedDateStr as Date_ISO_Type,
+        startTimeMs: employee.startWorkingTimeMs,
+        endTimeMs: employee.endWorkingTimeMs,
+        employeeId: blockedTime.employeeId,
+      });
+    } else {
+      if (!blockedTime.startTime || !blockedTime.endTime) continue;
+
+      const startDateTime = combineDateTimeInTimezone(
+        blockedDateStr as Date_ISO_Type,
+        blockedTime.startTime as Time_HH_MM_SS_Type,
+        `Europe/Berlin`,
+      );
+
+      const endDateTime = combineDateTimeInTimezone(
+        blockedDateStr as Date_ISO_Type,
+        blockedTime.endTime as Time_HH_MM_SS_Type,
+        `Europe/Berlin`,
+      );
+
+      normalizedBlockedTimes.push({
+        dateISO: blockedDateStr as Date_ISO_Type,
+        startTimeMs: startDateTime,
+        endTimeMs: endDateTime,
+        employeeId: blockedTime.employeeId,
+      });
+    }
+  }
+
+  return normalizedBlockedTimes;
+};
+
+/**
+ * Get period with days and employee availability
+ */
+export const getPeriodWithDaysAndEmployeeAvailabilityPure = (
+  initialParamDate: Date_ISO_Type,
+  groupedEmployeeAvailability: any[], // GroupedAvailabilityDayType[]
+  currentTimeMs: number,
+): WorkingDayPure[] => {
+  const initialParamDateMs = dayjs.utc(initialParamDate).valueOf();
+  const firstDayInPeriodMs = getStartOfWeek(initialParamDateMs);
+  const lastDayInPeriodMs = getEndOfWeek(initialParamDateMs);
+
+  const datesInPeriod = generateDateRange(firstDayInPeriodMs, lastDayInPeriodMs);
+
+  const period: WorkingDayPure[] = [];
+
+  for (const dateMs of datesInPeriod) {
+    if (!isDateTodayOrFuture(dateMs, currentTimeMs)) {
+      continue;
+    }
+
+    const dateISO = formatToISODate(dateMs);
+    const dayOfWeek = getDayOfWeek(dateMs);
+
+    const dayAvailability = groupedEmployeeAvailability.find(
+      availability => availability.dayId === dayOfWeek,
+    );
+
+    if (dayAvailability) {
+      const employees: EmployeeWorkingDayPure[] = dayAvailability.employees.map((employee: any) => {
+        const pauseTimes = [];
+
+        if (employee.blockStartTimeFirst && employee.blockEndTimeFirst) {
+          const pauseTime = createPauseTime(
+            dateISO,
+            employee.blockStartTimeFirst as Time_HH_MM_SS_Type,
+            employee.blockEndTimeFirst as Time_HH_MM_SS_Type,
+            `Europe/Berlin`,
+          );
+          pauseTimes.push(pauseTime);
+        }
+
+        return {
+          employeeId: employee.id,
+          startWorkingTimeMs: combineDateTimeInTimezone(
+            dateISO,
+            employee.startTime as Time_HH_MM_SS_Type,
+            `Europe/Berlin`,
+          ),
+          endWorkingTimeMs: combineDateTimeInTimezone(
+            dateISO,
+            employee.endTime as Time_HH_MM_SS_Type,
+            `Europe/Berlin`,
+          ),
+          pauseTimes,
+          advanceBookingTime: employee.advanceBookingTime,
+          timeslotInterval: parseInt(employee.timeslotInterval, 10),
+        };
+      });
+
+      period.push({
+        dateISO,
+        employees,
+      });
+    }
+  }
+
+  return period;
+};
+
+/**
+ * Process period availability - calculates day availability for all days
+ */
+export const processPeriodAvailabilityPure = (
+  period: WorkingDayPure[],
+  normalizedAppointments: NormalizedAppointmentPure[],
+  serviceDuration: Time_HH_MM_SS_Type,
+  currentTimeMs: number,
+): DayAvailabilityPure[] => {
+  const todayDateISO = formatToISODate(currentTimeMs);
+
+  return period.map(workingDay => {
+    const dayAppointments = filterAppointmentsByDate(normalizedAppointments, workingDay.dateISO);
+
+    return calculateDayAvailability(
+      workingDay,
+      dayAppointments,
+      currentTimeMs,
+      todayDateISO,
+      serviceDuration,
+    );
+  });
+};
+
+/**
+ * Generate time slots from day availability
+ */
+export const generateTimeSlotsFromDayAvailabilityPure = (
+  dayAvailability: DayAvailabilityPure[],
+  currentTimeMs?: number,
+): EmployeeWithTimeSlotsPure[][] => {
+  return dayAvailability.map((day) => {
+    // Only filter by current time for today's date
+    const dayDateMs = dayjs.utc(day.dateISO).valueOf();
+    const todayStartMs = dayjs().utc().startOf(`day`).valueOf();
+    const todayEndMs = dayjs().utc().endOf(`day`).valueOf();
+
+    const shouldFilterByTime = dayDateMs >= todayStartMs && dayDateMs <= todayEndMs;
+    const filterTime = shouldFilterByTime ? currentTimeMs : undefined;
+
+    return day.employees.map(employee => {
+      const timeSlots = generateEmployeeTimeSlots(
+        employee.availableTimes,
+        employee.timeslotInterval,
+        filterTime,
+      );
+
+      return {
+        employeeId: employee.employeeId,
+        timeSlots,
+      };
+    });
+  });
+};
+
+/**
+ * Group time slots by start time for display
+ */
+export const groupTimeSlotsForPeriodPure = (
+  employeeTimeSlotsPerDay: EmployeeWithTimeSlotsPure[][],
+  timezone: string = `Europe/Berlin`,
+): GroupedTimeSlotPure[][] => {
+  return employeeTimeSlotsPerDay.map((employeesForDay) => {
+    return groupTimeSlotsByStartTime(employeesForDay, timezone);
+  });
+};
+

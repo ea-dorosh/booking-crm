@@ -14,16 +14,14 @@ import {
   WorkingDayPure,
   GroupedTimeSlotPure,
   EmployeeWithTimeSlotsPure,
-} from '@/services/calendar/calendarUtils.pure.js';
-import {
   getPeriodWithDaysAndEmployeeAvailabilityPure,
-  normalizeSavedAppointments,
-  normalizeGoogleEventsForEmployees,
-  normalizeBlockedTimesForEmployees,
-  processPeriodAvailability,
-  generateTimeSlotsFromDayAvailability,
-  groupTimeSlotsForPeriod,
-} from '@/services/calendar/calendarUtils.adapter.js';
+  normalizeSavedAppointmentsPure,
+  normalizeGoogleEventsForEmployeesPure,
+  normalizeBlockedTimesForEmployeesPure,
+  processPeriodAvailabilityPure,
+  generateTimeSlotsFromDayAvailabilityPure,
+  groupTimeSlotsForPeriodPure,
+} from '@/services/calendar/calendarUtils.pure.js';
 import { getEmployeeBlockedTimesForDates } from '@/services/employees/employeesBlockedTimesService.js';
 import { AppointmentStatusEnum } from '@/enums/enums.js';
 import { Date_ISO_Type, Time_HH_MM_SS_Type } from '@/@types/utilTypes.js';
@@ -190,13 +188,13 @@ async function processSingleService(
   ]);
 
   // ✅ Pure functions: Normalize all appointments
-  const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
-  const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(
+  const normalizedSavedAppointments = normalizeSavedAppointmentsPure(savedAppointments);
+  const normalizedGoogleEvents = normalizeGoogleEventsForEmployeesPure(
     googleCalendarEvents,
     periodWithDaysAndEmployeeAvailability,
   );
   // REMOVED: normalizedPauseTimes - pause times are already in employee.pauseTimes
-  const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(
+  const normalizedBlockedTimes = normalizeBlockedTimesForEmployeesPure(
     blockedTimes,
     periodWithDaysAndEmployeeAvailability,
   );
@@ -241,7 +239,7 @@ async function processSingleService(
     console.log(`  - Employee ${block.employeeId}: ${block.dateISO} ${startTime} - ${endTime}`);
   });
 
-  const dayAvailability = processPeriodAvailability(
+  const dayAvailability = processPeriodAvailabilityPure(
     periodWithDaysAndEmployeeAvailability,
     allNormalizedAppointments,
     serviceDurationWithBuffer,
@@ -250,7 +248,7 @@ async function processSingleService(
 
 
   // ✅ Pure function: Generate time slots
-  const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailability(dayAvailability, currentTimeMs);
+  const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailabilityPure(dayAvailability, currentTimeMs);
 
   console.log(`🔍 DEBUG: employeeTimeSlotsPerDay.length:`, employeeTimeSlotsPerDay.length);
   console.log(`🔍 DEBUG: employeeTimeSlotsPerDay:`, employeeTimeSlotsPerDay.map((day, index) => ({
@@ -310,7 +308,7 @@ const getGroupedTimeSlots = async (
     }
 
     // ✅ Pure function: Group time slots
-    const groupedTimeSlots = groupTimeSlotsForPeriod(result.employeeTimeSlots);
+    const groupedTimeSlots = groupTimeSlotsForPeriodPure(result.employeeTimeSlots);
 
     // Convert to old format - include all dates even if no slots
     const dates = result.period.map(day => day.dateISO);
@@ -351,9 +349,9 @@ const getGroupedTimeSlots = async (
         firstServiceResult.period.map(day => day.dateISO),
       );
 
-      const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
-      const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(googleCalendarEvents, firstServiceResult.period);
-      const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(blockedTimes, firstServiceResult.period);
+      const normalizedSavedAppointments = normalizeSavedAppointmentsPure(savedAppointments);
+      const normalizedGoogleEvents = normalizeGoogleEventsForEmployeesPure(googleCalendarEvents, firstServiceResult.period);
+      const normalizedBlockedTimes = normalizeBlockedTimesForEmployeesPure(blockedTimes, firstServiceResult.period);
       // NOTE: pause times are already in employee.pauseTimes and processed by processPeriodAvailability
 
       const allNormalizedAppointments = [
@@ -367,7 +365,7 @@ const getGroupedTimeSlots = async (
 
       return {
         period: firstServiceResult.period,
-        dayAvailability: processPeriodAvailability(
+        dayAvailability: processPeriodAvailabilityPure(
           firstServiceResult.period,
           allNormalizedAppointments,
           serviceDurationWithBuffer,
@@ -393,9 +391,9 @@ const getGroupedTimeSlots = async (
         secondServiceResult.period.map(day => day.dateISO),
       );
 
-      const normalizedSavedAppointments = normalizeSavedAppointments(savedAppointments);
-      const normalizedGoogleEvents = normalizeGoogleEventsForEmployees(googleCalendarEvents, secondServiceResult.period);
-      const normalizedBlockedTimes = normalizeBlockedTimesForEmployees(blockedTimes, secondServiceResult.period);
+      const normalizedSavedAppointments = normalizeSavedAppointmentsPure(savedAppointments);
+      const normalizedGoogleEvents = normalizeGoogleEventsForEmployeesPure(googleCalendarEvents, secondServiceResult.period);
+      const normalizedBlockedTimes = normalizeBlockedTimesForEmployeesPure(blockedTimes, secondServiceResult.period);
       // NOTE: pause times are already in employee.pauseTimes and processed by processPeriodAvailability
 
       const allNormalizedAppointments = [
@@ -409,7 +407,7 @@ const getGroupedTimeSlots = async (
 
       return {
         period: secondServiceResult.period,
-        dayAvailability: processPeriodAvailability(
+        dayAvailability: processPeriodAvailabilityPure(
           secondServiceResult.period,
           allNormalizedAppointments,
           serviceDurationWithBuffer,

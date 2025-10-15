@@ -9,7 +9,7 @@ import {
   appointmentsToBlockedTimes,
   calculateEmployeeDayAvailability,
 } from './calendarUtils.pure';
-import { generateTimeSlotsFromDayAvailability } from './calendarUtils.adapter';
+import { generateTimeSlotsFromDayAvailabilityPure } from './calendarUtils.pure';
 
 // Setup dayjs plugins
 dayjs.extend(utc);
@@ -273,7 +273,7 @@ describe(`Appointment Blocking Logic - Real World Bug Tests`, () => {
         },
       ];
 
-      const result = generateTimeSlotsFromDayAvailability(dayAvailability);
+      const result = generateTimeSlotsFromDayAvailabilityPure(dayAvailability);
 
       expect(result).toHaveLength(1); // One day
       expect(result[0]).toHaveLength(1); // One employee
@@ -332,7 +332,7 @@ describe(`Appointment Blocking Logic - Real World Bug Tests`, () => {
         },
       ];
 
-      const result = generateTimeSlotsFromDayAvailability(dayAvailability);
+      const result = generateTimeSlotsFromDayAvailabilityPure(dayAvailability);
 
       const employeeSlots = result[0][0];
 
@@ -415,7 +415,7 @@ describe(`Appointment Blocking Logic - Real World Bug Tests`, () => {
         },
       ];
 
-      const timeSlots = generateTimeSlotsFromDayAvailability(dayAvailability);
+      const timeSlots = generateTimeSlotsFromDayAvailabilityPure(dayAvailability);
       const employeeSlots = timeSlots[0][0];
 
       // 7. Verify the fix
