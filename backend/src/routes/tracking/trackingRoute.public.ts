@@ -27,21 +27,8 @@ router.post(`/qr-scan`, async (request: CustomRequestType, response: CustomRespo
   }
 
   try {
-    console.log(`QR DEBUG BE: incoming headers`, {
-      'x-forwarded-for': request.headers[`x-forwarded-for`],
-      'x-real-ip': request.headers[`x-real-ip`],
-      'cf-connecting-ip': request.headers[`cf-connecting-ip`],
-      'user-agent': request.headers[`user-agent`],
-      referer: request.headers[`referer`],
-    });
-
     const clientIp = getClientIpFromRequest(request);
 
-    console.log(`QR DEBUG BE: resolved IPs`, {
-      clientIp,
-      expressIp: request.ip,
-      socketIp: request.socket?.remoteAddress,
-    });
     const scanData: QrScanData = {
       userAgent: request.headers[`user-agent`] || undefined,
       ipAddress: clientIp,
@@ -59,19 +46,7 @@ router.post(`/qr-scan`, async (request: CustomRequestType, response: CustomRespo
       },
     };
 
-    console.log(`QR DEBUG BE: scanData to save`, {
-      ipAddress: scanData.ipAddress,
-      hasDeviceInfo: Boolean(scanData.deviceInfo),
-      source: (scanData.deviceInfo as any)?.source,
-    });
-
     const result = await saveQrScan(request.dbPool, scanData);
-
-    console.log(`QR DEBUG BE: saved record`, {
-      id: result.id,
-      ip: result.ip_address,
-      scanned_at: result.scanned_at,
-    });
 
     response.json({
       message: `QR scan tracked successfully`,

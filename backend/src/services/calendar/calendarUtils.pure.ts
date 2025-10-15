@@ -137,8 +137,6 @@ export const calculateAvailableTimesMs = (
 
   const availableTimes: AvailableTimePure[] = [];
 
-  // Debug logs removed for production
-
   // If no blocked times, the entire working period is potentially available
   if (blockedTimes.length === 0) {
     const adjustedEndTimeMs = calculateAdjustedEndTimeMs(endWorkingTimeMs, serviceDuration);
@@ -194,9 +192,6 @@ export const calculateAvailableTimesMs = (
       });
     }
   }
-
-
-  // Debug logs removed for production
 
   return availableTimes;
 };
@@ -666,10 +661,6 @@ export const generateTimeSlotsFromRange = (
   maxPossibleStartTimeMs: number,
   intervalMinutes: number,
 ): TimeSlotPure[] => {
-  console.log(`🔍 DEBUG: generateTimeSlotsFromRange - minPossibleStartTimeMs:`, new Date(minPossibleStartTimeMs).toISOString());
-  console.log(`🔍 DEBUG: generateTimeSlotsFromRange - maxPossibleStartTimeMs:`, new Date(maxPossibleStartTimeMs).toISOString());
-  console.log(`🔍 DEBUG: generateTimeSlotsFromRange - intervalMinutes:`, intervalMinutes);
-
   const slots: TimeSlotPure[] = [];
 
   // Round start time to next 15-minute interval
@@ -834,12 +825,8 @@ export const calculateEmployeeDayAvailability = (
 ): EmployeeDayAvailabilityPure => {
   // Convert appointments to blocked times
   const appointmentBlocks = appointmentsToBlockedTimes(appointments);
-  // Debug logs removed for testing
 
-  // Convert pause times to blocked times
-  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - employee.pauseTimes:`, employee.pauseTimes);
   const pauseBlocks = pauseTimesToBlockedTimes(employee.pauseTimes);
-  console.log(`🔍 DEBUG: calculateEmployeeDayAvailability - pauseBlocks:`, pauseBlocks);
 
   // Calculate advance booking blocked time
   const advanceBookingParsed = parseAdvanceBookingTime(employee.advanceBookingTime);
@@ -943,9 +930,6 @@ export const groupTimeSlotsByStartTime = (
   employeesWithSlots: EmployeeWithTimeSlotsPure[],
   timezone: string,
 ): GroupedTimeSlotPure[] => {
-  console.log(`🔍 DEBUG: groupTimeSlotsByStartTime - employeesWithSlots.length:`, employeesWithSlots.length);
-  console.log(`🔍 DEBUG: groupTimeSlotsByStartTime - timezone:`, timezone);
-
   const slotMap = new Map<string, number[]>();
 
   for (const employee of employeesWithSlots) {
@@ -1170,11 +1154,6 @@ export const calculateAvailableTimeSlotsForTwoServices = (
         ),
       ),
     }));
-
-    console.log(`\n🔍 DEBUG [FEATURE] Combining slots for ${firstDay.dateISO}`);
-    firstServiceSlots.forEach(emp => {
-      console.log(`  👤 Employee ${emp.employeeId} has ${emp.timeSlots.length} slots`);
-    });
 
     // Combine time slots
     const combinations = combineTimeSlotsForTwoServices(

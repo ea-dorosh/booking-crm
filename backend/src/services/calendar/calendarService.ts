@@ -58,19 +58,17 @@ async function getGoogleCalendarEventsForEmployees(
 
   // Create employee dates map
   const employeeDatesMap = new Map<number, string[]>();
-  console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - periodWithDaysAndEmployeeAvailability:`, JSON.stringify(periodWithDaysAndEmployeeAvailability, null, 2));
+
   periodWithDaysAndEmployeeAvailability.forEach(dayData => {
-    console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - dayData:`, dayData);
     dayData.employees.forEach((employee: any) => {
       if (!employeeDatesMap.has(employee.employeeId)) {
         employeeDatesMap.set(employee.employeeId, []);
       }
       const dateISO = dayData.dateISO || dayData.day; // Support both pure and legacy formats
-      console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - pushing dateISO:`, dateISO);
+
       employeeDatesMap.get(employee.employeeId)!.push(dateISO);
     });
   });
-  console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - employeeDatesMap:`, employeeDatesMap);
 
   // Get events for each employee
   for (const [employeeId, dates] of employeeDatesMap) {
@@ -100,15 +98,6 @@ function convertToOldFormat(
   dates: Date_ISO_Type[],
   serviceId?: number,
 ): PeriodWithGroupedTimeslotsType[] {
-  console.log(`🔍 DEBUG: convertToOldFormat - groupedTimeSlots.length:`, groupedTimeSlots.length);
-  console.log(`🔍 DEBUG: convertToOldFormat - dates:`, dates);
-  console.log(`🔍 DEBUG: convertToOldFormat - serviceId:`, serviceId);
-  console.log(`🔍 DEBUG: convertToOldFormat - groupedTimeSlots:`, JSON.stringify(groupedTimeSlots.map((daySlots, index) => ({
-    day: dates[index] || dates[0],
-    slotsCount: daySlots?.length || 0,
-    slots: daySlots?.map(slot => slot.startTime) || [],
-  })), null, 2));
-
   return groupedTimeSlots.map((daySlots, index) => ({
     day: dates[index] || dates[0],
     availableTimeslots: (daySlots || []).map(slot => ({
@@ -206,39 +195,6 @@ async function processSingleService(
     ...normalizedBlockedTimes,
   ];
 
-  // DEBUG: Log all blocking sources for service
-  console.log(`\n🔍 DEBUG [FEATURE] Service ${serviceId} - Employee IDs: ${employeeIds.join(`,`)}`);
-  console.log(`📅 Saved Appointments (${normalizedSavedAppointments.length}):`);
-  normalizedSavedAppointments.forEach(apt => {
-    const startTime = new Date(apt.startTimeMs).toISOString();
-    const endTime = new Date(apt.endTimeMs).toISOString();
-    console.log(`  - Employee ${apt.employeeId}: ${apt.dateISO} ${startTime} - ${endTime}`);
-  });
-  console.log(`📅 Google Events (${normalizedGoogleEvents.length}):`);
-  normalizedGoogleEvents.forEach(evt => {
-    const startTime = new Date(evt.startTimeMs).toISOString();
-    const endTime = new Date(evt.endTimeMs).toISOString();
-    console.log(`  - Employee ${evt.employeeId}: ${evt.dateISO} ${startTime} - ${endTime}`);
-  });
-  console.log(`⏸️ Pause Times (from employee.pauseTimes):`);
-  periodWithDaysAndEmployeeAvailability.forEach(day => {
-    day.employees.forEach(emp => {
-      if (emp.pauseTimes && emp.pauseTimes.length > 0) {
-        emp.pauseTimes.forEach(pause => {
-          const startTime = new Date(pause.startPauseTimeMs).toISOString();
-          const endTime = new Date(pause.endPauseTimeMs).toISOString();
-          console.log(`  - Employee ${emp.employeeId}: ${day.dateISO} ${startTime} - ${endTime}`);
-        });
-      }
-    });
-  });
-  console.log(`🚫 Blocked Times (${normalizedBlockedTimes.length}):`);
-  normalizedBlockedTimes.forEach(block => {
-    const startTime = new Date(block.startTimeMs).toISOString();
-    const endTime = new Date(block.endTimeMs).toISOString();
-    console.log(`  - Employee ${block.employeeId}: ${block.dateISO} ${startTime} - ${endTime}`);
-  });
-
   const dayAvailability = processPeriodAvailabilityPure(
     periodWithDaysAndEmployeeAvailability,
     allNormalizedAppointments,
@@ -249,17 +205,6 @@ async function processSingleService(
 
   // ✅ Pure function: Generate time slots
   const employeeTimeSlotsPerDay = generateTimeSlotsFromDayAvailabilityPure(dayAvailability, currentTimeMs);
-
-  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay.length:`, employeeTimeSlotsPerDay.length);
-  console.log(`🔍 DEBUG: employeeTimeSlotsPerDay:`, employeeTimeSlotsPerDay.map((day, index) => ({
-    day: index,
-    employeesCount: day.length,
-    employees: day.map(emp => ({
-      employeeId: emp.employeeId,
-      slotsCount: emp.timeSlots.length,
-    })),
-  })));
-
 
   return {
     period: periodWithDaysAndEmployeeAvailability,
@@ -322,7 +267,6 @@ const getGroupedTimeSlots = async (
     });
   }
 
-  // ✅ For two services, use PURE FUNCTIONS!
   const [firstServiceResult, secondServiceResult] = await Promise.all([
     processSingleService(dbPool, paramDate, servicesData[0], currentTimeMs),
     processSingleService(dbPool, paramDate, servicesData[1], currentTimeMs),

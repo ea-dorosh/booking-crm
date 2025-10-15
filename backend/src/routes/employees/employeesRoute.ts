@@ -546,39 +546,6 @@ router.put(`/:employeeId/status`, async (request: CustomRequestType, response: C
 });
 
 // --- Blocked Times API ---
-// DEBUG: Check appointments in DB
-router.get(`/:employeeId/debug-appointments`, async (request: CustomRequestType, response: CustomResponseType) => {
-  if (!request.dbPool) {
-    response.status(500).json({ message: `Database connection not initialized` });
-    return;
-  }
-
-  const employeeId = Number(request.params.employeeId);
-  const { date } = request.query;
-
-  try {
-    const [rows] = await request.dbPool.query<any[]>(
-      `SELECT
-        id,
-        employee_id,
-        time_start,
-        time_end,
-        DATE(time_start) as date,
-        TIME(time_start) as start_time,
-        TIME(time_end) as end_time,
-        status
-      FROM SavedAppointments
-      WHERE employee_id = ?
-        AND DATE(time_start) = ?
-      ORDER BY time_start`,
-      [employeeId, date],
-    );
-    response.json(rows);
-  } catch (error) {
-    response.status(500).json({ message: (error as Error).message });
-  }
-});
-
 router.get(`/:employeeId/blocked-times`, async (request: CustomRequestType, response: CustomResponseType) => {
   if (!request.dbPool) {
     response.status(500).json({ message: `Database connection not initialized` });
