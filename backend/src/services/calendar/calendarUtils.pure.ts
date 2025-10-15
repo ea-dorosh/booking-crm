@@ -1160,6 +1160,11 @@ export const calculateAvailableTimeSlotsForTwoServices = (
       ),
     }));
 
+    console.log(`\n🔍 DEBUG [FEATURE] Combining slots for ${firstDay.dateISO}`);
+    firstServiceSlots.forEach(emp => {
+      console.log(`  👤 Employee ${emp.employeeId} has ${emp.timeSlots.length} slots`);
+    });
+
     // Combine time slots
     const combinations = combineTimeSlotsForTwoServices(
       firstServiceSlots,

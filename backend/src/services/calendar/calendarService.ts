@@ -67,8 +67,9 @@ async function getGoogleCalendarEventsForEmployees(
       if (!employeeDatesMap.has(employee.employeeId)) {
         employeeDatesMap.set(employee.employeeId, []);
       }
-      console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - pushing dateISO:`, dayData.day);
-      employeeDatesMap.get(employee.employeeId)!.push(dayData.day);
+      const dateISO = dayData.dateISO || dayData.day; // Support both pure and legacy formats
+      console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - pushing dateISO:`, dateISO);
+      employeeDatesMap.get(employee.employeeId)!.push(dateISO);
     });
   });
   console.log(`🔍 DEBUG: getGoogleCalendarEventsForEmployees - employeeDatesMap:`, employeeDatesMap);
@@ -207,11 +208,38 @@ async function processSingleService(
     ...normalizedBlockedTimes,
   ];
 
-  console.log(`🔍 DEBUG: savedAppointments:`, savedAppointments.length);
-  console.log(`🔍 DEBUG: normalizedSavedAppointments:`, JSON.stringify(normalizedSavedAppointments, null, 2));
-  console.log(`🔍 DEBUG: googleCalendarEvents:`, googleCalendarEvents.length);
-  console.log(`🔍 DEBUG: normalizedGoogleEvents:`, JSON.stringify(normalizedGoogleEvents, null, 2));
-  console.log(`🔍 DEBUG: allNormalizedAppointments:`, allNormalizedAppointments.length);
+  // DEBUG: Log all blocking sources for service
+  console.log(`\n🔍 DEBUG [FEATURE] Service ${serviceId} - Employee IDs: ${employeeIds.join(`,`)}`);
+  console.log(`📅 Saved Appointments (${normalizedSavedAppointments.length}):`);
+  normalizedSavedAppointments.forEach(apt => {
+    const startTime = new Date(apt.startTimeMs).toISOString();
+    const endTime = new Date(apt.endTimeMs).toISOString();
+    console.log(`  - Employee ${apt.employeeId}: ${apt.dateISO} ${startTime} - ${endTime}`);
+  });
+  console.log(`📅 Google Events (${normalizedGoogleEvents.length}):`);
+  normalizedGoogleEvents.forEach(evt => {
+    const startTime = new Date(evt.startTimeMs).toISOString();
+    const endTime = new Date(evt.endTimeMs).toISOString();
+    console.log(`  - Employee ${evt.employeeId}: ${evt.dateISO} ${startTime} - ${endTime}`);
+  });
+  console.log(`⏸️ Pause Times (from employee.pauseTimes):`);
+  periodWithDaysAndEmployeeAvailability.forEach(day => {
+    day.employees.forEach(emp => {
+      if (emp.pauseTimes && emp.pauseTimes.length > 0) {
+        emp.pauseTimes.forEach(pause => {
+          const startTime = new Date(pause.startPauseTimeMs).toISOString();
+          const endTime = new Date(pause.endPauseTimeMs).toISOString();
+          console.log(`  - Employee ${emp.employeeId}: ${day.dateISO} ${startTime} - ${endTime}`);
+        });
+      }
+    });
+  });
+  console.log(`🚫 Blocked Times (${normalizedBlockedTimes.length}):`);
+  normalizedBlockedTimes.forEach(block => {
+    const startTime = new Date(block.startTimeMs).toISOString();
+    const endTime = new Date(block.endTimeMs).toISOString();
+    console.log(`  - Employee ${block.employeeId}: ${block.dateISO} ${startTime} - ${endTime}`);
+  });
 
   const dayAvailability = processPeriodAvailability(
     periodWithDaysAndEmployeeAvailability,
