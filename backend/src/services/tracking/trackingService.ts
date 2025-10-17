@@ -212,3 +212,73 @@ export async function getQrScanStats(
   };
 }
 
+// Coupon QR Code tracking functions
+export async function saveCouponQrScan(
+  dbPool: Pool,
+  scanData: QrScanData,
+): Promise<QrScanRecord> {
+  const [result] = await dbPool.execute(
+    `INSERT INTO TrackingCouponQrScans (
+      scanned_at,
+      user_agent,
+      ip_address,
+      referrer,
+      device_info
+    ) VALUES (NOW(), ?, ?, ?, ?)`,
+    [
+      scanData.userAgent || null,
+      scanData.ipAddress || null,
+      scanData.referrer || null,
+      scanData.deviceInfo ? JSON.stringify(scanData.deviceInfo) : null,
+    ],
+  );
+
+  const insertId = (result as any).insertId;
+
+  const [rows] = await dbPool.execute(
+    `SELECT * FROM TrackingCouponQrScans WHERE id = ?`,
+    [insertId],
+  );
+
+  return (rows as QrScanRecord[])[0];
+}
+
+export async function getCouponQrScanStats(
+  dbPool: Pool,
+  days: number = 90,
+): Promise<QrScanStats> {
+  const [totalResult] = await dbPool.execute(
+    `SELECT COUNT(*) as total FROM TrackingCouponQrScans`,
+  );
+  const totalScans = (totalResult as any)[0].total;
+
+  const [uniqueResult] = await dbPool.execute(
+    `SELECT COUNT(DISTINCT ip_address) as unique_count
+     FROM TrackingCouponQrScans
+     WHERE ip_address IS NOT NULL`,
+  );
+  const uniqueScans = (uniqueResult as any)[0].unique_count;
+
+  const [dailyResult] = await dbPool.execute(
+    `SELECT
+       DATE(scanned_at) as date,
+       COUNT(*) as count
+     FROM TrackingCouponQrScans
+     WHERE scanned_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+     GROUP BY DATE(scanned_at)
+     ORDER BY date ASC`,
+    [days],
+  );
+
+  const scansByDay = (dailyResult as any[]).map(row => ({
+    date: row.date,
+    count: row.count,
+  }));
+
+  return {
+    totalScans,
+    uniqueScans,
+    scansByDay,
+  };
+}
+

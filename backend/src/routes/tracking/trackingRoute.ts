@@ -3,7 +3,7 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { getQrScanStats, getLinkClickStats } from '@/services/tracking/trackingService.js';
+import { getQrScanStats, getLinkClickStats, getCouponQrScanStats } from '@/services/tracking/trackingService.js';
 
 const router = express.Router();
 
@@ -49,5 +49,25 @@ router.get(`/link-stats`, async (request: CustomRequestType, response: CustomRes
   } catch (error) {
     console.error(`Error getting link click stats:`, error);
     response.status(500).json({ error: `Error getting link click stats` });
+  }
+});
+
+router.get(`/coupon-stats`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    const days = request.query.days ? parseInt(request.query.days as string) : 90;
+    const stats = await getCouponQrScanStats(request.dbPool, days);
+
+    response.json({
+      message: `Coupon QR scan stats retrieved successfully`,
+      data: stats,
+    });
+  } catch (error) {
+    console.error(`Error getting coupon QR scan stats:`, error);
+    response.status(500).json({ error: `Error getting coupon QR scan stats` });
   }
 });

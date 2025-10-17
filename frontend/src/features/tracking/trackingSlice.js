@@ -17,7 +17,7 @@ export const fetchQrScanStats = createAsyncThunk(
 export const fetchLinkClickStats = createAsyncThunk(
   `tracking/fetchLinkClickStats`,
   async ({
-    days = 90, channel, 
+    days = 90, channel,
   } = {}, { rejectWithValue }) => {
     try {
       const response = await trackingService.getLinkClickStats(days, channel);
@@ -28,11 +28,24 @@ export const fetchLinkClickStats = createAsyncThunk(
   },
 );
 
+export const fetchCouponQrScanStats = createAsyncThunk(
+  `tracking/fetchCouponQrScanStats`,
+  async (days = 90, { rejectWithValue }) => {
+    try {
+      const response = await trackingService.getCouponQrScanStats(days);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message || `Failed to fetch Coupon QR scan stats`);
+    }
+  },
+);
+
 const trackingSlice = createSlice({
   name: `tracking`,
   initialState: {
     stats: null,
     linkStats: null,
+    couponStats: null,
     loading: false,
     error: null,
   },
@@ -42,6 +55,7 @@ const trackingSlice = createSlice({
     },
     clearTrackingStats: (state) => {
       state.stats = null;
+      state.couponStats = null;
     },
   },
   extraReducers: (builder) => {
@@ -69,6 +83,19 @@ const trackingSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchLinkClickStats.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchCouponQrScanStats.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCouponQrScanStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.couponStats = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchCouponQrScanStats.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

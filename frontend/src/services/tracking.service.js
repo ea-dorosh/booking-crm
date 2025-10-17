@@ -29,9 +29,24 @@ const getLinkClickStats = async (days = 90, channel) => {
   }
 };
 
+const getCouponQrScanStats = async (days = 90) => {
+  try {
+    const response = await axios.get(`/tracking/coupon-stats`, {
+      params: {
+        days,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
+
 const trackingService = {
   getQrScanStats,
   getLinkClickStats,
+  getCouponQrScanStats,
 };
 
 export default trackingService;

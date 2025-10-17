@@ -12,17 +12,18 @@ import {
 } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchQrScanStats, fetchLinkClickStats } from '@/features/tracking/trackingSlice';
+import { fetchQrScanStats, fetchLinkClickStats, fetchCouponQrScanStats } from '@/features/tracking/trackingSlice';
 
 export default function QrStatsWidget() {
   const dispatch = useDispatch();
   const {
-    stats, linkStats, loading, error,
+    stats, linkStats, couponStats, loading, error,
   } = useSelector((state) => state.tracking);
 
   useEffect(() => {
     dispatch(fetchQrScanStats(90)); // Last 3 months
     dispatch(fetchLinkClickStats({ days: 90 }));
+    dispatch(fetchCouponQrScanStats(90)); // Last 3 months
   }, [dispatch]);
 
   if (loading) {
@@ -86,6 +87,7 @@ export default function QrStatsWidget() {
           <Grid
             item
             xs={6}
+            md={4}
           >
             <Box
               textAlign="center"
@@ -101,13 +103,14 @@ export default function QrStatsWidget() {
                 variant="body2"
                 color="text.secondary"
               >
-                QR Scans
+                Public QR Scans
               </Typography>
             </Box>
           </Grid>
           <Grid
             item
             xs={6}
+            md={4}
           >
             <Box
               textAlign="center"
@@ -123,13 +126,60 @@ export default function QrStatsWidget() {
                 variant="body2"
                 color="text.secondary"
               >
-                Unique QR Visitors
+                Unique Public QR Visitors
               </Typography>
             </Box>
           </Grid>
           <Grid
             item
             xs={6}
+            md={4}
+          >
+            <Box
+              textAlign="center"
+            >
+              <Typography
+                variant="h4"
+                color="success.main"
+                fontWeight="bold"
+              >
+                {couponStats?.totalScans ?? 0}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Coupon QR Scans
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={6}
+            md={4}
+          >
+            <Box
+              textAlign="center"
+            >
+              <Typography
+                variant="h4"
+                color="warning.main"
+                fontWeight="bold"
+              >
+                {couponStats?.uniqueScans ?? 0}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Unique Coupon QR Visitors
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={6}
+            md={4}
           >
             <Box
               textAlign="center"
@@ -152,6 +202,7 @@ export default function QrStatsWidget() {
           <Grid
             item
             xs={6}
+            md={4}
           >
             <Box
               textAlign="center"

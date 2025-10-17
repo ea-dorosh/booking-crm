@@ -3,7 +3,7 @@ import {
   CustomRequestType,
   CustomResponseType,
 } from '@/@types/expressTypes.js';
-import { saveQrScan, QrScanData, saveLinkClick } from '@/services/tracking/trackingService.js';
+import { saveQrScan, QrScanData, saveLinkClick, saveCouponQrScan } from '@/services/tracking/trackingService.js';
 
 function getClientIpFromRequest(req: express.Request): string | undefined {
   // Common proxy/CDN headers precedence
@@ -90,6 +90,48 @@ router.post(`/link-click`, async (request: CustomRequestType, response: CustomRe
   } catch (error) {
     console.error(`Error tracking link click:`, error);
     response.status(500).json({ error: `Error tracking link click` });
+  }
+});
+
+/** Track coupon QR code scans */
+router.post(`/coupon-qr-scan`, async (request: CustomRequestType, response: CustomResponseType) => {
+  if (!request.dbPool) {
+    response.status(500).json({ message: `Database connection not initialized` });
+    return;
+  }
+
+  try {
+    const clientIp = getClientIpFromRequest(request);
+
+    const scanData: QrScanData = {
+      userAgent: request.headers[`user-agent`] || undefined,
+      ipAddress: clientIp,
+      referrer: request.headers.referer || undefined,
+      deviceInfo: request.body.source === `server-side` ? {
+        source: `server-side`,
+        trackedAt: request.body.trackedAt,
+      } : {
+        screenWidth: request.body.screenWidth,
+        screenHeight: request.body.screenHeight,
+        language: request.body.language,
+        timezone: request.body.timezone,
+        isMobile: request.body.isMobile,
+        platform: request.body.platform,
+      },
+    };
+
+    const result = await saveCouponQrScan(request.dbPool, scanData);
+
+    response.json({
+      message: `Coupon QR scan tracked successfully`,
+      data: {
+        id: result.id,
+        scannedAt: result.scanned_at,
+      },
+    });
+  } catch (error) {
+    console.error(`Error tracking coupon QR scan:`, error);
+    response.status(500).json({ error: `Error tracking coupon QR scan` });
   }
 });
 
