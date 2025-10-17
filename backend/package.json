@@ -8,7 +8,7 @@
     "test": "jest",
     "test:fast": "jest --runInBand --silent",
     "test-watch": "jest --watchAll",
-    "build": "npm run lint && tsc --project tsconfig.build.json && tsc-alias",
+    "build": "npm run lint && npm run test && tsc --project tsconfig.build.json && tsc-alias",
     "build-fast": "tsc --project tsconfig.build.json && tsc-alias",
     "start": "node dist/server.js",
     "serve": "tsx watch src/server.ts",
